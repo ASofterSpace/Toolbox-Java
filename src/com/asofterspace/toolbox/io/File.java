@@ -1,7 +1,10 @@
 package com.asofterspace.toolbox.io;
 
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -139,18 +142,18 @@ public class File {
 			thisFile.createNewFile();
 			
 		} catch (IOException e) {
-			System.err.println("[ERROR] An IOException occurred when trying to create the file - inconceivable!");
+			System.err.println("[ERROR] An IOException occurred when trying to create the file " + thisFile + " - inconceivable!");
 		}
 		
 		// fill file with data
-		try (PrintWriter writer = new PrintWriter(thisFile)) {
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(thisFile), StandardCharsets.UTF_8)) {
 			
 			for (String line : filecontents) {
-				writer.println(line);
+				writer.write(line + "\n");
 			}
 			
-		} catch (FileNotFoundException e) {
-			System.err.println("[ERROR] We attempted to save a file, but a FileNotFoundException was raised - inconceivable!");
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + thisFile + " - inconceivable!");
 		}
 	}
 	

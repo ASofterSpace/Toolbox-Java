@@ -111,6 +111,15 @@ public class JSON {
 		
 		jsonString = jsonString.trim();
 
+		if (jsonString.equals("")) {
+			
+			kind = JSONkind.NULL;
+			
+			simpleContents = null;
+			
+			return "";
+		}
+		
 		if (jsonString.startsWith("{")) {
 
 			objContents = new HashMap<String, JSON>();
@@ -330,6 +339,9 @@ public class JSON {
 	 * @return the JSON object
 	 */
 	public JSON get(String key) {
+		if (objContents == null) {
+			return null;
+		}
 		return objContents.get(key);
 	}
 
@@ -397,6 +409,10 @@ public class JSON {
 	public Integer getInteger(String key) {
 
 		JSON result = get(key);
+		
+		if (result == null) {
+			return null;
+		}
 
 		if (result.kind == JSONkind.NUMBER) {
 			return (Integer) result.simpleContents;
