@@ -1,17 +1,21 @@
 package com.asofterspace.toolbox.io;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.asofterspace.toolbox.io.JSONkind;
 
 import com.asofterspace.toolbox.Utils;
 
 public class JSON {
 	
-	private boolean isSimpleValue;
-	private String simpleValue;
-	private Map<String, JSON> contents;
+	private JSONkind kind;
+	
+	private Map<String, JSON> objContents;
+	private List<JSON> arrContents;
+	private Object simpleContents;
 	
 	private String restString;
 
@@ -60,13 +64,14 @@ public class JSON {
 	 * @param jsonString
 	 */
 	private void init(String jsonString) {
-		
+
 		jsonString = jsonString.trim();
-		
+
 		if (jsonString.startsWith("{")) {
+
+			objContents = new HashMap<String, JSON>();
 			
-			isSimpleValue = false;
-			contents = new HashMap<String, JSON>();
+			kind = JSONkind.OBJECT;
 			
 			jsonString = jsonString.substring(1).trim();
 			
@@ -77,7 +82,7 @@ public class JSON {
 				jsonString = jsonString.substring(endIndex);
 				jsonString = jsonString.substring(jsonString.indexOf(":") + 1);
 				JSON value = new JSON(jsonString);
-				contents.put(key, value);
+				objContents.put(key, value);
 				jsonString = value.restString.trim();
 				if (jsonString.startsWith(",")) {
 					jsonString = jsonString.substring(1).trim();
@@ -91,86 +96,152 @@ public class JSON {
 			}
 			
 			restString = jsonString;
+
+		} else if (jsonString.startsWith("[")) {
 			
+			kind = JSONkind.ARRAY;
+			
+			arrContents = new ArrayList<JSON>();
+			
+			// TODO :: load array contents
+				
 		} else {
-			isSimpleValue = true;
+			
+			kind = JSONkind.STRING;
 			
 			int endIndex1 = jsonString.indexOf(",");
 			int endIndex2 = jsonString.indexOf("}");
+			
+			String simpleContentStr;
 
 			if (endIndex2 < 0) {
-				simpleValue = jsonString;
+				simpleContentStr = jsonString;
 				restString = "";
 			} else if ((endIndex1 < 0) || (endIndex1 > endIndex2)) {
-				simpleValue = jsonString.substring(0, endIndex2);
+				simpleContentStr = jsonString.substring(0, endIndex2);
 				restString = jsonString.substring(endIndex2);
 			} else {
-				simpleValue = jsonString.substring(0, endIndex1);
+				simpleContentStr = jsonString.substring(0, endIndex1);
 				restString = jsonString.substring(endIndex1);
 			}
 			
-			if (simpleValue.startsWith("\"") && simpleValue.endsWith("\"")) {
-				simpleValue = simpleValue.substring(1, simpleValue.length() - 1);
+			if (simpleContentStr.startsWith("\"") && simpleContentStr.endsWith("\"")) {
+				simpleContentStr = simpleContentStr.substring(1, simpleContentStr.length() - 1);
 			}
+			
+			simpleContents = simpleContentStr;
 		}
 	}
 
 	@Override
 	public String toString() {
 		
-		if (isSimpleValue) {
-			return simpleValue;
-		}
-		
-		StringBuilder result = new StringBuilder();
-		
-		result.append("{");
-		
-		boolean firstEntry = true;
-		
-		for (Map.Entry<String, JSON> entry : contents.entrySet()) {
+		switch (kind) {
+
+			case STRING:
+				return "\"" + simpleContents.toString() + "\"";
+				
+			case BOOLEAN:
+			case NUMBER:
+				return simpleContents.toString();
 			
-			if (firstEntry) {
-				firstEntry = false;
-			} else {
-			    result.append(", ");
-			}
-			
-		    String key = entry.getKey();
-		    JSON content = entry.getValue();
-		    
-		    result.append("\"");
-		    result.append(key);
-		    result.append("\": ");
-		    if (content.isSimpleValue) {
-		    	result.append("\"" + content.simpleValue + "\"");
-		    } else {
-		    	result.append(content.toString());
-		    }
+			case ARRAY:
+				StringBuilder arrResult = new StringBuilder();
+				
+				arrResult.append("[");
+
+				boolean arrFirstEntry = true;
+				
+				for (JSON item : arrContents) {
+
+					if (arrFirstEntry) {
+						arrFirstEntry = false;
+					} else {
+						arrResult.append(", ");
+					}
+					
+					arrResult.append(item.toString());
+				}
+				arrResult.append("]");
+				
+				return arrResult.toString();
+				
+			case OBJECT:
+				StringBuilder objResult = new StringBuilder();
+				
+				objResult.append("{");
+				
+				boolean objFirstEntry = true;
+				
+				for (Map.Entry<String, JSON> entry : objContents.entrySet()) {
+					
+					if (objFirstEntry) {
+						objFirstEntry = false;
+					} else {
+						objResult.append(", ");
+					}
+					
+				    String key = entry.getKey();
+				    JSON content = entry.getValue();
+				    
+				    objResult.append("\"");
+				    objResult.append(key);
+				    objResult.append("\": ");
+				    objResult.append(content.toString());
+				}
+				
+				objResult.append("}");
+				
+				return objResult.toString();
+				
+			default:
+				return "null";
 		}
-		
-		result.append("}");
-		
-		return result.toString();
 	}
-	
+
+	/**
+	 * Get the kind of JSON object this is
+	 * @return the kind
+	 */
+	public JSONkind getKind() {
+		return kind;
+	}
+
 	/**
 	 * Get the set of all defined keys in this JSON object
 	 * @return the set of defined keys
 	 */
 	public Set<String> getKeys() {
-		return contents.keySet();
+		return objContents.keySet();
 	}
 
 	/**
-	 * Get the value corresponding to a specific key
-	 * (which could be a JSON object just representing
-	 * a plain string, or a complex JSON object on its own)
+	 * Get the JSON-value corresponding to a specific key
+	 * in a JSON object
 	 * @param key the key to search for
-	 * @return the JSON object - possibly a plain string - stored
+	 * @return the JSON object
 	 */
-	public JSON get(Object key) {
-		return contents.get(key.toString());
+	public JSON get(String key) {
+		return objContents.get(key);
+	}
+
+	/**
+	 * Get the length of the array represented by this JSON
+	 * array
+	 * @return the length of the JSON array
+	 */
+	public int getLength() {
+		return arrContents.size();
+	}
+
+	/**
+	 * Get the JSON-value corresponding to a specific index
+	 * in a JSON array
+	 * @param index the index to get
+	 * @return the JSON object
+	 */
+	public JSON get(Integer index) {
+		return arrContents.get(index);
 	}
 
 	/**
@@ -183,17 +254,31 @@ public class JSON {
 	 * @param key the key to search for
 	 * @return the JSON object - hopefully a plain string - as string
 	 */
-	public String getString(Object key) {
-		return get(key).toString();
+	public String getString(String key) {
+		JSON result = get(key);
+		
+		// in case of a string, return the contained string WITHOUT
+		// enclosing ""-signs
+		if (result.kind == JSONkind.STRING) {
+			return result.simpleContents.toString();
+		}
+		
+		// if something else than a string is contained, return whatever
+		// it is that is contained
+		return result.toString();
 	}
-	
+
 	/**
-	 * Sets a key to the JSON value
+	 * Sets a key of the JSON object to the JSON value
 	 * @param key
 	 * @param value
 	 */
-	public void set(Object key, JSON value) {
-		contents.put(key.toString(), value);
+	public void set(String key, JSON value) {
+		kind = JSONkind.OBJECT;
+		if (objContents == null) {
+			objContents = new HashMap<String, JSON>();
+		}
+		objContents.put(key.toString(), value);
 	}
 
 	/**
@@ -201,9 +286,41 @@ public class JSON {
 	 * @param key
 	 * @param value
 	 */
-	public void setString(Object key, String value) {
+	public void setString(String key, String value) {
+
 		JSON jsonValue = new JSON(value);
-		contents.put(key.toString(), jsonValue);
+		
+		set(key, jsonValue);
+	}
+	
+	/**
+	 * Sets an index of the JSON array to the JSON value
+	 * @param index
+	 * @param value
+	 */
+	public void set(Integer index, JSON value) {
+		kind = JSONkind.ARRAY;
+		if (arrContents == null) {
+			arrContents = new ArrayList<JSON>();
+		}
+		arrContents.set(index, value);
+	}
+
+	/**
+	 * Appends a JSON value to the JSON array
+	 * @param value
+	 */
+	public void append(JSON value) {
+		kind = JSONkind.ARRAY;
+		if (arrContents == null) {
+			arrContents = new ArrayList<JSON>();
+		}
+		arrContents.add(value);
+	}
+
+	public void save(File targetFile) {
+		
+		targetFile.saveContent(this.toString());
 	}
 
 }

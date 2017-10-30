@@ -1,5 +1,11 @@
 package com.asofterspace.toolbox.io;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,12 +42,16 @@ public class File {
 	 */
 	public List<String> loadContents() {
 		
-		createParentDirectory();
-		
-		filecontents = new ArrayList<String>();
-		
-		// TODO
-		
+		try {
+			byte[] encoded = Files.readAllBytes(Paths.get(filename));
+
+			String newContent = new String(encoded, StandardCharsets.UTF_8);
+			  
+			setContent(newContent);
+			
+		} catch (IOException e) {
+			System.err.println("[ERROR] Trying to load the file " + filename + ", an I/O Exception occurred - inconceivable!");
+		}
 		return filecontents;
 	}
 
@@ -67,14 +77,53 @@ public class File {
 	}
 	
 	/**
+	 * Explicitly sets the contents of this file instance
+	 * as text consisting of several \n-separated lines
+	 * (this does NOT automagically write them to the hard
+	 * drive - if that is wanted, use saveContents()!)
+	 * @param contents file contents to be set
+	 */
+	public void setContent(String content) {
+		
+		filecontents = new ArrayList<String>();
+		
+		String[] lines = content.split("\n");
+		
+		for (String line : lines) {
+			filecontents.add(line);
+		}
+	}
+	
+	/**
 	 * Saves the current file contents of this instance
 	 * to the file system
 	 */
 	public void save() {
 
-		createParentDirectory();
+		java.io.File thisFile = new java.io.File(filename);
 		
-		// TODO
+		// create parent directories
+		thisFile.getParentFile().mkdirs();
+		
+		// create file
+		try {
+			
+			thisFile.createNewFile();
+			
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to create the file - inconceivable!");
+		}
+		
+		// fill file with data
+		try (PrintWriter writer = new PrintWriter(thisFile)) {
+			
+			for (String line : filecontents) {
+				writer.println(line);
+			}
+			
+		} catch (FileNotFoundException e) {
+			System.err.println("[ERROR] We attempted to save a file, but a FileNotFoundException was raised - inconceivable!");
+		}
 	}
 	
 	/**
@@ -90,12 +139,15 @@ public class File {
 	}
 	
 	/**
-	 * Creates the parent directory of this file on
-	 * the file system
+	 * Sets the file contents of this instance and writes
+	 * them to the file system
+	 * @param content file content
 	 */
-	private void createParentDirectory() {
+	public void saveContent(String content) {
 		
-		// TODO
+		setContent(content);
+		
+		save();
 	}
 	
 }

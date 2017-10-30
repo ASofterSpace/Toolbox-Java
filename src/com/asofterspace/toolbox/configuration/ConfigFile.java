@@ -10,7 +10,7 @@ public class ConfigFile {
 	
 	private String filename;
 	
-	private List<ConfigItem> configItems;
+	private JSON content;
 	
 	private static final String FOLDER = "./config/";
 	
@@ -43,20 +43,9 @@ public class ConfigFile {
 		
 		File correspondingFile = new File(FOLDER + filename + FILE_EXTENSION);
 		
-		JSON jsonContents = new JSON(correspondingFile);
-
-		configItems = new ArrayList<ConfigItem>();
-		
-		for (String key : jsonContents.getKeys()) {
-			
-			String value = jsonContents.getString(key);
-			
-			ConfigItem newItem = new ConfigItem(key, value);
-			
-			configItems.add(newItem);
-		}
+		content = new JSON(correspondingFile);
 	}
-
+	
 	/**
 	 * Stores the configuration on the file system (this is called
 	 * internally and does not need to be called from the outside
@@ -64,7 +53,18 @@ public class ConfigFile {
 	 */
 	private void saveToFile() {
 		
-		// TODO
+		File correspondingFile = new File(FOLDER + filename + FILE_EXTENSION);
+		
+		content.save(correspondingFile);
+	}
+
+	/**
+	 * Gets all the contents as JSON container
+	 * @return all the contents
+	 */
+	public JSON getAllContents() {
+		
+		return content;
 	}
 
 	/**
@@ -72,16 +72,9 @@ public class ConfigFile {
 	 * @param key
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
-	public String get(String key) {
+	public String getValue(String key) {
 		
-		for (ConfigItem item : configItems) {
-			
-			if (item.hasKey(key)) {
-				return item.getValue();
-			}
-		}
-		
-		return null;
+		return content.getString(key);
 	}
 
 	/**
@@ -91,18 +84,7 @@ public class ConfigFile {
 	 */
 	public void set(String key, String value) {
 
-		for (ConfigItem item : configItems) {
-			
-			if (item.hasKey(key)) {
-				item.setValue(value);
-				saveToFile();
-				return;
-			}
-		}
-		
-		ConfigItem newItem = new ConfigItem(key, value);
-		
-		configItems.add(newItem);
+		content.setString(key, value);
 		
 		saveToFile();
 	}

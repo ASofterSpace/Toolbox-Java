@@ -26,7 +26,7 @@ public class ConfigFileTest {
 
 		ConfigFile confFile2 = new ConfigFile(testfile);
 		
-		if (testvalue.equals(confFile2.get(testkey))) {
+		if (testvalue.equals(confFile2.getValue(testkey))) {
 			return;
 		}
 		

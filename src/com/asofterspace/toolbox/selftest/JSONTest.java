@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.asofterspace.toolbox.configuration.ConfigFile;
 import com.asofterspace.toolbox.io.JSON;
 
 public class JSONTest {
@@ -30,7 +29,7 @@ public class JSONTest {
 			return;
 		}
 		
-		fail("We stored foo:bar in a JSON object, then read the key foo - and did not get bar!");
+		fail("We stored foo:bar in a JSON object, then converted the object back to JSON - and did not get our input back!");
 	}
 
 }
