@@ -64,6 +64,28 @@ public class File {
 		
 		return filecontents;
 	}
+
+	/**
+	 * Gets the file content from the last time it was read
+	 * from the file system or set explicitly
+	 * @return file content as \n-separated lines in one string
+	 */
+	public String getContent() {
+		
+		StringBuilder result = new StringBuilder();
+		
+		String separator = "";
+		
+		for (String line : filecontents) {
+			
+			result.append(separator);
+			separator = "\n";
+			
+			result.append(line);
+		}
+
+		return result.toString();
+	}
 	
 	/**
 	 * Explicitly sets the contents of this file instance
@@ -90,6 +112,12 @@ public class File {
 		String[] lines = content.split("\n");
 		
 		for (String line : lines) {
+			if (line.endsWith("\r")) {
+				line = line.substring(0, line.length() - 1);
+			}
+			if (line.startsWith("\r")) {
+				line = line.substring(1);
+			}
 			filecontents.add(line);
 		}
 	}

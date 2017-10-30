@@ -204,11 +204,40 @@ public class JSON {
 			return jsonString.substring(4);
 		}
 
-		// TODO - actually read the number (if there is any)
 		kind = JSONkind.NUMBER;
+
+		String numStr = "";
 		
-		simpleContents = 1;
+		while (jsonString.length() > 0) {
+			
+			Character curChar = jsonString.charAt(0);
+			
+			if (Character.isDigit(curChar) || curChar.equals('.') || curChar.equals('-')) {
+				
+				numStr += curChar;
+
+				jsonString = jsonString.substring(1);
+			
+			} else {
+				
+				// we are not reading any further numerical digits - escape!
+				break;
+			}
+		}
 		
+		if (numStr.contains(".")) {
+			
+			// create a double
+
+			simpleContents = Double.valueOf(numStr);
+			
+		} else {
+			
+			// create an integer
+			
+			simpleContents = Integer.valueOf(numStr);
+		}
+
 		return jsonString;
 	}
 
@@ -358,6 +387,34 @@ public class JSON {
 		// if something else than a string is contained, return whatever
 		// it is that is contained
 		return result.toString();
+	}
+
+	/**
+	 * Gets an integer value stored in a key of a JSON object
+	 * @param key  the key to be searched for
+	 * @return the integer value stored in the key
+	 */
+	public Integer getInteger(String key) {
+
+		JSON result = get(key);
+
+		if (result.kind == JSONkind.NUMBER) {
+			return (Integer) result.simpleContents;
+		}
+
+		if (result.kind == JSONkind.BOOLEAN) {
+			if ((Boolean) result.simpleContents) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
+		if (result.kind == JSONkind.NULL) {
+			return null;
+		}
+		
+		return 0;
 	}
 
 	/**
