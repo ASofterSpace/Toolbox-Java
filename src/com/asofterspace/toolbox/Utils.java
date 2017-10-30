@@ -8,10 +8,12 @@ public class Utils {
 
 		StringBuilder sb = new StringBuilder();
 		
-		for (String jsonStr : stringList) {
-			sb.append(jsonStr);
+		if (stringList != null) {
+			for (String jsonStr : stringList) {
+				sb.append(jsonStr);
+			}
 		}
-		
+
 		return sb.toString();
 	}
 }

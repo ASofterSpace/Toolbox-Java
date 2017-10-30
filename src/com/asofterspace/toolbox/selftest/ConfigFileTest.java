@@ -15,7 +15,7 @@ public class ConfigFileTest {
 	 */
 	@Test
 	public void persistenceTest() {
-		
+
 		String testfile = "testfile";
 		String testkey = "test";
 		String testvalue = "somevalue";
@@ -29,7 +29,7 @@ public class ConfigFileTest {
 		if (testvalue.equals(confFile2.getValue(testkey))) {
 			return;
 		}
-		
+
 		fail("The configuration file does not seem to persist its information!");
 	}
 

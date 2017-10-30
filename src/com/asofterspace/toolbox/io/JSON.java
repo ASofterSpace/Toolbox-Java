@@ -16,23 +16,54 @@ public class JSON {
 	private Map<String, JSON> objContents;
 	private List<JSON> arrContents;
 	private Object simpleContents;
-	
-	private String restString;
 
 	
 	/**
 	 * Create an empty JSON object
 	 */
 	public JSON() {
-		init("{}");
-	}
+
+		kind = JSONkind.OBJECT;
 		
+		objContents = new HashMap<String, JSON>();
+	}
+	
 	/**
 	 * Create a JSON object based on a given JSON string
 	 */
 	public JSON(String jsonString) {
 		
 		init(jsonString);
+	}
+	
+	/**
+	* Create a JSON object based on an integer value
+	*/
+	public JSON(Integer intValue) {
+	
+		kind = JSONkind.NUMBER;
+		
+		simpleContents = intValue;
+	}
+	
+	/**
+	* Create a JSON object based on a double value
+	*/
+	public JSON(Double doubleValue) {
+	
+		kind = JSONkind.NUMBER;
+		
+		simpleContents = doubleValue;
+	}
+	
+	/**
+	* Create a JSON object based on a boolean value
+	*/
+	public JSON(Boolean boolValue) {
+	
+		kind = JSONkind.NUMBER;
+		
+		simpleContents = boolValue;
 	}
 	
 	/**
@@ -61,10 +92,23 @@ public class JSON {
 
 	/**
 	 * Initialize this JSON object based on a given JSON string
+	 * and return the rest that is left over of the string after
+	 * initialization
+	 * E.g. {"foo": [1, true, {"bar": 9}]} would give:
+	 * init({"foo": [1, true, {"bar": 9}]}) returns "",
+	 * which calls
+	 * init([1, true, {"bar": 9}]) returns "",
+	 * which calls
+	 * init(1, true, {"bar": 9}) returns true, {"bar": 9},
+	 * init(true, {"bar": 9}) returns {"bar": 9},
+	 * init({"bar": 9}) returns ""
+	 * which calls
+	 * init(9) returns "",
+	 * 
 	 * @param jsonString
 	 */
-	private void init(String jsonString) {
-
+	private String init(String jsonString) {
+		
 		jsonString = jsonString.trim();
 
 		if (jsonString.startsWith("{")) {
@@ -81,9 +125,9 @@ public class JSON {
 				String key = jsonString.substring(0, endIndex);
 				jsonString = jsonString.substring(endIndex);
 				jsonString = jsonString.substring(jsonString.indexOf(":") + 1);
-				JSON value = new JSON(jsonString);
+				JSON value = new JSON();
+				jsonString = value.init(jsonString).trim();
 				objContents.put(key, value);
-				jsonString = value.restString.trim();
 				if (jsonString.startsWith(",")) {
 					jsonString = jsonString.substring(1).trim();
 				}
@@ -95,42 +139,77 @@ public class JSON {
 				jsonString = jsonString.substring(1).trim();
 			}
 			
-			restString = jsonString;
-
-		} else if (jsonString.startsWith("[")) {
+			return jsonString;
+		}
+		
+		if (jsonString.startsWith("[")) {
 			
 			kind = JSONkind.ARRAY;
 			
 			arrContents = new ArrayList<JSON>();
 			
-			// TODO :: load array contents
-				
-		} else {
+			jsonString = jsonString.substring(1);
 			
+			while (jsonString.length() > 0) {
+				JSON newJSONelement = new JSON();
+				jsonString = newJSONelement.init(jsonString).trim();
+				arrContents.add(newJSONelement);
+				
+				while (jsonString.startsWith(",")) {
+					jsonString = jsonString.substring(1).trim();
+				}
+				
+				if (jsonString.startsWith("]")) {
+					return jsonString.substring(1);
+				}
+			}
+			
+			return jsonString;
+		}
+		
+		if (jsonString.startsWith("\"")) {
 			kind = JSONkind.STRING;
 			
-			int endIndex1 = jsonString.indexOf(",");
-			int endIndex2 = jsonString.indexOf("}");
+			jsonString = jsonString.substring(1);
 			
-			String simpleContentStr;
-
-			if (endIndex2 < 0) {
-				simpleContentStr = jsonString;
-				restString = "";
-			} else if ((endIndex1 < 0) || (endIndex1 > endIndex2)) {
-				simpleContentStr = jsonString.substring(0, endIndex2);
-				restString = jsonString.substring(endIndex2);
-			} else {
-				simpleContentStr = jsonString.substring(0, endIndex1);
-				restString = jsonString.substring(endIndex1);
-			}
-			
-			if (simpleContentStr.startsWith("\"") && simpleContentStr.endsWith("\"")) {
-				simpleContentStr = simpleContentStr.substring(1, simpleContentStr.length() - 1);
-			}
-			
-			simpleContents = simpleContentStr;
+			// TODO :: also allow escaping " (basically, by checking here is simpleContents
+			// ends with \ - in which case we add the " instead and carry on searching forward)
+			simpleContents = jsonString.substring(0, jsonString.indexOf("\""));
+			jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
+		
+			return jsonString;
 		}
+		
+		if (jsonString.startsWith("true")) {
+			kind = JSONkind.BOOLEAN;
+			
+			simpleContents = true;
+			
+			return jsonString.substring(4);
+		}
+		
+		if (jsonString.startsWith("false")) {
+			kind = JSONkind.BOOLEAN;
+			
+			simpleContents = false;
+			
+			return jsonString.substring(4);
+		}
+		
+		if (jsonString.startsWith("null")) {
+			kind = JSONkind.NULL;
+			
+			simpleContents = null;
+			
+			return jsonString.substring(4);
+		}
+
+		// TODO - actually read the number (if there is any)
+		kind = JSONkind.NUMBER;
+		
+		simpleContents = 1;
+		
+		return jsonString;
 	}
 
 	@Override
@@ -245,6 +324,19 @@ public class JSON {
 	}
 
 	/**
+	 * Get a list of JSON values corresponding to a JSON array
+	 * stored in a particular key of a JSON object
+	 * @param key the key to search for
+	 * @return the JSON array stored in the key
+	 */
+	public List<JSON> getArray(String key) {
+		
+		JSON result = get(key);
+		
+		return result.arrContents;
+	}
+
+	/**
 	 * Gets a string value stored in a key (which will
 	 * just return a string as string if the value is
 	 * already a string, but if the value is a complex
@@ -288,9 +380,24 @@ public class JSON {
 	 */
 	public void setString(String key, String value) {
 
-		JSON jsonValue = new JSON(value);
+		JSON jsonValue = new JSON("\"" + escapeJSONstr(value) + "\"");
 		
 		set(key, jsonValue);
+	}
+	
+	/**
+	 * Takes in a string such as:
+	 * foo"bar
+	 * Returns a string such as:
+	 * foo\"bar
+	 * @param str  a string that possibly contains " signs
+	 * @return a string in which every " sign is escaped
+	 */
+	private String escapeJSONstr(String str) {
+		
+		// TODO
+		
+		return str;
 	}
 	
 	/**
