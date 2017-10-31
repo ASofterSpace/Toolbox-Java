@@ -1,11 +1,8 @@
 package com.asofterspace.toolbox.io;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -35,8 +32,6 @@ public class File {
 	public File(String fullyQualifiedFileName) {
 	
 		filename = fullyQualifiedFileName;
-		
-		loadContents();
 	}
 	
 	/**
@@ -65,6 +60,10 @@ public class File {
 	 */
 	public List<String> getContents() {
 		
+		if (filecontents == null) {
+			loadContents();
+		}
+		
 		return filecontents;
 	}
 
@@ -74,6 +73,10 @@ public class File {
 	 * @return file content as \n-separated lines in one string
 	 */
 	public String getContent() {
+
+		if (filecontents == null) {
+			loadContents();
+		}
 		
 		StringBuilder result = new StringBuilder();
 		
