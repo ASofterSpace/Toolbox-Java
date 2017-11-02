@@ -1,7 +1,7 @@
 package com.asofterspace.toolbox.io;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +25,7 @@ public class JSON {
 
 		kind = JSONkind.OBJECT;
 		
-		objContents = new HashMap<String, JSON>();
+		objContents = new TreeMap<String, JSON>();
 	}
 	
 	/**
@@ -122,7 +122,7 @@ public class JSON {
 		
 		if (jsonString.startsWith("{")) {
 
-			objContents = new HashMap<String, JSON>();
+			objContents = new TreeMap<String, JSON>();
 			
 			kind = JSONkind.OBJECT;
 			
@@ -253,6 +253,26 @@ public class JSON {
 	@Override
 	public String toString() {
 		
+		return toString(null);
+	}
+
+	/**
+	 * Stores this JSON object in a string
+	 * @param compressed  whether to store this object compressed (true, default) or
+	 *                    uncompressed (false) - in which case it will be easier to
+	 *                    read by humans, but take up more space
+	 */
+	public String toString(Boolean compressed) {
+		
+		if (compressed == null) {
+			compressed = true;
+		}
+		
+		return toString(compressed, "");
+	}
+	
+	private String toString(boolean compressed, String linePrefix) {
+		
 		switch (kind) {
 
 			case STRING:
@@ -266,6 +286,10 @@ public class JSON {
 				StringBuilder arrResult = new StringBuilder();
 				
 				arrResult.append("[");
+				
+				if (!compressed) {
+					arrResult.append("\n" + linePrefix + "\t");
+				}
 
 				boolean arrFirstEntry = true;
 				
@@ -274,10 +298,17 @@ public class JSON {
 					if (arrFirstEntry) {
 						arrFirstEntry = false;
 					} else {
-						arrResult.append(", ");
+						arrResult.append(",");
+						if (!compressed) {
+							arrResult.append("\n" + linePrefix + "\t");
+						}
 					}
 					
-					arrResult.append(item.toString());
+					arrResult.append(item.toString(compressed, linePrefix + "\t"));
+				}
+
+				if (!compressed) {
+					arrResult.append("\n" + linePrefix);
 				}
 				arrResult.append("]");
 				
@@ -287,7 +318,11 @@ public class JSON {
 				StringBuilder objResult = new StringBuilder();
 				
 				objResult.append("{");
-				
+
+				if (!compressed) {
+					objResult.append("\n" + linePrefix + "\t");
+				}
+
 				boolean objFirstEntry = true;
 				
 				for (Map.Entry<String, JSON> entry : objContents.entrySet()) {
@@ -295,7 +330,10 @@ public class JSON {
 					if (objFirstEntry) {
 						objFirstEntry = false;
 					} else {
-						objResult.append(", ");
+						objResult.append(",");
+						if (!compressed) {
+							objResult.append("\n" + linePrefix + "\t");
+						}
 					}
 					
 				    String key = entry.getKey();
@@ -304,9 +342,12 @@ public class JSON {
 				    objResult.append("\"");
 				    objResult.append(key);
 				    objResult.append("\": ");
-				    objResult.append(content.toString());
+				    objResult.append(content.toString(compressed, linePrefix + "\t"));
 				}
-				
+
+				if (!compressed) {
+					objResult.append("\n" + linePrefix);
+				}
 				objResult.append("}");
 				
 				return objResult.toString();
@@ -441,7 +482,7 @@ public class JSON {
 	public void set(String key, JSON value) {
 		kind = JSONkind.OBJECT;
 		if (objContents == null) {
-			objContents = new HashMap<String, JSON>();
+			objContents = new TreeMap<String, JSON>();
 		}
 		objContents.put(key.toString(), value);
 	}
@@ -498,9 +539,25 @@ public class JSON {
 		arrContents.add(value);
 	}
 
+	/**
+	 * Stores this JSON object in a file on the local file system
+	 * @param targetFile  the file in which this JSON object is supposed to be stored
+	 */
 	public void save(File targetFile) {
 		
-		targetFile.saveContent(this.toString());
+		save(targetFile, null);
+	}
+
+	/**
+	 * Stores this JSON object in a file on the local file system
+	 * @param targetFile  the file in which this JSON object is supposed to be stored
+	 * @param compressed  whether to store this file compressed (true, default) or
+	 *                    uncompressed (false) - in which case it will be easier to
+	 *                    read by humans, but take up more space
+	 */
+	public void save(File targetFile, Boolean compressed) {
+		
+		targetFile.saveContent(this.toString(compressed));
 	}
 
 }

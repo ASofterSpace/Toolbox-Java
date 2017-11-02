@@ -64,7 +64,7 @@ public class ConfigFile {
 		
 		File correspondingFile = new File(filename);
 		
-		content.save(correspondingFile);
+		content.save(correspondingFile, false);
 	}
 
 	/**
