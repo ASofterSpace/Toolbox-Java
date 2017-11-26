@@ -1,7 +1,7 @@
 package com.asofterspace.toolbox.configuration;
 
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.web.JSON;
 
 public class ConfigFile {
 	
@@ -52,7 +52,7 @@ public class ConfigFile {
 		
 		File correspondingFile = new File(filename);
 		
-		content = new JSON(correspondingFile);
+		content = new JSON(correspondingFile.getContent());
 	}
 	
 	/**
@@ -62,9 +62,11 @@ public class ConfigFile {
 	 */
 	private void saveToFile() {
 		
+		String uncompressedJson = content.toString(false);
+		
 		File correspondingFile = new File(filename);
 		
-		content.save(correspondingFile, false);
+		correspondingFile.saveContent(uncompressedJson);
 	}
 
 	/**

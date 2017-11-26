@@ -1,11 +1,11 @@
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.web;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.asofterspace.toolbox.io.JSONkind;
+import com.asofterspace.toolbox.web.JSONkind;
 
 import com.asofterspace.toolbox.Utils;
 
@@ -71,19 +71,6 @@ public class JSON {
 	 * JSON file contents
 	 */
 	public JSON(List<String> jsonStrings) {
-		
-		String jsonContent = Utils.strListToString(jsonStrings);
-		
-		init(jsonContent);
-	}
-
-	/**
-	 * Create a JSON object based on a given file instance containing JSON
-	 * data
-	 */
-	public JSON(File jsonFile) {
-
-		List<String> jsonStrings = jsonFile.loadContents();
 		
 		String jsonContent = Utils.strListToString(jsonStrings);
 		
@@ -537,27 +524,6 @@ public class JSON {
 			arrContents = new ArrayList<JSON>();
 		}
 		arrContents.add(value);
-	}
-
-	/**
-	 * Stores this JSON object in a file on the local file system
-	 * @param targetFile  the file in which this JSON object is supposed to be stored
-	 */
-	public void save(File targetFile) {
-		
-		save(targetFile, null);
-	}
-
-	/**
-	 * Stores this JSON object in a file on the local file system
-	 * @param targetFile  the file in which this JSON object is supposed to be stored
-	 * @param compressed  whether to store this file compressed (true, default) or
-	 *                    uncompressed (false) - in which case it will be easier to
-	 *                    read by humans, but take up more space
-	 */
-	public void save(File targetFile, Boolean compressed) {
-		
-		targetFile.saveContent(this.toString(compressed));
 	}
 
 }

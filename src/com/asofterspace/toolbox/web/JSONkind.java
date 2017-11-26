@@ -1,4 +1,4 @@
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.web;
 
 public enum JSONkind {
 

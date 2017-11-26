@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.web.JSON;
 
 public class JSONTest {
 
