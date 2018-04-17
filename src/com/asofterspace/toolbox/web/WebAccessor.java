@@ -19,7 +19,7 @@ public class WebAccessor {
 	 * @param callback  The callback that is called once the content has been retrieved (or an error
 	 *                  has occurred)
 	 */
-	public static void getAsynch(final String url, final WebAccessdCallback callback) {
+	public static void getAsynch(final String url, final WebAccessedCallback callback) {
 
 		Thread t = new Thread(new Runnable() { public void run() {
 

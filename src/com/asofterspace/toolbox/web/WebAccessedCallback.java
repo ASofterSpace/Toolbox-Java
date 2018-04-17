@@ -5,7 +5,7 @@ package com.asofterspace.toolbox.web;
  *
  * @author Moya (a softer space, 2017)
  */
-public interface WebAccessdCallback {
+public interface WebAccessedCallback {
 
     /**
      * An error occurred during retrieval
