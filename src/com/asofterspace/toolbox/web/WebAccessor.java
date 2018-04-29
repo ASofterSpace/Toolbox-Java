@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 /**
  * This (hopefully) simplifies access to the web
@@ -40,6 +41,28 @@ public class WebAccessor {
 	 * @param url  The url of the web resource
 	 */
 	public static String get(String url) {
+		return getPutPost(url, "", "GET");
+	}
+
+	/**
+	 * Put a web resource synchronously
+	 * @param url  The url of the web resource
+	 * @param messageBody The message body to be sent
+	 */
+	public static String put(String url, String messageBody) {
+		return getPutPost(url, messageBody, "PUT");
+	}
+
+	/**
+	 * Post a web resource synchronously
+	 * @param url  The url of the web resource
+	 * @param messageBody The message body to be sent
+	 */
+	public static String post(String url, String messageBody) {
+		return getPutPost(url, messageBody, "POST");
+	}
+
+	private static String getPutPost(String url, String messageBody, String requestKind) {
 		
 		try {
 	
@@ -47,14 +70,23 @@ public class WebAccessor {
 			
 			HttpURLConnection connection = (HttpURLConnection) urlAsURL.openConnection();
 			
-			connection.setRequestMethod("GET");
+			connection.setRequestMethod(requestKind);
 			
 			// pretend to be a reasonable browser; in this case: firefox; see:
 			// https://stackoverflow.com/questions/13670692/403-forbidden-with-java-but-not-web-browser
 			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent/Firefox
 			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:10.0) Gecko/20100101 Firefox/10.0");
 
-			connection.connect();
+			if ("GET".equals(requestKind)) {
+				connection.connect();
+			} else {
+				String postData = URLEncoder.encode(messageBody, "UTF-8");
+				byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+				connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+				connection.setDoOutput(true);
+				connection.getOutputStream().write(postDataBytes);
+			}
 			
 			InputStreamReader ireader = new InputStreamReader(connection.getInputStream());
 			BufferedReader reader = new BufferedReader(ireader);
