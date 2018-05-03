@@ -1,20 +1,25 @@
 package com.asofterspace.toolbox.selftest;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import com.asofterspace.toolbox.configuration.ConfigFile;
+import com.asofterspace.toolbox.test.Test;
+import com.asofterspace.toolbox.test.TestUtils;
 
-public class ConfigFileTest {
+public class ConfigFileTest implements Test {
+
+	@Override
+	public void runAll() {
+
+		persistenceTest();
+	}
 
 	/**
 	 * Tests whether a config file actually saves its
 	 * information to the file system - and can retrieve
 	 * it again afterwards
 	 */
-	@Test
 	public void persistenceTest() {
+
+		TestUtils.start("Config File Persistence");
 
 		String testfile = "testfile";
 		String testkey = "test";
@@ -27,10 +32,11 @@ public class ConfigFileTest {
 		ConfigFile confFile2 = new ConfigFile(testfile);
 		
 		if (testvalue.equals(confFile2.getValue(testkey))) {
+			TestUtils.succeed();
 			return;
 		}
 
-		fail("The configuration file does not seem to persist its information!");
+		TestUtils.fail("The configuration file does not seem to persist its information!");
 	}
 
 }

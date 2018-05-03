@@ -26,3 +26,6 @@ bin
 
 # sourcefile list
 src/sourcefiles.list
+
+# test files
+config

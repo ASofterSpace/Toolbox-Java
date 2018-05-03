@@ -207,9 +207,11 @@ public class JSON {
 		while (jsonString.length() > 0) {
 			
 			Character curChar = jsonString.charAt(0);
-			
-			if (Character.isDigit(curChar) || curChar.equals('.') || curChar.equals('-')) {
-				
+
+			if (Character.isDigit(curChar) || curChar.equals('.') ||
+				curChar.equals(',') || curChar.equals('-') ||
+				curChar.equals('e') || curChar.equals('E')) {
+
 				numStr += curChar;
 
 				jsonString = jsonString.substring(1);
@@ -220,7 +222,9 @@ public class JSON {
 				break;
 			}
 		}
-		
+
+		numStr = numStr.replace(",", "");
+
 		if (numStr.contains(".")) {
 			
 			// create a double
@@ -366,11 +370,11 @@ public class JSON {
 	 * @param key the key to search for
 	 * @return the JSON object
 	 */
-	public JSON get(String key) {
+	public JSON get(Object key) {
 		if (objContents == null) {
 			return null;
 		}
-		return objContents.get(key);
+		return objContents.get(key.toString());
 	}
 
 	/**
@@ -415,7 +419,7 @@ public class JSON {
 	 * @param key the key to search for
 	 * @return the JSON object - hopefully a plain string - as string
 	 */
-	public String getString(String key) {
+	public String getString(Object key) {
 		JSON result = get(key);
 		
 		// in case of a string, return the contained string WITHOUT
