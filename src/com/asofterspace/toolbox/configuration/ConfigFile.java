@@ -54,7 +54,7 @@ public class ConfigFile {
 
 		// if no file could be loaded, then we will have to default to an empty one
 		if (correspondingFile == null) {
-			content = new JSON("{}");
+			content = new JSON();
 		} else {
 			content = new JSON(correspondingFile.getContent());
 		}
@@ -107,6 +107,17 @@ public class ConfigFile {
 		}
 		
 		return result;
+	}
+
+	/**
+	 * Sets all the contents based on a JSON container
+	 * @param newContent
+	 */
+	public void setAllContents(JSON newContent) {
+		
+		this.content = newContent;
+
+		saveToFile();
 	}
 
 	/**

@@ -78,6 +78,29 @@ public class JSON {
 	}
 
 	/**
+	 * Tells us whether this JSON object is empty or not
+	 */
+	public boolean isEmpty() {
+
+		switch (kind) {
+
+			case STRING:
+			case BOOLEAN:
+			case NUMBER:
+				return "".equals(simpleContents.toString());
+
+			case ARRAY:
+				return arrContents.size() < 1;
+				
+			case OBJECT:
+				return objContents.size() < 1;
+				
+			default:
+				return true;
+		}
+	}
+
+	/**
 	 * Initialize this JSON object based on a given JSON string
 	 * and return the rest that is left over of the string after
 	 * initialization
@@ -144,9 +167,14 @@ public class JSON {
 			
 			arrContents = new ArrayList<JSON>();
 			
-			jsonString = jsonString.substring(1);
+			jsonString = jsonString.substring(1).trim();
 			
 			while (jsonString.length() > 0) {
+
+				if (jsonString.startsWith("]")) {
+					return jsonString.substring(1);
+				}
+
 				JSON newJSONelement = new JSON();
 				jsonString = newJSONelement.init(jsonString).trim();
 				arrContents.add(newJSONelement);
@@ -155,9 +183,6 @@ public class JSON {
 					jsonString = jsonString.substring(1).trim();
 				}
 				
-				if (jsonString.startsWith("]")) {
-					return jsonString.substring(1);
-				}
 			}
 			
 			return jsonString;
