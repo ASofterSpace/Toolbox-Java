@@ -40,7 +40,7 @@ public class ConfigFile {
 			// then we probably want a local-ish file
 			filename = FOLDER + filename;
 		}
-		
+
 		loadFromFile();
 	}
 
@@ -49,10 +49,15 @@ public class ConfigFile {
 	 * and does not need to be called from the outside world)
 	 */
 	private void loadFromFile() {
-		
+
 		File correspondingFile = new File(filename);
-		
-		content = new JSON(correspondingFile.getContent());
+
+		// if no file could be loaded, then we will have to default to an empty one
+		if (correspondingFile == null) {
+			content = new JSON("{}");
+		} else {
+			content = new JSON(correspondingFile.getContent());
+		}
 	}
 	
 	/**

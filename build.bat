@@ -1,3 +1,5 @@
+rd /s /q bin
+
 md bin
 
 cd src

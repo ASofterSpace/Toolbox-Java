@@ -74,19 +74,25 @@ public class File {
 	 */
 	public String getContent() {
 
+		// if the content has not yet been fetched... fetch it!
 		if (filecontents == null) {
 			loadContents();
 		}
-		
+
+		// if the content still is not available... meh!
+		if (filecontents == null) {
+			return "";
+		}
+
 		StringBuilder result = new StringBuilder();
-		
+
 		String separator = "";
-		
+
 		for (String line : filecontents) {
-			
+
 			result.append(separator);
 			separator = "\n";
-			
+
 			result.append(line);
 		}
 
