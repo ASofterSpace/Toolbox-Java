@@ -10,19 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class File {
-	
+
 	private String filename;
-	
+
 	private List<String> filecontents;
 
-	
+
 	/**
 	 * Please do not construct a file without a name ;)
 	 */
 	@SuppressWarnings("unused")
 	private File() {
 	}
-	
+
 	/**
 	 * Create a new file instance based on the fully qualified file name,
 	 * using a slash as separator independent of the operating system,
@@ -33,7 +33,16 @@ public class File {
 	
 		filename = fullyQualifiedFileName;
 	}
-	
+
+	/**
+	 * Create a new file instance based on a Java File
+	 * @param javaFile
+	 */
+	public File(java.io.File javaFile) {
+
+		filename = javaFile.getName();
+	}
+
 	/**
 	 * Loads the file contents from the file system
 	 * @return file contents
