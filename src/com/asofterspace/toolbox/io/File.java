@@ -42,6 +42,14 @@ public class File {
 
 		filename = javaFile.getName();
 	}
+	
+	/**
+	 * Get the filename associated with this file object
+	 */
+	public String getFilename() {
+
+		return filename;
+	}
 
 	/**
 	 * Loads the file contents from the file system
@@ -199,4 +207,12 @@ public class File {
 		save();
 	}
 	
+	/**
+	 * Gives back a string representation of the file object
+	 */
+	@Override
+	public String toString() {
+		return "com.asofterspace.toolbox.io.File: " + filename;
+	}
+
 }
