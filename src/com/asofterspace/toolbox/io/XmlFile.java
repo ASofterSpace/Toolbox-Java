@@ -79,6 +79,7 @@ public class XmlFile extends File {
 				byte attrAmountCurrent = 0;
 				byte xmlnsId = 0;
 				int styleLength = 0;
+				byte nextElementId = 0;
 				boolean debug = false; // TODO :: remove debug switch
 				
 				for (int i = 0; i < len; i++) {
@@ -156,78 +157,94 @@ public class XmlFile extends File {
 								// TODO :: actually read a compressed integer, not just a byte and hope for the best!
 								eObjectAmount = cur;
 								break;
+							case 10:
+								nextElementId = (byte)(cur + 1);
+								break;
 						}
 					} else {
 						// if (inAttribute) {
 						if (debug) {
-						System.out.println("attrCurPos: " + attrCurPos);
-						System.out.println("attrLength: " + attrLength);
-						System.out.println("cur: " + cur);
+							System.out.println("attrCurPos: " + attrCurPos);
+							System.out.println("attrLength: " + attrLength);
+							System.out.println("cur: " + cur);
 						}
-							if (attrCurPos == 0) {
-								attrLength = cur;
-							} else {
-								if (cur == (byte)0x18) {
-									attrBuilder.append('#');
-								} else {
-									attrBuilder.append((char)cur);
-								}
+						
+						if (attrCurPos == 0) {
+							attrLength = cur;
+							// ignore 0x40 (64d) - does this have something to do with compressed integers?
+							if (cur == (byte)0x40) {
+								continue;
 							}
-							
-							attrCurPos++;
-							
-							if (attrLength == attrCurPos) {
-								inAttribute = false;
-								if (xmlns == null) {
-									xmlns = attrBuilder.toString();
-									System.out.println("found xmlns: " + xmlns);
-									i++;
-									xmlnsId = binaryContent[i];
+						} else {
+							if (cur == (byte)0x18) {
+								attrBuilder.append('#');
+							} else {
+								attrBuilder.append((char)cur);
+							}
+						}
+						
+						attrCurPos++;
+						
+						if (attrLength == attrCurPos) {
+							inAttribute = false;
+							if (xmlns == null) {
+								xmlns = attrBuilder.toString();
+								System.out.println("found xmlns: " + xmlns);
+								i++;
+								xmlnsId = binaryContent[i];
+							} else {
+								if (element == null) {
+									element = attrBuilder.toString();
+									System.out.println("found element: " + element);
 								} else {
-									if (element == null) {
-										element = attrBuilder.toString();
-										System.out.println("found element: " + element);
+									if (containedNamespace == null) {
+										containedNamespace = attrBuilder.toString();
+										containedNamespace = containedNamespace.replaceAll("/", ".");
+										System.out.println("found contained namespace: " + containedNamespace);
+										// no idea what the next byte means
+										i++;
 									} else {
-										if (containedNamespace == null) {
-											containedNamespace = attrBuilder.toString();
-											containedNamespace = containedNamespace.replaceAll("/", ".");
-											System.out.println("found contained namespace: " + containedNamespace);
-											// no idea what the next byte means
-											i++;
-										} else {
-											if (wroteElementStart) {
-												if (beforeEquals) {
-													if ((binaryContent[i+1] == 2) && (binaryContent[i+2] == 2)) {
-														cB.append(">\n<");
-														cB.append(attrBuilder);
-														cB.append(" ");
-														beforeEquals = true;
-													} else {
-														cB.append(' ');
-														cB.append(attrBuilder);
-														cB.append('=');
+										if (wroteElementStart) {
+											if (beforeEquals) {
+												if ((binaryContent[i+1] == nextElementId) && (binaryContent[i+2] == nextElementId)) {
+													cB.append(">\n");
+													beforeEquals = true;
+													wroteElementStart = false;
+													element = null;
+													xmlns = null;
+													containedNamespace = null;
+													i = i + 2;
+													// swallow further nextElementIds (we have observed 28, 22, 222, ...)
+													while (binaryContent[i+1] == nextElementId) {
+														i++;
 													}
+													nextElementId++;
 												} else {
-													cB.append('"');
+													cB.append(' ');
 													cB.append(attrBuilder);
-													cB.append('"');
-													i++;
-													cB.append("(" + binaryContent[i] + ")");
+													cB.append('=');
 												}
-												beforeEquals = !beforeEquals;
 											} else {
+												cB.append('"');
+												cB.append(attrBuilder);
+												cB.append('"');
 												i++;
-												cB.append("<" + namespaceToElement(element) + ":" + attrBuilder.toString() + "(" + binaryContent[i] + ") xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:" + namespaceToElement(xmlns) + "=\"" + xmlns + "(" + xmlnsId + ")\"");
-												wroteElementStart = true;
-												beforeEquals = true;
+												cB.append("(" + binaryContent[i] + ")");
 											}
+											beforeEquals = !beforeEquals;
+										} else {
+											i++;
+											cB.append("<" + namespaceToElement(element) + ":" + attrBuilder.toString() + "(" + binaryContent[i] + ") xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:" + namespaceToElement(xmlns) + "=\"" + xmlns + "(" + xmlnsId + ")\"");
+											wroteElementStart = true;
+											beforeEquals = true;
 										}
 									}
 								}
-								attrCurPos = 0;
-								attrLength = 0;
-								attrBuilder = new StringBuilder();
 							}
+							attrCurPos = 0;
+							attrLength = 0;
+							attrBuilder = new StringBuilder();
+						}
 						//} else {
 						//	inAttribute = true;
 						//	attrCounter++;
@@ -282,12 +299,18 @@ public class XmlFile extends File {
 				return "monitoringControlElement";
 			case "http://www.scopeset.de/MonitoringControlImplementation/UserDefinedDisplays/1.12":
 				return "userDefinedDisplay";
+			case "http://www.scopeset.de/MonitoringControlImplementation/UserDefinedDisplays/Mapping_UDD2MCM/1.12":
+				return "udd2mceMapper";
 			case "http://www.scopeset.de/core/qudv/conceptualmodel/1.5":
 				return "qudv.conceptualmodel_extModel";
 			case "http://www.scopeset.de/core/1.5":
 				return "xmi";
 			case "http://www.esa.int/dme/ConfigurationTracking/1.12.1":
-				// so far unknown
+			case "http://www.esa.int/dme/MonitoringControlImplementation/ProcedureScriptSwFunction/1.12.1":
+			case "http://www.esa.int/dme/MonitoringControlImplementation/1.12.1":
+			case "http://www.scopeset.de/PacketProcessing/1.0.0":
+			case "http://www.scopeset.de/MonitoringControlImplementation/ProcedureScriptSwFunction/1.12":
+				return "unknown";	
 		}
 		return "unknown(" + namespace + ")";
 	}
