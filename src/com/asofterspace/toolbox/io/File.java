@@ -40,7 +40,7 @@ public class File {
 	 */
 	public File(java.io.File javaFile) {
 
-		filename = javaFile.getName();
+		filename = javaFile.getAbsolutePath();
 	}
 	
 	/**
@@ -49,6 +49,22 @@ public class File {
 	public String getFilename() {
 
 		return filename;
+	}
+	
+	/**
+	 * Get a Java File object representing this file
+	 */
+	public java.io.File getJavaFile() {
+
+		return new java.io.File(filename);
+	}
+	
+	/**
+	 * Get a URI object representing this file
+	 */
+	public java.net.URI getURI() {
+
+		return getJavaFile().toURI();
 	}
 
 	/**
