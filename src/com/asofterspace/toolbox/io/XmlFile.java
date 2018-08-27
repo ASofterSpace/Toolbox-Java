@@ -245,38 +245,6 @@ public class XmlFile extends File {
 							attrLength = 0;
 							attrBuilder = new StringBuilder();
 						}
-						//} else {
-						//	inAttribute = true;
-						//	attrCounter++;
-							//if (cur != attrCounter) {
-							//	System.out.println(cB.toString());
-							//	throw new IOException("The file is neither valid XML nor a valid EMF binary file!");
-							//}
-						//}
-						/*
-						// before a string we always have the length of the string
-						switch (cur) {
-							case (byte)0x00: // n++: NUL
-							
-							case (byte)0x01: // n++: SOH
-								cB.append("\"");
-								break;
-								
-							case (byte)0x02: // n++: STX
-							
-							case (byte)0x0a:
-							case (byte)0x0d:
-							case (byte)0x1a:
-								// do nothing
-								break;
-							case (byte)0x18: // n++: CAN
-								cB.append("#");
-								break;
-							default:
-								cB.append((char)cur);
-								break;
-						}
-						*/
 					}
 				}
 				
