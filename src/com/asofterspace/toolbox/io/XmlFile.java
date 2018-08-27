@@ -102,47 +102,19 @@ public class XmlFile extends File {
 					
 					if (i < 12 + styleLength) {
 						// ensure that we are starting with ‰emf.... - the exact signature that NEEDS to be intact for this to be valid
-						switch (i + styleLength) {
-							case 0:
-								if (cur != (byte)0x89) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
-							case 1:
-								if (cur != (byte)0x65) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
-							case 2:
-								if (cur != (byte)0x6d) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
-							case 3:
-								if (cur != (byte)0x66) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
-							case 4:
-								if (cur != (byte)0x0a) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
-							case 5:
-								if (cur != (byte)0x0d) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
-							case 6:
-								if (cur != (byte)0x1a) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
-							case 7:
-								if (cur != (byte)0x0a) {
-									throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
-								}
-								break;
+						int j = i + styleLength;
+						if (((j == 0) && (cur != (byte)0x89)) ||
+							((j == 1) && (cur != (byte)0x65)) ||
+							((j == 2) && (cur != (byte)0x6d)) ||
+							((j == 3) && (cur != (byte)0x66)) ||
+							((j == 4) && (cur != (byte)0x0a)) ||
+							((j == 5) && (cur != (byte)0x0d)) ||
+							((j == 6) && (cur != (byte)0x1a)) ||
+							((j == 7) && (cur != (byte)0x0a))) {
+							throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
+						}
+								
+						switch (j) {
 							case 8:
 								// all CDM files we have seen so far were using version 0
 								if (cur != (byte)0x00) {
@@ -278,6 +250,7 @@ public class XmlFile extends File {
 			case "http://www.esa.int/dme/MonitoringControlImplementation/1.12.1":
 			case "http://www.scopeset.de/PacketProcessing/1.0.0":
 			case "http://www.scopeset.de/MonitoringControlImplementation/ProcedureScriptSwFunction/1.12":
+			case "http://www.scopeset.de/MonitoringControlImplementation/Packetization/Packetization/Parameter/1.12":
 				return "unknown";	
 		}
 		return "unknown(" + namespace + ")";
