@@ -9,18 +9,21 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A file object describes a single file and enables simple access to
+ * its contents.
+ */
 public class File {
 
-	private String filename;
+	String filename;
 
-	private List<String> filecontents;
+	List<String> filecontents;
 
 
 	/**
 	 * Please do not construct a file without a name ;)
 	 */
-	@SuppressWarnings("unused")
-	private File() {
+	protected File() {
 	}
 
 	/**
@@ -224,11 +227,25 @@ public class File {
 	}
 	
 	/**
+	 * Copy this file to another another file instance
+	 */
+	public void copyTo(File other) {
+
+		other.filename = this.filename;
+		
+		if (this.filecontents == null) {
+			other.filecontents = null;
+		} else {
+			other.filecontents = new ArrayList<>(this.filecontents);
+		}
+	}
+
+	/**
 	 * Gives back a string representation of the file object
 	 */
 	@Override
 	public String toString() {
 		return "com.asofterspace.toolbox.io.File: " + filename;
 	}
-
+	
 }
