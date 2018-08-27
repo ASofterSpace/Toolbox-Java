@@ -77,9 +77,9 @@ public class File {
 	public List<String> loadContents() {
 		
 		try {
-			byte[] encoded = Files.readAllBytes(Paths.get(filename));
+			byte[] binaryContent = Files.readAllBytes(Paths.get(filename));
 
-			String newContent = new String(encoded, StandardCharsets.UTF_8);
+			String newContent = new String(binaryContent, StandardCharsets.UTF_8);
 			  
 			setContent(newContent);
 			
