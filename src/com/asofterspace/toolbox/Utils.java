@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 3;
+	public final static int TOOLBOX_VERSION_NUMBER = 4;
 
 	public static String strListToString(List<String> stringList) {
 
