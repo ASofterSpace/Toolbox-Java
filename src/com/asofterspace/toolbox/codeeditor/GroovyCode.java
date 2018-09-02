@@ -29,7 +29,7 @@ public class GroovyCode extends DefaultStyledDocument {
 
 	// all primitive types of the Groovy language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "double", "int", "private", "protected", "public", "static", "void"}
+		new String[] {"boolean", "char", "double", "int", "final", "private", "protected", "public", "static", "void"}
 	));
 
 	// all string delimiters of the Groovy language
