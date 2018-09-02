@@ -1,7 +1,9 @@
 package com.asofterspace.toolbox.codeeditor;
 
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,7 +19,10 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Element;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.TabSet;
+import javax.swing.text.TabStop;
 
 public class GroovyCode extends DefaultStyledDocument {
 
@@ -26,12 +31,12 @@ public class GroovyCode extends DefaultStyledDocument {
 
 	// all keywords of the Groovy language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "class", "const", "continue", "def", "default", "do", "else", "enum", "extends", "false", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "package", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "while"}
+		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "while"}
 	));
 
 	// all primitive types of the Groovy language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "double", "int", "final", "private", "protected", "public", "static", "void"}
+		new String[] {"boolean", "char", "class", "double", "enum", "int", "final", "package", "private", "protected", "public", "static", "void"}
 	));
 
 	// all string delimiters of the Groovy language
@@ -75,6 +80,11 @@ public class GroovyCode extends DefaultStyledDocument {
 	
 	// the background color of all editors
 	private static Color schemeBackgroundColor;
+	
+	// the font sizes, fonts and tab sets of all editors
+	private static int fontSize = 15;
+	private static Font lastFont;
+	private static TabSet lastTabSet;
 
 
 	public GroovyCode(JTextPane editor) {
@@ -89,16 +99,21 @@ public class GroovyCode extends DefaultStyledDocument {
 
 		// declare which end of line marker is to be used
 		putProperty(DefaultEditorKit.EndOfLineStringProperty, EOL);
+		
+		// initialize the font size, lastFont etc. if they have not been initialized before
+		if (lastFont == null) {
+			setFontSize(fontSize);
+		}
 
 		// initialize all the attribute sets, if they have not been initialized before
 		if (attrAnnotation == null) {
+			// yepp, nothing has been initialized before, so we go for a default scheme
 			setLightScheme();
 		}
 
 		// actually style the editor with... us
 		decoratedEditor.setDocument(this);
-		decoratedEditor.setFont(new Font("Courier New", Font.PLAIN, 15));
-		decoratedEditor.setBackground(schemeBackgroundColor);
+		applySchemeAndFontToOurEditor();
 		
 		instances.add(this);
 	}
@@ -128,7 +143,7 @@ public class GroovyCode extends DefaultStyledDocument {
 		
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(255, 255, 255);
-		applySchemeToAllEditors();
+		applySchemeAndFontToAllEditors();
 	}
 	
 	public static void setDarkScheme() {
@@ -162,17 +177,59 @@ public class GroovyCode extends DefaultStyledDocument {
 		
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(0, 0, 0);
-		applySchemeToAllEditors();
+		applySchemeAndFontToAllEditors();
+	}
+	
+	public static void setFontSize(int newSize) {
+	
+		fontSize = newSize;
+		
+		lastFont = new Font("Courier New", Font.PLAIN, fontSize);
+		
+		applySchemeAndFontToAllEditors();
 	}
 
-	private static void applySchemeToAllEditors() {
+	private static void applySchemeAndFontToAllEditors() {
 		
+		// ignore calls to this function before fonts have actually
+		// been initialized (which can happen if a style is statically
+		// chosen already before the very first editor has been created)
+		if (lastFont == null) {
+			return;
+		}
+		
+		// calculate the correct tab stops
+		Canvas c = new Canvas();
+		FontMetrics fm = c.getFontMetrics(lastFont);
+		int tabWidth = 4 * fm.charWidth(' ');
+
+		// we create 100 tab stops... that should be enough (per line!)
+		TabStop[] tabStops = new TabStop[100];
+
+		for (int i = 0; i < tabStops.length; i++) {
+			tabStops[i] = new TabStop((i+1) * tabWidth);
+		}
+
+		lastTabSet = new TabSet(tabStops);
+		
+		// actually apply it all
 		for (GroovyCode instance : instances) {
 		
-			instance.decoratedEditor.setBackground(schemeBackgroundColor);
-			
+			instance.applySchemeAndFontToOurEditor();
+
 			instance.highlightAllText();
 		}
+	}
+	
+	private void applySchemeAndFontToOurEditor() {
+		
+		decoratedEditor.setBackground(schemeBackgroundColor);
+
+		decoratedEditor.setFont(lastFont);
+
+		Style style = decoratedEditor.getLogicalStyle();
+		StyleConstants.setTabSet(style, lastTabSet);
+		decoratedEditor.setLogicalStyle(style);
 	}
 	
 	@Override
