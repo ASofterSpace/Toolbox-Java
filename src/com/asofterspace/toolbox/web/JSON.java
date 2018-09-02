@@ -447,6 +447,10 @@ public class JSON {
 	public String getString(Object key) {
 		JSON result = get(key);
 		
+		if (result == null) {
+			return null;
+		}
+		
 		// in case of a string, return the contained string WITHOUT
 		// enclosing ""-signs
 		if (result.kind == JSONkind.STRING) {

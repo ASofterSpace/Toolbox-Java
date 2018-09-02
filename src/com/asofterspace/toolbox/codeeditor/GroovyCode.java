@@ -3,7 +3,9 @@ package com.asofterspace.toolbox.codeeditor;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.event.DocumentEvent;
@@ -58,15 +60,21 @@ public class GroovyCode extends DefaultStyledDocument {
 	private boolean curMultilineComment;
 
 	// styles for the different kinds of text in the document
-	protected MutableAttributeSet attrAnnotation;
-	protected MutableAttributeSet attrComment;
-	protected MutableAttributeSet attrKeyword;
-	protected MutableAttributeSet attrRegular;
-	protected MutableAttributeSet attrPrimitiveType;
-	protected MutableAttributeSet attrString;
+	private static MutableAttributeSet attrAnnotation;
+	private static MutableAttributeSet attrComment;
+	private static MutableAttributeSet attrKeyword;
+	private static MutableAttributeSet attrRegular;
+	private static MutableAttributeSet attrPrimitiveType;
+	private static MutableAttributeSet attrString;
 
 	// the editor that is to be decorated by us
 	private final JTextPane decoratedEditor;
+	
+	// the list of all decorated editors
+	private static List<GroovyCode> instances = new ArrayList<GroovyCode>();
+	
+	// the background color of all editors
+	private static Color schemeBackgroundColor;
 
 
 	public GroovyCode(JTextPane editor) {
@@ -82,17 +90,22 @@ public class GroovyCode extends DefaultStyledDocument {
 		// declare which end of line marker is to be used
 		putProperty(DefaultEditorKit.EndOfLineStringProperty, EOL);
 
-		// initialize all the attribute sets
-		initAttributeSets();
+		// initialize all the attribute sets, if they have not been initialized before
+		if (attrAnnotation == null) {
+			setLightScheme();
+		}
 
 		// actually style the editor with... us
 		decoratedEditor.setDocument(this);
-		decoratedEditor.setBackground(new Color(255, 255, 255));
 		decoratedEditor.setFont(new Font("Courier New", Font.PLAIN, 15));
+		decoratedEditor.setBackground(schemeBackgroundColor);
+		
+		instances.add(this);
 	}
 
-	private void initAttributeSets() {
-
+	public static void setLightScheme() {
+	
+		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAnnotation, new Color(0, 128, 0));
 
@@ -112,8 +125,56 @@ public class GroovyCode extends DefaultStyledDocument {
 
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(128, 0, 0));
+		
+		// re-decorate the editor
+		schemeBackgroundColor = new Color(255, 255, 255);
+		applySchemeToAllEditors();
+	}
+	
+	public static void setDarkScheme() {
+	
+		// change the attribute sets
+		attrAnnotation = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 128));
+		StyleConstants.setBackground(attrAnnotation, new Color(0, 0, 0));
+
+		attrComment = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrComment, new Color(128, 255, 128));
+		StyleConstants.setBackground(attrComment, new Color(0, 0, 0));
+		StyleConstants.setItalic(attrComment, true);
+
+		attrKeyword = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrKeyword, new Color(128, 128, 255));
+		StyleConstants.setBackground(attrKeyword, new Color(0, 0, 0));
+		StyleConstants.setBold(attrKeyword, true);
+
+		attrRegular = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
+		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
+
+		attrPrimitiveType = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrPrimitiveType, new Color(255, 96, 255));
+		StyleConstants.setBackground(attrPrimitiveType, new Color(0, 0, 0));
+
+		attrString = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
+		StyleConstants.setBackground(attrString, new Color(0, 0, 0));
+		
+		// re-decorate the editor
+		schemeBackgroundColor = new Color(0, 0, 0);
+		applySchemeToAllEditors();
 	}
 
+	private static void applySchemeToAllEditors() {
+		
+		for (GroovyCode instance : instances) {
+		
+			instance.decoratedEditor.setBackground(schemeBackgroundColor);
+			
+			instance.highlightAllText();
+		}
+	}
+	
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
@@ -177,6 +238,11 @@ public class GroovyCode extends DefaultStyledDocument {
 
 		highlightText(event.getOffset(), event.getLength());
 	}
+	
+	private void highlightAllText() {
+		highlightText(0, this.getLength());
+	}
+			
 
 	// this is the main function that... well... hightlights our text :)
 	private void highlightText(int start, int length) {
