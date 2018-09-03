@@ -55,6 +55,29 @@ public class File {
 	}
 	
 	/**
+	 * Get only the local part of the filename associated with this file object,
+	 * so just the name itself instead of the full path
+	 */
+	public String getLocalFilename() {
+
+		if (filename == null) {
+			return null;
+		}
+		
+		String[] firstFilenameParts = filename.split("/");
+		String firstResult = firstFilenameParts[firstFilenameParts.length - 1];
+		
+		String[] secondFilenameParts = filename.split("\\\\");
+		String secondResult = secondFilenameParts[secondFilenameParts.length - 1];
+		
+		if (firstResult.length() > secondResult.length()) {
+			return secondResult;
+		} else {
+			return firstResult;
+		}
+	}
+	
+	/**
 	 * Get a Java File object representing this file
 	 */
 	public java.io.File getJavaFile() {

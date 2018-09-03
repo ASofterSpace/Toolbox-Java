@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
@@ -25,19 +26,16 @@ import org.w3c.dom.Element;
  */
 public class XmlFile extends File {
 
-	// ideally, this class should have no own members (they should all be in File,
-	// and here we should just have additional methods for working on it), or at
-	// least the own members should be fine as null that are later lazy-loaded
-	// if this ever changes, classes that extend this one (such as CdmFile in
-	// the CdmScriptEditor) need to get their constructors adapted!
-	
-	Document xmlcontents = null;
+	protected Document xmlcontents = null;
+
+	protected XmlMode mode = XmlMode.NONE_LOADED;
+
 
 	/**
 	 * You can construct a XmlFile instance by directly from a path name.
 	 */
 	public XmlFile(String fullyQualifiedFileName) {
-	
+
 		super(fullyQualifiedFileName);
 	}
 
@@ -45,37 +43,39 @@ public class XmlFile extends File {
 	 * You can construct an XmlFile instance by basing it on an existing file object.
 	 */
 	public XmlFile(File regularFile) {
-	
+
 		super();
-		
+
 		regularFile.copyTo(this);
 	}
 
 	private void loadXmlContents() {
-	
+
 		try {
-			
+
 			// let's try to load the regular XML contents...
-			
+
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-			
+
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-			
+
 			xmlcontents = documentBuilder.parse(this.getJavaFile());
-			
+
 			xmlcontents.getDocumentElement().normalize();
-			
+
+			mode = XmlMode.XML_LOADED;
+
 		} catch (Exception xE) {
-			
+		
 			// oh no - REGULAR xml, this was not!
 			// maybe it is a binary file...
 			// we can try to decode EMF binary manually - let's see how well we are doing!
-			
+
 			try {
 				byte[] binaryContent = Files.readAllBytes(Paths.get(this.filename));
-				
+
 				StringBuilder cB = new StringBuilder();
-				
+
 				cB.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
 				int len = binaryContent.length;
@@ -96,11 +96,11 @@ public class XmlFile extends File {
 				int styleLength = 0;
 				byte nextElementId = 0;
 				boolean debug = false; // TODO :: remove debug switch
-				
+
 				for (int i = 0; i < len; i++) {
-					
+
 					byte cur = binaryContent[i];
-					
+
 					// we first have the signature (8 bytes)
 					// then the version (1 byte)
 					// then the style (4 bytes) if version is above 0 (nothing otherwise)
@@ -114,7 +114,7 @@ public class XmlFile extends File {
 					// however, in the beginning we first have the xmlns namespace, then the
 					// actual element name (however, expressed as namespace), followed by
 					// the namespace prefix for everything that is following / contained!
-					
+
 					if (i < 12 + styleLength) {
 						// ensure that we are starting with ‰emf.... - the exact signature that NEEDS to be intact for this to be valid
 						int j = i + styleLength;
@@ -128,7 +128,7 @@ public class XmlFile extends File {
 							((j == 7) && (cur != (byte)0x0a))) {
 							throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
 						}
-								
+
 						switch (j) {
 							case 8:
 								// all CDM files we have seen so far were using version 0
@@ -155,7 +155,7 @@ public class XmlFile extends File {
 							System.out.println("attrLength: " + attrLength);
 							System.out.println("cur: " + cur);
 						}
-						
+
 						if (attrCurPos == 0) {
 							attrLength = cur;
 							// ignore 0x40 (64d) - does this have something to do with compressed integers?
@@ -169,9 +169,9 @@ public class XmlFile extends File {
 								attrBuilder.append((char)cur);
 							}
 						}
-						
+
 						attrCurPos++;
-						
+
 						if (attrLength == attrCurPos) {
 							inAttribute = false;
 							if (xmlns == null) {
@@ -234,18 +234,22 @@ public class XmlFile extends File {
 						}
 					}
 				}
-				
+
 				System.out.println("");
 				System.out.println(cB.toString());
 
+				mode = XmlMode.EMF_LOADED;
+
 			} catch (IOException bE) {
 				System.out.println(bE);
+
+				mode = XmlMode.NONE_LOADED;
 			}
 		}
 	}
-	
+
 	private String namespaceToElement(String namespace) {
-	
+
 		switch (namespace) {
 			case "http://www.scopeset.de/ConfigurationTracking/1.12":
 				return "configurationcontrol";
@@ -266,34 +270,48 @@ public class XmlFile extends File {
 			case "http://www.scopeset.de/PacketProcessing/1.0.0":
 			case "http://www.scopeset.de/MonitoringControlImplementation/ProcedureScriptSwFunction/1.12":
 			case "http://www.scopeset.de/MonitoringControlImplementation/Packetization/Packetization/Parameter/1.12":
-				return "unknown";	
+				return "unknown";
 		}
 		return "unknown(" + namespace + ")";
 	}
-	
+
 	public Node getRoot() {
 
 		if (xmlcontents == null) {
 			loadXmlContents();
 		}
-		
+
 		return xmlcontents.getDocumentElement();
 	}
+
+	public XmlMode getMode() {
 	
+		if (xmlcontents == null) {
+			loadXmlContents();
+		}
+
+		return mode;
+	}
+
 	public void save() {
 
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+			transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
+			transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			Result output = new StreamResult(this.getJavaFile());
+			xmlcontents.setXmlStandalone(true);
 			Source input = new DOMSource(xmlcontents);
 
 			transformer.transform(input, output);
-			
+
 		} catch (TransformerException e) {
 			System.err.println(e);
 		}
 	}
-   
+
 	/**
 	 * Gives back a string representation of the xml file object
 	 */
@@ -301,5 +319,5 @@ public class XmlFile extends File {
 	public String toString() {
 		return "com.asofterspace.toolbox.io.XmlFile: " + filename + " (root element: " + this.getRoot().getNodeName() + ")";
 	}
-	
+
 }
