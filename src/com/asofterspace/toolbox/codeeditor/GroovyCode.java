@@ -1,5 +1,7 @@
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.utils.Callback;
+
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
@@ -23,6 +25,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
+
 
 public class GroovyCode extends DefaultStyledDocument {
 
@@ -63,6 +66,9 @@ public class GroovyCode extends DefaultStyledDocument {
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
+	
+	// the callback to be called when something changes
+	private Callback onChangeCallback;
 
 	// styles for the different kinds of text in the document
 	private static MutableAttributeSet attrAnnotation;
@@ -232,6 +238,11 @@ public class GroovyCode extends DefaultStyledDocument {
 		decoratedEditor.setLogicalStyle(style);
 	}
 	
+	public void setOnChange(Callback callback) {
+
+		onChangeCallback = callback;
+	}
+	
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
@@ -266,6 +277,10 @@ public class GroovyCode extends DefaultStyledDocument {
 		if (overrideCaretPos) {
 			decoratedEditor.setCaretPosition(origCaretPos + 1);
 		}
+		
+		if (onChangeCallback != null) {
+			onChangeCallback.call();
+		}
 	}
 
 	@Override
@@ -286,6 +301,10 @@ public class GroovyCode extends DefaultStyledDocument {
 		}
 
 		highlightText(offset, 0);
+		
+		if (onChangeCallback != null) {
+			onChangeCallback.call();
+		}
 	}
 
 	@Override
