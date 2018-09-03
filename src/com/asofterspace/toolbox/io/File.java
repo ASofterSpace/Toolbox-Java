@@ -88,6 +88,16 @@ public class File {
 		}
 		return filecontents;
 	}
+	
+	/**
+	 * Ensure that the contents have been loaded
+	 */
+	protected void ensureContents() {
+	
+		if (filecontents == null) {
+			loadContents();
+		}
+	}
 
 	/**
 	 * Gets the file contents from the last time they were read
@@ -96,9 +106,8 @@ public class File {
 	 */
 	public List<String> getContents() {
 		
-		if (filecontents == null) {
-			loadContents();
-		}
+		// if the content has not yet been fetched... fetch it!
+		ensureContents();
 		
 		return filecontents;
 	}
@@ -111,9 +120,7 @@ public class File {
 	public String getContent() {
 
 		// if the content has not yet been fetched... fetch it!
-		if (filecontents == null) {
-			loadContents();
-		}
+		ensureContents();
 
 		// if the content still is not available... meh!
 		if (filecontents == null) {
@@ -144,6 +151,17 @@ public class File {
 	public void setContents(List<String> contents) {
 		
 		filecontents = contents;
+	}
+	
+	/**
+	 * Explicitly sets the contents of this file instance
+	 * as text consisting of several \n-separated lines
+	 * (this does NOT automagically write them to the hard
+	 * drive - if that is wanted, use saveContents()!)
+	 * @param contents file contents to be set
+	 */
+	public void setContent(StringBuilder content) {
+		setContent(content.toString());
 	}
 	
 	/**

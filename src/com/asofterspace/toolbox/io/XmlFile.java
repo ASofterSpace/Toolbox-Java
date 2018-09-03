@@ -27,6 +27,14 @@ public class XmlFile extends File {
 	Document xmlcontents = null;
 
 	/**
+	 * You can construct a XmlFile instance by directly from a path name.
+	 */
+	public XmlFile(String fullyQualifiedFileName) {
+	
+		super(fullyQualifiedFileName);
+	}
+
+	/**
 	 * You can construct an XmlFile instance by basing it on an existing file object.
 	 */
 	public XmlFile(File regularFile) {
