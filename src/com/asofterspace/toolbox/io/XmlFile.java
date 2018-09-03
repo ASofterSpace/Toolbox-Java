@@ -6,6 +6,13 @@ import java.nio.file.Paths;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -271,6 +278,20 @@ public class XmlFile extends File {
 		}
 		
 		return xmlcontents.getDocumentElement();
+	}
+	
+	public void save() {
+
+		try {
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			Result output = new StreamResult(this.getJavaFile());
+			Source input = new DOMSource(xmlcontents);
+
+			transformer.transform(input, output);
+			
+		} catch (TransformerException e) {
+			System.err.println(e);
+		}
 	}
    
 	/**
