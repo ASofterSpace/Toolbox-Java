@@ -37,7 +37,7 @@ public class CsvFile extends File {
 	public String getHeadLine() {
 		
 		// if the content has not yet been fetched... fetch it!
-		ensureContents();
+		ensureContents(true);
 
 		return filecontents.get(0);
 	}
@@ -45,7 +45,7 @@ public class CsvFile extends File {
 	public String getContentLine() {
 	
 		// if the content has not yet been fetched... fetch it!
-		ensureContents();
+		ensureContents(true);
 
 		// get the next line...
 		currentLine++;

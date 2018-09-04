@@ -97,7 +97,7 @@ public class File {
 	 * Loads the file contents from the file system
 	 * @return file contents
 	 */
-	public List<String> loadContents() {
+	public List<String> loadContents(boolean complainIfMissing) {
 		
 		try {
 			byte[] binaryContent = Files.readAllBytes(Paths.get(filename));
@@ -107,18 +107,21 @@ public class File {
 			setContent(newContent);
 			
 		} catch (IOException e) {
-			System.err.println("[ERROR] Trying to load the file " + filename + ", an I/O Exception occurred - inconceivable!");
+			if (complainIfMissing) {
+				System.err.println("[ERROR] Trying to load the file " + filename + ", an I/O Exception occurred - inconceivable!");
+			}
 		}
 		return filecontents;
 	}
 	
 	/**
 	 * Ensure that the contents have been loaded
+	 * @param complainIfMissing Complain on sys err if the file is missing
 	 */
-	protected void ensureContents() {
+	protected void ensureContents(boolean complainIfMissing) {
 	
 		if (filecontents == null) {
-			loadContents();
+			loadContents(complainIfMissing);
 		}
 	}
 
@@ -129,8 +132,19 @@ public class File {
 	 */
 	public List<String> getContents() {
 		
+		return getContents(true);
+	}
+
+	/**
+	 * Gets the file contents from the last time they were read
+	 * from the file system or set explicitly
+	 * @param complainIfMissing Complain on sys err if the file is missing
+	 * @return file contents
+	 */
+	public List<String> getContents(boolean complainIfMissing) {
+		
 		// if the content has not yet been fetched... fetch it!
-		ensureContents();
+		ensureContents(complainIfMissing);
 		
 		return filecontents;
 	}
@@ -141,9 +155,19 @@ public class File {
 	 * @return file content as \n-separated lines in one string
 	 */
 	public String getContent() {
+		return getContent(true);
+	}
+	
+	/**
+	 * Gets the file content from the last time it was read
+	 * from the file system or set explicitly
+	 * @param complainIfMissing Complain on sys err if the file is missing
+	 * @return file content as \n-separated lines in one string
+	 */
+	public String getContent(boolean complainIfMissing) {
 
 		// if the content has not yet been fetched... fetch it!
-		ensureContents();
+		ensureContents(complainIfMissing);
 
 		// if the content still is not available... meh!
 		if (filecontents == null) {

@@ -56,7 +56,9 @@ public class ConfigFile {
 		if (correspondingFile == null) {
 			content = new JSON();
 		} else {
-			content = new JSON(correspondingFile.getContent());
+			// here, we do NOT want to complain if the content is missing - as it is entirely reasonable
+			// that a program is opened for the first time, and the config has not been written before
+			content = new JSON(correspondingFile.getContent(false));
 		}
 	}
 	
