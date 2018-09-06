@@ -304,6 +304,13 @@ public class File {
 			other.filecontents = new ArrayList<>(this.filecontents);
 		}
 	}
+	
+	/**
+	 * Delete this file from disk
+	 */
+	public void delete() {
+		getJavaFile().delete();
+	}
 
 	/**
 	 * Gives back a string representation of the file object
