@@ -128,6 +128,12 @@ public class XmlFile extends File {
 							((j == 7) && (cur != (byte)0x0a))) {
 							throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
 						}
+						
+						// sooo we encountered an EMF file... but that is all, we do not attempt to parse it!
+						if (j > 7) {
+							mode = XmlMode.EMF_LOADED;
+							return;
+						}
 
 						switch (j) {
 							case 8:
