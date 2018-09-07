@@ -1,5 +1,7 @@
 package com.asofterspace.toolbox.io;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,18 @@ public class Directory {
 		dirname = javaDirectory.getAbsolutePath();
 	}
 	
+	public String getDirname() {
+		return dirname;
+	}
+	
+	/**
+	 * Get a Java File object representing this directory
+	 */
+	public java.io.File getJavaFile() {
+
+		return new java.io.File(dirname);
+	}
+	
 	/**
 	 * Creates this directory on the underlying file system
 	 */
@@ -53,6 +67,29 @@ public class Directory {
 		delete();
 		
 		create();
+	}
+	
+	public Boolean isEmpty() {
+	
+		java.io.File entryPoint = new java.io.File(dirname);
+		
+		if (entryPoint.isDirectory()) {
+			java.io.File[] children = entryPoint.listFiles();
+			
+			return children.length <= 0;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Returns true if something exists under this name (which does NOT need to be a directory, btw.!)
+	 */
+	public boolean exists() {
+	
+		java.io.File entryPoint = new java.io.File(dirname);
+		
+		return entryPoint.exists();
 	}
 	
 	/**
@@ -83,7 +120,29 @@ public class Directory {
 		
 		return result;
 	}
-	
+
+	/**
+	 * Take an old file that is in this directory or a subdirectory, and return a new file pointing to the same
+	 * relative path underneath the new directory
+	 * E.g. if this is /usr/bin and oldFile is /usr/bar/foo/bar.txt, with newDir being /var, then this function
+	 * returns a file pointing towards /var/foo/bar.txt (but no actual moving or copying is being done on disk)
+	 */
+	public File traverseFileTo(File oldFile, Directory newDir) {
+
+		Directory oldDir = this;
+		
+		// express new file relative to old dir
+        Path oldFilePath = Paths.get(oldFile.getFilename());
+        Path oldDirPath = Paths.get(oldDir.dirname);
+        Path filePathRelative = oldDirPath.relativize(oldFilePath);
+
+		// append relative file path to new dir
+        Path newDirPath = Paths.get(newDir.dirname);
+		java.io.File newJavaFile = newDirPath.resolve(filePathRelative).toFile();
+		
+		return new File(newJavaFile);
+	}
+
 	/**
 	 * Deletes this directory and all files and folders inside,
 	 * recursively

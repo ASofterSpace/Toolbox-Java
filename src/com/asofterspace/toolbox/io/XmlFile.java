@@ -301,13 +301,25 @@ public class XmlFile extends File {
 
 	public void save() {
 
+		saveTo(this);
+	}
+	
+	public void saveTo(File newLocation) {
+		
+		filename = newLocation.filename;
+
+		java.io.File thisFile = new java.io.File(filename);
+		
+		// create parent directories
+		thisFile.getParentFile().mkdirs();
+				
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
 			transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			Result output = new StreamResult(this.getJavaFile());
+			Result output = new StreamResult(getJavaFile());
 			xmlcontents.setXmlStandalone(true);
 			Source input = new DOMSource(xmlcontents);
 
