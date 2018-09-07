@@ -34,7 +34,7 @@ public class File {
 	 */
 	public File(String fullyQualifiedFileName) {
 	
-		filename = fullyQualifiedFileName;
+		this.filename = fullyQualifiedFileName;
 	}
 
 	/**
@@ -43,7 +43,18 @@ public class File {
 	 */
 	public File(java.io.File javaFile) {
 
-		filename = javaFile.getAbsolutePath();
+		this.filename = javaFile.getAbsolutePath();
+	}
+
+	/**
+	 * Create a new file instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public File(Directory directory, String filename) {
+
+		this.filename = Paths.get(directory.getDirname()).resolve(filename).toAbsolutePath().toString();
 	}
 	
 	/**
@@ -81,7 +92,6 @@ public class File {
 	 * Get a Java File object representing this file
 	 */
 	public java.io.File getJavaFile() {
-
 		return new java.io.File(filename);
 	}
 	
@@ -93,6 +103,14 @@ public class File {
 		return getJavaFile().toURI();
 	}
 
+	/**
+	 * Returns true if something exists under this name (which does NOT need to be a file, btw.!)
+	 */
+	public boolean exists() {
+
+		return getJavaFile().exists();
+	}
+	
 	/**
 	 * Loads the file contents from the file system
 	 * @return file contents
@@ -244,7 +262,9 @@ public class File {
 		java.io.File thisFile = new java.io.File(filename);
 		
 		// create parent directories
-		thisFile.getParentFile().mkdirs();
+		if (thisFile.getParentFile() != null) {
+			thisFile.getParentFile().mkdirs();
+		}
 		
 		// create file
 		try {
@@ -289,6 +309,15 @@ public class File {
 		setContent(content);
 		
 		save();
+	}
+	
+	/**
+	 * Re-set the location of this particular CDM file (such that when we call save() later on, the new location is used,
+	 * but until save() is called, nothing changes)
+	 */
+	public void setFilelocation(File newLocation) {
+	
+		filename = newLocation.getFilename();
 	}
 	
 	/**

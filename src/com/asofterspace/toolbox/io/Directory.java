@@ -36,6 +36,9 @@ public class Directory {
 		dirname = javaDirectory.getAbsolutePath();
 	}
 	
+	/**
+	 * Get the path of the directory
+	 */
 	public String getDirname() {
 		return dirname;
 	}

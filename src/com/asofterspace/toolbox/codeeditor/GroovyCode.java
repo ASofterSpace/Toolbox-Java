@@ -6,6 +6,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -89,6 +90,7 @@ public class GroovyCode extends DefaultStyledDocument {
 	
 	// the font sizes, fonts and tab sets of all editors
 	private static int fontSize = 15;
+	private static String editorFontFamily;
 	private static Font lastFont;
 	private static TabSet lastTabSet;
 
@@ -96,7 +98,7 @@ public class GroovyCode extends DefaultStyledDocument {
 	public GroovyCode(JTextPane editor) {
 
 		super();
-
+		
 		// keep track of the editor we are decorating (useful e.g. to get and set caret pos during insert operations)
 		decoratedEditor = editor;
 
@@ -122,6 +124,44 @@ public class GroovyCode extends DefaultStyledDocument {
 		applySchemeAndFontToOurEditor();
 		
 		instances.add(this);
+	}
+	
+	private static void initializeEditorFont() {
+	
+		// if no editor font family has been found yet...
+		if (editorFontFamily == null) {
+		
+			// ... go hunt for one!
+			String[] familiarFontFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+
+			// in the worst case, any "monospace" font is better than the default
+			for (String fontFamily : familiarFontFamilies) {
+				if (fontFamily.toLowerCase().startsWith("monospace")) {
+					editorFontFamily = fontFamily;
+				}
+			}
+			
+			// if there is a dedicated console font (Consolas, Lucida Console, ...), use that
+			for (String fontFamily : familiarFontFamilies) {
+				if (fontFamily.toLowerCase().contains("consol")) {
+					editorFontFamily = fontFamily;
+				}
+			}
+			
+			// if there is a dedicated terminal font (Terminus Font, ...), use that
+			for (String fontFamily : familiarFontFamilies) {
+				if (fontFamily.toLowerCase().startsWith("terminus")) {
+					editorFontFamily = fontFamily;
+				}
+			}
+			
+			// if there is Courier New, then yayyy - use that, we like it!
+			for (String fontFamily : familiarFontFamilies) {
+				if (fontFamily.toLowerCase().replace(" ", "").equals("couriernew")) {
+					editorFontFamily = fontFamily;
+				}
+			}
+		}
 	}
 
 	public static void setLightScheme() {
@@ -190,7 +230,13 @@ public class GroovyCode extends DefaultStyledDocument {
 	
 		fontSize = newSize;
 		
-		lastFont = new Font("Courier New", Font.PLAIN, fontSize);
+		initializeEditorFont();
+		
+		if (editorFontFamily == null) {
+			lastFont = new Font("", Font.PLAIN, fontSize);
+		} else {
+			lastFont = new Font(editorFontFamily, Font.PLAIN, fontSize);
+		}
 		
 		applySchemeAndFontToAllEditors();
 	}
