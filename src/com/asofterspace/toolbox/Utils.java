@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 10;
+	public final static int TOOLBOX_VERSION_NUMBER = 11;
 
     private static final char[] ECORE_UUID_LETTERS = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_'};
 
@@ -63,6 +63,25 @@ public class Utils {
 		String ecoreUUID = "_" + base64UUID.substring(0, 22);
 
         return ecoreUUID;
+	}
+	
+	/**
+	 * Takes in a link of the forms:
+	 * file#id ,  #id  or  id
+	 * And returns in each case:
+	 * id
+	 */
+	public static String getIdFromEcoreLink(String link) {
+
+		if (link == null) {
+			return null;
+		}
+		
+		if (link.contains("#")) {
+			return link.substring(link.lastIndexOf("#") + 1);
+		}
+		
+		return link;
 	}
 
 	public static String strListToString(List<String> stringList) {
