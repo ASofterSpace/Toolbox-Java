@@ -3,7 +3,9 @@ package com.asofterspace.toolbox.gui;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
+
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 
 
 public class GuiUtils {
@@ -13,14 +15,18 @@ public class GuiUtils {
 	 */
 	public static void centerAndShowWindow(Window window) {
 
-		// Center the window
-		window.setLocationRelativeTo(null);
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				// Center the window
+				window.setLocationRelativeTo(null);
 
-		// Stage everything to be shown
-		window.pack();
+				// Stage everything to be shown
+				window.pack();
 
-		// Actually display the whole jazz
-		window.setVisible(true);
+				// Actually display the whole jazz
+				window.setVisible(true);
+			}
+		});
 	}
 
 	/**
