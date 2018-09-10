@@ -16,9 +16,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
-import org.w3c.dom.Element;
 
 /**
  * An xml file object describes a single xml file and enables simple access to
@@ -281,10 +281,27 @@ public class XmlFile extends File {
 		return "unknown(" + namespace + ")";
 	}
 
-	public Node getRoot() {
+	public Element createElement(String name) {
 
 		if (xmlcontents == null) {
 			loadXmlContents();
+		}
+
+		if (xmlcontents == null) {
+			return null;
+		}
+
+		return xmlcontents.createElement(name);
+	}
+
+	public Element getRoot() {
+
+		if (xmlcontents == null) {
+			loadXmlContents();
+		}
+
+		if (xmlcontents == null) {
+			return null;
 		}
 
 		return xmlcontents.getDocumentElement();

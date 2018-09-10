@@ -7,11 +7,44 @@ import java.util.UUID;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 9;
+	public final static int TOOLBOX_VERSION_NUMBER = 10;
 
     private static final char[] ECORE_UUID_LETTERS = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_'};
 
+	// these values are set once at the startup of the program which contains
+	// the Utils and are constant from then onwards
+	public static String PROGRAM_TITLE;
+	public static String VERSION_NUMBER;
+	public static String VERSION_DATE;
 
+	public static void setProgramTitle(String programTitle) {
+		PROGRAM_TITLE = programTitle;
+	}
+	
+	public static void setVersionNumber(String versionNumber) {
+		VERSION_NUMBER = versionNumber;
+	}
+	
+	public static void setVersionDate(String versionDate) {
+		VERSION_DATE = versionDate;
+	}
+	
+	public static String getProgramTitle() {
+		return PROGRAM_TITLE;
+	}
+	
+	public static String getVersionNumber() {
+		return VERSION_NUMBER;
+	}
+	
+	public static String getVersionDate() {
+		return VERSION_DATE;
+	}
+	
+	public static String getFullProgramIdentifier() {
+		return "A Softer Space " + getProgramTitle() + " Version " + getVersionNumber();
+	}
+	
 	public static String generateEcoreUUID() {
 
 		// start with a real UUID!
