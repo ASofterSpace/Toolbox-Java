@@ -92,6 +92,7 @@ public class File {
 	 * Get a Java File object representing this file
 	 */
 	public java.io.File getJavaFile() {
+
 		return new java.io.File(filename);
 	}
 	
@@ -101,6 +102,14 @@ public class File {
 	public java.net.URI getURI() {
 
 		return getJavaFile().toURI();
+	}
+	
+	/**
+	 * Gets the directory containing this file
+	 */
+	public Directory getParentDirectory() {
+
+		return new Directory(getJavaFile().getParent());
 	}
 
 	/**

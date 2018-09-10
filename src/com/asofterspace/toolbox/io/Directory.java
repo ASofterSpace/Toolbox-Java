@@ -141,9 +141,22 @@ public class Directory {
 
 		// append relative file path to new dir
         Path newDirPath = Paths.get(newDir.dirname);
-		java.io.File newJavaFile = newDirPath.resolve(filePathRelative).toFile();
 		
+		java.io.File newJavaFile = newDirPath.resolve(filePathRelative).toFile();
 		return new File(newJavaFile);
+	}
+
+	/**
+	 * Take a file that is in this directory or a subdirectory, and return a path as string pointing to the same
+	 * file as relative path seen from this directory
+	 * E.g. if this is /usr/bin and file is /usr/bar/foo/bar.txt, then this function returns a string containing
+	 * foo/bar.txt (but no actual moving or copying is being done on disk)
+	 */
+	public String getRelativePath(File file) {
+	
+        Path filePath = Paths.get(file.getFilename());
+        Path dirPath = Paths.get(dirname);
+        return dirPath.relativize(filePath).toString();
 	}
 
 	/**

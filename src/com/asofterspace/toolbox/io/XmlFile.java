@@ -322,13 +322,16 @@ public class XmlFile extends File {
 	}
 	
 	public void saveTo(File newLocation) {
-		
-		filename = newLocation.filename;
 
-		java.io.File thisFile = new java.io.File(filename);
-		
+		saveTo(newLocation.filename);
+	}
+
+	public void saveTo(String newLocation) {
+
+		filename = newLocation;
+
 		// create parent directories
-		thisFile.getParentFile().mkdirs();
+		getJavaFile().getParentFile().mkdirs();
 				
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
