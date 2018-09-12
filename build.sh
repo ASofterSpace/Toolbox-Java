@@ -12,7 +12,7 @@ javac -d ../bin @sourcefiles.list
 
 cd ..
 
-read -p Build executed successfully; continuing with the self-tests...
+read -p "Build executed successfully; press a key to continue with the self-tests..."
 
 rm -rf config
 
