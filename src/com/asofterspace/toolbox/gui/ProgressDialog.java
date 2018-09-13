@@ -1,5 +1,7 @@
 package com.asofterspace.toolbox.gui;
 
+import com.asofterspace.toolbox.utils.ProgressIndicator;
+
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
@@ -14,7 +16,7 @@ import javax.swing.SwingUtilities;
  * This class takes care of displaying a modal window containing a progress bar which can be updated programmatically.
  * Whoop whoop! :)
  */
-public class ProgressDialog {
+public class ProgressDialog implements ProgressIndicator {
 
 	private JFrame progressDialog;
 	

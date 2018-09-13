@@ -2,11 +2,11 @@ package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.cdm.exceptions.AttemptingEmfException;
 import com.asofterspace.toolbox.cdm.exceptions.CdmLoadingException;
-import com.asofterspace.toolbox.gui.ProgressDialog;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.XmlMode;
+import com.asofterspace.toolbox.utils.ProgressIndicator;
 import com.asofterspace.toolbox.Utils;
 
 import java.io.IOException;
@@ -49,11 +49,8 @@ public class CdmCtrl {
 
 	// call this on a different thread please, as it can take forever
 	// (and the updating of the progress bar only works if this is on a different thread!)
-	public static void loadCdmDirectory(Directory cdmDir) throws AttemptingEmfException, CdmLoadingException {
+	public static void loadCdmDirectory(Directory cdmDir, ProgressIndicator progress) throws AttemptingEmfException, CdmLoadingException {
 
-		// add a progress bar (which is especially helpful when the CDM contains no scripts, so the main view stays empty after loading a CDM!)
-		ProgressDialog progress = new ProgressDialog("Loading the CDM directory...");
-	
 		cdmLoaded = false;
 
 		fileList = new ArrayList<>();

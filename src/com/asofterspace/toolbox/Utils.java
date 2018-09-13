@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 12;
+	public final static int TOOLBOX_VERSION_NUMBER = 13;
 
     private static final char[] ECORE_UUID_LETTERS = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_'};
 
@@ -43,6 +43,10 @@ public class Utils {
 	
 	public static String getFullProgramIdentifier() {
 		return "A Softer Space " + getProgramTitle() + " Version " + getVersionNumber();
+	}
+	
+	public static String getFullProgramIdentifierWithDate() {
+		return getFullProgramIdentifier() + " (" + getVersionDate() + ")";
 	}
 	
 	public static String generateEcoreUUID() {
