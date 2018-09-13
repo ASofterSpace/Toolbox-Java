@@ -11,6 +11,7 @@ import com.asofterspace.toolbox.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /* // TAKE OUT EMF DEPENDENCIES
@@ -30,6 +31,22 @@ public class CdmCtrl {
 	public static final String DEFAULT_NAMESPACE = "DefaultNamespace";
 	
 	public static final String MCM_PATH_DELIMITER = ".";
+
+	private static final List<String> KNOWN_CDM_VERSIONS = Arrays.asList(
+		"1.14.0",
+		"1.14.0b",
+		"1.13.0bd1",
+		"1.12.1",
+		"1.12"
+	);
+
+	private static final List<String> KNOWN_CDM_PREFIXES = Arrays.asList(
+		"http://www.esa.int/egscc/",
+		"http://www.esa.int/dme/",
+		"http://www.esa.int/",
+		"http://www.esa.int/dme/",
+		"http://www.scopeset.de/"
+	);
 
 	// has a CDM been loaded, like, at all?
 	private static boolean cdmLoaded = false;
@@ -260,6 +277,77 @@ public class CdmCtrl {
 		}
 
 		return fileList.get(0).getCdmVersionPrefix();
+	}
+	
+	public static String getCompatWithEGSCCstr(String version, String prefix) {
+	
+		final String NOT_A_RELEASE = "(not included in any official EGS-CC release)";
+		
+		switch (version) {
+			case "1.13.0bd1":
+				if ("http://www.esa.int/".equals(prefix)) {
+					return "IR3, IR3p1, IR3p2";
+				}
+				return NOT_A_RELEASE;
+			case "1.13.0":
+				return NOT_A_RELEASE;
+			case "1.14.0b":
+				return NOT_A_RELEASE;
+			case "1.14.0":
+				if ("http://www.esa.int/egscc/".equals(prefix)) {
+					return "IR4";
+				}
+				return NOT_A_RELEASE;
+		}
+	
+		return "(unknown)";
+	}
+
+	public static String getCompatWithMCDEstr(String version, String prefix) {
+
+		// TODO :: there is also MCDE version 0.15.2 - what CDM is that one using?
+
+		switch (version) {
+			case "1.12.1":
+				if ("http://www.esa.int/dme/".equals(prefix)) {
+					return "0.18.0";
+				}
+				break;
+			case "1.13.0bd1":
+				if ("http://www.esa.int/".equals(prefix)) {
+					return "0.18.4";
+				}
+				break;
+			case "1.14.0b":
+				if ("http://www.esa.int/dme/".equals(prefix)) {
+					return "0.18.5 (probably)"; // TODO :: make sure this is the case (or not ^^)
+				}
+				break;
+			case "1.14.0":
+				if ("http://www.esa.int/egscc/".equals(prefix)) {
+					return "0.18.7";
+				}
+				break;
+		}
+	
+		return "(unknown)";
+	}
+	
+	/**
+	 * A list of all known CDM versions
+	 * Please do not modify this list directly but copy it instead if using it!
+	 */
+	public static List<String> getKnownCdmVersions() {
+		return KNOWN_CDM_VERSIONS;
+	}
+	
+	/**
+	 * A list of prefixes corresponding to the CDM versions given back by
+	 * getKnownCdmVersions()
+	 * Please do not modify this list directly but copy it instead if using it!
+	 */
+	public static List<String> getKnownCdmPrefixes() {
+		return KNOWN_CDM_PREFIXES;
 	}
 
 	public static List<CdmMonitoringControlElement> getMonitoringControlElements() {
