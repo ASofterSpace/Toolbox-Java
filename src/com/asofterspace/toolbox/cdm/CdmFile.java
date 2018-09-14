@@ -203,6 +203,60 @@ public class CdmFile extends XmlFile {
 	}
 
 	/**
+	 * Convert this CDM file to the given version and prefix - if either is null,
+	 * keep the current one
+	 */
+	public void convertTo(String toVersion, String toPrefix) {
+	
+		if (toVersion == null) {
+			toVersion = getCdmVersion();
+		}
+		
+		if (toPrefix == null) {
+			toPrefix = getCdmVersionPrefix();
+		}
+		
+		// sanitize our input
+		while (toVersion.startsWith("/")) {
+			toVersion = toVersion.substring(1);
+		}
+		
+		while (toPrefix.endsWith("/")) {
+			toPrefix = toPrefix.substring(0, toPrefix.length() - 1);
+		}
+	
+		Node root = getRoot();
+		
+		if (root == null) {
+			return;
+		}
+		
+		NamedNodeMap scriptAttributes = root.getAttributes();
+
+		Node configurationcontrol = scriptAttributes.getNamedItem("xmlns:configurationcontrol");
+		if (configurationcontrol != null) {
+			configurationcontrol.setNodeValue(toPrefix + "/" + CdmCtrl.CDM_NAMESPACE_MIDDLE + toVersion);
+		}
+
+		Node mcmimplementationitems = scriptAttributes.getNamedItem("xmlns:mcmimplementationitems");
+		if (mcmimplementationitems != null) {
+			mcmimplementationitems.setNodeValue(toPrefix + "/MonitoringControl/MCMImplementationItems/" + toVersion);
+		}
+
+		Node monitoringcontrolcommon = scriptAttributes.getNamedItem("xmlns:monitoringcontrolcommon");
+		if (monitoringcontrolcommon != null) {
+			monitoringcontrolcommon.setNodeValue(toPrefix + "/MonitoringControl/MonitoringControlCommon/" + toVersion);
+		}
+
+		Node monitoringcontrolmodel = scriptAttributes.getNamedItem("xmlns:monitoringcontrolmodel");
+		if (monitoringcontrolmodel != null) {
+			monitoringcontrolmodel.setNodeValue(toPrefix + "/MonitoringControl/MonitoringControlModel/" + toVersion);
+		}
+
+		// TODO :: also convert to the appropriate qudv, if we are aware which one it is!
+	}
+
+	/**
 	 * Get the CDM version that this CDM file belongs to, or null if none can be identified.
 	 */
 	public String getCdmVersion() {

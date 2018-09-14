@@ -256,6 +256,27 @@ public class CdmCtrl {
 	public static Directory getLastLoadedDirectory() {
 		return lastLoadedDirectory;
 	}
+	
+	/**
+	 * Convert all loaded CDM files to the given version and prefix - if either is null,
+	 * keep the current one of the first file (so e.g. if the CDM contains two files,
+	 * one in version 1.12 and one in version 1.12.1, and version is given as null,
+	 * then both will be converted to 1.12, so at least they are all consistent!)
+	 */
+	public static void convertTo(String toVersion, String toPrefix) {
+	
+		if (toVersion == null) {
+			toVersion = getCdmVersion();
+		}
+		
+		if (toPrefix == null) {
+			toPrefix = getCdmVersionPrefix();
+		}
+		
+		for (CdmFile cdmFile : fileList) {
+			cdmFile.convertTo(toVersion, toPrefix);
+		}		
+	}
 
 	/**
 	 * Get the CDM version of one CDM file at random - as they should all have the same version,
@@ -349,6 +370,28 @@ public class CdmCtrl {
 	public static List<String> getKnownCdmPrefixes() {
 		return KNOWN_CDM_PREFIXES;
 	}
+	
+	/**
+	 * Given a CDM version (which is allowed to be null), return the corresponding
+	 * prefix if it is known (or null if it is not)
+	 */
+	public static String getPrefixForVersion(String toVersion) {
+		
+		if (toVersion == null) {
+			return null;
+		}
+		
+		int i = 0;
+		
+		for (String ver : KNOWN_CDM_VERSIONS) {
+			if (ver.equals(toVersion)) {
+				return KNOWN_CDM_PREFIXES.get(i);
+			}
+			i++;
+		}
+		
+		return null;
+	}
 
 	public static List<CdmMonitoringControlElement> getMonitoringControlElements() {
 		if (!cdmLoaded) {
@@ -397,23 +440,49 @@ public class CdmCtrl {
 
 	/**
 	 * Check if the CDM as a whole is valid;
-	 * returns true if it is valid, and false if it is not;
-	 * in the case of it not being valid, the StringBuilder
+	 * returns 0 if it is valid, and the amount of problems
+	 * encountered if it is not;
+	 * in the case of it not being valid, the List<String>
 	 * that has been passed in will be filled with more detailed
 	 * explanations about why it is not valid
 	 */
-	public static boolean isCdmValid(StringBuilder outProblemsFound) {
+	public static int checkValidity(List<String> outProblemsFound) {
 
 		// innocent unless proven otherwise
-		boolean verdict = true;
+		int verdict = 0;
+
+		// TODO :: also check not just the main version of the file, but all the other versions in the xmlns thingenses?
 
 		// validate that all CDM files are using the same CDM version
+		// btw., we do NOT need to check that the version prefixes are all the same,
+		// as we check that all versions are the same, and for each file we check
+		// that the prefix agrees with the version... so it follows that, if we do
+		// not complain, then the prefixes are all the same too :)
+
 		List<CdmFile> cdmFiles = CdmCtrl.getCdmFiles();
 		List<String> cdmVersionsFound = new ArrayList<>();
-
-		// TODO :: also check that the version prefixes are all the same?
+		
 		for (CdmFile file : cdmFiles) {
 			String curVersion = file.getCdmVersion();
+			String curVersionPrefix = file.getCdmVersionPrefix();
+			if (curVersion == null) {
+				verdict++;
+				outProblemsFound.add(file.getLocalFilename() + " has no CDM version identifier!");
+			} else {
+				if (curVersionPrefix == null) {
+					verdict++;
+					outProblemsFound.add(file.getLocalFilename() + " has no CDM version prefix!");
+				} else {
+					// also check that the prefixes agree with the versions
+					String shouldBePrefix = getPrefixForVersion(curVersion);
+					if (shouldBePrefix != null) {
+						if (!curVersionPrefix.equals(shouldBePrefix)) {
+							verdict++;
+							outProblemsFound.add(file.getLocalFilename() + " has the CDM version " + curVersion + " with prefix " + curVersionPrefix + ", but this version is known to use the prefix " + shouldBePrefix + "!");
+						}
+					}
+				}
+			}
 			if (!cdmVersionsFound.contains(curVersion)) {
 				cdmVersionsFound.add(curVersion);
 			}
@@ -421,19 +490,28 @@ public class CdmCtrl {
 
 		// oh no, we have different CDM versions!
 		if (cdmVersionsFound.size() > 1) {
-			verdict = false;
-			outProblemsFound.append("CIs with multiple CDM versions have been mixed together!\n");
-			outProblemsFound.append("Found CDM versions: ");
+			verdict++;
+			outProblemsFound.add("CIs with multiple CDM versions have been mixed together!");
+			StringBuilder foundVersions = new StringBuilder();
+			foundVersions.append("Found CDM versions: ");
 			String sep = "";
 			for (String cdmVersionFound : cdmVersionsFound) {
-				outProblemsFound.append(sep);
+				foundVersions.append(sep);
 				sep = ", ";
-				outProblemsFound.append(cdmVersionFound);
+				if (cdmVersionFound == null) {
+					foundVersions.append("(none)");
+				} else {
+					foundVersions.append(cdmVersionFound);
+				}
 			}
+			outProblemsFound.add(foundVersions.toString());
 		}
 
 		// TODO :: check that all activity mappers are fully filled (e.g. no script or activity missing),
-		// and that these mappings then also exist (e.g. not mapping to a CI that is not existing, etc.)
+		// and that these mappings then also exist (e.g. not mapping to a CI that is not existing, etc.),
+		// that all CIs have at least one child, that all references actually lead to somwhere, that there
+		// is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
+		// listed in other MCEs as subElement)
 
 		return verdict;
 	}
