@@ -29,7 +29,7 @@ public class CdmCtrl {
 	// public static final String ASS_CDM_NAMESPACE = ASS_CDM_NAMESPACE_ROOT + "ConfigurationTracking/";
 
 	public static final String DEFAULT_NAMESPACE = "DefaultNamespace";
-	
+
 	public static final String MCM_PATH_DELIMITER = ".";
 
 	private static final List<String> KNOWN_CDM_VERSIONS = Arrays.asList(
@@ -81,9 +81,9 @@ public class CdmCtrl {
 
 		double i = 0;
 		double len = cdmFiles.size();
-		
+
 		try {
-		
+
 			if (len <= 0) {
 				throw new CdmLoadingException("The directory " + cdmDir.getDirname() + " does not seem to contain any .cdm files at all.");
 			}
@@ -102,7 +102,7 @@ public class CdmCtrl {
 			reloadModel();
 
 			cdmLoaded = true;
-		
+
 		} finally {
 			progress.done();
 		}
@@ -256,7 +256,7 @@ public class CdmCtrl {
 	public static Directory getLastLoadedDirectory() {
 		return lastLoadedDirectory;
 	}
-	
+
 	/**
 	 * Convert all loaded CDM files to the given version and prefix - if either is null,
 	 * keep the current one of the first file (so e.g. if the CDM contains two files,
@@ -264,18 +264,18 @@ public class CdmCtrl {
 	 * then both will be converted to 1.12, so at least they are all consistent!)
 	 */
 	public static void convertTo(String toVersion, String toPrefix) {
-	
+
 		if (toVersion == null) {
 			toVersion = getCdmVersion();
 		}
-		
+
 		if (toPrefix == null) {
 			toPrefix = getCdmVersionPrefix();
 		}
-		
+
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.convertTo(toVersion, toPrefix);
-		}		
+		}
 	}
 
 	/**
@@ -299,11 +299,11 @@ public class CdmCtrl {
 
 		return fileList.get(0).getCdmVersionPrefix();
 	}
-	
+
 	public static String getCompatWithEGSCCstr(String version, String prefix) {
-	
+
 		final String NOT_A_RELEASE = "(not included in any official EGS-CC release)";
-		
+
 		switch (version) {
 			case "1.13.0bd1":
 				if ("http://www.esa.int/".equals(prefix)) {
@@ -320,7 +320,7 @@ public class CdmCtrl {
 				}
 				return NOT_A_RELEASE;
 		}
-	
+
 		return "(unknown)";
 	}
 
@@ -350,10 +350,10 @@ public class CdmCtrl {
 				}
 				break;
 		}
-	
+
 		return "(unknown)";
 	}
-	
+
 	/**
 	 * A list of all known CDM versions
 	 * Please do not modify this list directly but copy it instead if using it!
@@ -361,7 +361,7 @@ public class CdmCtrl {
 	public static List<String> getKnownCdmVersions() {
 		return KNOWN_CDM_VERSIONS;
 	}
-	
+
 	/**
 	 * A list of prefixes corresponding to the CDM versions given back by
 	 * getKnownCdmVersions()
@@ -370,26 +370,26 @@ public class CdmCtrl {
 	public static List<String> getKnownCdmPrefixes() {
 		return KNOWN_CDM_PREFIXES;
 	}
-	
+
 	/**
 	 * Given a CDM version (which is allowed to be null), return the corresponding
 	 * prefix if it is known (or null if it is not)
 	 */
 	public static String getPrefixForVersion(String toVersion) {
-		
+
 		if (toVersion == null) {
 			return null;
 		}
-		
+
 		int i = 0;
-		
+
 		for (String ver : KNOWN_CDM_VERSIONS) {
 			if (ver.equals(toVersion)) {
 				return KNOWN_CDM_PREFIXES.get(i);
 			}
 			i++;
 		}
-		
+
 		return null;
 	}
 
@@ -413,14 +413,14 @@ public class CdmCtrl {
 		}
 		return scriptToActivityMappingCIs;
 	}
-	
+
 	public static List<CdmScript2Activity> getScriptToActivityMappings() {
 		if (!cdmLoaded) {
 			return new ArrayList<>();
 		}
 		return scriptToActivityMappings;
 	}
-	
+
 	public static List<CdmActivity> getActivities() {
 		if (!cdmLoaded) {
 			return new ArrayList<>();
@@ -461,7 +461,7 @@ public class CdmCtrl {
 
 		List<CdmFile> cdmFiles = CdmCtrl.getCdmFiles();
 		List<String> cdmVersionsFound = new ArrayList<>();
-		
+
 		for (CdmFile file : cdmFiles) {
 			String curVersion = file.getCdmVersion();
 			String curVersionPrefix = file.getCdmVersionPrefix();
@@ -487,7 +487,7 @@ public class CdmCtrl {
 				cdmVersionsFound.add(curVersion);
 			}
 		}
-		
+
 		// TODO :: also ensure that the qudv versions are correct - sadly, the qudv prefixes are not even
 		// aligned with the CDM prefixes, e.g. in 1.14.0 prefix is esa/egscc, but qudv prefix is esa/dme
 		// (or wait, was that just because we did a manual conversion wrong? re-check if this is the case!),
@@ -512,16 +512,16 @@ public class CdmCtrl {
 			}
 			outProblemsFound.add(foundVersions.toString());
 		}
-		
+
 		// TODO :: check that in version 1.14.0, all arguments have names and arg values have names and values!
 		// (and eng args have eng values rather than raw values...)
 
 		// TODO :: check that all activity mappers are fully filled (e.g. no script or activity missing)
-		
+
 		// TODO :: check that all CIs have at least one child
-		
+
 		// TODO :: check that all references actually lead to somewhere
-		
+
 		// TODO :: check that there is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
 		// listed in other MCEs as subElement)
 
@@ -533,7 +533,7 @@ public class CdmCtrl {
 		// TODO :: ensure that the name is not yet taken
 
 		CdmActivity createdActivity = mceContainingThis.addActivity(newActivityName, newActivityAlias);
-		
+
 		// append the resulting new mapping to the internal list of mappings of the CdmCtrl
 		activities.add(createdActivity);
 
@@ -562,17 +562,17 @@ public class CdmCtrl {
 				largestFoundHas = nowFoundHas;
 			}
 		}
-		
+
 		// TODO :: make this name configurable?
 		String mappingBaseName = script.getName() + "_mapping";
 		String mappingName = mappingBaseName;
 
 		// ensure that the name is not yet taken
 		List<CdmScript2Activity> existingMappers = CdmCtrl.getScriptToActivityMappings();
-		
+
 		boolean doContinue = true;
 		int i = 1;
-		
+
 		while (doContinue) {
 			doContinue = false;
 			for (CdmScript2Activity existingMapper : existingMappers) {
@@ -607,17 +607,17 @@ public class CdmCtrl {
 			activityFile,
 			activityId
 		);
-		
+
 		// append the resulting new mapping to the internal list of mappings of the CdmCtrl
 		scriptToActivityMappings.add(createdMapping);
 
 		return createdMapping;
 	}
-	
+
 	public static String getXMLNS() {
 		return "xmlns:configurationcontrol=\"" + getCdmVersionPrefix() + CDM_NAMESPACE_MIDDLE + getCdmVersion() + "\"";
 	}
-	
+
 	/**
 	 * Tries to add a new script to activity CI
 	 * Returns true if successful, false otherwise
@@ -672,7 +672,7 @@ public class CdmCtrl {
 		} catch (AttemptingEmfException | CdmLoadingException e2) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
