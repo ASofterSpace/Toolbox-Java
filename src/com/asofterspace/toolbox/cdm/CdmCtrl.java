@@ -85,7 +85,7 @@ public class CdmCtrl {
 		try {
 		
 			if (len <= 0) {
-				throw new CdmLoadingException("The directory " + cdmDir + " does not seem to contain any .cdm files at all.");
+				throw new CdmLoadingException("The directory " + cdmDir.getDirname() + " does not seem to contain any .cdm files at all.");
 			}
 
 			for (File cdmFile : cdmFiles) {
