@@ -326,12 +326,10 @@ public class CdmCtrl {
 
 	public static String getCompatWithMCDEstr(String version, String prefix) {
 
-		// TODO :: there is also MCDE version 0.15.2 - what CDM is that one using?
-
 		switch (version) {
 			case "1.12.1":
 				if ("http://www.esa.int/dme/".equals(prefix)) {
-					return "0.18.0";
+					return "0.15.2 and 0.18.0";
 				}
 				break;
 			case "1.13.0bd1":
@@ -524,6 +522,8 @@ public class CdmCtrl {
 
 		// TODO :: check that there is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
 		// listed in other MCEs as subElement)
+		
+		// TODO :: check that every MCE has an MCE definition
 
 		return verdict;
 	}
