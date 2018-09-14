@@ -37,6 +37,10 @@ public class CdmMonitoringControlElement extends CdmNode {
 		// OR in a child node such as:
 		// <subElements href="#_AAAAAA"/>
 
+		// TODO :: not just subElements, but EVERYTHING that is key="value"
+		// can also be expressed as child:
+		// <key href="value" (possibly xmi:id, xsi:type, or whatever)/>
+
 		this.subElements = new ArrayList<>();
 		
 		String subStrs = getValue("subElements");

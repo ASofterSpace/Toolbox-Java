@@ -487,6 +487,12 @@ public class CdmCtrl {
 				cdmVersionsFound.add(curVersion);
 			}
 		}
+		
+		// TODO :: also ensure that the qudv versions are correct - sadly, the qudv prefixes are not even
+		// aligned with the CDM prefixes, e.g. in 1.14.0 prefix is esa/egscc, but qudv prefix is esa/dme
+		// (or wait, was that just because we did a manual conversion wrong? re-check if this is the case!),
+		// while in 1.12, qudv prefix is scopeset... (in both, qudv version is 1.5)
+		// confirmed good example: xmlns:configurationcontrol="http://www.esa.int/dme/ConfigurationTracking/1.14.0b" xmlns:qudv.blocks_extModel="http://www.esa.int/dme/core/qudv/blocks/1.5" xmlns:qudv.conceptualmodel_extModel="http://www.esa.int/dme/core/qudv/conceptualmodel/1.5"
 
 		// oh no, we have different CDM versions!
 		if (cdmVersionsFound.size() > 1) {
@@ -506,11 +512,17 @@ public class CdmCtrl {
 			}
 			outProblemsFound.add(foundVersions.toString());
 		}
+		
+		// TODO :: check that in version 1.14.0, all arguments have names and arg values have names and values!
+		// (and eng args have eng values rather than raw values...)
 
-		// TODO :: check that all activity mappers are fully filled (e.g. no script or activity missing),
-		// and that these mappings then also exist (e.g. not mapping to a CI that is not existing, etc.),
-		// that all CIs have at least one child, that all references actually lead to somwhere, that there
-		// is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
+		// TODO :: check that all activity mappers are fully filled (e.g. no script or activity missing)
+		
+		// TODO :: check that all CIs have at least one child
+		
+		// TODO :: check that all references actually lead to somewhere
+		
+		// TODO :: check that there is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
 		// listed in other MCEs as subElement)
 
 		return verdict;
