@@ -6,6 +6,7 @@ import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.XmlMode;
+import com.asofterspace.toolbox.utils.NoOpProgressIndicator;
 import com.asofterspace.toolbox.utils.ProgressIndicator;
 import com.asofterspace.toolbox.Utils;
 
@@ -46,6 +47,28 @@ public class CdmCtrl {
 		"http://www.esa.int/",
 		"http://www.esa.int/dme/",
 		"http://www.scopeset.de/"
+	);
+
+	// a reasonable default CDM prefix to be used in case a user-supplied CDM version is not known
+	public static final String REASONABLE_DEFAULT_CDM_PREFIX = "http://www.esa.int/dme/";
+
+	private static final String TMPL_JUST_ROOT = "Just Root Element";
+	private static final String TMPL_JUST_ROOT_SHORT = "just_root";
+	private static final String TMPL_ROOT_ROUTE_SAP = "Root Element with Default Route and SAP";
+	private static final String TMPL_ROOT_ROUTE_SAP_SHORT = "root_route_sap";
+	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE = "Root Element with Route, SAP and Example Data Type";
+	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE_SHORT = "root_route_sap_ex_type";
+	
+	private static final List<String> CDM_TEMPLATES = Arrays.asList(
+		TMPL_JUST_ROOT,
+		TMPL_ROOT_ROUTE_SAP,
+		TMPL_ROOT_ROUTE_SAP_EX_TYPE
+	);
+	
+	private static final List<String> CDM_TEMPLATES_SHORT = Arrays.asList(
+		TMPL_JUST_ROOT_SHORT,
+		TMPL_ROOT_ROUTE_SAP_SHORT,
+		TMPL_ROOT_ROUTE_SAP_EX_TYPE_SHORT
 	);
 
 	// has a CDM been loaded, like, at all?
@@ -351,6 +374,13 @@ public class CdmCtrl {
 
 		return "(unknown)";
 	}
+	
+	/**
+	 * The highest CDM version that is known to this controller
+	 */
+	public static String getHighestKnownCdmVersion() {
+		return KNOWN_CDM_VERSIONS.get(0);
+	}
 
 	/**
 	 * A list of all known CDM versions
@@ -457,7 +487,7 @@ public class CdmCtrl {
 		// that the prefix agrees with the version... so it follows that, if we do
 		// not complain, then the prefixes are all the same too :)
 
-		List<CdmFile> cdmFiles = CdmCtrl.getCdmFiles();
+		List<CdmFile> cdmFiles = getCdmFiles();
 		List<String> cdmVersionsFound = new ArrayList<>();
 
 		for (CdmFile file : cdmFiles) {
@@ -522,7 +552,7 @@ public class CdmCtrl {
 
 		// TODO :: check that there is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
 		// listed in other MCEs as subElement)
-		
+
 		// TODO :: check that every MCE has an MCE definition
 
 		return verdict;
@@ -543,7 +573,7 @@ public class CdmCtrl {
 	public static CdmScript2Activity addScriptToActivityMapping(CdmScript script, CdmActivity activity) {
 
 		// first of all, get all script to activity mapping CIs
-		List<CdmFile> scriptToActivityMapperCis = CdmCtrl.getScriptToActivityMappingCIs();
+		List<CdmFile> scriptToActivityMapperCis = getScriptToActivityMappingCIs();
 
 		// if there are none, create a new one
 		if (scriptToActivityMapperCis.size() < 1) {
@@ -568,7 +598,7 @@ public class CdmCtrl {
 		String mappingName = mappingBaseName;
 
 		// ensure that the name is not yet taken
-		List<CdmScript2Activity> existingMappers = CdmCtrl.getScriptToActivityMappings();
+		List<CdmScript2Activity> existingMappers = getScriptToActivityMappings();
 
 		boolean doContinue = true;
 		int i = 1;
@@ -630,7 +660,7 @@ public class CdmCtrl {
 		File newFileLocation;
 
 		while (true) {
-			newFileLocation = new File(CdmCtrl.getLastLoadedDirectory(), "Resource_" + newCiName + ".cdm");
+			newFileLocation = new File(getLastLoadedDirectory(), "Resource_" + newCiName + ".cdm");
 
 			// check that the newCiName (+ .cdm) is not already the file name of some other CDM file!
 			if (!newFileLocation.exists()) {
@@ -646,7 +676,7 @@ public class CdmCtrl {
 		// add a script CI with one script with exactly this name - but do not save it on the hard disk just yet
 		String newCiContent =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-			"<configurationcontrol:Script2ActivityMapperCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" " + CdmCtrl.getXMLNS() + " xmi:id=\"" + Utils.generateEcoreUUID() + "\" externalVersionLabel=\"Created by the " + Utils.getFullProgramIdentifier() + "\" name=\"" + newCiName + "\" onlineRevisionIdentifier=\"0\">\n" +
+			"<configurationcontrol:Script2ActivityMapperCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" " + getXMLNS() + " xmi:id=\"" + Utils.generateEcoreUUID() + "\" externalVersionLabel=\"Created by the " + Utils.getFullProgramIdentifier() + "\" name=\"" + newCiName + "\" onlineRevisionIdentifier=\"0\">\n" +
 			"</configurationcontrol:Script2ActivityMapperCI>";
 
 		File tmpCi = new File("tmpfile.tmp");
@@ -654,9 +684,9 @@ public class CdmCtrl {
 		tmpCi.save();
 
 		try {
-			CdmFile newCdmFile = CdmCtrl.loadCdmFile(tmpCi);
+			CdmFile newCdmFile = loadCdmFile(tmpCi);
 
-			List<CdmFile> scriptToActivityMapperCis = CdmCtrl.getScriptToActivityMappingCIs();
+			List<CdmFile> scriptToActivityMapperCis = getScriptToActivityMappingCIs();
 
 			if (scriptToActivityMapperCis.size() != 1) {
 				return false;
@@ -672,6 +702,166 @@ public class CdmCtrl {
 		} catch (AttemptingEmfException | CdmLoadingException e2) {
 			return false;
 		}
+
+		return true;
+	}
+
+	private static String createExternalVersionLabel() {
+		return "externalVersionLabel=\"Created by the " + Utils.getFullProgramIdentifier() + "\"";
+	}
+
+	/**
+	 * Get a list of all templates that are supported for creating a new CDM
+	 */
+	public static List<String> getTemplates() {
+		return CDM_TEMPLATES;
+	}
+
+	/**
+	 * Get a list of all templates that are supported for creating a new CDM,
+	 * written in their short forms
+	 */
+	public static List<String> getTemplatesShort() {
+		return CDM_TEMPLATES_SHORT;
+	}
+
+	/**
+	 * Creates a new CDM at the indicated path and immediately opens it.
+	 * Returns true if it all worked, or false otherwise.
+	 */
+	public static boolean createNewCdm(String cdmPath, String version, String versionPrefix, String template) throws AttemptingEmfException, CdmLoadingException {
+
+		if ("".equals(cdmPath)) {
+			throw new CdmLoadingException("Please enter a CDM path to create the new CDM files!");
+		}
+
+		if ("".equals(version)) {
+			throw new CdmLoadingException("Please enter a CDM version to create the new CDM files!");
+		}
+
+		if ("".equals(versionPrefix)) {
+			throw new CdmLoadingException("Please enter a CDM version prefix to create the new CDM files!");
+		}
+
+		Directory cdmDir = new Directory(cdmPath);
+
+		// if the new directory does not yet exist, then we have to create it...
+		if (!cdmDir.exists()) {
+			cdmDir.create();
+		}
+
+		// complain if the directory is not empty
+		Boolean isEmpty = cdmDir.isEmpty();
+		if ((isEmpty == null) || !isEmpty) {
+			throw new CdmLoadingException("The specified directory is not empty - please create the new CDM in an empty directory!");
+		}
+		
+		String newCiName;
+		String mcmRootDefinitionUuid;
+		String resourceMcmContent;
+		File mcmCi;
+
+		// btw., all of our templates are written for version 1.14.0... so we convert them later on in this function to whatever version is actually required ^^		
+		switch (template) {
+
+			case TMPL_JUST_ROOT:
+			case TMPL_JUST_ROOT_SHORT:
+
+				// create just the ResourceMcm.cdm file in XML format with one root node (mcmRoot)
+				newCiName = "Mcm";
+				mcmRootDefinitionUuid = Utils.generateEcoreUUID();
+				resourceMcmContent =
+					"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+					"<configurationcontrol:McmCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:checkandcondition=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + version + "\" xmlns:configurationcontrol=\"" + versionPrefix + CDM_NAMESPACE_MIDDLE + version + "\" xmlns:mcmchecks=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/MCMChecks/" + version + "\" xmlns:mcmimplementationitems=\"" + versionPrefix + "MonitoringControl/MCMImplementationItems/" + version + "\" xmlns:monitoringcontrolcommon=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/" + version + "\" xmlns:monitoringcontrolmodel=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/" + version + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
+					"  <monitoringControlElement xmi:id=\"" + Utils.generateEcoreUUID() + "\" name=\"mcmRoot\" subElements=\"\" definition=\"" + mcmRootDefinitionUuid + "\">\n" +
+					"  </monitoringControlElement>\n" +
+					"  <monitoringControlElementDefinition xmi:id=\"" + mcmRootDefinitionUuid + "\" name=\"mcmRoot_Definition\" subElements=\"\">\n" +
+					"  </monitoringControlElementDefinition>\n" +
+					"</configurationcontrol:McmCI>";
+
+				mcmCi = new File(cdmDir, "Resource_" + newCiName + ".cdm");
+				mcmCi.setContent(resourceMcmContent);
+				mcmCi.save();
+
+				// also create the Manifest file
+				// TODO
+
+				break;
+
+			case TMPL_ROOT_ROUTE_SAP_EX_TYPE:
+			case TMPL_ROOT_ROUTE_SAP_EX_TYPE_SHORT:
+
+				newCiName = "DataTypes";
+				String displayFormatUuid = Utils.generateEcoreUUID();
+				resourceMcmContent =
+					"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+					"<configurationcontrol:DataTypesCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:configurationcontrol=\"" + versionPrefix + CDM_NAMESPACE_MIDDLE + version + "\" xmlns:monitoringcontrolcommon=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/" + version + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
+					"  <abstractDataType xsi:type=\"monitoringcontrolcommon:SignedInteger\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" name=\"INT32\" bitLength=\"32\" signedIntegerDisplayFormat=\"" + displayFormatUuid + "\"/>\n" +
+					"  <abstractDataDisplayFormat xsi:type=\"monitoringcontrolcommon:SignedIntegerDisplayFormat\" xmi:id=\"" + displayFormatUuid + "\" name=\"INT32Format\" format=\"decimal\"/>\n" +
+					"</configurationcontrol:DataTypesCI>\n";
+
+				mcmCi = new File(cdmDir, "Resource_" + newCiName + ".cdm");
+				mcmCi.setContent(resourceMcmContent);
+				mcmCi.save();
+
+				// also add this to the Manifest file
+				// TODO
+
+				// INTENTIONALLY FALL THROUGH TO THE NEXT CASE - as the McmCI is the same! ^^
+
+			case TMPL_ROOT_ROUTE_SAP:
+			case TMPL_ROOT_ROUTE_SAP_SHORT:
+
+				// create just the ResourceMcm.cdm file in XML format with one root node (mcmRoot)
+				newCiName = "Mcm";
+				String routeUuid = Utils.generateEcoreUUID();
+				String routeTypeUuid = Utils.generateEcoreUUID();
+				String sapUuid = Utils.generateEcoreUUID();
+				mcmRootDefinitionUuid = Utils.generateEcoreUUID();
+				String routeDefinitionUuid = Utils.generateEcoreUUID();
+				String routeTypeDefinitionUuid = Utils.generateEcoreUUID();
+				String sapDefinitionUuid = Utils.generateEcoreUUID();
+				resourceMcmContent =
+					"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+					"<configurationcontrol:McmCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:checkandcondition=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + version + "\" xmlns:configurationcontrol=\"" + versionPrefix + CDM_NAMESPACE_MIDDLE + version + "\" xmlns:mcmchecks=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/MCMChecks/" + version + "\" xmlns:mcmimplementationitems=\"" + versionPrefix + "MonitoringControl/MCMImplementationItems/" + version + "\" xmlns:monitoringcontrolcommon=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/" + version + "\" xmlns:monitoringcontrolmodel=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/" + version + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
+					"  <monitoringControlElement xmi:id=\"" + Utils.generateEcoreUUID() + "\" name=\"mcmRoot\" subElements=\"\" defaultRoute=\"" + routeUuid + "\" definition=\"" + mcmRootDefinitionUuid + "\" defaultServiceAccessPoint=\"" + sapUuid + "\">\n" +
+					"    <monitoringControlElementAspects xsi:type=\"monitoringcontrolmodel:Route\" xmi:id=\"" + routeUuid + "\" name=\"DefaultRoute\" baseElement=\"" + routeDefinitionUuid + "\" hasPredictedValue=\"false\" routeName=\"DefaultRoute\" routeID=\"1\" routeType=\"" + routeTypeUuid + "\"/>\n" +
+					"    <monitoringControlElementAspects xsi:type=\"monitoringcontrolmodel:RouteType\" xmi:id=\"" + routeTypeUuid + "\" name=\"DefaultRouteType\" baseElement=\"" + routeTypeDefinitionUuid + "\" hasPredictedValue=\"false\" routeIDType=\"1\"/>\n" +
+					"    <monitoringControlElementAspects xsi:type=\"mcmimplementationitems:ServiceAccessPoint\" xmi:id=\"" + sapUuid + "\" name=\"13\" baseElement=\"" + sapDefinitionUuid + "\" hasPredictedValue=\"false\" validRoutes=\"" + routeUuid + "\"/>\n" +
+					"  </monitoringControlElement>\n" +
+					"  <monitoringControlElementDefinition xmi:id=\"" + mcmRootDefinitionUuid + "\" name=\"mcmRoot_Definition\" subElements=\"\">\n" +
+					"    <monitoringControlElementAspects xsi:type=\"monitoringcontrolmodel:Route\" xmi:id=\"" + routeDefinitionUuid + "\" name=\"DefaultRoute\" hasPredictedValue=\"false\" routeName=\"DefaultRouteDef\" routeID=\"1\" routeType=\"" + routeTypeDefinitionUuid + "\"/>\n" +
+					"    <monitoringControlElementAspects xsi:type=\"monitoringcontrolmodel:RouteType\" xmi:id=\"" + routeTypeDefinitionUuid + "\" name=\"DefaultRouteTypeDef\" hasPredictedValue=\"false\" routeIDType=\"1\"/>\n" +
+					"    <monitoringControlElementAspects xsi:type=\"mcmimplementationitems:ServiceAccessPoint\" xmi:id=\"" + sapDefinitionUuid + "\" name=\"13\" hasPredictedValue=\"false\" validRoutes=\"" + routeDefinitionUuid + "\" />\n" +
+					"  </monitoringControlElementDefinition>\n" +
+					"</configurationcontrol:McmCI>";
+
+				mcmCi = new File(cdmDir, "Resource_" + newCiName + ".cdm");
+				mcmCi.setContent(resourceMcmContent);
+				mcmCi.save();
+
+				// also create the Manifest file
+				// TODO
+
+				break;
+
+			default:
+				throw new CdmLoadingException("The template '" + template + "' that you selected does not seem to be available - oops!");
+		}
+
+		// immediately open the newly created CDM using the CdmCtrl, just as if the open dialog had been called
+		// (as we are just opening one, two short files, this should take less than a second and displaying
+		// a progress bar would only confuse everyone!)
+		ProgressIndicator noProgress = new NoOpProgressIndicator();
+		loadCdmDirectory(cdmDir, noProgress);
+
+		// actually convert our templates to the current version
+		for (CdmFile cdmFile : fileList) {
+			cdmFile.convertTo(version, versionPrefix);
+		}
+
+		// aaand finally save immediately - after the conversion
+		save();
 
 		return true;
 	}
