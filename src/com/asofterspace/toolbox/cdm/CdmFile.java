@@ -331,8 +331,15 @@ public class CdmFile extends XmlFile {
 				<engineeringArgumentDefinition href="_4"/>
 			  </arguments>
 
-		// TODO :: get example for 1.14.0b, so that we know if the changes appeared from 1.13.0bd1 to 1.14.0b,
-		// or from 1.14.0b to 1.14.0...
+		Example 2 in 1.14.0b: << not 100% sure about this example, but it should be correct and we used it as the basis for now...
+			  <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_1" name="EngArg1">
+				<engineeringDefaultValue xsi:type="monitoringcontrolmodel:EngineeringArgumentValue" xmi:id="_2">
+				  <value xsi:type="monitoringcontrolmodel:ParameterRawValue" xmi:id="_3" value="9"/>
+				</engineeringDefaultValue>
+				<engineeringArgumentDefinition href="_4"/>
+			  </arguments>
+			  
+		=> the name was added to the <arguments> (we can use the name of the definition, and add "...Def" to the definition name)
 
 		Example 2 in 1.14.0:
 			  <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_1" name="EngArg1">
@@ -342,10 +349,9 @@ public class CdmFile extends XmlFile {
 				<engineeringArgumentDefinition href="_4"/>
 			  </arguments>
 
-		=> the name was added to the <arguments> (we can use the name of the definition, and add "...Def" to the definition name)
 		=> ParameterRawValue inside EngineeringArgumentValues was transformed into ParameterEngValue
 		=> a value is actually necessary inside an engineeringDefaultValue (in this example, the value was there, but I think
-		   I saw a 1.13.0bd1 CDM with a engineeringDefaultValue that contained actually no value xD); instead of setting a value
+		   I saw a 1.13.0bd1 CDM with an engineeringDefaultValue that contained actually no value xD); instead of setting a value
 		   in that case we can just delete the entire engineeringDefaultValue instance!
 		*/
 
@@ -384,7 +390,58 @@ public class CdmFile extends XmlFile {
 					break;
 					// up
 					case "1.14.0b":
-						// TODO :: adjust names and arguments etc. as seen in example 1
+						// adjust names of arguments as seen in example 2
+						// navigate to all: <configurationcontrol:McmCI :: <monitoringControlElement :: <monitoringControlElementAspects xsi:type="monitoringcontrolmodel:Activity" :: <arguments
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+
+							Element root = getRoot();
+							NodeList elements = getRoot().getChildNodes();
+							int len = elements.getLength();
+							int newargcounter = 1;
+
+							for (int i = 0; i < len; i++) {
+								Node mce = elements.item(i);
+								if ("monitoringControlElement".equals(mce.getNodeName())) {
+									NodeList mceAspects = mce.getChildNodes();
+									if (mceAspects == null) {
+										break;
+									}
+									int mceAspectLen = mceAspects.getLength();
+
+									for (int j = 0; j < mceAspectLen; j++) {
+										Node mceAspect = mceAspects.item(j);
+										if ("monitoringControlElementAspects".equals(mceAspect.getNodeName())) {
+											Node mceAspectType = mceAspect.getAttributes().getNamedItem("xsi:type");
+											if (mceAspectType == null) {
+												break;
+											}
+											if ("monitoringcontrolmodel:Activity".equals(mceAspectType.getNodeValue())) {
+												NodeList arguments = mceAspect.getChildNodes();
+												if (arguments == null) {
+													break;
+												}
+												int arglen = arguments.getLength();
+
+												for (int k = 0; k < arglen; k++) {
+													Node argumentNode = arguments.item(k);
+													
+													if (argumentNode instanceof Element) {
+														Element argument = (Element) argumentNode;
+
+														Node argname = argument.getAttributes().getNamedItem("name");
+														if (argname == null) {
+															// TODO :: get the name of the definition instead, if there is one available
+															argument.setAttribute("name", "Argument " + newargcounter);
+															newargcounter++;
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					break;
 				}
 				break;
@@ -392,10 +449,132 @@ public class CdmFile extends XmlFile {
 				switch (dest) {
 					// down
 					case "1.13.0bd1":
-						// TODO :: adjust names and arguments etc. back as seen in example 1
+						// adjust names of arguments back as seen in example 2
+						// navigate to all: <configurationcontrol:McmCI :: <monitoringControlElement :: <monitoringControlElementAspects xsi:type="monitoringcontrolmodel:Activity" :: <arguments
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+
+							Element root = getRoot();
+							NodeList elements = getRoot().getChildNodes();
+							int len = elements.getLength();
+							int newargcounter = 1;
+
+							for (int i = 0; i < len; i++) {
+								Node mce = elements.item(i);
+								if ("monitoringControlElement".equals(mce.getNodeName())) {
+									NodeList mceAspects = mce.getChildNodes();
+									if (mceAspects == null) {
+										break;
+									}
+									int mceAspectLen = mceAspects.getLength();
+
+									for (int j = 0; j < mceAspectLen; j++) {
+										Node mceAspect = mceAspects.item(j);
+										if ("monitoringControlElementAspects".equals(mceAspect.getNodeName())) {
+											Node mceAspectType = mceAspect.getAttributes().getNamedItem("xsi:type");
+											if (mceAspectType == null) {
+												break;
+											}
+											if ("monitoringcontrolmodel:Activity".equals(mceAspectType.getNodeValue())) {
+												NodeList arguments = mceAspect.getChildNodes();
+												if (arguments == null) {
+													break;
+												}
+												int arglen = arguments.getLength();
+
+												for (int k = 0; k < arglen; k++) {
+													Node argumentNode = arguments.item(k);
+
+													if (argumentNode instanceof Element) {
+														Element argument = (Element) argumentNode;
+
+														argument.removeAttribute("name");
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					break;
 					// up
 					case "1.14.0":
+						// adjust parameter raw to eng as seen in example 2
+						// navigate to all: <configurationcontrol:McmCI :: <monitoringControlElement :: <monitoringControlElementAspects xsi:type="monitoringcontrolmodel:Activity" :: <arguments
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+
+							Element root = getRoot();
+							NodeList elements = getRoot().getChildNodes();
+							int len = elements.getLength();
+							int newargcounter = 1;
+
+							for (int i = 0; i < len; i++) {
+								Node mce = elements.item(i);
+								if ("monitoringControlElement".equals(mce.getNodeName())) {
+									NodeList mceAspects = mce.getChildNodes();
+									if (mceAspects == null) {
+										break;
+									}
+									int mceAspectLen = mceAspects.getLength();
+
+									for (int j = 0; j < mceAspectLen; j++) {
+										Node mceAspect = mceAspects.item(j);
+										if ("monitoringControlElementAspects".equals(mceAspect.getNodeName())) {
+											Node mceAspectType = mceAspect.getAttributes().getNamedItem("xsi:type");
+											if (mceAspectType == null) {
+												break;
+											}
+											if ("monitoringcontrolmodel:Activity".equals(mceAspectType.getNodeValue())) {
+												NodeList arguments = mceAspect.getChildNodes();
+												if (arguments == null) {
+													break;
+												}
+												int arglen = arguments.getLength();
+
+												for (int k = 0; k < arglen; k++) {
+													Node argumentNode = arguments.item(k);
+													
+													// in case this argument contains an engineeringDefaultValue, transform ParameterRawValue to ParameterEngValue inside of it
+													NodeList argChildren = argumentNode.getChildNodes();
+													if (argChildren == null) {
+														break;
+													}
+													int argChildrenLen = argChildren.getLength();
+
+													for (int l = 0; l < argChildrenLen; l++) {
+														Node argChild = argChildren.item(l);
+														if ("engineeringDefaultValue".equals(argChild.getNodeName())) {
+															NodeList argValues = argChild.getChildNodes();
+															if (argValues == null) {
+																break;
+															}
+															int argValuesLen = argValues.getLength();
+
+															for (int m = 0; m < argValuesLen; m++) {
+																Node argValue = argValues.item(m);
+																if ("value".equals(argValue.getNodeName())) {
+																	Node argValueType = argValue.getAttributes().getNamedItem("xsi:type");
+																	if (argValueType == null) {
+																		if (argValue instanceof Element) {
+																			Element argValueEl = (Element) argValue;
+																			argValueEl.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterEngValue");
+																		}
+																	} else {
+																		if ("monitoringcontrolmodel:ParameterRawValue".equals(argValueType.getNodeValue())) {
+																			argValueType.setNodeValue("monitoringcontrolmodel:ParameterEngValue");
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					break;
 				}
 				break;
@@ -403,6 +582,82 @@ public class CdmFile extends XmlFile {
 				switch (dest) {
 					// down
 					case "1.14.0b":
+						// adjust parameters eng back to raw as seen in example 2
+						// navigate to all: <configurationcontrol:McmCI :: <monitoringControlElement :: <monitoringControlElementAspects xsi:type="monitoringcontrolmodel:Activity" :: <arguments
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+
+							Element root = getRoot();
+							NodeList elements = getRoot().getChildNodes();
+							int len = elements.getLength();
+							int newargcounter = 1;
+
+							for (int i = 0; i < len; i++) {
+								Node mce = elements.item(i);
+								if ("monitoringControlElement".equals(mce.getNodeName())) {
+									NodeList mceAspects = mce.getChildNodes();
+									if (mceAspects == null) {
+										break;
+									}
+									int mceAspectLen = mceAspects.getLength();
+
+									for (int j = 0; j < mceAspectLen; j++) {
+										Node mceAspect = mceAspects.item(j);
+										if ("monitoringControlElementAspects".equals(mceAspect.getNodeName())) {
+											Node mceAspectType = mceAspect.getAttributes().getNamedItem("xsi:type");
+											if (mceAspectType == null) {
+												break;
+											}
+											if ("monitoringcontrolmodel:Activity".equals(mceAspectType.getNodeValue())) {
+												NodeList arguments = mceAspect.getChildNodes();
+												if (arguments == null) {
+													break;
+												}
+												int arglen = arguments.getLength();
+
+												for (int k = 0; k < arglen; k++) {
+													Node argumentNode = arguments.item(k);
+
+													// in case this argument contains an engineeringDefaultValue, transform ParameterEngValue back to ParameterRawValue inside of it
+													NodeList argChildren = argumentNode.getChildNodes();
+													if (argChildren == null) {
+														break;
+													}
+													int argChildrenLen = argChildren.getLength();
+
+													for (int l = 0; l < argChildrenLen; l++) {
+														Node argChild = argChildren.item(l);
+														if ("engineeringDefaultValue".equals(argChild.getNodeName())) {
+															NodeList argValues = argChild.getChildNodes();
+															if (argValues == null) {
+																break;
+															}
+															int argValuesLen = argValues.getLength();
+
+															for (int m = 0; m < argValuesLen; m++) {
+																Node argValue = argValues.item(m);
+																if ("value".equals(argValue.getNodeName())) {
+																	Node argValueType = argValue.getAttributes().getNamedItem("xsi:type");
+																	if (argValueType == null) {
+																		if (argValue instanceof Element) {
+																			Element argValueEl = (Element) argValue;
+																			argValueEl.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterRawValue");
+																		}
+																	} else {
+																		if ("monitoringcontrolmodel:ParameterEngValue".equals(argValueType.getNodeValue())) {
+																			argValueType.setNodeValue("monitoringcontrolmodel:ParameterRawValue");
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					break;
 				}
 				break;
