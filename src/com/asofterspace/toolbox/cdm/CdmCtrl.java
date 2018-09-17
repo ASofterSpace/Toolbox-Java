@@ -362,7 +362,7 @@ public class CdmCtrl {
 				break;
 			case "1.14.0b":
 				if ("http://www.esa.int/dme/".equals(prefix)) {
-					return "0.18.5 (probably)"; // TODO :: make sure this is the case (or not ^^)
+					return "0.18.5";
 				}
 				break;
 			case "1.14.0":
