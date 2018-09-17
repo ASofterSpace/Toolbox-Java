@@ -58,13 +58,13 @@ public class CdmCtrl {
 	private static final String TMPL_ROOT_ROUTE_SAP_SHORT = "root_route_sap";
 	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE = "Root Element with Route, SAP and Example Data Type";
 	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE_SHORT = "root_route_sap_ex_type";
-	
+
 	private static final List<String> CDM_TEMPLATES = Arrays.asList(
 		TMPL_JUST_ROOT,
 		TMPL_ROOT_ROUTE_SAP,
 		TMPL_ROOT_ROUTE_SAP_EX_TYPE
 	);
-	
+
 	private static final List<String> CDM_TEMPLATES_SHORT = Arrays.asList(
 		TMPL_JUST_ROOT_SHORT,
 		TMPL_ROOT_ROUTE_SAP_SHORT,
@@ -374,7 +374,7 @@ public class CdmCtrl {
 
 		return "(unknown)";
 	}
-	
+
 	/**
 	 * The highest CDM version that is known to this controller
 	 */
@@ -755,13 +755,16 @@ public class CdmCtrl {
 		if ((isEmpty == null) || !isEmpty) {
 			throw new CdmLoadingException("The specified directory is not empty - please create the new CDM in an empty directory!");
 		}
-		
+
 		String newCiName;
 		String mcmRootDefinitionUuid;
 		String resourceMcmContent;
 		File mcmCi;
 
-		// btw., all of our templates are written for version 1.14.0... so we convert them later on in this function to whatever version is actually required ^^		
+		// btw., all of our templates are written for version 1.14.0... so we convert them later on in this function to whatever version is actually required ^^
+		String templateVersion = "1.14.0";
+		String templateVersionPrefix = "http://www.esa.int/egscc/";
+
 		switch (template) {
 
 			case TMPL_JUST_ROOT:
@@ -772,7 +775,7 @@ public class CdmCtrl {
 				mcmRootDefinitionUuid = Utils.generateEcoreUUID();
 				resourceMcmContent =
 					"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-					"<configurationcontrol:McmCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:checkandcondition=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + version + "\" xmlns:configurationcontrol=\"" + versionPrefix + CDM_NAMESPACE_MIDDLE + version + "\" xmlns:mcmchecks=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/MCMChecks/" + version + "\" xmlns:mcmimplementationitems=\"" + versionPrefix + "MonitoringControl/MCMImplementationItems/" + version + "\" xmlns:monitoringcontrolcommon=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/" + version + "\" xmlns:monitoringcontrolmodel=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/" + version + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
+					"<configurationcontrol:McmCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:checkandcondition=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + templateVersion + "\" xmlns:configurationcontrol=\"" + templateVersionPrefix + CDM_NAMESPACE_MIDDLE + templateVersion + "\" xmlns:mcmchecks=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlModel/MCMChecks/" + templateVersion + "\" xmlns:mcmimplementationitems=\"" + templateVersionPrefix + "MonitoringControl/MCMImplementationItems/" + templateVersion + "\" xmlns:monitoringcontrolcommon=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlCommon/" + templateVersion + "\" xmlns:monitoringcontrolmodel=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlModel/" + templateVersion + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
 					"  <monitoringControlElement xmi:id=\"" + Utils.generateEcoreUUID() + "\" name=\"mcmRoot\" subElements=\"\" definition=\"" + mcmRootDefinitionUuid + "\">\n" +
 					"  </monitoringControlElement>\n" +
 					"  <monitoringControlElementDefinition xmi:id=\"" + mcmRootDefinitionUuid + "\" name=\"mcmRoot_Definition\" subElements=\"\">\n" +
@@ -795,7 +798,7 @@ public class CdmCtrl {
 				String displayFormatUuid = Utils.generateEcoreUUID();
 				resourceMcmContent =
 					"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-					"<configurationcontrol:DataTypesCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:configurationcontrol=\"" + versionPrefix + CDM_NAMESPACE_MIDDLE + version + "\" xmlns:monitoringcontrolcommon=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/" + version + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
+					"<configurationcontrol:DataTypesCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:configurationcontrol=\"" + templateVersionPrefix + CDM_NAMESPACE_MIDDLE + templateVersion + "\" xmlns:monitoringcontrolcommon=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlCommon/" + templateVersion + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
 					"  <abstractDataType xsi:type=\"monitoringcontrolcommon:SignedInteger\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" name=\"INT32\" bitLength=\"32\" signedIntegerDisplayFormat=\"" + displayFormatUuid + "\"/>\n" +
 					"  <abstractDataDisplayFormat xsi:type=\"monitoringcontrolcommon:SignedIntegerDisplayFormat\" xmi:id=\"" + displayFormatUuid + "\" name=\"INT32Format\" format=\"decimal\"/>\n" +
 					"</configurationcontrol:DataTypesCI>\n";
@@ -823,7 +826,7 @@ public class CdmCtrl {
 				String sapDefinitionUuid = Utils.generateEcoreUUID();
 				resourceMcmContent =
 					"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-					"<configurationcontrol:McmCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:checkandcondition=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + version + "\" xmlns:configurationcontrol=\"" + versionPrefix + CDM_NAMESPACE_MIDDLE + version + "\" xmlns:mcmchecks=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/MCMChecks/" + version + "\" xmlns:mcmimplementationitems=\"" + versionPrefix + "MonitoringControl/MCMImplementationItems/" + version + "\" xmlns:monitoringcontrolcommon=\"" + versionPrefix + "MonitoringControl/MonitoringControlCommon/" + version + "\" xmlns:monitoringcontrolmodel=\"" + versionPrefix + "MonitoringControl/MonitoringControlModel/" + version + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
+					"<configurationcontrol:McmCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:checkandcondition=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + templateVersion + "\" xmlns:configurationcontrol=\"" + templateVersionPrefix + CDM_NAMESPACE_MIDDLE + templateVersion + "\" xmlns:mcmchecks=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlModel/MCMChecks/" + templateVersion + "\" xmlns:mcmimplementationitems=\"" + templateVersionPrefix + "MonitoringControl/MCMImplementationItems/" + templateVersion + "\" xmlns:monitoringcontrolcommon=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlCommon/" + templateVersion + "\" xmlns:monitoringcontrolmodel=\"" + templateVersionPrefix + "MonitoringControl/MonitoringControlModel/" + templateVersion + "\" xmi:id=\"" + Utils.generateEcoreUUID() + "\" " + createExternalVersionLabel() + " onlineRevisionIdentifier=\"0\" name=\"" + newCiName + "CI\">\n" +
 					"  <monitoringControlElement xmi:id=\"" + Utils.generateEcoreUUID() + "\" name=\"mcmRoot\" subElements=\"\" defaultRoute=\"" + routeUuid + "\" definition=\"" + mcmRootDefinitionUuid + "\" defaultServiceAccessPoint=\"" + sapUuid + "\">\n" +
 					"    <monitoringControlElementAspects xsi:type=\"monitoringcontrolmodel:Route\" xmi:id=\"" + routeUuid + "\" name=\"DefaultRoute\" baseElement=\"" + routeDefinitionUuid + "\" hasPredictedValue=\"false\" routeName=\"DefaultRoute\" routeID=\"1\" routeType=\"" + routeTypeUuid + "\"/>\n" +
 					"    <monitoringControlElementAspects xsi:type=\"monitoringcontrolmodel:RouteType\" xmi:id=\"" + routeTypeUuid + "\" name=\"DefaultRouteType\" baseElement=\"" + routeTypeDefinitionUuid + "\" hasPredictedValue=\"false\" routeIDType=\"1\"/>\n" +

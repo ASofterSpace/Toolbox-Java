@@ -319,7 +319,9 @@ public class CdmFile extends XmlFile {
 			  <monitoringControlElementDefinition xmi:id="_3" name="mcmRootDef"/>
 			</configurationcontrol:McmCI>
 
-		=> the isModified="false" in the McmCI is missing in 1.13.0bd1... is that important?
+		=> the isModified="false" in the McmCI is missing in 1.13.0bd1, as it became optional - so from 1.13.0bd1 down to 1.12.1,
+		   add it in if it is missing, but the other way around keep it if it is there :)
+		   TODO :: check if this is the case for other CIs besides the McmCI too!
 
 		Example 2 in 1.13.0bd1:
 			  <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_1">
@@ -348,8 +350,39 @@ public class CdmFile extends XmlFile {
 		*/
 
 		switch (orig) {
+
+			case "1.12":
+				switch (dest) {
+					// up
+					case "1.12.1":
+					break;
+				}
+				break;
+			case "1.12.1":
+				switch (dest) {
+					// down
+					case "1.12":
+					break;
+					// up
+					case "1.13.0bd1":
+						// deleting the isModified attribute (see example 1) is NOT necessary, as it is still valid in 0.13.0bd1
+					break;
+				}
+				break;
 			case "1.13.0bd1":
 				switch (dest) {
+					// down
+					case "1.12.1":
+						// let's add the isModified attribute with default false (see example 1) in case it is missing!
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+							Element root = getRoot();
+							Node isModified = root.getAttributes().getNamedItem("isModified");
+							if (isModified == null) {
+								root.setAttribute("isModified", "false");
+							}
+						}
+					break;
+					// up
 					case "1.14.0b":
 						// TODO :: adjust names and arguments etc. as seen in example 1
 					break;
@@ -357,8 +390,19 @@ public class CdmFile extends XmlFile {
 				break;
 			case "1.14.0b":
 				switch (dest) {
+					// down
 					case "1.13.0bd1":
 						// TODO :: adjust names and arguments etc. back as seen in example 1
+					break;
+					// up
+					case "1.14.0":
+					break;
+				}
+				break;
+			case "1.14.0":
+				switch (dest) {
+					// down
+					case "1.14.0b":
 					break;
 				}
 				break;
