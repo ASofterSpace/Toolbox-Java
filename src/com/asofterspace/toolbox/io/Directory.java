@@ -135,8 +135,8 @@ public class Directory {
 		Directory oldDir = this;
 		
 		// express new file relative to old dir
-        Path oldFilePath = Paths.get(oldFile.getFilename());
-        Path oldDirPath = Paths.get(oldDir.dirname);
+        Path oldFilePath = Paths.get(oldFile.getFilename()).toAbsolutePath();
+        Path oldDirPath = Paths.get(oldDir.dirname).toAbsolutePath();
         Path filePathRelative = oldDirPath.relativize(oldFilePath);
 
 		// append relative file path to new dir
