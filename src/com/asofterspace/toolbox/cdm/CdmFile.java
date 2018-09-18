@@ -255,6 +255,16 @@ public class CdmFile extends XmlFile {
 			monitoringcontrolmodel.setNodeValue(toPrefix + "/MonitoringControl/MonitoringControlModel/" + toVersion);
 		}
 
+		Node container = scriptAttributes.getNamedItem("xmlns:container");
+		if (container != null) {
+			container.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Container/" + toVersion);
+		}
+
+		Node parameter = scriptAttributes.getNamedItem("xmlns:parameter");
+		if (parameter != null) {
+			parameter.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Parameter/" + toVersion);
+		}
+
 		// TODO :: also convert the UDD xmlns, at least these exist (but we do not know the xmlns name right now)
 		// prefix /MonitoringControlImplementation/UserDefinedDisplays/Mapping_UDD2MCM/ version
 		// prefix /MonitoringControlImplementation/UserDefinedDisplays/ version
@@ -401,7 +411,7 @@ public class CdmFile extends XmlFile {
 
 							for (int i = 0; i < len; i++) {
 								Node mce = elements.item(i);
-								if ("monitoringControlElement".equals(mce.getNodeName())) {
+								if ("monitoringControlElement".equals(mce.getNodeName()) || "monitoringControlElementDefinition".equals(mce.getNodeName())) {
 									NodeList mceAspects = mce.getChildNodes();
 									if (mceAspects == null) {
 										break;
@@ -425,7 +435,7 @@ public class CdmFile extends XmlFile {
 												for (int k = 0; k < arglen; k++) {
 													Node argumentNode = arguments.item(k);
 													
-													if (argumentNode instanceof Element) {
+													if (("arguments".equals(argumentNode.getNodeName())) && (argumentNode instanceof Element)) {
 														Element argument = (Element) argumentNode;
 
 														Node argname = argument.getAttributes().getNamedItem("name");
@@ -460,7 +470,7 @@ public class CdmFile extends XmlFile {
 
 							for (int i = 0; i < len; i++) {
 								Node mce = elements.item(i);
-								if ("monitoringControlElement".equals(mce.getNodeName())) {
+								if ("monitoringControlElement".equals(mce.getNodeName()) || "monitoringControlElementDefinition".equals(mce.getNodeName())) {
 									NodeList mceAspects = mce.getChildNodes();
 									if (mceAspects == null) {
 										break;
@@ -484,7 +494,7 @@ public class CdmFile extends XmlFile {
 												for (int k = 0; k < arglen; k++) {
 													Node argumentNode = arguments.item(k);
 
-													if (argumentNode instanceof Element) {
+													if (("arguments".equals(argumentNode.getNodeName())) && (argumentNode instanceof Element)) {
 														Element argument = (Element) argumentNode;
 
 														argument.removeAttribute("name");

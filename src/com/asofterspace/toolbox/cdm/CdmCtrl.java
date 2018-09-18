@@ -39,6 +39,7 @@ public class CdmCtrl {
 		"1.13.0bd1",
 		"1.12.1",
 		"1.12"
+		// we are also aware of 1.11.3
 	);
 
 	private static final List<String> KNOWN_CDM_PREFIXES = Arrays.asList(
@@ -47,6 +48,7 @@ public class CdmCtrl {
 		"http://www.esa.int/",
 		"http://www.esa.int/dme/",
 		"http://www.scopeset.de/"
+		// 1.11.3 used scopeset.de as well, we think
 	);
 
 	// a reasonable default CDM prefix to be used in case a user-supplied CDM version is not known
