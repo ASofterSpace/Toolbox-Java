@@ -329,9 +329,8 @@ public class CdmFile extends XmlFile {
 			  <monitoringControlElementDefinition xmi:id="_3" name="mcmRootDef"/>
 			</configurationcontrol:McmCI>
 
-		=> the isModified="false" in the McmCI is missing in 1.13.0bd1, as it became optional - so from 1.13.0bd1 down to 1.12.1,
+		=> the isModified="false" in every (!) CI is missing in 1.13.0bd1, as it became optional - so from 1.13.0bd1 down to 1.12.1,
 		   add it in if it is missing, but the other way around keep it if it is there :)
-		   TODO :: check if this is the case for other CIs besides the McmCI too!
 
 		Example 2 in 1.13.0bd1:
 			  <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_1">
@@ -360,9 +359,6 @@ public class CdmFile extends XmlFile {
 			  </arguments>
 
 		=> ParameterRawValue inside EngineeringArgumentValues was transformed into ParameterEngValue
-		=> a value is actually necessary inside an engineeringDefaultValue (in this example, the value was there, but I think
-		   I saw a 1.13.0bd1 CDM with an engineeringDefaultValue that contained actually no value xD); instead of setting a value
-		   in that case we can just delete the entire engineeringDefaultValue instance!
 		*/
 
 		switch (orig) {
@@ -390,12 +386,10 @@ public class CdmFile extends XmlFile {
 					// down
 					case "1.12.1":
 						// let's add the isModified attribute with default false (see example 1) in case it is missing!
-						if ("configurationcontrol:McmCI".equals(getCiType())) {
-							Element root = getRoot();
-							Node isModified = root.getAttributes().getNamedItem("isModified");
-							if (isModified == null) {
-								root.setAttribute("isModified", "false");
-							}
+						Element root = getRoot();
+						Node isModified = root.getAttributes().getNamedItem("isModified");
+						if (isModified == null) {
+							root.setAttribute("isModified", "false");
 						}
 					break;
 					// up
@@ -520,7 +514,7 @@ public class CdmFile extends XmlFile {
 
 							for (int i = 0; i < len; i++) {
 								Node mce = elements.item(i);
-								if ("monitoringControlElement".equals(mce.getNodeName())) {
+								if ("monitoringControlElement".equals(mce.getNodeName()) || "monitoringControlElementDefinition".equals(mce.getNodeName())) {
 									NodeList mceAspects = mce.getChildNodes();
 									if (mceAspects == null) {
 										break;
@@ -603,7 +597,7 @@ public class CdmFile extends XmlFile {
 
 							for (int i = 0; i < len; i++) {
 								Node mce = elements.item(i);
-								if ("monitoringControlElement".equals(mce.getNodeName())) {
+								if ("monitoringControlElement".equals(mce.getNodeName()) || "monitoringControlElementDefinition".equals(mce.getNodeName())) {
 									NodeList mceAspects = mce.getChildNodes();
 									if (mceAspects == null) {
 										break;
