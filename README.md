@@ -24,7 +24,7 @@ build.bat
 Or under Linux:
 
 ```
-build.sh
+./build.sh
 ```
 
 ## License
