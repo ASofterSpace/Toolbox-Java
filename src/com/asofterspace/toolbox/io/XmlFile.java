@@ -294,6 +294,15 @@ public class XmlFile extends File {
 		return xmlcontents.createElement(name);
 	}
 
+	public Document getDocument() {
+
+		if (xmlcontents == null) {
+			loadXmlContents();
+		}
+
+		return xmlcontents;
+	}
+
 	public Element getRoot() {
 
 		if (xmlcontents == null) {

@@ -7,6 +7,7 @@ import com.asofterspace.toolbox.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -303,6 +304,109 @@ public class CdmFile extends XmlFile {
 		}
 	}
 
+	private void conversionSetAttributeForElems(String tagName, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					elem.setAttribute(setAttributeName, setAttributeValue);
+				}
+			}
+		}
+	}
+
+	private void conversionSetAttributeForElems(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+					if (elemAttr != null) {
+						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+							elem.setAttribute(setAttributeName, setAttributeValue);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void conversionRemoveAttributeFromElems(String tagName, String removeAttributeName) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					elem.removeAttribute(removeAttributeName);
+				}
+			}
+		}
+	}
+
+	private void conversionRemoveAttributeFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeAttributeName) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+					if (elemAttr != null) {
+						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+							elem.removeAttribute(removeAttributeName);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void conversionRenameElems(String fromTagName, String toTagName) {
+		NodeList elems = getDocument().getElementsByTagName(fromTagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				getDocument().renameNode(elemNode, null, toTagName);
+			}
+		}
+	}
+
+	private void conversionRenameElems(String fromTagName, String hasAttributeName, String hasAttributeValue, String toTagName) {
+		NodeList elems = getDocument().getElementsByTagName(fromTagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				Node elemAttr = elemNode.getAttributes().getNamedItem(hasAttributeName);
+				if (elemAttr != null) {
+					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+						getDocument().renameNode(elemNode, null, toTagName);
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Go from one version to another - the version strings have already been changed,
 	 * this here only changes the actual layout of the CIs themselves such that they
@@ -359,6 +463,67 @@ public class CdmFile extends XmlFile {
 			  </arguments>
 
 		=> ParameterRawValue inside EngineeringArgumentValues was transformed into ParameterEngValue
+
+		Example 3 in 1.12.1:
+			<configurationcontrol:PacketCI ...
+			  <packet xmi:id="_1" name="ChangeIcuModeUIntEnum">
+			    <descriptions xmi:id="_2" language="English" description="description" qualifier="Short"/>
+			    <trailer href="_3"/>
+			    <dataField xmi:id="_4" name="ChangeIcuMode_dataField">
+			      <innerElements xsi:type="container:innerContainer" xmi:id="_5" offset="0" repetitionNumber="1">
+				<container href="_6"/>
+			      </innerElements>
+			      <innerElements xsi:type="container:innerContainer" xmi:id="_7" offset="0" repetitionNumber="1" container="_8"/>
+			    </dataField>
+
+		Example 3 in 1.13.0bd1:
+			<configurationcontrol:PacketCI ...
+			  <packet xmi:id="_1" name="ChangeIcuModeUIntEnum" namespace="namespace">
+			    <descriptions xmi:id="_2" language="English" description="description" qualifier="Short"/>
+			    <trailer href="_3"/>
+			    <dataField xmi:id="_4" name="ChangeIcuMode_dataField" namespace="namespace">
+			      <innerElements xsi:type="container:InnerContainer" xmi:id="_5" offset="0" repetitionNumber="1">
+				<container href="_6"/>
+			      </innerElements>
+			      <innerElements xsi:type="container:InnerContainer" xmi:id="_7" offset="0" repetitionNumber="1" container="_8"/>
+			    </dataField>
+
+		=> a namespace was added to packets and dataFields (but it is optional - so it does not have to be added for 1.13.0bd1,
+		   but it has to be removed when going backwards!)
+		=> <innerElements/> with xsi:type="container:innerContainer" have been changed to xsi:type="container:InnerContainer"
+
+		Example 4 in 1.12.1:
+			<configurationcontrol:PacketCI
+			  <container name="containerName" xmi:id="_1" xsi:type="container:ParameterContainer">
+			    <innerParameters offset="0" parameter="_2" timeOffset="0.0" xmi:id="_3"/>
+			    <innerParameters offset="2" parameter="_4" timeOffset="0.0" xmi:id="_5"/>
+			  </container>
+
+		Example 4 in 1.13.0bd1:
+			<configurationcontrol:PacketCI
+			  <container xmi:id="_1" name="containerName" namespace="namespace">
+			    <innerElements xsi:type="container:InnerParameter" xmi:id="_3" offset="0" timeOffset="0.0" parameter="_2"/>
+			    <innerElements xsi:type="container:InnerParameter" xmi:id="_5" offset="0" timeOffset="0.0" parameter="_4"/>
+			  </container>
+
+		Example 4 in 1.13.0bd1 (we think, but definitely possible in 1.14.0, but the previous one also still possible), alternative way of writing this down:
+			<configurationcontrol:PacketCI
+			  <container xmi:id="_1" name="containerName" namespace="namespace">
+			    <innerElements xsi:type="container:InnerParameter" xmi:id="_3" offset="0" timeOffset="0.0">
+			      <parameter xsi:type="parameter:SimplePktParameter" href="_2"/>
+			    </innerElements>
+			    <innerElements xsi:type="container:InnerParameter" xmi:id="_5" offset="0" timeOffset="0.0">
+			      <parameter xsi:type="parameter:SimplePktParameter" href="_4"/>
+			    </innerElements>
+			  </container>
+
+		=> a namespace was added to containers (it is optional - so it does not have to be added for 1.13.0bd1,
+		   but it has to be removed when going backwards!)
+		=> containers lost their xsi:type
+		=> innerParameters became innerElements with xsi:type container:InnerParameter
+		=> there is an alternative way of splitting out the parameters and giving them an extra xsi:type,
+		   but let's ignore that for now (mostly we do forward conversion anyway, and there this does not
+		   have to be considered... TODO :: actually consider this for backwards conversions, too!)
 		*/
 
 		switch (orig) {
@@ -377,7 +542,25 @@ public class CdmFile extends XmlFile {
 					break;
 					// up
 					case "1.13.0bd1":
-						// deleting the isModified attribute (see example 1) is NOT necessary, as it is still valid in 0.13.0bd1
+						// deleting the isModified attribute (see example 1) is NOT necessary, as it is still valid in 1.13.0bd1
+
+						if ("configurationcontrol:PacketCI".equals(getCiType())) {
+							// transforming <innerElements/> with xsi:type="container:innerContainer"
+							// to xsi:type="container:InnerContainer" (see example 3)
+							conversionSetAttributeForElems("innerElements", "xsi:type", "container:innerContainer",
+								"xsi:type", "container:InnerContainer");
+
+							// adding a namespace to packets, dataFields (see example 3)
+							// and containers (see example 4) is NOT necessary,
+							// as it is just optional in 1.13.0bd1
+
+							// remove the xsi:type from containers (see example 4)
+							conversionRemoveAttributeFromElems("container", "xsi:type");
+
+							// innerParameters became innerElements with xsi:type container:InnerParameter (see example 4)
+							conversionSetAttributeForElems("innerParameters", "xsi:type", "container:InnerParameter");
+							conversionRenameElems("innerParameters", "innerElements");
+						}
 					break;
 				}
 				break;
@@ -386,10 +569,34 @@ public class CdmFile extends XmlFile {
 					// down
 					case "1.12.1":
 						// let's add the isModified attribute with default false (see example 1) in case it is missing!
-						Element root = getRoot();
-						Node isModified = root.getAttributes().getNamedItem("isModified");
-						if (isModified == null) {
-							root.setAttribute("isModified", "false");
+						{
+							Element root = getRoot();
+							Node isModified = root.getAttributes().getNamedItem("isModified");
+							if (isModified == null) {
+								root.setAttribute("isModified", "false");
+							}
+						}
+
+						if ("configurationcontrol:PacketCI".equals(getCiType())) {
+							// transforming <innerElements/> with xsi:type="container:InnerContainer"
+							// back to xsi:type="container:innerContainer" (see example 3)
+							conversionSetAttributeForElems("innerElements", "xsi:type", "container:InnerContainer",
+								"xsi:type", "container:innerContainer");
+
+							// removing the namespace from packets, dataFields (see example 3)
+							// and containers (see example 4)
+							conversionRemoveAttributeFromElems("packet", "namespace");
+							conversionRemoveAttributeFromElems("dataField", "namespace");
+							conversionRemoveAttributeFromElems("container", "namespace");
+
+							// add the xsi:type to containers (see example 4)
+							conversionSetAttributeForElems("container", "xsi:type", "container:ParameterContainer");
+
+							// innerParameters became innerElements with xsi:type container:InnerParameter (see example 4)
+							// - and now we transform them back! ;)
+							conversionRenameElems("innerElements", "xsi:type", "container:InnerParameter",
+								"innerParameters");
+							conversionRemoveAttributeFromElems("innerParameters", "xsi:type");
 						}
 					break;
 					// up
@@ -453,52 +660,9 @@ public class CdmFile extends XmlFile {
 				switch (dest) {
 					// down
 					case "1.13.0bd1":
-						// adjust names of arguments back as seen in example 2
-						// navigate to all: <configurationcontrol:McmCI :: <monitoringControlElement :: <monitoringControlElementAspects xsi:type="monitoringcontrolmodel:Activity" :: <arguments
+						// adjust names of arguments back as seen in example 2 - by removing them cold-bloodedly ;)
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
-
-							Element root = getRoot();
-							NodeList elements = getRoot().getChildNodes();
-							int len = elements.getLength();
-							int newargcounter = 1;
-
-							for (int i = 0; i < len; i++) {
-								Node mce = elements.item(i);
-								if ("monitoringControlElement".equals(mce.getNodeName()) || "monitoringControlElementDefinition".equals(mce.getNodeName())) {
-									NodeList mceAspects = mce.getChildNodes();
-									if (mceAspects == null) {
-										break;
-									}
-									int mceAspectLen = mceAspects.getLength();
-
-									for (int j = 0; j < mceAspectLen; j++) {
-										Node mceAspect = mceAspects.item(j);
-										if ("monitoringControlElementAspects".equals(mceAspect.getNodeName())) {
-											Node mceAspectType = mceAspect.getAttributes().getNamedItem("xsi:type");
-											if (mceAspectType == null) {
-												break;
-											}
-											if ("monitoringcontrolmodel:Activity".equals(mceAspectType.getNodeValue())) {
-												NodeList arguments = mceAspect.getChildNodes();
-												if (arguments == null) {
-													break;
-												}
-												int arglen = arguments.getLength();
-
-												for (int k = 0; k < arglen; k++) {
-													Node argumentNode = arguments.item(k);
-
-													if (("arguments".equals(argumentNode.getNodeName())) && (argumentNode instanceof Element)) {
-														Element argument = (Element) argumentNode;
-
-														argument.removeAttribute("name");
-													}
-												}
-											}
-										}
-									}
-								}
-							}
+							conversionRemoveAttributeFromElems("arguments", "name");
 						}
 					break;
 					// up
