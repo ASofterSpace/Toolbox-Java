@@ -76,13 +76,20 @@ public class Directory {
 	
 		java.io.File entryPoint = new java.io.File(dirname);
 		
+		// a directory is empty if it has no children
 		if (entryPoint.isDirectory()) {
 			java.io.File[] children = entryPoint.listFiles();
 			
 			return children.length <= 0;
 		}
+
+		// a file is never empty - it is always something blocking us from writing a subfile into this path
+		if (entryPoint.isFile()) {
+			return false;
+		}
 		
-		return null;
+		// neither a file nor a directory? this is a directory not yet existing - and by definition empty! ;)
+		return true;
 	}
 	
 	/**
