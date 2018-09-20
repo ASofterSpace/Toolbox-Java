@@ -3,6 +3,8 @@ package com.asofterspace.toolbox.io;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -323,6 +325,256 @@ public class XmlFile extends File {
 		}
 
 		return mode;
+	}
+
+	public List<Element> domGetElems(String tagName) {
+
+		List<Element> result = new ArrayList<Element>();
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					result.add((Element) elemNode);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<Element> domGetElems(String tagName, String hasAttributeName, String hasAttributeValue) {
+
+		List<Element> result = new ArrayList<Element>();
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Node elemAttr = elemNode.getAttributes().getNamedItem(hasAttributeName);
+					if (elemAttr != null) {
+						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+							result.add((Element) elemNode);
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<Element> domGetChildrenOfElems(String tagName) {
+
+		List<Element> result = new ArrayList<Element>();
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				NodeList children = elemNode.getChildNodes();
+				if (children == null) {
+					break;
+				}
+				int childrenLen = children.getLength();
+
+				for (int j = 0; j < childrenLen; j++) {
+					Node childNode = children.item(j);
+					if (childNode instanceof Element) {
+						result.add((Element) childNode);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<Element> domGetChildrenOfElems(String tagName, String hasAttributeName, String hasAttributeValue) {
+
+		List<Element> result = new ArrayList<Element>();
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elem = elems.item(i);
+				Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+				if (elemAttr != null) {
+					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+						NodeList children = elem.getChildNodes();
+						if (children == null) {
+							break;
+						}
+						int childrenLen = children.getLength();
+
+						for (int j = 0; j < childrenLen; j++) {
+							Node childNode = children.item(j);
+							if (childNode instanceof Element) {
+								result.add((Element) childNode);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public void domSetAttributeForElems(String tagName, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					elem.setAttribute(setAttributeName, setAttributeValue);
+				}
+			}
+		}
+	}
+
+	public void domSetAttributeForElems(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+					if (elemAttr != null) {
+						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+							elem.setAttribute(setAttributeName, setAttributeValue);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void domSetAttributeForElemsIfAttrIsMissing(String tagName, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
+					if (elemAttr == null) {
+						elem.setAttribute(setAttributeName, setAttributeValue);
+					}
+				}
+			}
+		}
+	}
+
+	public void domSetAttributeForElemsIfAttrIsMissing(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+					if (elemAttr != null) {
+						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+							elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
+							if (elemAttr == null) {
+								elem.setAttribute(setAttributeName, setAttributeValue);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void domRemoveAttributeFromElems(String tagName, String removeAttributeName) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					elem.removeAttribute(removeAttributeName);
+				}
+			}
+		}
+	}
+
+	public void domRemoveAttributeFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeAttributeName) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+					if (elemAttr != null) {
+						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+							elem.removeAttribute(removeAttributeName);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void domRenameElems(String fromTagName, String toTagName) {
+		NodeList elems = getDocument().getElementsByTagName(fromTagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				getDocument().renameNode(elemNode, null, toTagName);
+			}
+		}
+	}
+
+	public void domRenameElems(String fromTagName, String hasAttributeName, String hasAttributeValue, String toTagName) {
+		NodeList elems = getDocument().getElementsByTagName(fromTagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				Node elemAttr = elemNode.getAttributes().getNamedItem(hasAttributeName);
+				if (elemAttr != null) {
+					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+						getDocument().renameNode(elemNode, null, toTagName);
+					}
+				}
+			}
+		}
 	}
 
 	public void save() {
