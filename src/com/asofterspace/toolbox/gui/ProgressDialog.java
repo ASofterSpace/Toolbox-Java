@@ -53,7 +53,7 @@ public class ProgressDialog implements ProgressIndicator {
 		GuiUtils.centerAndShowWindow(progressDialog);
 	}
 	
-	public void setProgress(double currentProgress) {
+	public void setProgress(final double currentProgress) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				progressBar.setValue((int) (RESOLUTION * currentProgress));

@@ -548,6 +548,61 @@ public class XmlFile extends File {
 		}
 	}
 
+	public void domRemoveChildrenFromElems(String tagName, String removeChildName) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elem = elems.item(i);
+				NodeList children = elem.getChildNodes();
+				if (children == null) {
+					break;
+				}
+				int childrenLen = children.getLength();
+
+				for (int j = childrenLen - 1; j >= 0; j--) {
+					Node childNode = children.item(j);
+					if (removeChildName.equals(childNode.getNodeName())) {
+						elem.removeChild(childNode);
+					}
+				}
+
+			}
+		}
+	}
+
+	public void domRemoveChildrenFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeChildName) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elem = elems.item(i);
+				Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+				if (elemAttr != null) {
+					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+						NodeList children = elem.getChildNodes();
+						if (children == null) {
+							break;
+						}
+						int childrenLen = children.getLength();
+
+						for (int j = childrenLen - 1; j >= 0; j--) {
+							Node childNode = children.item(j);
+							if (removeChildName.equals(childNode.getNodeName())) {
+								elem.removeChild(childNode);
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+
 	public void domRenameElems(String fromTagName, String toTagName) {
 		NodeList elems = getDocument().getElementsByTagName(fromTagName);
 		if (elems != null) {

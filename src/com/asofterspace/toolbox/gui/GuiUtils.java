@@ -35,7 +35,7 @@ public class GuiUtils {
 	/**
 	 * Takes a created window - e.g. a JFrame or a JDialog - and shows it in the middle of the screen
 	 */
-	public static void centerAndShowWindow(Window window) {
+	public static void centerAndShowWindow(final Window window) {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {

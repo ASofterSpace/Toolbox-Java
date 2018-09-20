@@ -1,5 +1,6 @@
 package com.asofterspace.toolbox.cdm;
 
+import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlFile;
 import com.asofterspace.toolbox.Utils;
@@ -143,7 +144,7 @@ public class CdmFile extends XmlFile {
 		String mappingNamespace = CdmCtrl.DEFAULT_NAMESPACE;
 
 		// generate a new random ID
-		String mappingId = Utils.generateEcoreUUID();
+		String mappingId = UuidEncoderDecoder.generateEcoreUUID();
 
 		// actually create the element
 		Element newMapping = createElement("scriptActivityImpl");
@@ -209,6 +210,7 @@ public class CdmFile extends XmlFile {
 	 */
 	public void convertTo(String toVersion, String toPrefix) {
 
+		// sanitize our input
 		String origVersion = getCdmVersion();
 
 		if (toVersion == null) {
@@ -219,7 +221,6 @@ public class CdmFile extends XmlFile {
 			toPrefix = getCdmVersionPrefix();
 		}
 
-		// sanitize our input
 		while (toVersion.startsWith("/")) {
 			toVersion = toVersion.substring(1);
 		}
@@ -227,6 +228,15 @@ public class CdmFile extends XmlFile {
 		while (toPrefix.endsWith("/")) {
 			toPrefix = toPrefix.substring(0, toPrefix.length() - 1);
 		}
+		
+		// switch out the namespaces
+		conversionSwitchNamespaces(toVersion, toPrefix);
+		
+		// step through the detailed version changes
+		conversionStepThroughChanges(origVersion, toVersion);
+	}
+	
+	private void conversionSwitchNamespaces(String toVersion, String toPrefix) {
 
 		Node root = getRoot();
 
@@ -261,9 +271,19 @@ public class CdmFile extends XmlFile {
 			container.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Container/" + toVersion);
 		}
 
+		Node mapping_mcm2packet = scriptAttributes.getNamedItem("xmlns:mapping_mcm2packet");
+		if (mapping_mcm2packet != null) {
+			mapping_mcm2packet.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Mapping_MCM2Packet/" + toVersion);
+		}
+
 		Node parameter = scriptAttributes.getNamedItem("xmlns:parameter");
 		if (parameter != null) {
 			parameter.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Parameter/" + toVersion);
+		}
+
+		Node packetprocessing = scriptAttributes.getNamedItem("xmlns:packetprocessing");
+		if (packetprocessing != null) {
+			packetprocessing.setNodeValue(toPrefix + "/PacketProcessing/" + toVersion);
 		}
 
 		// TODO :: also convert the UDD xmlns, at least these exist (but we do not know the xmlns name right now)
@@ -275,7 +295,10 @@ public class CdmFile extends XmlFile {
 		// but qudv prefix is esa/dme (or wait, was that just because we did a manual conversion wrong?
 		// re-check if this is the case!), while in 1.12, qudv prefix is scopeset... (in both, qudv version is 1.5)
 		// confirmed good example: xmlns:configurationcontrol="http://www.esa.int/dme/ConfigurationTracking/1.14.0b" xmlns:qudv.blocks_extModel="http://www.esa.int/dme/core/qudv/blocks/1.5" xmlns:qudv.conceptualmodel_extModel="http://www.esa.int/dme/core/qudv/conceptualmodel/1.5"
-
+	}
+	
+	private void conversionStepThroughChanges(String origVersion, String toVersion) {
+	
 		List<String> knownVersions = CdmCtrl.getKnownCdmVersions();
 		int origIndex = knownVersions.indexOf(origVersion);
 		int destIndex = knownVersions.indexOf(toVersion);
@@ -304,6 +327,29 @@ public class CdmFile extends XmlFile {
 		}
 	}
 
+	private void conversionRenameRoot(String prevNamespace, String newNamespace, String newCiName) {
+							
+		Node root = getRoot();
+		
+		if (root == null) {
+			return;
+		}
+		
+		// store the original namespace
+		NamedNodeMap scriptAttributes = root.getAttributes();
+		Node configurationcontrol = scriptAttributes.getNamedItem("xmlns:" + prevNamespace);
+		if (configurationcontrol != null) {
+			// get the actual namespace string (including http:// and all) that we assigned
+			prevNamespace = configurationcontrol.getNodeValue();
+		}
+		
+		// actually register the namespace formally
+		getDocument().createElementNS(prevNamespace, newNamespace + ":" + newCiName);
+
+		// assign the CI name, using the namespace we just registered
+		getDocument().renameNode(root, prevNamespace, newNamespace + ":" + newCiName);
+	}
+	
 	/**
 	 * Go from one version to another - the version strings have already been changed,
 	 * this here only changes the actual layout of the CIs themselves such that they
@@ -452,14 +498,16 @@ public class CdmFile extends XmlFile {
 				switch (dest) {
 					// up
 					case "1.12.1":
-					break;
+						break;
 				}
 				break;
+				
 			case "1.12.1":
 				switch (dest) {
 					// down
 					case "1.12":
-					break;
+						break;
+					
 					// up
 					case "1.13.0bd1":
 						// deleting the isModified attribute (see example 1) is NOT necessary, as it is still valid in 1.13.0bd1
@@ -481,9 +529,11 @@ public class CdmFile extends XmlFile {
 							domSetAttributeForElems("innerParameters", "xsi:type", "container:InnerParameter");
 							domRenameElems("innerParameters", "innerElements");
 						}
-					break;
+						
+						break;
 				}
 				break;
+				
 			case "1.13.0bd1":
 				switch (dest) {
 					// down
@@ -518,7 +568,9 @@ public class CdmFile extends XmlFile {
 								"innerParameters");
 							domRemoveAttributeFromElems("innerParameters", "xsi:type");
 						}
-					break;
+						
+						break;
+					
 					// up
 					case "1.14.0b":
 						// adjust names of arguments as seen in example 2
@@ -568,14 +620,37 @@ public class CdmFile extends XmlFile {
 									// just add a mapping f(1) = "one" - what possible harm could be done? ^^
 									newLiteral.setAttribute("x", "1");
 									newLiteral.setAttribute("y", "one");
-									newLiteral.setAttribute("xmi:id", Utils.generateEcoreUUID());
+									newLiteral.setAttribute("xmi:id", UuidEncoderDecoder.generateEcoreUUID());
 									enumeration.appendChild(newLiteral);
 								}
 							}
 						}
-					break;
+						
+						// adjust packets - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
+						if ("configurationcontrol:PacketCI".equals(getCiType())) {
+							// add the packetType to the packets based on the sourceType of a contained pktParameter
+							// (use TM by default, if none are contained)
+							domRemoveAttributeFromElems("packet", "packetType");
+
+							domRemoveAttributeFromElems("pktParameter", "sourceType");
+						}
+
+						// remove sourceDataType and sourceDisplayFormat
+						// TODO :: implement the opposite for the other direction somehow
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDataType");
+							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDisplayFormat");
+						}
+
+						// rename units and quantities CI
+						if ("configurationcontrol:UnitsAndQuantatiesCI".equals(getCiType())) {
+							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantitiesCI");
+						}
+
+						break;
 				}
 				break;
+				
 			case "1.14.0b":
 				switch (dest) {
 					// down
@@ -592,9 +667,27 @@ public class CdmFile extends XmlFile {
 								"xsi:type", "monitoringcontrolcommon:EnumerationDataType",
 								"defaultText");
 
-							// TODO :: do we have to remove the enumeration literals?
+							// TODO :: remove the enumeration literals (copy - they need to be removed!)
 						}
-					break;
+						
+						// adjust packets back - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
+						if ("configurationcontrol:PacketCI".equals(getCiType())) {
+							// TODO :: this could also be set to "Command" - to figure out which one it is,
+							// check which container this is used in, and which packet that one is used in,
+							// until you get up to the <packet> element with packetType="TM" or packetType="TC"
+							domSetAttributeForElemsIfAttrIsMissing("pktParameter", "sourceType", "Telemetry");
+
+							// remove the packetType from the packets after we used it to figure out the correct sourceType for the pktParameter
+							domRemoveAttributeFromElems("packet", "packetType");
+						}
+
+						// rename units and quantities CI back
+						if ("configurationcontrol:UnitsAndQuantitiesCI".equals(getCiType())) {
+							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantatiesCI");
+						}
+						
+						break;
+					
 					// up
 					case "1.14.0":
 						// adjust parameter raw to eng as seen in example 2
@@ -621,9 +714,11 @@ public class CdmFile extends XmlFile {
 								}
 							}
 						}
-					break;
+						
+						break;
 				}
 				break;
+				
 			case "1.14.0":
 				switch (dest) {
 					// down
@@ -652,7 +747,8 @@ public class CdmFile extends XmlFile {
 								}
 							}
 						}
-					break;
+						
+						break;
 				}
 				break;
 		}

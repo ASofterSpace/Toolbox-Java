@@ -1,6 +1,6 @@
 package com.asofterspace.toolbox.cdm;
 
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 		if (subStrs != null) {
 			String[] subStrsArr = subStrs.split(" ");
 			for (String subStr : subStrsArr) {
-				this.subElements.add(Utils.getIdFromEcoreLink(subStr));
+				this.subElements.add(UuidEncoderDecoder.getIdFromEcoreLink(subStr));
 			}
 		}
 		
@@ -58,7 +58,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 		for (int i = 0; i < len; i++) {
 			Node subElement = subElementList.item(i);
 			if ("subElements".equals(subElement.getNodeName())) {
-				this.subElements.add(Utils.getIdFromEcoreLink(subElement.getAttributes().getNamedItem("href").getNodeValue()));
+				this.subElements.add(UuidEncoderDecoder.getIdFromEcoreLink(subElement.getAttributes().getNamedItem("href").getNodeValue()));
 			}
 		}
 	}
@@ -109,7 +109,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 		// TODO :: add default ServiceAccessPoint
 		
 		// generate a new random ID
-		String activityId = Utils.generateEcoreUUID();
+		String activityId = UuidEncoderDecoder.generateEcoreUUID();
 
 		// actually create the element
 		Element newActivity = parent.createElement("monitoringControlElementAspects");
@@ -119,7 +119,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 		newActivity.setAttribute("hasPredictedValue", "false");
 
 		if ((newActivityAlias != null) && !("".equals(newActivityAlias))) {
-			String newAliasId = Utils.generateEcoreUUID();
+			String newAliasId = UuidEncoderDecoder.generateEcoreUUID();
 			Element newAlias = parent.createElement("aliases");
 			newAlias.setAttribute("xsi:type", "monitoringcontrolcommon:MonitoringAndControlAlias");
 			newAlias.setAttribute("xmi:id", newAliasId);
