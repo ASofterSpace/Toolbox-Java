@@ -7,13 +7,6 @@ package com.asofterspace.toolbox.coders;
  */
 public class Base64Decoder {
 
-	// by design, only the following chars are considerd... whitespace, equals signs etc. are ignored
-    final static char[] NUM_TO_CHAR = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
-                'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-                'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+',
-                '/'};
-
     /**
      * Decodes a base64 encoded text back into regular text (and as there are a million base64
      * standards out there: we are trying to achieve compatibility with both the Original Base64 for
@@ -23,7 +16,7 @@ public class Base64Decoder {
      */
     public static String decodeFromBase64(String base64Text) {
 	
-		return decodeFromBase64(base64Text, NUM_TO_CHAR);
+		return decodeFromBase64(base64Text, Base64Encoder.NUM_TO_BASE64_CHAR);
 	}
 	
     /**

@@ -11,11 +11,12 @@ import java.util.List;
 public class Base64Encoder {
 
     // we have our base64 chars on 0 .. 63
-    final static char[] NUM_TO_CHAR = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
-                'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-                'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+',
-                '/'};
+    public final static char[] NUM_TO_BASE64_CHAR = new char[]{
+				'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+				'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+				'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+				'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+				'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 
     /**
      * Encodes text into base64 (and as there are a million base64 standards out there: we are
@@ -25,8 +26,8 @@ public class Base64Encoder {
      * @return The input text encoded in base64
      */
     public static String encodeIntoBase64(String inputText) {
-	
-		return encodeIntoBase64(inputText.getBytes(), NUM_TO_CHAR);
+
+		return encodeIntoBase64(inputText.getBytes(), NUM_TO_BASE64_CHAR);
 	}
 
     /**
@@ -37,10 +38,10 @@ public class Base64Encoder {
      * @return The byte array encoded in base64
      */
     public static String encodeIntoBase64(byte[] inputBytes) {
-	
-		return encodeIntoBase64(inputBytes, NUM_TO_CHAR);
+
+		return encodeIntoBase64(inputBytes, NUM_TO_BASE64_CHAR);
 	}
-	
+
     /**
      * Encodes text into base64 (and as there are a million base64 standards out there: we are
      * trying to achieve compatibility with both the Original Base64 for PEM and the current Base64
@@ -50,7 +51,7 @@ public class Base64Encoder {
      * @return The input text encoded in base64
      */
     public static String encodeIntoBase64(String inputText, char[] base64Chars) {
-	
+
 		return encodeIntoBase64(inputText.getBytes(), base64Chars);
 	}
 
@@ -63,7 +64,7 @@ public class Base64Encoder {
      * @return The byte array encoded in base64
      */
     public static String encodeIntoBase64(byte[] inputBytes, char[] base64Chars) {
-	
+
         List<Integer> numbers = new ArrayList<>();
 
         int offset = 0;
@@ -106,7 +107,7 @@ public class Base64Encoder {
                     break;
             }
         }
-		
+
 		String trailer = "";
 
         switch (offset) {
@@ -119,7 +120,7 @@ public class Base64Encoder {
                 trailer = "=";
                 break;
         }
-		
+
 		return encodeIntoBase64(numbers, base64Chars) + trailer;
 	}
 
@@ -131,10 +132,8 @@ public class Base64Encoder {
 
         int off = 0;
 		int i = 0;
-		
-		System.out.println("start");
+
 		for (Integer num : numbers) {
-		System.out.println(num);
             base64characters[i+off] = base64Chars[num % 64];
 
             // add newline after 64 characters, as demanded by old base64 specs (which is still
@@ -145,7 +144,7 @@ public class Base64Encoder {
                 off++;
                 base64characters[i+off] = '\n';
             }
-			
+
 			i++;
         }
 
@@ -160,5 +159,5 @@ public class Base64Encoder {
 
         return result;
     }
-	
+
 }

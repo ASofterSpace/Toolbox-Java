@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 18;
+	public final static int TOOLBOX_VERSION_NUMBER = 19;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -38,7 +38,7 @@ public class Utils {
 	}
 	
 	public static String getFullProgramIdentifier() {
-		return "A Softer Space " + getProgramTitle() + " Version " + getVersionNumber();
+		return "A Softer Space " + getProgramTitle() + " version " + getVersionNumber();
 	}
 	
 	public static String getFullProgramIdentifierWithDate() {
