@@ -592,7 +592,10 @@ public abstract class CdmFileBase extends XmlFile {
 								"xsi:type", "monitoringcontrolcommon:EnumerationDataType",
 								"defaultText");
 
-							// TODO :: remove the enumeration literals (copy - they need to be removed!)
+							// remove the enumeration literals (copy - they need to be removed!)
+							domRemoveChildrenFromElems("abstractDataType",
+								"xsi:type", "monitoringcontrolcommon:EnumerationDataType",
+								"enumerationLiterals");
 						}
 						
 						// adjust packets back - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
