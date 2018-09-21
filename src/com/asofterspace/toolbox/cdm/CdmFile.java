@@ -228,15 +228,19 @@ public class CdmFile extends XmlFile {
 		while (toPrefix.endsWith("/")) {
 			toPrefix = toPrefix.substring(0, toPrefix.length() - 1);
 		}
-		
-		// switch out the namespaces
-		conversionSwitchNamespaces(toVersion, toPrefix);
+
+		// we need to switch out THIS namespace first, as otherwise root elements cannot be renamed in the next step
+		conversionSwitchConfigurationControlNamespace(toVersion, toPrefix);
 		
 		// step through the detailed version changes
 		conversionStepThroughChanges(origVersion, toVersion);
+
+		// switch out the other, more volatile namespaces (namespaces can be modified in the previous step,
+		// e.g. xmlns:PUSServicegeneric being added or removed, so this one has to come afterwards!)
+		conversionSwitchOtherNamespaces(toVersion, toPrefix);
 	}
 	
-	private void conversionSwitchNamespaces(String toVersion, String toPrefix) {
+	private void conversionSwitchConfigurationControlNamespace(String toVersion, String toPrefix) {
 
 		Node root = getRoot();
 
@@ -250,6 +254,17 @@ public class CdmFile extends XmlFile {
 		if (configurationcontrol != null) {
 			configurationcontrol.setNodeValue(toPrefix + "/" + CdmCtrl.CDM_NAMESPACE_MIDDLE + toVersion);
 		}
+	}
+
+	private void conversionSwitchOtherNamespaces(String toVersion, String toPrefix) {
+
+		Node root = getRoot();
+
+		if (root == null) {
+			return;
+		}
+
+		NamedNodeMap scriptAttributes = root.getAttributes();
 
 		Node mcmimplementationitems = scriptAttributes.getNamedItem("xmlns:mcmimplementationitems");
 		if (mcmimplementationitems != null) {
@@ -276,9 +291,19 @@ public class CdmFile extends XmlFile {
 			mapping_mcm2packet.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Mapping_MCM2Packet/" + toVersion);
 		}
 
+		Node mappingservicepacket = scriptAttributes.getNamedItem("xmlns:mapping_service2packet");
+		if (mappingservicepacket != null) {
+			mappingservicepacket.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Mapping_Service2Packet/" + toVersion);
+		}
+
 		Node parameter = scriptAttributes.getNamedItem("xmlns:parameter");
 		if (parameter != null) {
 			parameter.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Parameter/" + toVersion);
+		}
+
+		Node pusservicegeneric = scriptAttributes.getNamedItem("xmlns:PUSServicegeneric");
+		if (pusservicegeneric != null) {
+			pusservicegeneric.setNodeValue(toPrefix + "/MonitoringControlImplementation/PusServiceLayer/PUS_Service_generic/" + toVersion);
 		}
 
 		Node packetprocessing = scriptAttributes.getNamedItem("xmlns:packetprocessing");
@@ -290,11 +315,39 @@ public class CdmFile extends XmlFile {
 		// prefix /MonitoringControlImplementation/UserDefinedDisplays/Mapping_UDD2MCM/ version
 		// prefix /MonitoringControlImplementation/UserDefinedDisplays/ version
 
-		// TODO :: also convert to the appropriate qudv, if we are aware which one it is!
-		// sadly, the qudv prefixes are not even aligned with the CDM prefixes, e.g. in 1.14.0 prefix is esa/egscc,
-		// but qudv prefix is esa/dme (or wait, was that just because we did a manual conversion wrong?
-		// re-check if this is the case!), while in 1.12, qudv prefix is scopeset... (in both, qudv version is 1.5)
-		// confirmed good example: xmlns:configurationcontrol="http://www.esa.int/dme/ConfigurationTracking/1.14.0b" xmlns:qudv.blocks_extModel="http://www.esa.int/dme/core/qudv/blocks/1.5" xmlns:qudv.conceptualmodel_extModel="http://www.esa.int/dme/core/qudv/conceptualmodel/1.5"
+		// TODO :: if the version here ever differs from 1.5, we will need to start keeping track of that version relative to the CDM version too
+		// (and start keeping that in mind for validation, etc.)
+
+		// qudv examples that seem to be correct:
+		// for 1.14.0: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5" (note: NOT aligned with generic version prefix of 1.14.0!)
+		// for 1.14.0b: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5"
+		// for 1.13.0bd1: "http://www.esa.int/core/qudv/conceptualmodel/1.5"
+
+		String qudvPrefix = "http://www.esa.int/dme/core/qudv/";
+
+		switch (toVersion) {
+
+			case "1.14.0":
+			case "1.14.0b":
+				qudvPrefix = "http://www.esa.int/dme/core/qudv/";
+				break;
+
+			case "1.13.0bd1":
+				qudvPrefix = "http://www.esa.int/core/qudv/";
+				break;
+
+			// TODO :: figure this out for the other CDM versions too!
+		}
+
+		Node qudvBlocksExtModel = scriptAttributes.getNamedItem("xmlns:qudv.blocks_extModel");
+		if (qudvBlocksExtModel != null) {
+			qudvBlocksExtModel.setNodeValue(qudvPrefix + "blocks/1.5");
+		}
+
+		Node qudvConceptExtModel = scriptAttributes.getNamedItem("xmlns:qudv.conceptualmodel_extModel");
+		if (qudvConceptExtModel != null) {
+			qudvConceptExtModel.setNodeValue(qudvPrefix + "conceptualmodel/1.5");
+		}
 	}
 	
 	private void conversionStepThroughChanges(String origVersion, String toVersion) {
@@ -344,7 +397,7 @@ public class CdmFile extends XmlFile {
 		}
 		
 		// actually register the namespace formally
-		getDocument().createElementNS(prevNamespace, newNamespace + ":" + newCiName);
+		// getDocument().createElementNS(prevNamespace, newNamespace + ":" + newCiName);
 
 		// assign the CI name, using the namespace we just registered
 		getDocument().renameNode(root, prevNamespace, newNamespace + ":" + newCiName);
@@ -490,6 +543,18 @@ public class CdmFile extends XmlFile {
 
 		=> a defaultText was added
 		=> a monitoringcontrolcommon:EnumerationDataType now needs to contain at least one enumerationLiterals instance
+
+
+		Example 6 in 1.14.0b: << definitely in 1.13.0bd1, but based on example 2 we assume actually in 1.14.0b the same as in 1.13.0bd1
+			<monitoringControlElementAspects ... xsi:type="monitoringcontrolmodel:EngineeringParameter">
+				<defaultValue value="..." xmi:id="_1" xsi:type="monitoringcontrolmodel:ParameterRawValue"/>
+			  
+		Example 6 in 1.14.0:
+			<monitoringControlElementAspects ... xsi:type="monitoringcontrolmodel:EngineeringParameter">
+				<defaultValue value="..." xmi:id="_1" xsi:type="monitoringcontrolmodel:ParameterEngValue"/>
+
+		=> ParameterRawValue inside EngineeringParameters was transformed into ParameterEngValue
+		=> this is basically like example 2, but different, because everyone is trying to confuse us as much as possible!
 		*/
 
 		switch (orig) {
@@ -635,11 +700,32 @@ public class CdmFile extends XmlFile {
 							domRemoveAttributeFromElems("pktParameter", "sourceType");
 						}
 
-						// remove sourceDataType and sourceDisplayFormat
-						// TODO :: implement the opposite for the other direction somehow
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
+							// remove sourceDataType and sourceDisplayFormat, as the field no longer seems to exist
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							// TODO :: implement the opposite for the other direction somehow
 							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDataType");
 							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDisplayFormat");
+
+							// remove available arguments, as the field no longer seems to exist
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							// TODO :: implement the opposite for the other direction somehow
+							domRemoveAttributeFromElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:DeducedArgumentDefinition", "availableArguments");
+						}
+
+						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
+
+							// add type to verification stage
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+
+							domSetAttributeForElems("configurationcontrol:PUSServicesCI", "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+							domSetAttributeForElems("configurationcontrol:PUSServicesCI", "xmlns:PUSServicegeneric", "placeholder");
+
+							domSetAttributeForElemsIfAttrIsMissing("defaultVerificationStages", "xsi:type", "PUSServicegeneric:PUSVerificationStage");
+
+							// do these changes need to be un-done on the way back, or can they be kept?
+							domSetAttributeForElemsIfAttrIsMissing("defaultVerificationStages", "stageType", "TCAcceptance");
+							domRemoveAttributeFromElems("defaultVerificationStages", "nextStage");
 						}
 
 						// rename units and quantities CI
@@ -681,6 +767,14 @@ public class CdmFile extends XmlFile {
 							domRemoveAttributeFromElems("packet", "packetType");
 						}
 
+						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
+							// remove type from verification stage
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRemoveAttributeFromElems("defaultVerificationStages", "xsi:type");
+							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:PUSServicegeneric");
+							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:xsi");
+						}
+
 						// rename units and quantities CI back
 						if ("configurationcontrol:UnitsAndQuantitiesCI".equals(getCiType())) {
 							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantatiesCI");
@@ -698,8 +792,12 @@ public class CdmFile extends XmlFile {
 							List<Element> children = domGetChildrenOfElems("engineeringDefaultValue");
 							children.addAll(domGetChildrenOfElems("defaultValue",
 								"xsi:type", "monitoringcontrolmodel:EngineeringArgumentValue"));
+							// also add defaultValues that are children of EngineeringParameters, see example 6
+							children.addAll(domGetChildrenOfElems("monitoringControlElementAspects",
+								"xsi:type", "monitoringcontrolmodel:EngineeringParameter"));
 							for (Element argValue : children) {
-								if ("value".equals(argValue.getNodeName())) {
+								// for example 2, take value, and for example 6, take defaultValue
+								if (("value".equals(argValue.getNodeName())) || ("defaultValue".equals(argValue.getNodeName()))) {
 									Node argValueType = argValue.getAttributes().getNamedItem("xsi:type");
 									if (argValueType == null) {
 										if (argValue instanceof Element) {
@@ -731,8 +829,12 @@ public class CdmFile extends XmlFile {
 							List<Element> children = domGetChildrenOfElems("engineeringDefaultValue");
 							children.addAll(domGetChildrenOfElems("defaultValue",
 								"xsi:type", "monitoringcontrolmodel:EngineeringArgumentValue"));
+							// also add defaultValues that are children of EngineeringParameters, see example 6
+							children.addAll(domGetChildrenOfElems("monitoringControlElementAspects",
+								"xsi:type", "monitoringcontrolmodel:EngineeringParameter"));
 							for (Element argValue : children) {
-								if ("value".equals(argValue.getNodeName())) {
+								// for example 2, take value, and for example 6, take defaultValue
+								if (("value".equals(argValue.getNodeName())) || ("defaultValue".equals(argValue.getNodeName()))) {
 									Node argValueType = argValue.getAttributes().getNamedItem("xsi:type");
 									if (argValueType == null) {
 										if (argValue instanceof Element) {
