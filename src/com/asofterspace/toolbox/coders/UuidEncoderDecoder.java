@@ -120,10 +120,18 @@ public class UuidEncoderDecoder {
 
 	public static String convertJavaUUIDtoEcore(String sourceUUID) {
 
+		if (sourceUUID == null) {
+			return null;
+		}
+
 		return convertJavaUUIDtoEcore(UUID.fromString(sourceUUID));
 	}
 
 	public static String convertJavaUUIDtoEcore(UUID sourceUUID) {
+
+		if (sourceUUID == null) {
+			return null;
+		}
 
 		// convert the UUID to base 64
 		ByteBuffer sourceByteBuf = ByteBuffer.wrap(new byte[16]);
@@ -147,6 +155,10 @@ public class UuidEncoderDecoder {
 	}
 
 	public static String convertEcoreUUIDtoJava(String sourceUUID) {
+	
+		if (sourceUUID == null) {
+			return null;
+		}
 
 		// remove starting underscrore - should be there for an ecore UUID
 		if ((sourceUUID.length() == 23) && (sourceUUID.startsWith("_"))) {

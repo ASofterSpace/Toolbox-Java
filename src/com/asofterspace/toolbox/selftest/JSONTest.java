@@ -16,7 +16,7 @@ public class JSONTest implements Test {
 
 	public void fromStringTest() {
 
-		TestUtils.start("JSON From String");
+		TestUtils.start("JSON from String");
 
 		JSON testObject = new JSON("{\"foo\":\"bar\"}");
 
@@ -30,7 +30,7 @@ public class JSONTest implements Test {
 
 	public void toStringTest() {
 
-		TestUtils.start("JSON To String");
+		TestUtils.start("JSON to String");
 
 		JSON testObject = new JSON("{\"foo\": \"bar\"}");
 

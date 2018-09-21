@@ -21,7 +21,7 @@ public class UuidTest implements Test {
 
 	public void generateUuidTest() {
 
-		TestUtils.start("Generate UUID Test");
+		TestUtils.start("Generate UUID");
 
 		String uuid = UuidEncoderDecoder.generateJavaUUID();
 
@@ -46,7 +46,7 @@ public class UuidTest implements Test {
 
 	public void prettifyUuidTest() {
 
-		TestUtils.start("Prettify UUID Test");
+		TestUtils.start("Prettify UUID");
 
 		// when told that this is (supposed to be) a Java UUID, the prettifier should prettify even this hot mess...
 		String prettyJavaUuid = UuidEncoderDecoder.prettifyJavaUUID("---1-23----4");
@@ -82,7 +82,7 @@ public class UuidTest implements Test {
 
 	public void ensureUuidTest() {
 
-		TestUtils.start("Ensure UUID Test");
+		TestUtils.start("Ensure UUID");
 
 		try {
 			String prettyJavaUuid = UuidEncoderDecoder.ensureUUIDisJava("12345678-abcd-1234-abcd-123456789012");
