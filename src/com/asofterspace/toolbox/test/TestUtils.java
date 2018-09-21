@@ -51,6 +51,7 @@ public class TestUtils {
 		currentVerdict = 1;
 
 		System.out.println("The " + currentTest + " Test failed... oh no!");
+		System.out.println("Reason: " + reason);
 		System.out.println("");
 	}
 

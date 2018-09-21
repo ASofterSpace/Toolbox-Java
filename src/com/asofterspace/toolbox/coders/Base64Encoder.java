@@ -11,12 +11,12 @@ import java.util.List;
 public class Base64Encoder {
 
     // we have our base64 chars on 0 .. 63
-    public final static char[] NUM_TO_BASE64_CHAR = new char[]{
-				'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-				'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-				'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-				'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-				'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+    public final static char[] NUM_TO_BASE64_CHAR = new char[] {
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+		'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 
     /**
      * Encodes text into base64 (and as there are a million base64 standards out there: we are
@@ -74,10 +74,15 @@ public class Base64Encoder {
         // inputText: aa aa aa aa bb bb bb bb cc cc cc cc | characters a, b and c in ASCII
         // numbers:   00 00 00 11 11 11 22 22 22 33 33 33 | base64 numbers 0, 1, 2 and 3
 
-        for (byte thisChar : inputBytes) {
+        for (byte thisByte : inputBytes) {
+			// silly Java nonsense as there is no unsigned-ness... args!
+			int thisChar = thisByte % 256;
+			if (thisChar < 0) {
+				thisChar += 256;
+			}
             switch (offset) {
                 case 0:
-                    numbers.add(thisChar >>> 2);
+                    numbers.add(thisChar >> 2);
                     // use 11b, which however is not a notation Java understands, so let's write
                     // it in hexadecimal instead: 0x3
                     buffer = thisChar & 0x3;
@@ -86,7 +91,7 @@ public class Base64Encoder {
 
                 case 2:
                     buffer = buffer << 4;
-                    int newChar = thisChar >>> 4;
+                    int newChar = thisChar >> 4;
                     numbers.add(buffer | newChar);
                     // use 1111b, which however is not a notation Java understands, so let's write
                     // it in hexadecimal instead: 0xF
@@ -96,9 +101,8 @@ public class Base64Encoder {
 
                 case 4:
                     buffer = buffer << 2;
-                    newChar = thisChar >>> 6;
+                    newChar = thisChar >> 6;
                     numbers.add(buffer | newChar);
-
                     // use 111111b, which however is not a notation Java understands, so let's write
                     // it in hexadecimal instead: 0x3F
                     newChar = thisChar & 0x3F;

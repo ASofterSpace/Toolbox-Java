@@ -11,6 +11,10 @@ public class AllTests {
 		TestUtils.run(new ConfigFileTest());
 
 		TestUtils.run(new JSONTest());
+		
+		TestUtils.run(new UuidTest());
+		
+		TestUtils.run(new CdmTest());
 
 		TestUtils.endSuite();
 	}

@@ -6,7 +6,7 @@ cd src
 
 dir /s /B *.java > sourcefiles.list
 
-javac -d ../bin @sourcefiles.list
+javac -encoding utf8 -d ../bin @sourcefiles.list
 
 cd ..
 
