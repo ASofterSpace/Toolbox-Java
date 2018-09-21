@@ -89,11 +89,25 @@ public class CdmCtrl {
 
 	private static Directory lastLoadedDirectory;
 
-
+	
 	// call this on a different thread please, as it can take forever
 	// (and the updating of the progress bar only works if this is on a different thread!)
 	public static void loadCdmDirectory(Directory cdmDir, ProgressIndicator progress) throws AttemptingEmfException, CdmLoadingException {
 
+		loadCdmDirectoryFaster(cdmDir, progress);
+		
+		// reload the model once, after all the CDM files have been loaded
+		reloadModel();
+	}
+
+	// loads a CDM directory, but does NOT refresh the stored model - meaning that the files are only really
+	// available individually, but no overall model has been created
+	// in most cases, do not USE this - however, when you are a tiny little CLI, and you e.g. know you are
+	// only going to convert the CDM to a different version (which works on a file-by-file-basis), and will
+	// afterwards exit (so will never use the full model, including a full MCM tree etc.), then you can call
+	// this one here :)
+	public static void loadCdmDirectoryFaster(Directory cdmDir, ProgressIndicator progress) throws AttemptingEmfException, CdmLoadingException {
+	
 		cdmLoaded = false;
 
 		fileList = new ArrayList<>();
@@ -123,9 +137,6 @@ public class CdmCtrl {
 			}
 
 			lastLoadedDirectory = cdmDir;
-
-			// reload the model once, after all the CDM files have been loaded
-			reloadModel();
 
 			cdmLoaded = true;
 
