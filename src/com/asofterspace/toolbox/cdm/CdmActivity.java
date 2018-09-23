@@ -25,6 +25,8 @@ public class CdmActivity extends CdmNode {
 	private String defaultServiceAccessPointId;
 
 	private String alias;
+	
+	private boolean isDefinition;
 
 	
 	// the activityNode is a monitoringControlElementAspects node which is a child of a monitoringControlElement node,
@@ -53,6 +55,8 @@ public class CdmActivity extends CdmNode {
 				this.alias = aliasOrArg.getAttributes().getNamedItem("alias").getNodeValue();
 			}
 		}
+		
+		this.isDefinition = "monitoringControlElementDefinition".equals(thisNode.getParentNode().getNodeName());
 
 		// TODO :: also take care of arguments, e.g.
 		// <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_AAAAACqUzEIAAAAAAAABoA" engineeringArgumentDefinition="______91W8zUAAAAAAAAB8w">
@@ -66,8 +70,7 @@ public class CdmActivity extends CdmNode {
 	}
 
 	public boolean isDefinition() {
-		// if it has a baseElement attribute then it is a "real" activity, if it does not have it, then it is a definition
-		return baseElementId == null;
+		return isDefinition;
 	}
 
 	public String getAlias() {
