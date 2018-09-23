@@ -1,7 +1,6 @@
 package com.asofterspace.toolbox.cdm;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.w3c.dom.NamedNodeMap;
@@ -49,9 +48,9 @@ public class CdmScript extends CdmNode {
 	 * Get all script2Activity mappings associated with this particular script - there could be several
 	 * mappings mapping to this script!
 	 */
-	public List<CdmScript2Activity> getAssociatedScript2Activities() {
+	public Set<CdmScript2Activity> getAssociatedScript2Activities() {
 
-		List<CdmScript2Activity> results = new ArrayList<>();
+		Set<CdmScript2Activity> results = new HashSet<>();
 
 		Set<CdmScript2Activity> script2Activities = CdmCtrl.getScriptToActivityMappings();
 
@@ -72,7 +71,7 @@ public class CdmScript extends CdmNode {
 
 		// delete entries from the script to activity mapper - as there could be several
 		// activities mapped to this script...
-		List<CdmScript2Activity> script2Activities = getAssociatedScript2Activities();
+		Set<CdmScript2Activity> script2Activities = getAssociatedScript2Activities();
 
 		// ... we iterate...
 		for (CdmScript2Activity script2Activity : script2Activities) {
