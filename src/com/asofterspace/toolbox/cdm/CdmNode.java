@@ -22,6 +22,8 @@ public class CdmNode {
 	protected String name;
 
 	protected String namespace;
+	
+	protected String type;
 
 	protected String id;
 
@@ -38,9 +40,21 @@ public class CdmNode {
 		
 		this.namespace = getValue("namespace");
 		
+		this.type = getValue("xsi:type");
+		
 		this.id = getValue("xmi:id");
 	}
 	
+	public CdmNode(CdmNode other) {
+		parent = other.parent;
+		thisNode = other.thisNode;
+		attributes = other.attributes;
+		name = other.name;
+		namespace = other.namespace;
+		type = other.type;
+		id = other.id;
+	}
+
 	protected String getValue(String key) {
 
 		Node resultNode = attributes.getNamedItem(key);
@@ -56,12 +70,20 @@ public class CdmNode {
 		return parent;
 	}
 
+	public Node getNode() {
+		return thisNode;
+	}
+
 	public String getName() {
 		return name;
 	}
 
 	public String getNamespace() {
 		return namespace;
+	}
+
+	public String getType() {
+		return type;
 	}
 
 	public String getId() {

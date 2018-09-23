@@ -17,6 +17,8 @@ public class UuidTest implements Test {
 		prettifyUuidTest();
 
 		ensureUuidTest();
+		
+		getIdFromLinkTest();
 	}
 
 	public void generateUuidTest() {
@@ -142,6 +144,20 @@ public class UuidTest implements Test {
 			}
 		} catch (ConversionException e) {
 			TestUtils.fail("There was a ConversionException while trying to convert UUIDs! Message: " + e.getMessage());
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void getIdFromLinkTest() {
+
+		TestUtils.start("Get ID from Ecore Link");
+
+		String result = UuidEncoderDecoder.getIdFromEcoreLink("foo#_bar");
+
+		if (!result.equals("_bar")) {
+			TestUtils.fail("We tried to get the id _bar from the link foo#_bar, but got " + result + " instead!");
 			return;
 		}
 

@@ -29,10 +29,10 @@ public class CdmActivity extends CdmNode {
 	
 	// the activityNode is a monitoringControlElementAspects node which is a child of a monitoringControlElement node,
 	// and NOT a direct child of a CI root node!
-	public CdmActivity(CdmFile parent, Node activityNode) {
+	public CdmActivity(CdmNode baseNode) {
 
-		super(parent, activityNode);
-	
+		super(baseNode);
+		
 		this.baseElementId = getValue("baseElement");
 		
 		this.hasPredictedValue = getValue("hasPredictedValue");
@@ -43,7 +43,7 @@ public class CdmActivity extends CdmNode {
 		
 		this.defaultServiceAccessPointId = getValue("defaultServiceAccessPoint");
 		
-		NodeList aliassesAndArgs = activityNode.getChildNodes();
+		NodeList aliassesAndArgs = thisNode.getChildNodes();
 
 		int len = aliassesAndArgs.getLength();
 
@@ -58,6 +58,11 @@ public class CdmActivity extends CdmNode {
 		// <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_AAAAACqUzEIAAAAAAAABoA" engineeringArgumentDefinition="______91W8zUAAAAAAAAB8w">
 		//   <engineeringDefaultValue xsi:type="..." xmi:id="_2Fdl8qboEeiEK5o2bemhxQ" parameter="_2Fdl8KboEeiEK5o2bemhxQ"/>
 		// </arguments>
+	}
+	
+	public CdmActivity(CdmFile parent, Node thisNode) {
+
+		this(new CdmNode(parent, thisNode));
 	}
 
 	public boolean isDefinition() {

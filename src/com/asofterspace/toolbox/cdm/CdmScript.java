@@ -2,6 +2,7 @@ package com.asofterspace.toolbox.cdm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -13,13 +14,18 @@ public class CdmScript extends CdmNode {
 	private String content;
 	
 
-	public CdmScript(CdmFile parent, Node scriptNode) {
-	
-		super(parent, scriptNode);
+	public CdmScript(CdmNode baseNode) {
 
+		super(baseNode);
+		
 		this.content = getValue("scriptContent");
 	}
 	
+	public CdmScript(CdmFile parent, Node thisNode) {
+
+		this(new CdmNode(parent, thisNode));
+	}
+
 	public String getSourceCode() {
 		return content;
 	}
@@ -44,27 +50,18 @@ public class CdmScript extends CdmNode {
 	 * mappings mapping to this script!
 	 */
 	public List<CdmScript2Activity> getAssociatedScript2Activities() {
-	
+
 		List<CdmScript2Activity> results = new ArrayList<>();
-		
-		List<CdmFile> scriptToActivityMapperCis = CdmCtrl.getScriptToActivityMappingCIs();
-	
-		// String parentFilename = parent.getLocalFilename();
-	
-		// TODO :: maybe get the CdmScript2Activity instances from the CdmCtrl directly, instead of going via the CIs here!
-		
-		for (CdmFile scriptToActivityMapperCi : scriptToActivityMapperCis) {
-			
-			List<CdmScript2Activity> script2Activities = scriptToActivityMapperCi.getScript2Activities();
-			
-			for (CdmScript2Activity script2Activity : script2Activities) {
-				// check if a script to activity mapper maps the script id of this particular script!
-				// TODO :: also check if the filename maps (however, this is complicated, as the file
-				// could be in a different folder etc. - so it is simpler to only check for the id,
-				// which *should* be unique anyway!)
-				if (script2Activity.mapsScript(id)) {
-					results.add(script2Activity);
-				}
+
+		Set<CdmScript2Activity> script2Activities = CdmCtrl.getScriptToActivityMappings();
+
+		for (CdmScript2Activity script2Activity : script2Activities) {
+			// check if a script to activity mapper maps the script id of this particular script!
+			// TODO :: also check if the filename maps (however, this is complicated, as the file
+			// could be in a different folder etc. - so it is simpler to only check for the id,
+			// which *should* be unique anyway!)
+			if (script2Activity.mapsScript(id)) {
+				results.add(script2Activity);
 			}
 		}
 		

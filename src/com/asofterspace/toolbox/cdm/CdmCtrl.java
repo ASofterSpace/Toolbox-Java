@@ -14,7 +14,11 @@ import com.asofterspace.toolbox.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /* // TAKE OUT EMF DEPENDENCIES
 import org.eclipse.emf.common.util.URI;
@@ -63,6 +67,10 @@ public class CdmCtrl {
 	private static final String TMPL_ROOT_ROUTE_SAP_SHORT = "root_route_sap";
 	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE = "Root Element with Route, SAP and Example Data Type";
 	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE_SHORT = "root_route_sap_ex_type";
+	
+	static final String CI_MCM = "configurationcontrol:McmCI";
+	static final String CI_SCRIPT = "configurationcontrol:ScriptCI";
+	static final String CI_SCRIPT_TO_ACTIVITY = "configurationcontrol:Script2ActivityMapperCI";
 
 	private static final List<String> CDM_TEMPLATES = Arrays.asList(
 		TMPL_JUST_ROOT,
@@ -80,18 +88,44 @@ public class CdmCtrl {
 	private static boolean cdmLoaded = false;
 
 	// all of the loaded CDM files (intended more for internal-ish use)
-	private static List<CdmFile> fileList = new ArrayList<>();
+	private static Set<CdmFile> fileList = new HashSet<>();
+	private static Map<String, Set<CdmFile>> ciMap = new HashMap<>();
 
-	// our model of the CDM (intended more for external-ish use)
-	private static List<CdmMonitoringControlElement> mces;
-	private static List<CdmScript> scripts;
-	private static List<CdmFile> scriptToActivityMappingCIs;
-	private static List<CdmScript2Activity> scriptToActivityMappings;
-	private static List<CdmActivity> activities;
+	// our model of the CDM (intended more for external-ish use) - only initialized on reloadModel()!
+
+	// map of ALL CdmNodes, including the ones in the other lists
+	private static Map<String, CdmNode> xmiIdMap;
+
+	// just some lists of special elements
+	private static Set<CdmMonitoringControlElement> mces;
+	private static Set<CdmScript> scripts;
+	private static Set<CdmScript2Activity> scriptToActivityMappings;
+	private static Set<CdmActivity> activities;
+
+	// keep a list of mcm tree roots, as in a misconfigured CDM there could be none or several - so we need to be able to express that!
+	private static Set<CdmMonitoringControlElement> mcmTreeRoots;
 
 	private static Directory lastLoadedDirectory;
 
 	
+	private static void initCdmCtrl() {
+	
+		fileList = new HashSet<>();
+		ciMap = new HashMap<>();
+	}
+	
+	private static void initFullModel() {
+	
+		xmiIdMap = new HashMap<>();
+		
+		mces = new HashSet<>();
+		scripts = new HashSet<>();
+		scriptToActivityMappings = new HashSet<>();
+		activities = new HashSet<>();
+		
+		mcmTreeRoots = new HashSet<>();
+	}
+
 	// call this on a different thread please, as it can take forever
 	// (and the updating of the progress bar only works if this is on a different thread!)
 	public static void loadCdmDirectory(Directory cdmDir, ProgressIndicator progress) throws AttemptingEmfException, CdmLoadingException {
@@ -112,13 +146,8 @@ public class CdmCtrl {
 	
 		cdmLoaded = false;
 		
-		fileList = new ArrayList<>();
-		mces = new ArrayList<>();
-		scripts = new ArrayList<>();
-		scriptToActivityMappingCIs = new ArrayList<>();
-		scriptToActivityMappings = new ArrayList<>();
-		activities = new ArrayList<>();
-
+		initCdmCtrl();
+		
 		List<File> cdmFiles = cdmDir.getAllFiles(true);
 
 		double i = 0;
@@ -126,16 +155,16 @@ public class CdmCtrl {
 
 		try {
 
-			if (len <= 0) {
-				throw new CdmLoadingException("The directory " + cdmDir.getDirname() + " does not seem to contain any .cdm files at all.");
-			}
-
 			for (File cdmFile : cdmFiles) {
-				if (cdmFile.getFilename().endsWith(".cdm")) {
-					loadAnotherCdmFile(cdmFile);
+				if (cdmFile.getFilename().toLowerCase().endsWith(".cdm")) {
+					loadCdmFileInternally(cdmFile);
 					i++;
 					progress.setProgress(i / len);
 				}
+			}
+
+			if (i <= 0) {
+				throw new CdmLoadingException("The directory " + cdmDir.getDirname() + " does not seem to contain any .cdm files at all.");
 			}
 
 			lastLoadedDirectory = cdmDir;
@@ -146,19 +175,46 @@ public class CdmCtrl {
 			progress.done();
 		}
 	}
+	
+	/**
+	 * Loads just one CDM file and reloads all the models, pretending that our entire CDM was just this one file
+	 */
+	public static void loadJustOneCdmFile(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
 
-	public static CdmFile loadCdmFile(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
+		cdmLoaded = false;
+		
+		initCdmCtrl();
 
-		CdmFile result = loadAnotherCdmFile(cdmFile);
+		if (cdmFile.getFilename().toLowerCase().endsWith(".cdm")) {
+			loadCdmFileInternally(cdmFile);
+		} else {
+			throw new CdmLoadingException("The file " + cdmFile.getFilename() + " does not seem to be a .cdm file.");
+		}
+
+		lastLoadedDirectory = cdmFile.getParentDirectory();
+
+		cdmLoaded = true;
+	
+		// reload the model once, after all the CDM file has been loaded
+		reloadModel();
+	}
+
+	/**
+	 * Loads another CDM file, after already having loaded an entire directory
+	 * (e.g. because we added a new file and want to load it now)
+	 */
+	public static CdmFile loadAnotherCdmFile(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
+
+		CdmFile result = loadCdmFileInternally(cdmFile);
 
 		// as this function was called from - gasp! - the outside world, we have to reload the model now...
 		// at least for this one file ;)
-		reloadModel(result);
-
+		reloadAnotherModel(result);
+		
 		return result;
 	}
 
-	private static CdmFile loadAnotherCdmFile(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
+	private static CdmFile loadCdmFileInternally(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
 
 		CdmFile result = loadCdmFileViaXML(cdmFile);
 
@@ -180,6 +236,18 @@ public class CdmCtrl {
 		// loadCdmFileViaEMF(cdmFile);
 
 		fileList.add(result);
+		
+		String ciType = result.getCiType();
+		
+		Set<CdmFile> thisCiMap = ciMap.get(ciType);
+		
+		if (thisCiMap == null) {
+			thisCiMap = new HashSet<>();
+			thisCiMap.add(result);
+			ciMap.put(ciType, thisCiMap);
+		} else {
+			thisCiMap.add(result);
+		}
 
 		return result;
 	}
@@ -237,34 +305,86 @@ public class CdmCtrl {
 	 * Reload the entire internal model of the CDM
 	 */
 	private static void reloadModel() {
+	
+		initFullModel();
+	
+		// load the model for each file individually
 		for (CdmFile cdmFile : fileList) {
-			reloadModel(cdmFile);
+			cdmFile.addContentsToCdmCtrl();
 		}
+		
+		// load the entire merged model (e.g. building the entire MCM tree across all files)
+		reloadMergedModel();
 	}
-
+	
 	/**
-	 * Reload the internal model of the CDM for one particular file
+	 * Reload the internal model of the CDM for one particular file, in addition to all others that are already there
 	 */
-	private static void reloadModel(CdmFile cdmFile) {
+	private static void reloadAnotherModel(CdmFile cdmFile) {
 
-		switch (cdmFile.getCiType()) {
-
-			case "configurationcontrol:ScriptCI":
-				scripts.addAll(cdmFile.getScripts());
-				break;
-
-			case "configurationcontrol:Script2ActivityMapperCI":
-				scriptToActivityMappingCIs.add(cdmFile);
-				scriptToActivityMappings.addAll(cdmFile.getScript2Activities());
-				break;
-
-			case "configurationcontrol:McmCI":
-				activities.addAll(cdmFile.getActivities());
-				mces.addAll(cdmFile.getMonitoringControlElements());
-				break;
+		cdmFile.addContentsToCdmCtrl();
+		
+		// load the entire merged model (e.g. building the entire MCM tree across all files)
+		reloadMergedModel();
+	}
+	
+	/**
+	 * Adds one node to our internal model - called from cdmFile, after we call it in addContentsToCdmCtrl
+	 */
+	static void addToModel(CdmNode cdmNode) {
+	
+		if (cdmNode instanceof CdmScript) {
+			scripts.add((CdmScript) cdmNode);
 		}
+	
+		if (cdmNode instanceof CdmScript2Activity) {
+			scriptToActivityMappings.add((CdmScript2Activity) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmMonitoringControlElement) {
+			mces.add((CdmMonitoringControlElement) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmActivity) {
+			activities.add((CdmActivity) cdmNode);
+		}
+
+		// in any case, add this node to the map of all nodes
+		xmiIdMap.put(cdmNode.getId(), cdmNode);
 	}
 
+	private static void reloadMergedModel() {
+
+		// figure out what the MCM Tree Roots might be
+		reloadTreeRoots();
+	}
+	
+	private static void reloadTreeRoots() {
+		
+		// first get a list of all MCEs
+		Set<CdmMonitoringControlElement> leftOverMces = new HashSet<>(mces);
+		
+		// set all MCEs to being roots
+		for (CdmMonitoringControlElement mce : leftOverMces) {
+			mce.setContainingElement(null);
+		}
+		
+		// now let each MCE find a path towards its children
+		// (each MCE if it is root gets its children fast from our internal id map and tells them that they are not root anymore,
+		// and they tell their children - unless they already know - and update their own internal link up such that they know
+		// who is their daddy)
+		for (CdmMonitoringControlElement mce : leftOverMces) {
+			mce.initSubTreeFromHere();
+		}
+
+		// finally, iterate overall MCEs once more and ask if they still are root or not - there should be exactly one left ;)
+		for (CdmMonitoringControlElement mce : leftOverMces) {
+			if (mce.isRoot()) {
+				mcmTreeRoots.add(mce);
+			}
+		}
+	}
+	
 	public static boolean hasCdmBeenLoaded() {
 		return cdmLoaded;
 	}
@@ -327,7 +447,7 @@ public class CdmCtrl {
 			return "";
 		}
 
-		return fileList.get(0).getCdmVersion();
+		return fileList.iterator().next().getCdmVersion();
 	}
 
 	public static String getCdmVersionPrefix() {
@@ -336,7 +456,7 @@ public class CdmCtrl {
 			return "";
 		}
 
-		return fileList.get(0).getCdmVersionPrefix();
+		return fileList.iterator().next().getCdmVersionPrefix();
 	}
 
 	public static String getCompatWithEGSCCstr(String version, String prefix) {
@@ -437,37 +557,45 @@ public class CdmCtrl {
 		return null;
 	}
 
-	public static List<CdmMonitoringControlElement> getMonitoringControlElements() {
+	public static Set<CdmFile> getCIs(String ciName) {
+		
 		if (!cdmLoaded) {
-			return new ArrayList<>();
+			return new HashSet<>();
+		}
+		
+		Set<CdmFile> result = ciMap.get(ciName);
+		
+		if (result == null) {
+			return new HashSet<>();
+		}
+		
+		return result;
+	}
+
+	public static Set<CdmMonitoringControlElement> getMonitoringControlElements() {
+		if (!cdmLoaded) {
+			return new HashSet<>();
 		}
 		return mces;
 	}
 
-	public static List<CdmScript> getScripts() {
+	public static Set<CdmScript> getScripts() {
 		if (!cdmLoaded) {
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 		return scripts;
 	}
 
-	public static List<CdmFile> getScriptToActivityMappingCIs() {
+	public static Set<CdmScript2Activity> getScriptToActivityMappings() {
 		if (!cdmLoaded) {
-			return new ArrayList<>();
-		}
-		return scriptToActivityMappingCIs;
-	}
-
-	public static List<CdmScript2Activity> getScriptToActivityMappings() {
-		if (!cdmLoaded) {
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 		return scriptToActivityMappings;
 	}
 
-	public static List<CdmActivity> getActivities() {
+	public static Set<CdmActivity> getActivities() {
 		if (!cdmLoaded) {
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 		return activities;
 	}
@@ -475,9 +603,9 @@ public class CdmCtrl {
 	/**
 	 * Get the list of CDM files that have been loaded
 	 */
-	public static List<CdmFile> getCdmFiles() {
+	public static Set<CdmFile> getCdmFiles() {
 		if (!cdmLoaded) {
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 		return fileList;
 	}
@@ -503,8 +631,8 @@ public class CdmCtrl {
 		// that the prefix agrees with the version... so it follows that, if we do
 		// not complain, then the prefixes are all the same too :)
 
-		List<CdmFile> cdmFiles = getCdmFiles();
-		List<String> cdmVersionsFound = new ArrayList<>();
+		Set<CdmFile> cdmFiles = getCdmFiles();
+		Set<String> cdmVersionsFound = new HashSet<>();
 
 		for (CdmFile file : cdmFiles) {
 			String curVersion = file.getCdmVersion();
@@ -527,9 +655,7 @@ public class CdmCtrl {
 					}
 				}
 			}
-			if (!cdmVersionsFound.contains(curVersion)) {
-				cdmVersionsFound.add(curVersion);
-			}
+			cdmVersionsFound.add(curVersion);
 		}
 
 		// TODO :: also ensure that the qudv versions are correct - sadly, the qudv prefixes are not even
@@ -566,8 +692,18 @@ public class CdmCtrl {
 
 		// TODO :: check that all references actually lead to somewhere
 
-		// TODO :: check that there is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
+		// check that there is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
 		// listed in other MCEs as subElement)
+		if (getMonitoringControlElements().size() < 1) {
+			verdict++;
+			outProblemsFound.add("The MCM tree does not seem to contain any nodes at all!");
+		} else if (getAllMcmTreeRoots().size() < 1) {
+			verdict++;
+			outProblemsFound.add("The MCM tree seems to not contain a root node, meaning that the intended root node was attached as child of another node!");
+		} else if (getAllMcmTreeRoots().size() > 1) {
+			verdict++;
+			outProblemsFound.add("The MCM tree seems to have " + getAllMcmTreeRoots().size() + " root nodes, which means that there are " + getAllMcmTreeRoots().size() + " times as many root nodes as are allowed! ;)");
+		}
 
 		// TODO :: check that every MCE has an MCE definition
 
@@ -589,7 +725,7 @@ public class CdmCtrl {
 	public static CdmScript2Activity addScriptToActivityMapping(CdmScript script, CdmActivity activity) {
 
 		// first of all, get all script to activity mapping CIs
-		List<CdmFile> scriptToActivityMapperCis = getScriptToActivityMappingCIs();
+		Set<CdmFile> scriptToActivityMapperCis = getCIs(CI_SCRIPT_TO_ACTIVITY);
 
 		// if there are none, create a new one
 		if (scriptToActivityMapperCis.size() < 1) {
@@ -600,9 +736,9 @@ public class CdmCtrl {
 
 		// add a new script to activity mapping to the largest script to activity mapping CI that comes into our hands
 		int largestFoundHas = -1;
-		CdmFile scriptToActivityMapperCI = scriptToActivityMapperCis.get(0);
+		CdmFile scriptToActivityMapperCI = null;
 		for (CdmFile curCI : scriptToActivityMapperCis) {
-			int nowFoundHas = curCI.getScript2Activities().size();
+			int nowFoundHas = curCI.getRoughSize();
 			if (nowFoundHas > largestFoundHas) {
 				scriptToActivityMapperCI = curCI;
 				largestFoundHas = nowFoundHas;
@@ -614,7 +750,7 @@ public class CdmCtrl {
 		String mappingName = mappingBaseName;
 
 		// ensure that the name is not yet taken
-		List<CdmScript2Activity> existingMappers = getScriptToActivityMappings();
+		Set<CdmScript2Activity> existingMappers = getScriptToActivityMappings();
 
 		boolean doContinue = true;
 		int i = 1;
@@ -654,8 +790,7 @@ public class CdmCtrl {
 			activityId
 		);
 
-		// append the resulting new mapping to the internal list of mappings of the CdmCtrl
-		scriptToActivityMappings.add(createdMapping);
+		// no need to update our internal lists, as that is already done by the addScript2Activity function
 
 		return createdMapping;
 	}
@@ -692,17 +827,17 @@ public class CdmCtrl {
 		// add a script CI with one script with exactly this name - but do not save it on the hard disk just yet
 		String newCiContent =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-			"<configurationcontrol:Script2ActivityMapperCI xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" " + getXMLNS() + " xmi:id=\"" + UuidEncoderDecoder.generateEcoreUUID() + "\" externalVersionLabel=\"Created by the " + Utils.getFullProgramIdentifier() + "\" name=\"" + newCiName + "\" onlineRevisionIdentifier=\"0\">\n" +
-			"</configurationcontrol:Script2ActivityMapperCI>";
+			"<" + CI_SCRIPT_TO_ACTIVITY + " xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" " + getXMLNS() + " xmi:id=\"" + UuidEncoderDecoder.generateEcoreUUID() + "\" externalVersionLabel=\"Created by the " + Utils.getFullProgramIdentifier() + "\" name=\"" + newCiName + "\" onlineRevisionIdentifier=\"0\">\n" +
+			"</" + CI_SCRIPT_TO_ACTIVITY + ">";
 
 		File tmpCi = new File("tmpfile.tmp");
 		tmpCi.setContent(newCiContent);
 		tmpCi.save();
 
 		try {
-			CdmFile newCdmFile = loadCdmFile(tmpCi);
+			CdmFile newCdmFile = loadAnotherCdmFile(tmpCi);
 
-			List<CdmFile> scriptToActivityMapperCis = getScriptToActivityMappingCIs();
+			Set<CdmFile> scriptToActivityMapperCis = getCIs(CI_SCRIPT_TO_ACTIVITY);
 
 			if (scriptToActivityMapperCis.size() != 1) {
 				return false;
@@ -883,6 +1018,44 @@ public class CdmCtrl {
 		save();
 
 		return true;
+	}
+	
+	/**
+	 * This is the quick-access version of getAllMcmTreeRoots() - here assuming that there is exactly one to be returned
+	 */
+	public static CdmMonitoringControlElement getMcmTreeRoot() {
+		
+		if (mcmTreeRoots == null) {
+			return null;
+		}
+		
+		if (mcmTreeRoots.size() > 0) {
+			return mcmTreeRoots.iterator().next();
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Get all individual unconnected MCM tree roots that have bee found... the result should have exactly
+	 * one element, otherwise something is very wrong with our lovely CDM ;)
+	 */
+	public static Set<CdmMonitoringControlElement> getAllMcmTreeRoots() {
+		
+		if (mcmTreeRoots == null) {
+			return new HashSet<>();
+		}
+		
+		return mcmTreeRoots;
+	}
+
+	/**
+	 * This is the quick-access version of findByUuid - where findByUuid really searches everywhere,
+	 * this here just looks up the correct node in the internal map; assuming all IDs are indeed unique,
+	 * as they should be, this here also works and is much faster - so use this function for internal access!
+	 */
+	public static CdmNode getByUuid(String ecoreUuid) {
+		return xmiIdMap.get(ecoreUuid);
 	}
 	
 	/**

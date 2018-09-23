@@ -2,8 +2,8 @@ package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -13,18 +13,27 @@ import org.w3c.dom.NodeList;
 
 public class CdmMonitoringControlElement extends CdmNode {
 
+	// delayed initialization - ready to be used after CdmCtrl.reloadTreeRoots()
+	private CdmMonitoringControlElement containingElement;
+
 	private String definitionId;
 
 	private String defaultRouteId;
 
 	private String defaultServiceAccessPointId;
 	
-	private List<String> subElements;
+	private Set<String> subElementIds;
+	
+	// delayed initialization - ready to be used after CdmCtrl.reloadTreeRoots()
+	private Set<CdmMonitoringControlElement> subElements;
+	
 
+	public CdmMonitoringControlElement(CdmNode baseNode) {
 
-	public CdmMonitoringControlElement(CdmFile parent, Node mceNode) {
-
-		super(parent, mceNode);
+		super(baseNode);
+		
+		// this means that we are the mcm tree root element - for now ;)
+		this.containingElement = null;
 		
 		this.definitionId = getValue("definition");
 		
@@ -41,52 +50,43 @@ public class CdmMonitoringControlElement extends CdmNode {
 		// can also be expressed as child:
 		// <key href="value" (possibly xmi:id, xsi:type, or whatever)/>
 
-		this.subElements = new ArrayList<>();
+		this.subElementIds = new HashSet<>();
 		
 		String subStrs = getValue("subElements");
 		if (subStrs != null) {
 			String[] subStrsArr = subStrs.split(" ");
 			for (String subStr : subStrsArr) {
-				this.subElements.add(UuidEncoderDecoder.getIdFromEcoreLink(subStr));
+				this.subElementIds.add(UuidEncoderDecoder.getIdFromEcoreLink(subStr));
 			}
 		}
 		
-		NodeList subElementList = mceNode.getChildNodes();
+		NodeList subElementList = thisNode.getChildNodes();
 
 		int len = subElementList.getLength();
 
 		for (int i = 0; i < len; i++) {
 			Node subElement = subElementList.item(i);
 			if ("subElements".equals(subElement.getNodeName())) {
-				this.subElements.add(UuidEncoderDecoder.getIdFromEcoreLink(subElement.getAttributes().getNamedItem("href").getNodeValue()));
+				this.subElementIds.add(UuidEncoderDecoder.getIdFromEcoreLink(subElement.getAttributes().getNamedItem("href").getNodeValue()));
 			}
 		}
+		
+		this.subElements = new HashSet<>();
 	}
 	
-	public List<String> getSubElementIds() {
+	public CdmMonitoringControlElement(CdmFile parent, Node thisNode) {
+
+		this(new CdmNode(parent, thisNode));
+	}
+
+	public Set<String> getSubElementIds() {
+		return subElementIds;
+	}
+
+	public Set<CdmMonitoringControlElement> getSubElements() {
 		return subElements;
 	}
-	
-	public CdmMonitoringControlElement getContainingElement() {
 
-		List<CdmMonitoringControlElement> mces = CdmCtrl.getMonitoringControlElements();
-		
-		if (mces == null) {
-			return null;
-		}
-		
-		// TODO :: we should also check the filename, not just the id, in case it is given as
-		// file#id (or at least drop the filename, so we can compare the id more nicely...)
-		for (CdmMonitoringControlElement mce : mces) {
-			List<String> subElementIds = mce.getSubElementIds();
-			if ((subElementIds != null) && (subElementIds.contains(id))) {
-				return mce;
-			}
-		}
-		
-		return null;
-	}
-	
 	public String getPath() {
 	
 		CdmMonitoringControlElement containedIn = getContainingElement();
@@ -128,8 +128,48 @@ public class CdmMonitoringControlElement extends CdmNode {
 		}
 		
 		thisNode.appendChild(newActivity);
-
-		return new CdmActivity(parent, newActivity);
+		
+		CdmActivity activityNode = new CdmActivity(parent, newActivity);
+		
+		// update cdm ctrl model with the new node
+		CdmCtrl.addToModel(activityNode);
+		
+		return activityNode;
+	}
+	
+	/**
+	 * If the containing element is null, then yepp, we are the root of the MCM tree - whoop whoop!
+	 */
+	public boolean isRoot() {
+		return containingElement == null;
+	}
+	
+	public CdmMonitoringControlElement getContainingElement() {
+		return containingElement;
+	}
+	
+	// this is used by the CdmCtrl.reloadTreeRoots() function to set up the MCM tree cleverly - do not interfere from the outside without thinking hard!
+	public void setContainingElement(CdmMonitoringControlElement newContainingElement) {
+		this.containingElement = newContainingElement;
+	}
+	
+	// this is used by the CdmCtrl.reloadTreeRoots() function to set up the MCM tree cleverly - do not interfere from the outside without thinking hard!
+	// let each MCE find a path towards its children
+	// (each MCE gets its children fast from our internal id map and tells them that they are not root anymore,
+	// which causes them to update their own internal link up such that they know who is their daddy)
+	// funnily enough, we do NOT do this recursively, but in three iterations (see the CdmCtrl) - meaning that
+	// we are safe from cycling forever trivially, as we do not go deeper and deeper into the tree, but for
+	// each leaf just once tell it that it is not root (TODO :: unless several nodes own the same leaf, in which case... öhm...
+	// the root simply gets overwritten in the setContainingElement function - we could maybe introduce a flag
+	// that is asked for later for the validation to validate that no node has two parents!)
+	public void initSubTreeFromHere() {
+		for (String id : subElementIds) {
+			CdmNode subNode = CdmCtrl.getByUuid(id);
+			if (subNode instanceof CdmMonitoringControlElement) {
+				((CdmMonitoringControlElement) subNode).setContainingElement(this);
+				subElements.add((CdmMonitoringControlElement) subNode);
+			}
+		}
 	}
 
 }

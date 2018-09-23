@@ -30,108 +30,103 @@ public class CdmFile extends CdmFileBase {
 
 		super(regularFile);
 	}
-	
+
+	void addContentsToCdmCtrl() {
+
+		// we have been deleted, we do not add anything anywhere! Hah!
+		if (deleted) {
+			return;
+		}
+
+		recursivelyAddToCdmCtrl(getRoot(), getCiType());
+	}
+
+	private void recursivelyAddToCdmCtrl(Node curNode, String ciType) {
+
+		// TODO :: also update the xmiIdMap when elements are added dynamically (e.g. activities, scripts, mappers, etc.),
+		// or when they are removed
+
+		// check if this even is a node that we are interested in - that is, if it has an EMF ID (only nodes with IDs and their children are of interest!)
+		if (curNode == null) {
+			return;
+		}
+
+		NamedNodeMap attributes = curNode.getAttributes();
+
+		if (attributes == null) {
+			return;
+		}
+
+		Node idNode = attributes.getNamedItem("xmi:id");
+
+		if (idNode == null) {
+			return;
+		}
+
+		String nodeId = idNode.getNodeValue();
+
+		if (nodeId == null) {
+			return;
+		}
+
+		// now actually add the current node to the internal model in the controller - first to specialized lists, and then to the full id map...
+		String nodeName = curNode.getNodeName();
+
+		CdmNode cdmNode = new CdmNode(this, curNode);
+
+		switch (ciType) {
+
+			case CdmCtrl.CI_SCRIPT:
+				if ("script".equals(nodeName)) {
+					cdmNode = new CdmScript(cdmNode);
+					break;
+				}
+				break;
+
+			case CdmCtrl.CI_SCRIPT_TO_ACTIVITY:
+				if ("scriptActivityImpl".equals(nodeName)) {
+					cdmNode = new CdmScript2Activity(cdmNode);
+					break;
+				}
+				break;
+
+			case CdmCtrl.CI_MCM:
+				if ("monitoringControlElement".equals(nodeName)) {
+					cdmNode = new CdmMonitoringControlElement(cdmNode);
+					break;
+				}
+				if ("monitoringControlElementAspects".equals(nodeName)) {
+					if ("monitoringcontrolmodel:Activity".equals(cdmNode.getType())) {
+						cdmNode = new CdmActivity(cdmNode);
+						break;
+					}
+				}
+				break;
+		}
+
+		// update cdm ctrl model with the new node
+		CdmCtrl.addToModel(cdmNode);
+
+		// it has been confirmed, this node is of interest to us... let's recursively call ourselves for all the children
+		NodeList children = curNode.getChildNodes();
+
+		int len = children.getLength();
+
+		for (int i = 0; i < len; i++) {
+			// how sad that Java does not know tail call optimization! this would be beautiful! :D
+			recursivelyAddToCdmCtrl(children.item(i), ciType);
+		}
+	}
+
 	public String getPathRelativeToCdmRoot() {
-	
+
 		Directory cdmRootDir = CdmCtrl.getLastLoadedDirectory();
 		Path cdmRootPath = cdmRootDir.getJavaFile().toPath().toAbsolutePath();
 		Path cdmFilePath = getJavaFile().toPath().toAbsolutePath();
-		
+
 		Path relativePath = cdmRootPath.relativize(cdmFilePath);
-		
+
 		return relativePath.toString();
-	}
-
-	/**
-	 * Get all the monitoring control elements defined in this CDM file, NOT their definitions!
-	 * (this does not check if this even is an McmCI - you should check it first, to not search through others forever ^^)
-	 */
-	public List<CdmMonitoringControlElement> getMonitoringControlElements() {
-
-		List<CdmMonitoringControlElement> results = new ArrayList<>();
-
-		if (deleted) {
-			return results;
-		}
-
-		NodeList elements = getRoot().getChildNodes();
-
-		int len = elements.getLength();
-
-		for (int i = 0; i < len; i++) {
-			try {
-				Node mce = elements.item(i);
-				if ("monitoringControlElement".equals(mce.getNodeName())) {
-					results.add(new CdmMonitoringControlElement(this, mce));
-				}
-			} catch (NullPointerException e) {
-				System.err.println("ERROR: The " + Utils.th(i) + " child node in " + getFilename() + " does not have a properly assigned attribute and will be ignored!");
-			}
-		}
-
-		return results;
-	}
-
-	/**
-	 * Get all the scripts defined in this CDM file
-	 * (this does not check if this even is a ScriptCI - you should check it first, to not search through others forever ^^)
-	 */
-	public List<CdmScript> getScripts() {
-
-		List<CdmScript> results = new ArrayList<>();
-
-		if (deleted) {
-			return results;
-		}
-
-		NodeList elements = getRoot().getChildNodes();
-
-		int len = elements.getLength();
-
-		for (int i = 0; i < len; i++) {
-			try {
-				Node elem = elements.item(i);
-				if ("script".equals(elem.getNodeName())) {
-					results.add(new CdmScript(this, elem));
-				}
-			} catch (NullPointerException e) {
-				// ignore script nodes that do not contain name or scriptContent attributes
-				System.err.println("ERROR: A script in " + getFilename() + " does not have a properly assigned attribute and will be ignored!");
-			}
-		}
-
-		return results;
-	}
-
-	/**
-	 * Get all the script to activity mapper entries defined in this CDM file
-	 * (this does not check if this even is a Script2ActivityMapperCI - you should check it first, to not search through others forever ^^)
-	 */
-	public List<CdmScript2Activity> getScript2Activities() {
-
-		List<CdmScript2Activity> results = new ArrayList<>();
-
-		if (deleted) {
-			return results;
-		}
-
-		NodeList elements = getRoot().getChildNodes();
-
-		int len = elements.getLength();
-
-		for (int i = 0; i < len; i++) {
-			try {
-				Node elem = elements.item(i);
-				if ("scriptActivityImpl".equals(elem.getNodeName())) {
-					results.add(new CdmScript2Activity(this, elem));
-				}
-			} catch (NullPointerException e) {
-				// ignore script nodes that do not contain name or scriptContent attributes
-				System.err.println("ERROR: A scriptActivityImpl in " + getFilename() + " does not have a properly assigned attribute and will be ignored!");
-			}
-		}
-
-		return results;
 	}
 
 	/**
@@ -161,46 +156,12 @@ public class CdmFile extends CdmFileBase {
 
 		getRoot().appendChild(newMapping);
 
-		return new CdmScript2Activity(this, newMapping);
-	}
-
-	/**
-	 * Get all the activities defined in this CDM file, NOT their definitions defined in mce definitions!
-	 * (this does not check if this even is an McmCI - you should check it first, to not search through others forever ^^)
-	 */
-	public List<CdmActivity> getActivities() {
-
-		List<CdmActivity> results = new ArrayList<>();
-
-		if (deleted) {
-			return results;
-		}
-
-		NodeList elements = getRoot().getChildNodes();
-
-		int len = elements.getLength();
-
-		for (int i = 0; i < len; i++) {
-			try {
-				Node mce = elements.item(i);
-				if ("monitoringControlElement".equals(mce.getNodeName())) {
-					NodeList mceAspects = mce.getChildNodes();
-					int mceAspectLen = mceAspects.getLength();
-					for (int j = 0; j < mceAspectLen; j++) {
-						Node mceAspect = mceAspects.item(j);
-						if ("monitoringControlElementAspects".equals(mceAspect.getNodeName())) {
-							if ("monitoringcontrolmodel:Activity".equals(mceAspect.getAttributes().getNamedItem("xsi:type").getNodeValue())) {
-								results.add(new CdmActivity(this, mceAspect));
-							}
-						}
-					}
-				}
-			} catch (NullPointerException e) {
-				System.err.println("ERROR: The " + Utils.th(i) + " child node in " + getFilename() + " does not have a properly assigned attribute and will be ignored!");
-			}
-		}
-
-		return results;
+		CdmScript2Activity newNode = new CdmScript2Activity(this, newMapping);
+		
+		// update cdm ctrl model with the new node
+		CdmCtrl.addToModel(newNode);
+		
+		return newNode;
 	}
 
 	/**
@@ -210,17 +171,17 @@ public class CdmFile extends CdmFileBase {
 	public void findByUuid(String ecoreUuid, List<CdmNode> result) {
 		recursivelyFindByKey(getRoot(), "xmi:id", ecoreUuid, result);
 	}
-	
+
 	public void findByName(String name, List<CdmNode> result) {
 		recursivelyFindByKey(getRoot(), "name", name, result);
 	}
-	
+
 	public void findByType(String type, List<CdmNode> result) {
 		recursivelyFindByKey(getRoot(), "xsi:type", type, result);
 	}
-	
+
 	private void recursivelyFindByKey(Node currentNode, String key, String value, List<CdmNode> result) {
-		
+
 		NamedNodeMap attributes = currentNode.getAttributes();
 
 		if (attributes != null) {
@@ -231,22 +192,43 @@ public class CdmFile extends CdmFileBase {
 				}
 			}
 		}
-		
+
 		NodeList children = currentNode.getChildNodes();
 		int len = children.getLength();
 		for (int i = 0; i < len; i++) {
 			recursivelyFindByKey(children.item(i), key, value, result);
 		}
 	}
-	
+
 	public void findByXmlTag(String xmlTag, List<CdmNode> result) {
-	
+
 		NodeList elements = getDocument().getElementsByTagName(xmlTag);
-		
+
 		int len = elements.getLength();
 
 		for (int i = 0; i < len; i++) {
 			result.add(new CdmNode(this, elements.item(i)));
 		}
+	}
+
+	/**
+	 * Gets a rough size that can be used to compare several CIs and check which one is larger -
+	 * e.g. to find a useful default for inserting something into
+	 */
+	public int getRoughSize() {
+
+		Node root = getRoot();
+
+		if (root == null) {
+			return 0;
+		}
+
+		NodeList children = root.getChildNodes();
+
+		if (children == null) {
+			return 0;
+		}
+
+		return children.getLength();
 	}
 }

@@ -22,14 +22,14 @@ public class CdmTest implements Test {
 	public void runAll() {
 
 		createAndValidateCdmTest();
-		
+
 		findEntityInCdmTest();
 	}
-	
+
 	public void createAndValidateCdmTest() {
-	
+
 		TestUtils.start("Create and Validate CDM");
-		
+
 		// ensure the directory is clear
 		Directory testDir = new Directory("test");
 		testDir.clear();
@@ -41,9 +41,9 @@ public class CdmTest implements Test {
 				TestUtils.fail("We tried to create a new CDM, the creation result was not true!");
 				return;
 			}
-			
+
 			List<String> problems = new ArrayList<>();
-			
+
 			int valid = CdmCtrl.checkValidity(problems);
 
 			if (valid != 0) {
@@ -54,16 +54,16 @@ public class CdmTest implements Test {
 			TestUtils.fail("We tried to create a new CDM, but got this exception: " + e.getMessage());
 			return;
 		}
-		
+
 		TestUtils.succeed();
 	}
-	
+
 	public void findEntityInCdmTest() {
-	
+
 		TestUtils.start("Find Entity in CDM");
-		
+
 		// we know that the previous test just ran, so we can attempt to read stuff out from that test... :)
-		
+
 		Directory cdmDir = new Directory(CDM_TEST_PATH);
 		ProgressIndicator noProgress = new NoOpProgressIndicator();
 
@@ -75,9 +75,10 @@ public class CdmTest implements Test {
 		}
 
 		List<CdmNode> foundNodes = CdmCtrl.findByName("mcmRoot");
-		
+		CdmNode foundNode;
+
 		if (foundNodes.size() == 1) {
-			CdmNode foundNode = foundNodes.get(0);
+			foundNode = foundNodes.get(0);
 			if (!"mcmRoot".equals(foundNode.getName())) {
 				TestUtils.fail("We wanted to find a node called mcmRoot, but we found one called " + foundNode.getName() + " instead!");
 				return;
@@ -90,11 +91,25 @@ public class CdmTest implements Test {
 			TestUtils.fail("We wanted to find one node called mcmRoot, but we found " + foundNodes.size() + "!");
 			return;
 		}
-		
+
+		foundNodes = CdmCtrl.findByUuid(foundNode.getId());
+
+		if (foundNodes.size() != 1) {
+			TestUtils.fail("We wanted to find one node with a specific UUID, but we found " + foundNodes.size() + "!");
+			return;
+		}
+
+		foundNode = CdmCtrl.getByUuid(foundNode.getId());
+
+		if (foundNode == null) {
+			TestUtils.fail("We wanted to find one node with a specific UUID, but we could not actually find it!");
+			return;
+		}
+
 		foundNodes = CdmCtrl.findByXmlTag("monitoringControlElementDefinition");
-		
+
 		if (foundNodes.size() == 1) {
-			CdmNode foundNode = foundNodes.get(0);
+			foundNode = foundNodes.get(0);
 			if (!"mcmRoot_Definition".equals(foundNode.getName())) {
 				TestUtils.fail("We wanted to find a node called mcmRoot_Definition, but we found one called " + foundNode.getName() + " instead!");
 				return;
@@ -107,7 +122,7 @@ public class CdmTest implements Test {
 			TestUtils.fail("We wanted to find one node with the XML tag monitoringControlElementDefinition, but we found " + foundNodes.size() + "!");
 			return;
 		}
-		
+
 		TestUtils.succeed();
 	}
 

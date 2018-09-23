@@ -1,6 +1,6 @@
 package com.asofterspace.toolbox.cdm;
 
-import java.util.List;
+import java.util.Set;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -18,11 +18,11 @@ public class CdmScript2Activity extends CdmNode {
 	private String mappedScriptId;
 
 
-	public CdmScript2Activity(CdmFile parent, Node script2ActivityNode) {
-	
-		super(parent, script2ActivityNode);
+	public CdmScript2Activity(CdmNode baseNode) {
 
-		NodeList elements = script2ActivityNode.getChildNodes();
+		super(baseNode);
+		
+		NodeList elements = thisNode.getChildNodes();
 
 		int len = elements.getLength();
 
@@ -61,6 +61,11 @@ public class CdmScript2Activity extends CdmNode {
 		}
 	}
 
+	public CdmScript2Activity(CdmFile parent, Node thisNode) {
+
+		this(new CdmNode(parent, thisNode));
+	}
+
 	public boolean mapsScript(String scriptId) {
 		return scriptId.equals(mappedScriptId);
 	}
@@ -95,7 +100,7 @@ public class CdmScript2Activity extends CdmNode {
 			return null;
 		}
 		
-		List<CdmActivity> activities = CdmCtrl.getActivities();
+		Set<CdmActivity> activities = CdmCtrl.getActivities();
 		
 		if (activities == null) {
 			return null;
