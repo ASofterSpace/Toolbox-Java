@@ -7,18 +7,18 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 
-public class CdmScript2Activity extends CdmNode {
+public class CdmProcedure2Activity extends CdmNode {
 
 	private String mappedActivityFilename;
 	
 	private String mappedActivityId;
 	
-	private String mappedScriptFilename;
+	private String mappedProcedureFilename;
 	
-	private String mappedScriptId;
+	private String mappedProcedureId;
 
 
-	public CdmScript2Activity(CdmNode baseNode) {
+	public CdmProcedure2Activity(CdmNode baseNode) {
 
 		super(baseNode);
 		
@@ -54,33 +54,33 @@ public class CdmScript2Activity extends CdmNode {
 					this.mappedActivityFilename = hrefSplit[0];
 					this.mappedActivityId = hrefSplit[1];
 				}
-				if ("script".equals(elem.getNodeName())) {
-					this.mappedScriptFilename = hrefSplit[0];
-					this.mappedScriptId = hrefSplit[1];
+				if ("procedure".equals(elem.getNodeName())) {
+					this.mappedProcedureFilename = hrefSplit[0];
+					this.mappedProcedureId = hrefSplit[1];
 				}
 			}
 		}
 	}
 
-	public CdmScript2Activity(CdmFile parentFile, Node thisNode) {
+	public CdmProcedure2Activity(CdmFile parentFile, Node thisNode) {
 
 		this(new CdmNode(parentFile, thisNode));
 	}
 
-	public boolean mapsScript(String scriptId) {
-		return scriptId.equals(mappedScriptId);
+	public boolean mapsProcedure(String procedureId) {
+		return procedureId.equals(mappedProcedureId);
 	}
 	
 	// TODO - this works as long as the file is in the same folder as this file,
 	// but for CIs in different subfolders, this would need to be more elaborate...
-	// (for now, we therefore just use mapsScript(id), as the id should be unique)
-	public boolean mapsScript(String cdmFilename, String scriptId) {
+	// (for now, we therefore just use mapsProcedure(id), as the id should be unique)
+	public boolean mapsProcedure(String cdmFilename, String procedureId) {
 	
-		if (!cdmFilename.equals(mappedScriptFilename)) {
+		if (!cdmFilename.equals(mappedProcedureFilename)) {
 			return false;
 		}
 		
-		if (!scriptId.equals(mappedScriptId)) {
+		if (!procedureId.equals(mappedProcedureId)) {
 			return false;
 		}
 		
@@ -116,21 +116,21 @@ public class CdmScript2Activity extends CdmNode {
 		return null;
 	}
 	
-	public String getMappedScriptFilename() {
-		return mappedScriptFilename;
+	public String getmappedProcedureFilename() {
+		return mappedProcedureFilename;
 	}
 	
-	public String getMappedScriptId() {
-		return mappedScriptId;
+	public String getmappedProcedureId() {
+		return mappedProcedureId;
 	}
 	
 	public void delete() {
 	
-		// delete the script itself from the parent file
+		// delete the procedure itself from the parent file
 		super.delete();
 		
 		// delete us from the list of mappings, as the CI containing us will be kept always, so we do not need to keep
-		// track of being deleted and later on truly delete us (like in the case of a CdmScript), but can instead just
+		// track of being deleted and later on truly delete us (like in the case of a CdmProcedure), but can instead just
 		// remove ourselves entirely from the program right now
 		// TODO :: however, when the CI containing us is completely empty, then it should be deleted... at least upon the next save xD
 		CdmCtrl.removeFromModel(this);

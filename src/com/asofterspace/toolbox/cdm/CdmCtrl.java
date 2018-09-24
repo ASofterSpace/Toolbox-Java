@@ -71,6 +71,8 @@ public class CdmCtrl {
 	static final String CI_MCM = "configurationcontrol:McmCI";
 	static final String CI_SCRIPT = "configurationcontrol:ScriptCI";
 	static final String CI_SCRIPT_TO_ACTIVITY = "configurationcontrol:Script2ActivityMapperCI";
+	static final String CI_PROCEDURE = "configurationcontrol:ProcedureCI";
+	static final String CI_PROCEDURE_TO_ACTIVITY = "configurationcontrol:Procedure2McmMapperCI";
 
 	private static final List<String> CDM_TEMPLATES = Arrays.asList(
 		TMPL_JUST_ROOT,
@@ -98,9 +100,11 @@ public class CdmCtrl {
 
 	// just some lists of special elements
 	private static Set<CdmMonitoringControlElement> mces;
+	private static Set<CdmActivity> activities;
 	private static Set<CdmScript> scripts;
 	private static Set<CdmScript2Activity> scriptToActivityMappings;
-	private static Set<CdmActivity> activities;
+	private static Set<CdmProcedure> procedures;
+	private static Set<CdmProcedure2Activity> procedureToActivityMappings;
 
 	// keep a list of mcm tree roots, as in a misconfigured CDM there could be none or several - so we need to be able to express that!
 	private static Set<CdmMonitoringControlElement> mcmTreeRoots;
@@ -119,9 +123,11 @@ public class CdmCtrl {
 		xmiIdMap = new HashMap<>();
 		
 		mces = new HashSet<>();
+		activities = new HashSet<>();
 		scripts = new HashSet<>();
 		scriptToActivityMappings = new HashSet<>();
-		activities = new HashSet<>();
+		procedures = new HashSet<>();
+		procedureToActivityMappings = new HashSet<>();
 		
 		mcmTreeRoots = new HashSet<>();
 	}
@@ -341,6 +347,14 @@ public class CdmCtrl {
 			scriptToActivityMappings.add((CdmScript2Activity) cdmNode);
 		}
 	
+		if (cdmNode instanceof CdmProcedure) {
+			procedures.add((CdmProcedure) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmProcedure2Activity) {
+			procedureToActivityMappings.add((CdmProcedure2Activity) cdmNode);
+		}
+	
 		if (cdmNode instanceof CdmMonitoringControlElement) {
 			mces.add((CdmMonitoringControlElement) cdmNode);
 		}
@@ -351,6 +365,36 @@ public class CdmCtrl {
 
 		// in any case, add this node to the map of all nodes
 		xmiIdMap.put(cdmNode.getId(), cdmNode);
+	}
+	
+	static void removeFromModel(CdmNode cdmNode) {
+	
+		if (cdmNode instanceof CdmScript) {
+			scripts.remove((CdmScript) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmScript2Activity) {
+			scriptToActivityMappings.remove((CdmScript2Activity) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmProcedure) {
+			procedures.remove((CdmProcedure) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmProcedure2Activity) {
+			procedureToActivityMappings.remove((CdmProcedure2Activity) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmMonitoringControlElement) {
+			mces.remove((CdmMonitoringControlElement) cdmNode);
+		}
+	
+		if (cdmNode instanceof CdmActivity) {
+			activities.remove((CdmActivity) cdmNode);
+		}
+
+		// in any case, add this node to the map of all nodes
+		xmiIdMap.remove(cdmNode.getId());
 	}
 
 	private static void reloadMergedModel() {
@@ -591,6 +635,20 @@ public class CdmCtrl {
 			return new HashSet<>();
 		}
 		return scriptToActivityMappings;
+	}
+
+	public static Set<CdmProcedure> getProcedures() {
+		if (!cdmLoaded) {
+			return new HashSet<>();
+		}
+		return procedures;
+	}
+
+	public static Set<CdmProcedure2Activity> getProcedureToActivityMappings() {
+		if (!cdmLoaded) {
+			return new HashSet<>();
+		}
+		return procedureToActivityMappings;
 	}
 
 	public static Set<CdmActivity> getActivities() {

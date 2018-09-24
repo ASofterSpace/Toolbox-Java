@@ -90,6 +90,20 @@ public class CdmFile extends CdmFileBase {
 				}
 				break;
 
+			case CdmCtrl.CI_PROCEDURE:
+				if ("procedure".equals(nodeName)) {
+					cdmNode = new CdmProcedure(cdmNode);
+					break;
+				}
+				break;
+
+			case CdmCtrl.CI_PROCEDURE_TO_ACTIVITY:
+				if ("procedureActivityImpl".equals(nodeName)) {
+					cdmNode = new CdmProcedure2Activity(cdmNode);
+					break;
+				}
+				break;
+
 			case CdmCtrl.CI_MCM:
 				if ("monitoringControlElement".equals(nodeName)) {
 					cdmNode = new CdmMonitoringControlElement(cdmNode);
