@@ -518,7 +518,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							// rename activityInhibitionPeriod back to activityInhibtionPeriod
-							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
+							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibitionPeriod", "activityInhibtionPeriod");
 						}
 
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
@@ -533,14 +533,26 @@ public abstract class CdmFileBase extends XmlFile {
 							domRemoveAttributeFromElems("dataField", "namespace");
 							domRemoveAttributeFromElems("container", "namespace");
 
+							/*
+							oookay, so the situation is a little bit complicated:
+							if a container only has innerElements that are of type container:InnerParameter,
+							  then the container should get the type container:ParameterContainer and the
+							  innerElements should be transformed into innerParameters without type
+							however, if the container has other elements (such as innerElements with type
+							  container:innerContainer), then it should not be transformed
+							in any case however, the generic container that is not a ParameterContainer
+							  also works for parameters that are expressed as innerElements, so let's
+							  just keep all the containers generic and do NOT convert back :)
+
 							// add the xsi:type to containers (see example 4)
-							domSetAttributeForElems("container", "xsi:type", "container:ParameterContainer");
+							domSetAttributeForNonHrefElemsIfAttrIsMissing("container", "xsi:type", "container:ParameterContainer");
 
 							// innerParameters became innerElements with xsi:type container:InnerParameter (see example 4)
 							// - and now we transform them back! ;)
 							domRenameElems("innerElements", "xsi:type", "container:InnerParameter",
 								"innerParameters");
 							domRemoveAttributeFromElems("innerParameters", "xsi:type");
+							*/
 						}
 						
 						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
@@ -560,7 +572,9 @@ public abstract class CdmFileBase extends XmlFile {
 							domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
 						}
 
-						// no need to remove all the namespaces, as they also exist in 1.12.1 - they just are not mandatory
+						// some namespaces have to be removed, as they do not exist in 1.12.1
+						// TODO :: figure out which ones have to be removed! (we do not get validation
+						// errors in the mcde, as it just ignores additional attributes...)
 
 						break;
 					
