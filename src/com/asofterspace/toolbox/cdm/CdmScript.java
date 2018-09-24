@@ -20,9 +20,9 @@ public class CdmScript extends CdmNode {
 		this.content = getValue("scriptContent");
 	}
 	
-	public CdmScript(CdmFile parent, Node thisNode) {
+	public CdmScript(CdmFile parentFile, Node thisNode) {
 
-		this(new CdmNode(parent, thisNode));
+		this(new CdmNode(parentFile, thisNode));
 	}
 
 	public String getSourceCode() {
@@ -87,7 +87,7 @@ public class CdmScript extends CdmNode {
 		super.delete();
 
 		// check if there are still elements left now, and if not, delete the entire parent file
-		NodeList elements = parent.getRoot().getChildNodes();
+		NodeList elements = getParentFile().getRoot().getChildNodes();
 		
 		// assume there are no elements left...
 		boolean noElementsLeft = true;
@@ -109,7 +109,7 @@ public class CdmScript extends CdmNode {
 		// delete the entire parent file
 		// (or actually set a deleted flag, to delete it when save() is called ^^)
 		if (noElementsLeft) {
-			parent.delete();
+			getParentFile().delete();
 		}
 	}
 

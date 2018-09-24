@@ -64,9 +64,9 @@ public class CdmActivity extends CdmNode {
 		// </arguments>
 	}
 	
-	public CdmActivity(CdmFile parent, Node thisNode) {
+	public CdmActivity(CdmFile parentFile, Node thisNode) {
 
-		this(new CdmNode(parent, thisNode));
+		this(new CdmNode(parentFile, thisNode));
 	}
 
 	public boolean isDefinition() {

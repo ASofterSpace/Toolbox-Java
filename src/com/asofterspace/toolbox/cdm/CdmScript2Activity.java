@@ -61,9 +61,9 @@ public class CdmScript2Activity extends CdmNode {
 		}
 	}
 
-	public CdmScript2Activity(CdmFile parent, Node thisNode) {
+	public CdmScript2Activity(CdmFile parentFile, Node thisNode) {
 
-		this(new CdmNode(parent, thisNode));
+		this(new CdmNode(parentFile, thisNode));
 	}
 
 	public boolean mapsScript(String scriptId) {

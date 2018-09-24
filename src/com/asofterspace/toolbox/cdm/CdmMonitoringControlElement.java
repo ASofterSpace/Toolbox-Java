@@ -1,9 +1,13 @@
 package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
+import com.asofterspace.toolbox.utils.EnumeratedCollection;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+
+import javax.swing.tree.TreeNode;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -11,7 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 
-public class CdmMonitoringControlElement extends CdmNode {
+public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 
 	// delayed initialization - ready to be used after CdmCtrl.reloadTreeRoots()
 	private CdmMonitoringControlElement containingElement;
@@ -22,11 +26,11 @@ public class CdmMonitoringControlElement extends CdmNode {
 
 	private String defaultServiceAccessPointId;
 	
-	private Set<String> subElementIds;
+	private List<String> subElementIds;
 	
 	// delayed initialization - ready to be used after CdmCtrl.reloadTreeRoots()
-	private Set<CdmMonitoringControlElement> subElements;
-	
+	private List<CdmMonitoringControlElement> subElements;
+
 
 	public CdmMonitoringControlElement(CdmNode baseNode) {
 
@@ -50,7 +54,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 		// can also be expressed as child:
 		// <key href="value" (possibly xmi:id, xsi:type, or whatever)/>
 
-		this.subElementIds = new HashSet<>();
+		this.subElementIds = new ArrayList<>();
 		
 		String subStrs = getValue("subElements");
 		if (subStrs != null) {
@@ -71,19 +75,19 @@ public class CdmMonitoringControlElement extends CdmNode {
 			}
 		}
 		
-		this.subElements = new HashSet<>();
+		this.subElements = new ArrayList<>();
 	}
 	
-	public CdmMonitoringControlElement(CdmFile parent, Node thisNode) {
+	public CdmMonitoringControlElement(CdmFile parentFile, Node thisNode) {
 
-		this(new CdmNode(parent, thisNode));
+		this(new CdmNode(parentFile, thisNode));
 	}
 
-	public Set<String> getSubElementIds() {
+	public List<String> getSubElementIds() {
 		return subElementIds;
 	}
 
-	public Set<CdmMonitoringControlElement> getSubElements() {
+	public List<CdmMonitoringControlElement> getSubElements() {
 		return subElements;
 	}
 
@@ -112,7 +116,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 		String activityId = UuidEncoderDecoder.generateEcoreUUID();
 
 		// actually create the element
-		Element newActivity = parent.createElement("monitoringControlElementAspects");
+		Element newActivity = getParentFile().createElement("monitoringControlElementAspects");
 		newActivity.setAttribute("xsi:type", "monitoringcontrolmodel:Activity");
 		newActivity.setAttribute("xmi:id", activityId);
 		newActivity.setAttribute("name", newActivityName);
@@ -120,7 +124,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 
 		if ((newActivityAlias != null) && !("".equals(newActivityAlias))) {
 			String newAliasId = UuidEncoderDecoder.generateEcoreUUID();
-			Element newAlias = parent.createElement("aliases");
+			Element newAlias = getParentFile().createElement("aliases");
 			newAlias.setAttribute("xsi:type", "monitoringcontrolcommon:MonitoringAndControlAlias");
 			newAlias.setAttribute("xmi:id", newAliasId);
 			newAlias.setAttribute("alias", newActivityAlias);
@@ -129,7 +133,7 @@ public class CdmMonitoringControlElement extends CdmNode {
 		
 		thisNode.appendChild(newActivity);
 		
-		CdmActivity activityNode = new CdmActivity(parent, newActivity);
+		CdmActivity activityNode = new CdmActivity(getParentFile(), newActivity);
 		
 		// update cdm ctrl model with the new node
 		CdmCtrl.addToModel(activityNode);
@@ -171,5 +175,47 @@ public class CdmMonitoringControlElement extends CdmNode {
 			}
 		}
 	}
+	
+	// ------------------------------------------------------------------------------------------
+	// the following are methods provided such that we are conforming with the TreeNode interface
+	// ------------------------------------------------------------------------------------------
+	
+	public Enumeration children() {
+		return new EnumeratedCollection(subElements);
+	}
+	
+	public boolean getAllowsChildren() {
+		return true;
+	}
+	
+	public TreeNode getChildAt(int childIndex) {
+		return subElements.get(childIndex);
+	}
+	
+	public int getChildCount() {
+		return subElements.size();
+	}
+	
+	public int getIndex(TreeNode node) {
+		return subElements.indexOf(node);
+	}
+	
+	public TreeNode getParent() {
+		return containingElement;
+	}
+	
+	public boolean isLeaf() {
+		// actually, none of these elements are leafs, because they are all MCEs - they all could contain parameters etc. :)
+		// return subElements.size() == 0;
+		return false;
+	}
+	
+	public String toString() {
+		return getName();
+	}
+
+	// ----------------------------------------------------------------------------------------------
+	// the previous ones are methods provided such that we are conforming with the TreeNode interface
+	// ----------------------------------------------------------------------------------------------
 
 }

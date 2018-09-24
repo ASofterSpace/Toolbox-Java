@@ -13,7 +13,7 @@ import org.w3c.dom.NodeList;
  */
 public class CdmNode {
 
-	protected CdmFile parent;
+	protected CdmFile parentFile;
 
 	protected Node thisNode;
 	
@@ -28,9 +28,9 @@ public class CdmNode {
 	protected String id;
 
 
-	public CdmNode(CdmFile parent, Node thisNode) {
+	public CdmNode(CdmFile parentFile, Node thisNode) {
 
-		this.parent = parent;
+		this.parentFile = parentFile;
 
 		this.thisNode = thisNode;
 
@@ -46,7 +46,7 @@ public class CdmNode {
 	}
 	
 	public CdmNode(CdmNode other) {
-		parent = other.parent;
+		parentFile = other.parentFile;
 		thisNode = other.thisNode;
 		attributes = other.attributes;
 		name = other.name;
@@ -66,8 +66,8 @@ public class CdmNode {
 		return resultNode.getNodeValue();
 	}
 
-	public CdmFile getParent() {
-		return parent;
+	public CdmFile getParentFile() {
+		return parentFile;
 	}
 
 	public Node getNode() {
@@ -148,7 +148,7 @@ public class CdmNode {
 			System.out.println("XML Tag: " + xmlTag);
 		}
 		
-		System.out.println("Contained in: " + parent.getPathRelativeToCdmRoot());
+		System.out.println("Contained in: " + getParentFile().getPathRelativeToCdmRoot());
 	}
 
 }

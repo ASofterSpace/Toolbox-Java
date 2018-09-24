@@ -83,8 +83,8 @@ public class CdmTest implements Test {
 				TestUtils.fail("We wanted to find a node called mcmRoot, but we found one called " + foundNode.getName() + " instead!");
 				return;
 			}
-			if (!"Resource_Mcm.cdm".equals(foundNode.getParent().getPathRelativeToCdmRoot())) {
-				TestUtils.fail("The node that we found should be contained in the file Resource_Mcm.cdm, but it is contained in " + foundNode.getParent().getPathRelativeToCdmRoot() + " instead!");
+			if (!"Resource_Mcm.cdm".equals(foundNode.getParentFile().getPathRelativeToCdmRoot())) {
+				TestUtils.fail("The node that we found should be contained in the file Resource_Mcm.cdm, but it is contained in " + foundNode.getParentFile().getPathRelativeToCdmRoot() + " instead!");
 				return;
 			}
 		} else {
@@ -114,8 +114,8 @@ public class CdmTest implements Test {
 				TestUtils.fail("We wanted to find a node called mcmRoot_Definition, but we found one called " + foundNode.getName() + " instead!");
 				return;
 			}
-			if (!"Resource_Mcm.cdm".equals(foundNode.getParent().getPathRelativeToCdmRoot())) {
-				TestUtils.fail("The node that we found should be contained in the file Resource_Mcm.cdm, but it is contained in " + foundNode.getParent().getPathRelativeToCdmRoot() + " instead!");
+			if (!"Resource_Mcm.cdm".equals(foundNode.getParentFile().getPathRelativeToCdmRoot())) {
+				TestUtils.fail("The node that we found should be contained in the file Resource_Mcm.cdm, but it is contained in " + foundNode.getParentFile().getPathRelativeToCdmRoot() + " instead!");
 				return;
 			}
 		} else {

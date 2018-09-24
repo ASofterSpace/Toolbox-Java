@@ -770,14 +770,14 @@ public class CdmCtrl {
 
 		// do not just use the filename, but keep track of the relative paths - here, the relative path
 		// of the script relative to the script to activity mapper CI
-		String scriptFile = scriptToActivityMapperCI.getParentDirectory().getRelativePath(script.getParent());
+		String scriptFile = scriptToActivityMapperCI.getParentDirectory().getRelativePath(script.getParentFile());
 		// we want a path with forward slashes, even under Windows, as the CDM is always written Linux-y
 		scriptFile = IoUtils.osPathStrToLinuxPathStr(scriptFile);
 		String scriptId = script.getId();
 
 		// do not just use the filename, but keep track of the relative paths - here, the relative path
 		// of the activity relative to the script to activity mapper CI
-		String activityFile = scriptToActivityMapperCI.getParentDirectory().getRelativePath(activity.getParent());
+		String activityFile = scriptToActivityMapperCI.getParentDirectory().getRelativePath(activity.getParentFile());
 		// we want a path with forward slashes, even under Windows, as the CDM is always written Linux-y
 		activityFile = IoUtils.osPathStrToLinuxPathStr(activityFile);
 		String activityId = activity.getId();
