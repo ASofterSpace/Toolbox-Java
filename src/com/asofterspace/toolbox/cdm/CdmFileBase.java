@@ -242,6 +242,49 @@ public abstract class CdmFileBase extends XmlFile {
 		getDocument().renameNode(root, prevNamespace, newNamespace + ":" + newCiName);
 	}
 	
+	// add these namespaces both when going up from 1.12.1 and when going down from 1.14.0bd1 :)
+	private void addNamespacesIfMissingFor1130bd1AsItLovesNamespaces() {
+		
+		// add namespace for containers and friends
+		final String nsp = "namespace";
+		final String dnsp = "defaultNamespace";
+		if ("configurationcontrol:PacketCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("container", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("pktParameter", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("defaultValue", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("dataField", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("packet", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("parameterValue", nsp, dnsp);
+		}
+		if ("configurationcontrol:PacketProcessingCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("packetProtocolTypes", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("customProcessings", nsp, dnsp);
+		}
+		if ("configurationcontrol:Packet2ActivityMapperCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("packetActivityImpl", nsp, dnsp);
+		}
+		if ("configurationcontrol:Packet2ReportingDataMapperCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("packetEventImpl", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("packetParameterMCMParameterImpl", nsp, dnsp);
+		}
+		if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("applicationProcess", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("pUSService", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("serviceRequest", nsp, dnsp);
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("serviceReport", nsp, dnsp);
+		}
+		if ("configurationcontrol:PusService2PacketMapperCI".equals(getCiType())) {
+			domSetAttributeForElemsIfAttrIsMissing("serviceRequestReportImplementation", nsp, dnsp);
+			domSetAttributeForElemsIfAttrIsMissing("serviceParameterImpl", nsp, dnsp);
+		}
+		if ("configurationcontrol:ScriptCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("script", nsp, dnsp);
+		}
+		if ("configurationcontrol:Script2ActivityMapperCI".equals(getCiType())) {
+			domSetAttributeForElemsIfAttrIsMissing("scriptActivityImpl", nsp, dnsp);
+		}
+	}
+
 	/**
 	 * Go from one version to another - the version strings have already been changed,
 	 * this here only changes the actual layout of the CIs themselves such that they
@@ -416,6 +459,11 @@ public abstract class CdmFileBase extends XmlFile {
 					case "1.13.0bd1":
 						// deleting the isModified attribute (see example 1) is NOT necessary, as it is still valid in 1.13.0bd1
 
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+							// rename activityInhibtionPeriod to activityInhibitionPeriod
+							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
+						}
+
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
 							// transforming <innerElements/> with xsi:type="container:innerContainer"
 							// to xsi:type="container:InnerContainer" (see example 3)
@@ -434,6 +482,23 @@ public abstract class CdmFileBase extends XmlFile {
 							domRenameElems("innerParameters", "innerElements");
 						}
 						
+						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
+							// rename globalWaitingMagin to globalWaitingMargin
+							domRenameAttributes("applicationProcess", "globalWaitingMagin", "globalWaitingMargin");
+
+							// rename checksStartOfExectuion to checksStartOfExecution
+							domRenameAttributes("applicationProcess", "checksStartOfExectuion", "checksStartOfExecution");
+						}
+
+						if ("configurationcontrol:PusService2PacketMapperCI".equals(getCiType())) {
+							// rename SimplePktParameter to pktParameter
+							domSetAttributeForElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter", "placeholder");
+							domSetAttributeForElemsIfAttrIsMissing("SimplePktParameter", "xsi:type", "parameter:SimplePktParameter");
+							domRenameElems("SimplePktParameter", "pktParameter");
+						}
+
+						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();
+
 						break;
 				}
 				break;
@@ -449,6 +514,11 @@ public abstract class CdmFileBase extends XmlFile {
 							if (isModified == null) {
 								root.setAttribute("isModified", "false");
 							}
+						}
+
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+							// rename activityInhibitionPeriod back to activityInhibtionPeriod
+							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
 						}
 
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
@@ -473,6 +543,25 @@ public abstract class CdmFileBase extends XmlFile {
 							domRemoveAttributeFromElems("innerParameters", "xsi:type");
 						}
 						
+						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
+							// rename globalWaitingMargin back to globalWaitingMagin
+							domRenameAttributes("applicationProcess", "globalWaitingMargin", "globalWaitingMagin");
+
+							// rename checksStartOfExecution back to checksStartOfExectuion
+							domRenameAttributes("applicationProcess", "checksStartOfExecution", "checksStartOfExectuion");
+						}
+
+						if ("configurationcontrol:PusService2PacketMapperCI".equals(getCiType())) {
+							// rename pktParameter back to SimplePktParameter
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRemoveAttributeFromElems("pktParameter", "xsi:type", "parameter:SimplePktParameter", "xsi:type");
+							domRenameElems("pktParameter", "SimplePktParameter");
+							// TODO :: before removing this namespace, check if it is actually no longer in use in any xsi_types! (we deleted some right now, but maybe there are other such elements left?)
+							domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
+						}
+
+						// no need to remove all the namespaces, as they also exist in 1.12.1 - they just are not mandatory
+
 						break;
 					
 					// up
@@ -502,10 +591,6 @@ public abstract class CdmFileBase extends XmlFile {
 							// (could also be a 1.14.0b > 1.14.0 change instead!)
 							// TODO :: implement the opposite for the other direction somehow
 							domRemoveAttributeFromElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:DeducedArgumentDefinition", "availableArguments");
-
-							// rename activityInhibtionPeriod to activityInhibitionPeriod
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
 						}
 
 						// adjust enumerations (see example 5)
@@ -567,28 +652,14 @@ public abstract class CdmFileBase extends XmlFile {
 							// do these changes need to be un-done on the way back, or can they be kept?
 							domSetAttributeForElemsIfAttrIsMissing("defaultVerificationStages", "stageType", "TCAcceptance");
 							domRemoveAttributeFromElems("defaultVerificationStages", "nextStage");
-
-							// rename globalWaitingMagin to globalWaitingMargin
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domRenameAttributes("applicationProcess", "globalWaitingMagin", "globalWaitingMargin");
-
-							// rename checksStartOfExectuion to checksStartOfExecution
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domRenameAttributes("applicationProcess", "checksStartOfExectuion", "checksStartOfExecution");
-						}
-
-						if ("configurationcontrol:PusService2PacketMapperCI".equals(getCiType())) {
-							// rename SimplePktParameter to pktParameter
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domSetAttributeForElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter", "placeholder");
-							domSetAttributeForElemsIfAttrIsMissing("SimplePktParameter", "xsi:type", "parameter:SimplePktParameter");
-							domRenameElems("SimplePktParameter", "pktParameter");
 						}
 
 						// rename units and quantities CI
 						if ("configurationcontrol:UnitsAndQuantatiesCI".equals(getCiType())) {
 							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantitiesCI");
 						}
+
+						// do not remove the namespace for containers and friends, as the field still exists in 1.14.0b
 
 						break;
 				}
@@ -601,10 +672,6 @@ public abstract class CdmFileBase extends XmlFile {
 						// adjust names of arguments back as seen in example 2 - by removing them cold-bloodedly ;)
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							domRemoveAttributeFromElems("arguments", "name");
-
-							// rename activityInhibitionPeriod back to activityInhibtionPeriod
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
 						}
 
 						// adjust enumerations back (see example 5)
@@ -638,30 +705,15 @@ public abstract class CdmFileBase extends XmlFile {
 							// TODO :: before removing this namespace, check if it is actually no longer in use in any xsi_types! (we deleted some right now, but maybe there are other such elements left?)
 							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:PUSServicegeneric");
 							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:xsi");
-
-							// rename globalWaitingMargin back to globalWaitingMagin
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domRenameAttributes("applicationProcess", "globalWaitingMargin", "globalWaitingMagin");
-
-							// rename checksStartOfExecution back to checksStartOfExectuion
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domRenameAttributes("applicationProcess", "checksStartOfExecution", "checksStartOfExectuion");
-						}
-
-						if ("configurationcontrol:PusService2PacketMapperCI".equals(getCiType())) {
-							// rename pktParameter back to SimplePktParameter
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							domRemoveAttributeFromElems("pktParameter", "xsi:type", "parameter:SimplePktParameter", "xsi:type");
-							domRenameElems("pktParameter", "SimplePktParameter");
-							// TODO :: before removing this namespace, check if it is actually no longer in use in any xsi_types! (we deleted some right now, but maybe there are other such elements left?)
-							domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
 						}
 
 						// rename units and quantities CI back
 						if ("configurationcontrol:UnitsAndQuantitiesCI".equals(getCiType())) {
 							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantatiesCI");
 						}
-						
+
+						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();
+
 						break;
 					
 					// up

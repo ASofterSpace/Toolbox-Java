@@ -511,6 +511,55 @@ public class XmlFile extends File {
 		}
 	}
 
+	public void domSetAttributeForNonHrefElemsIfAttrIsMissing(String tagName, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node hrefAttr = elem.getAttributes().getNamedItem("href");
+					if (hrefAttr == null) {
+						Node elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
+						if (elemAttr == null) {
+							elem.setAttribute(setAttributeName, setAttributeValue);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void domSetAttributeForNonHrefElemsIfAttrIsMissing(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				if (elemNode instanceof Element) {
+					Element elem = (Element) elemNode;
+					Node hrefAttr = elem.getAttributes().getNamedItem("href");
+					if (hrefAttr == null) {
+						Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
+						if (elemAttr != null) {
+							if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
+								elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
+								if (elemAttr == null) {
+									elem.setAttribute(setAttributeName, setAttributeValue);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public void domRemoveAttributeFromElems(String tagName, String removeAttributeName) {
 
 		NodeList elems = getDocument().getElementsByTagName(tagName);
