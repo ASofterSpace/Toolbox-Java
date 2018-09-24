@@ -83,7 +83,7 @@ public class CdmScript extends CdmNode {
 			script2Activity.delete();
 		}
 		
-		// delete the script itself from the parent file
+		// delete the script itself from the parent file and the model in the controller
 		super.delete();
 
 		// check if there are still elements left now, and if not, delete the entire parent file

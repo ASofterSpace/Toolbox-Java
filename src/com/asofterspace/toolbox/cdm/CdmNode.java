@@ -109,6 +109,9 @@ public class CdmNode {
 
 		// delete this itself from the parent
 		thisNode.getParentNode().removeChild(thisNode);
+		
+		// delete this from the full model in the controller
+		CdmCtrl.removeFromModel(this);
 	}
 
 	/**

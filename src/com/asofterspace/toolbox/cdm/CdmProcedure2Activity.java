@@ -126,13 +126,9 @@ public class CdmProcedure2Activity extends CdmNode {
 	
 	public void delete() {
 	
-		// delete the procedure itself from the parent file
+		// delete the mapping itself from the parent file
 		super.delete();
 		
-		// delete us from the list of mappings, as the CI containing us will be kept always, so we do not need to keep
-		// track of being deleted and later on truly delete us (like in the case of a CdmProcedure), but can instead just
-		// remove ourselves entirely from the program right now
-		// TODO :: however, when the CI containing us is completely empty, then it should be deleted... at least upon the next save xD
-		CdmCtrl.removeFromModel(this);
+		// TODO :: when the CI containing us is completely empty, then it should be deleted... at least upon the next save xD
 	}
 }
