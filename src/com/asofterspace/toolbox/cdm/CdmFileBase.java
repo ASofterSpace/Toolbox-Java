@@ -491,6 +491,21 @@ public abstract class CdmFileBase extends XmlFile {
 									newargcounter++;
 								}
 							}
+
+							// remove sourceDataType and sourceDisplayFormat, as the field no longer seems to exist
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							// TODO :: implement the opposite for the other direction somehow
+							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDataType");
+							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDisplayFormat");
+
+							// remove available arguments, as the field no longer seems to exist
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							// TODO :: implement the opposite for the other direction somehow
+							domRemoveAttributeFromElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:DeducedArgumentDefinition", "availableArguments");
+
+							// rename activityInhibtionPeriod to activityInhibitionPeriod
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
 						}
 
 						// adjust enumerations (see example 5)
@@ -539,19 +554,6 @@ public abstract class CdmFileBase extends XmlFile {
 							domRemoveAttributeFromElems("pktParameter", "sourceType");
 						}
 
-						if ("configurationcontrol:McmCI".equals(getCiType())) {
-							// remove sourceDataType and sourceDisplayFormat, as the field no longer seems to exist
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							// TODO :: implement the opposite for the other direction somehow
-							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDataType");
-							domRemoveChildrenFromElems("monitoringControlElementAspects", "sourceDisplayFormat");
-
-							// remove available arguments, as the field no longer seems to exist
-							// (could also be a 1.14.0b > 1.14.0 change instead!)
-							// TODO :: implement the opposite for the other direction somehow
-							domRemoveAttributeFromElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:DeducedArgumentDefinition", "availableArguments");
-						}
-
 						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
 
 							// add type to verification stage
@@ -565,6 +567,22 @@ public abstract class CdmFileBase extends XmlFile {
 							// do these changes need to be un-done on the way back, or can they be kept?
 							domSetAttributeForElemsIfAttrIsMissing("defaultVerificationStages", "stageType", "TCAcceptance");
 							domRemoveAttributeFromElems("defaultVerificationStages", "nextStage");
+
+							// rename globalWaitingMagin to globalWaitingMargin
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRenameAttributes("applicationProcess", "globalWaitingMagin", "globalWaitingMargin");
+
+							// rename checksStartOfExectuion to checksStartOfExecution
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRenameAttributes("applicationProcess", "checksStartOfExectuion", "checksStartOfExecution");
+						}
+
+						if ("configurationcontrol:PusService2PacketMapperCI".equals(getCiType())) {
+							// rename SimplePktParameter to pktParameter
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domSetAttributeForElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter", "placeholder");
+							domSetAttributeForElemsIfAttrIsMissing("SimplePktParameter", "xsi:type", "parameter:SimplePktParameter");
+							domRenameElems("SimplePktParameter", "pktParameter");
 						}
 
 						// rename units and quantities CI
@@ -583,6 +601,10 @@ public abstract class CdmFileBase extends XmlFile {
 						// adjust names of arguments back as seen in example 2 - by removing them cold-bloodedly ;)
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							domRemoveAttributeFromElems("arguments", "name");
+
+							// rename activityInhibitionPeriod back to activityInhibtionPeriod
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
 						}
 
 						// adjust enumerations back (see example 5)
@@ -613,8 +635,26 @@ public abstract class CdmFileBase extends XmlFile {
 							// remove type from verification stage
 							// (could also be a 1.14.0b > 1.14.0 change instead!)
 							domRemoveAttributeFromElems("defaultVerificationStages", "xsi:type");
+							// TODO :: before removing this namespace, check if it is actually no longer in use in any xsi_types! (we deleted some right now, but maybe there are other such elements left?)
 							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:PUSServicegeneric");
 							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:xsi");
+
+							// rename globalWaitingMargin back to globalWaitingMagin
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRenameAttributes("applicationProcess", "globalWaitingMargin", "globalWaitingMagin");
+
+							// rename checksStartOfExecution back to checksStartOfExectuion
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRenameAttributes("applicationProcess", "checksStartOfExecution", "checksStartOfExectuion");
+						}
+
+						if ("configurationcontrol:PusService2PacketMapperCI".equals(getCiType())) {
+							// rename pktParameter back to SimplePktParameter
+							// (could also be a 1.14.0b > 1.14.0 change instead!)
+							domRemoveAttributeFromElems("pktParameter", "xsi:type", "parameter:SimplePktParameter", "xsi:type");
+							domRenameElems("pktParameter", "SimplePktParameter");
+							// TODO :: before removing this namespace, check if it is actually no longer in use in any xsi_types! (we deleted some right now, but maybe there are other such elements left?)
+							domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
 						}
 
 						// rename units and quantities CI back
