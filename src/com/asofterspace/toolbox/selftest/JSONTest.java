@@ -1,6 +1,6 @@
 package com.asofterspace.toolbox.selftest;
 
-import com.asofterspace.toolbox.web.JSON;
+import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 

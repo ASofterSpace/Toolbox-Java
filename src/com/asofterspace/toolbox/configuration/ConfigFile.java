@@ -1,7 +1,8 @@
 package com.asofterspace.toolbox.configuration;
 
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.web.JSON;
+import com.asofterspace.toolbox.io.JSON;
+
 
 public class ConfigFile {
 	

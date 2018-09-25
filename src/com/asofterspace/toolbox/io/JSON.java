@@ -1,13 +1,14 @@
-package com.asofterspace.toolbox.web;
+package com.asofterspace.toolbox.io;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.asofterspace.toolbox.web.JSONkind;
 
+import com.asofterspace.toolbox.io.JSONkind;
 import com.asofterspace.toolbox.Utils;
+
 
 public class JSON {
 	
