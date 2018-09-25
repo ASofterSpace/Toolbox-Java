@@ -11,70 +11,70 @@ import com.asofterspace.toolbox.Utils;
 
 
 public class JSON {
-	
+
 	private JSONkind kind;
-	
+
 	private Map<String, JSON> objContents;
 	private List<JSON> arrContents;
 	private Object simpleContents;
 
-	
+
 	/**
 	 * Create an empty JSON object
 	 */
 	public JSON() {
 
 		kind = JSONkind.OBJECT;
-		
+
 		objContents = new TreeMap<String, JSON>();
 	}
-	
+
 	/**
 	 * Create a JSON object based on a given JSON string
 	 */
 	public JSON(String jsonString) {
-		
+
 		init(jsonString);
 	}
-	
+
 	/**
 	* Create a JSON object based on an integer value
 	*/
 	public JSON(Integer intValue) {
-	
+
 		kind = JSONkind.NUMBER;
-		
+
 		simpleContents = intValue;
 	}
-	
+
 	/**
 	* Create a JSON object based on a double value
 	*/
 	public JSON(Double doubleValue) {
-	
+
 		kind = JSONkind.NUMBER;
-		
+
 		simpleContents = doubleValue;
 	}
-	
+
 	/**
 	* Create a JSON object based on a boolean value
 	*/
 	public JSON(Boolean boolValue) {
-	
+
 		kind = JSONkind.NUMBER;
-		
+
 		simpleContents = boolValue;
 	}
-	
+
 	/**
 	 * Create a JSON object based on a given list of strings representing
 	 * JSON file contents
 	 */
 	public JSON(List<String> jsonStrings) {
-		
+
 		String jsonContent = Utils.strListToString(jsonStrings);
-		
+
 		init(jsonContent);
 	}
 
@@ -92,10 +92,10 @@ public class JSON {
 
 			case ARRAY:
 				return arrContents.size() < 1;
-				
+
 			case OBJECT:
 				return objContents.size() < 1;
-				
+
 			default:
 				return true;
 		}
@@ -115,30 +115,30 @@ public class JSON {
 	 * init({"bar": 9}) returns ""
 	 * which calls
 	 * init(9) returns "",
-	 * 
+	 *
 	 * @param jsonString
 	 */
 	private String init(String jsonString) {
-		
+
 		jsonString = jsonString.trim();
 
 		if (jsonString.equals("")) {
-			
+
 			kind = JSONkind.NULL;
-			
+
 			simpleContents = null;
-			
+
 			return "";
 		}
-		
+
 		if (jsonString.startsWith("{")) {
 
 			objContents = new TreeMap<String, JSON>();
-			
+
 			kind = JSONkind.OBJECT;
-			
+
 			jsonString = jsonString.substring(1).trim();
-			
+
 			while (jsonString.startsWith("\"")) {
 				jsonString = jsonString.substring(1).trim();
 				int endIndex = jsonString.indexOf("\"");
@@ -152,24 +152,24 @@ public class JSON {
 					jsonString = jsonString.substring(1).trim();
 				}
 			}
-			
+
 			jsonString = jsonString.trim();
-			
+
 			if (jsonString.startsWith("}")) {
 				jsonString = jsonString.substring(1).trim();
 			}
-			
+
 			return jsonString;
 		}
-		
+
 		if (jsonString.startsWith("[")) {
-			
+
 			kind = JSONkind.ARRAY;
-			
+
 			arrContents = new ArrayList<JSON>();
-			
+
 			jsonString = jsonString.substring(1).trim();
-			
+
 			while (jsonString.length() > 0) {
 
 				if (jsonString.startsWith("]")) {
@@ -179,59 +179,59 @@ public class JSON {
 				JSON newJSONelement = new JSON();
 				jsonString = newJSONelement.init(jsonString).trim();
 				arrContents.add(newJSONelement);
-				
+
 				while (jsonString.startsWith(",")) {
 					jsonString = jsonString.substring(1).trim();
 				}
-				
+
 			}
-			
+
 			return jsonString;
 		}
-		
+
 		if (jsonString.startsWith("\"")) {
 			kind = JSONkind.STRING;
-			
+
 			jsonString = jsonString.substring(1);
-			
+
 			// TODO :: also allow escaping " (basically, by checking here is simpleContents
 			// ends with \ - in which case we add the " instead and carry on searching forward)
 			simpleContents = jsonString.substring(0, jsonString.indexOf("\""));
 			jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
-		
+
 			return jsonString;
 		}
-		
+
 		if (jsonString.startsWith("true")) {
 			kind = JSONkind.BOOLEAN;
-			
+
 			simpleContents = true;
-			
+
 			return jsonString.substring(4);
 		}
-		
+
 		if (jsonString.startsWith("false")) {
 			kind = JSONkind.BOOLEAN;
-			
+
 			simpleContents = false;
-			
+
 			return jsonString.substring(4);
 		}
-		
+
 		if (jsonString.startsWith("null")) {
 			kind = JSONkind.NULL;
-			
+
 			simpleContents = null;
-			
+
 			return jsonString.substring(4);
 		}
 
 		kind = JSONkind.NUMBER;
 
 		String numStr = "";
-		
+
 		while (jsonString.length() > 0) {
-			
+
 			Character curChar = jsonString.charAt(0);
 
 			if (Character.isDigit(curChar) || curChar.equals('.') ||
@@ -241,9 +241,9 @@ public class JSON {
 				numStr += curChar;
 
 				jsonString = jsonString.substring(1);
-			
+
 			} else {
-				
+
 				// we are not reading any further numerical digits - escape!
 				break;
 			}
@@ -252,15 +252,15 @@ public class JSON {
 		numStr = numStr.replace(",", "");
 
 		if (numStr.contains(".")) {
-			
+
 			// create a double
 
 			simpleContents = Double.valueOf(numStr);
-			
+
 		} else {
-			
+
 			// create an integer
-			
+
 			simpleContents = Integer.valueOf(numStr);
 		}
 
@@ -269,7 +269,7 @@ public class JSON {
 
 	@Override
 	public String toString() {
-		
+
 		return toString(null);
 	}
 
@@ -280,36 +280,36 @@ public class JSON {
 	 *                    read by humans, but take up more space
 	 */
 	public String toString(Boolean compressed) {
-		
+
 		if (compressed == null) {
 			compressed = true;
 		}
-		
+
 		return toString(compressed, "");
 	}
-	
+
 	private String toString(boolean compressed, String linePrefix) {
-		
+
 		switch (kind) {
 
 			case STRING:
 				return "\"" + simpleContents.toString() + "\"";
-				
+
 			case BOOLEAN:
 			case NUMBER:
 				return simpleContents.toString();
-			
+
 			case ARRAY:
 				StringBuilder arrResult = new StringBuilder();
-				
+
 				arrResult.append("[");
-				
+
 				if (!compressed) {
 					arrResult.append("\n" + linePrefix + "\t");
 				}
 
 				boolean arrFirstEntry = true;
-				
+
 				for (JSON item : arrContents) {
 
 					if (arrFirstEntry) {
@@ -320,7 +320,7 @@ public class JSON {
 							arrResult.append("\n" + linePrefix + "\t");
 						}
 					}
-					
+
 					arrResult.append(item.toString(compressed, linePrefix + "\t"));
 				}
 
@@ -328,12 +328,12 @@ public class JSON {
 					arrResult.append("\n" + linePrefix);
 				}
 				arrResult.append("]");
-				
+
 				return arrResult.toString();
-				
+
 			case OBJECT:
 				StringBuilder objResult = new StringBuilder();
-				
+
 				objResult.append("{");
 
 				if (!compressed) {
@@ -341,9 +341,9 @@ public class JSON {
 				}
 
 				boolean objFirstEntry = true;
-				
+
 				for (Map.Entry<String, JSON> entry : objContents.entrySet()) {
-					
+
 					if (objFirstEntry) {
 						objFirstEntry = false;
 					} else {
@@ -352,10 +352,10 @@ public class JSON {
 							objResult.append("\n" + linePrefix + "\t");
 						}
 					}
-					
+
 				    String key = entry.getKey();
 				    JSON content = entry.getValue();
-				    
+
 				    objResult.append("\"");
 				    objResult.append(key);
 				    objResult.append("\": ");
@@ -366,9 +366,9 @@ public class JSON {
 					objResult.append("\n" + linePrefix);
 				}
 				objResult.append("}");
-				
+
 				return objResult.toString();
-				
+
 			default:
 				return "null";
 		}
@@ -392,11 +392,17 @@ public class JSON {
 
 	/**
 	 * Get the JSON-value corresponding to a specific key
-	 * in a JSON object
+	 * in a JSON object or to a specific index in a JSON
+	 * array
 	 * @param key the key to search for
 	 * @return the JSON object
 	 */
 	public JSON get(Object key) {
+
+		if ((key instanceof Integer) && (arrContents != null)) {
+			return arrContents.get((Integer) key);
+		}
+
 		if (objContents == null) {
 			return null;
 		}
@@ -413,25 +419,15 @@ public class JSON {
 	}
 
 	/**
-	 * Get the JSON-value corresponding to a specific index
-	 * in a JSON array
-	 * @param index the index to get
-	 * @return the JSON object
-	 */
-	public JSON get(Integer index) {
-		return arrContents.get(index);
-	}
-
-	/**
 	 * Get a list of JSON values corresponding to a JSON array
 	 * stored in a particular key of a JSON object
 	 * @param key the key to search for
 	 * @return the JSON array stored in the key
 	 */
 	public List<JSON> getArray(String key) {
-		
+
 		JSON result = get(key);
-		
+
 		return result.arrContents;
 	}
 
@@ -447,17 +443,17 @@ public class JSON {
 	 */
 	public String getString(Object key) {
 		JSON result = get(key);
-		
+
 		if (result == null) {
 			return null;
 		}
-		
+
 		// in case of a string, return the contained string WITHOUT
 		// enclosing ""-signs
 		if (result.kind == JSONkind.STRING) {
 			return result.simpleContents.toString();
 		}
-		
+
 		// if something else than a string is contained, return whatever
 		// it is that is contained
 		return result.toString();
@@ -471,7 +467,7 @@ public class JSON {
 	public Integer getInteger(String key) {
 
 		JSON result = get(key);
-		
+
 		if (result == null) {
 			return null;
 		}
@@ -491,7 +487,7 @@ public class JSON {
 		if (result.kind == JSONkind.NULL) {
 			return null;
 		}
-		
+
 		return 0;
 	}
 
@@ -516,10 +512,10 @@ public class JSON {
 	public void setString(String key, String value) {
 
 		JSON jsonValue = new JSON("\"" + escapeJSONstr(value) + "\"");
-		
+
 		set(key, jsonValue);
 	}
-	
+
 	/**
 	 * Takes in a string such as:
 	 * foo"bar
@@ -529,12 +525,12 @@ public class JSON {
 	 * @return a string in which every " sign is escaped
 	 */
 	private String escapeJSONstr(String str) {
-		
+
 		// TODO
-		
+
 		return str;
 	}
-	
+
 	/**
 	 * Sets an index of the JSON array to the JSON value
 	 * @param index
