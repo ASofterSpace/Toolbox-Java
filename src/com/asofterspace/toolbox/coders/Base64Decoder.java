@@ -113,6 +113,10 @@ public class Base64Decoder {
                 result.append((char) shiftedBuffer);
                 break;
         }
+		
+		if (base64Text.endsWith("=")) {
+			result.setLength(result.length() - 1);
+		}
 
         return result.toString();
     }
@@ -178,8 +182,8 @@ public class Base64Decoder {
         int buffer = 0;
 
         // the numbers are arranged in such a way:
-        // numbers: 00 00 00 11 11 11 | base64 numbers 0, 1
-        // result:  aa aa bb bb cc cc | hex characters a, b and c
+        // numbers: 00 00 00 11 11 11 22 22 22 ... | base64 numbers 0, 1
+        // result:  aa aa bb bb cc cc dd dd ee ... | hex characters a, b and c
 
         for (int numPos = 0; numPos < charPos; numPos++) {
             switch (offset) {
@@ -209,6 +213,10 @@ public class Base64Decoder {
                 result.append((char) shiftedBuffer);
                 break;
         }
+		
+		if (base64Text.endsWith("=")) {
+			result.setLength(result.length() - 1);
+		}
 
         return result.toString();
     }
