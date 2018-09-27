@@ -458,6 +458,7 @@ public abstract class CdmFileBase extends XmlFile {
 						switch (getCiType()) {
 							case "configurationcontrol:DataTypesCI":
 							case "configurationcontrol:McmCI":
+							case "configurationcontrol:ScriptCI":
 							
 								String defaultCiName = getLocalFilename();
 								
