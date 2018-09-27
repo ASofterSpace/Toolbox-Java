@@ -470,6 +470,11 @@ public abstract class CdmFileBase extends XmlFile {
 								domSetAttributeForElemsIfAttrIsMissing(getCiType(), "isModified", "false");
 						}
 
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+							// rename grammarBasedExpression to expression
+							domRenameChildrenOfElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:SyntheticParameter", "grammarBasedExpression", "expression");
+						}
+
 						break;
 				}
 				break;
@@ -478,6 +483,13 @@ public abstract class CdmFileBase extends XmlFile {
 				switch (dest) {
 					// down
 					case "1.12":
+						// TODO :: do we need to un-do adding names? (or are names for McmCIs etc. allowed, but optional in 1.12?)
+						
+						if ("configurationcontrol:McmCI".equals(getCiType())) {
+							// rename expression back to grammarBasedExpression
+							domRenameChildrenOfElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:SyntheticParameter", "expression", "grammarBasedExpression");
+						}
+
 						break;
 
 					// up
