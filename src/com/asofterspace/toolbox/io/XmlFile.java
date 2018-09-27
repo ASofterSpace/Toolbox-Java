@@ -326,6 +326,44 @@ public class XmlFile extends File {
 
 		return mode;
 	}
+	
+	/**
+	 * Checks if there are any elements in the current DOM whose tag starts with the given prefix;
+	 * returns true if such elements can be found and false otherwise
+	 */
+	public boolean domIsTagPrefixInUse(String prefix) {
+
+		return domIsTagPrefixInUseForSubTree(prefix, getRoot());
+	}
+	
+	private boolean domIsTagPrefixInUseForSubTree(String prefix, Node subTreeRoot) {
+	
+		if (subTreeRoot.getNodeName().startsWith(prefix)) {
+			return true;
+		}
+	
+		NodeList children = subTreeRoot.getChildNodes();
+		
+		if (children == null) {
+			return false;
+		}
+		
+		int childrenLen = children.getLength();
+
+		for (int i = 0; i < childrenLen; i++) {
+			
+			Node childNode = children.item(i);
+			
+			// ignore children that are not full elements
+			if (childNode instanceof Element) {
+				if (domIsTagPrefixInUseForSubTree(prefix, childNode)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 
 	public List<Element> domGetElems(String tagName) {
 

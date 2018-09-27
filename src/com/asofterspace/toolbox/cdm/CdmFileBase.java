@@ -150,7 +150,7 @@ public abstract class CdmFileBase extends XmlFile {
 			packetprocessing.setNodeValue(toPrefix + "/PacketProcessing/" + toVersion);
 		}
 
-		// TODO :: also convert the UDD xmlns, at least these exist (but we do not know the xmlns name right now)
+		// TODO :: also convert the UDD xmlns, at least these exist in 1.12 (but we do not know the xmlns name right now)
 		// prefix /MonitoringControlImplementation/UserDefinedDisplays/Mapping_UDD2MCM/ version
 		// prefix /MonitoringControlImplementation/UserDefinedDisplays/ version
 
@@ -576,8 +576,9 @@ public abstract class CdmFileBase extends XmlFile {
 							// (could also be a 1.14.0b > 1.14.0 change instead!)
 							domRemoveAttributeFromElems("pktParameter", "xsi:type", "parameter:SimplePktParameter", "xsi:type");
 							domRenameElems("pktParameter", "SimplePktParameter");
-							// TODO :: before removing this namespace, check if it is actually no longer in use in any xsi_types! (we deleted some right now, but maybe there are other such elements left?)
-							domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
+							if (!domIsTagPrefixInUse("parameter:")) {
+								domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
+							}
 						}
 
 						// some namespaces have to be removed, as they do not exist in 1.12.1
@@ -724,9 +725,12 @@ public abstract class CdmFileBase extends XmlFile {
 							// remove type from verification stage
 							// (could also be a 1.14.0b > 1.14.0 change instead!)
 							domRemoveAttributeFromElems("defaultVerificationStages", "xsi:type");
-							// TODO :: before removing this namespace, check if it is actually no longer in use in any xsi_types! (we deleted some right now, but maybe there are other such elements left?)
-							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:PUSServicegeneric");
-							domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:xsi");
+							if (!domIsTagPrefixInUse("PUSServicegeneric:")) {
+								domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:PUSServicegeneric");
+							}
+							if (!domIsTagPrefixInUse("xsi:")) {
+								domRemoveAttributeFromElems("configurationcontrol:PUSServicesCI", "xmlns:xsi");
+							}
 						}
 
 						// rename units and quantities CI back
