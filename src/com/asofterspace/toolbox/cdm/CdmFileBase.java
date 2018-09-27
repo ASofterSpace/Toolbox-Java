@@ -453,6 +453,22 @@ public abstract class CdmFileBase extends XmlFile {
 				switch (dest) {
 					// up
 					case "1.12.1":
+					
+						// set name for the CI
+						switch (getCiType()) {
+							case "configurationcontrol:DataTypesCI":
+							case "configurationcontrol:McmCI":
+							
+								String defaultCiName = getLocalFilename();
+								
+								if (defaultCiName.toLowerCase().endsWith(".cdm")) {
+									defaultCiName = defaultCiName.substring(0, defaultCiName.length() - 4);
+								}
+							
+								domSetAttributeForElemsIfAttrIsMissing(getCiType(), "name", defaultCiName);
+								domSetAttributeForElemsIfAttrIsMissing(getCiType(), "isModified", "false");
+						}
+
 						break;
 				}
 				break;
