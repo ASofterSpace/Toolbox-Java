@@ -70,7 +70,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 		// we need to switch out THIS namespace first, as otherwise root elements cannot be renamed in the next step
 		conversionSwitchConfigurationControlNamespace(toVersion, toPrefix);
-		
+
 		// step through the detailed version changes
 		conversionStepThroughChanges(origVersion, toVersion);
 
@@ -78,7 +78,7 @@ public abstract class CdmFileBase extends XmlFile {
 		// e.g. xmlns:PUSServicegeneric being added or removed, so this one has to come afterwards!)
 		conversionSwitchOtherNamespaces(toVersion, toPrefix);
 	}
-	
+
 	private void conversionSwitchConfigurationControlNamespace(String toVersion, String toPrefix) {
 
 		Node root = getRoot();
@@ -161,6 +161,8 @@ public abstract class CdmFileBase extends XmlFile {
 		// for 1.14.0: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5" (note: NOT aligned with generic version prefix of 1.14.0!)
 		// for 1.14.0b: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5"
 		// for 1.13.0bd1: "http://www.esa.int/core/qudv/conceptualmodel/1.5"
+		// for 1.12.1: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5" (TODO: there also seems to be something like http://www.esa.int/dme/core/1.5!)
+		// for 1.12: "http://www.scopeset.de/core/qudv/conceptualmodel/1.5" (TODO: there also seems to be something like http://www.scopeset.de/core/1.5!)
 
 		String qudvPrefix = "http://www.esa.int/dme/core/qudv/";
 
@@ -175,7 +177,13 @@ public abstract class CdmFileBase extends XmlFile {
 				qudvPrefix = "http://www.esa.int/core/qudv/";
 				break;
 
-			// TODO :: figure this out for the other CDM versions too!
+			case "1.12.1":
+				qudvPrefix = "http://www.esa.int/dme/core/qudv/";
+				break;
+
+			case "1.12":
+				qudvPrefix = "http://www.scopeset.de/core/qudv/";
+				break;
 		}
 
 		Node qudvBlocksExtModel = scriptAttributes.getNamedItem("xmlns:qudv.blocks_extModel");
@@ -188,9 +196,9 @@ public abstract class CdmFileBase extends XmlFile {
 			qudvConceptExtModel.setNodeValue(qudvPrefix + "conceptualmodel/1.5");
 		}
 	}
-	
+
 	private void conversionStepThroughChanges(String origVersion, String toVersion) {
-	
+
 		List<String> knownVersions = CdmCtrl.getKnownCdmVersions();
 		int origIndex = knownVersions.indexOf(origVersion);
 		int destIndex = knownVersions.indexOf(toVersion);
@@ -220,13 +228,13 @@ public abstract class CdmFileBase extends XmlFile {
 	}
 
 	private void conversionRenameRoot(String prevNamespace, String newNamespace, String newCiName) {
-							
+
 		Node root = getRoot();
-		
+
 		if (root == null) {
 			return;
 		}
-		
+
 		// store the original namespace
 		NamedNodeMap scriptAttributes = root.getAttributes();
 		Node configurationcontrol = scriptAttributes.getNamedItem("xmlns:" + prevNamespace);
@@ -234,17 +242,17 @@ public abstract class CdmFileBase extends XmlFile {
 			// get the actual namespace string (including http:// and all) that we assigned
 			prevNamespace = configurationcontrol.getNodeValue();
 		}
-		
+
 		// actually register the namespace formally
 		// getDocument().createElementNS(prevNamespace, newNamespace + ":" + newCiName);
 
 		// assign the CI name, using the namespace we just registered
 		getDocument().renameNode(root, prevNamespace, newNamespace + ":" + newCiName);
 	}
-	
+
 	// add these namespaces both when going up from 1.12.1 and when going down from 1.14.0bd1 :)
 	private void addNamespacesIfMissingFor1130bd1AsItLovesNamespaces() {
-		
+
 		// add namespace for containers and friends
 		final String nsp = "namespace";
 		final String dnsp = "defaultNamespace";
@@ -330,7 +338,7 @@ public abstract class CdmFileBase extends XmlFile {
 				</engineeringDefaultValue>
 				<engineeringArgumentDefinition href="_4"/>
 			  </arguments>
-			  
+
 		=> the name was added to the <arguments> (we can use the name of the definition, and add "...Def" to the definition name)
 
 		Example 2 in 1.14.0:
@@ -430,7 +438,7 @@ public abstract class CdmFileBase extends XmlFile {
 		Example 6 in 1.14.0b: << definitely in 1.13.0bd1, but based on example 2 we assume actually in 1.14.0b the same as in 1.13.0bd1
 			<monitoringControlElementAspects ... xsi:type="monitoringcontrolmodel:EngineeringParameter">
 				<defaultValue value="..." xmi:id="_1" xsi:type="monitoringcontrolmodel:ParameterRawValue"/>
-			  
+
 		Example 6 in 1.14.0:
 			<monitoringControlElementAspects ... xsi:type="monitoringcontrolmodel:EngineeringParameter">
 				<defaultValue value="..." xmi:id="_1" xsi:type="monitoringcontrolmodel:ParameterEngValue"/>
@@ -448,13 +456,13 @@ public abstract class CdmFileBase extends XmlFile {
 						break;
 				}
 				break;
-				
+
 			case "1.12.1":
 				switch (dest) {
 					// down
 					case "1.12":
 						break;
-					
+
 					// up
 					case "1.13.0bd1":
 						// deleting the isModified attribute (see example 1) is NOT necessary, as it is still valid in 1.13.0bd1
@@ -481,7 +489,7 @@ public abstract class CdmFileBase extends XmlFile {
 							domSetAttributeForElems("innerParameters", "xsi:type", "container:InnerParameter");
 							domRenameElems("innerParameters", "innerElements");
 						}
-						
+
 						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
 							// rename globalWaitingMagin to globalWaitingMargin
 							domRenameAttributes("applicationProcess", "globalWaitingMagin", "globalWaitingMargin");
@@ -502,7 +510,7 @@ public abstract class CdmFileBase extends XmlFile {
 						break;
 				}
 				break;
-				
+
 			case "1.13.0bd1":
 				switch (dest) {
 					// down
@@ -554,7 +562,7 @@ public abstract class CdmFileBase extends XmlFile {
 							domRemoveAttributeFromElems("innerParameters", "xsi:type");
 							*/
 						}
-						
+
 						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
 							// rename globalWaitingMargin back to globalWaitingMagin
 							domRenameAttributes("applicationProcess", "globalWaitingMargin", "globalWaitingMagin");
@@ -577,7 +585,7 @@ public abstract class CdmFileBase extends XmlFile {
 						// errors in the mcde, as it just ignores additional attributes...)
 
 						break;
-					
+
 					// up
 					case "1.14.0b":
 						// adjust names of arguments as seen in example 2
@@ -643,7 +651,7 @@ public abstract class CdmFileBase extends XmlFile {
 								}
 							}
 						}
-						
+
 						// adjust packets - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
 							// add the packetType to the packets based on the sourceType of a contained pktParameter
@@ -678,7 +686,7 @@ public abstract class CdmFileBase extends XmlFile {
 						break;
 				}
 				break;
-				
+
 			case "1.14.0b":
 				switch (dest) {
 					// down
@@ -700,7 +708,7 @@ public abstract class CdmFileBase extends XmlFile {
 								"xsi:type", "monitoringcontrolcommon:EnumerationDataType",
 								"enumerationLiterals");
 						}
-						
+
 						// adjust packets back - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
 							// TODO :: this could also be set to "Command" - to figure out which one it is,
@@ -729,7 +737,7 @@ public abstract class CdmFileBase extends XmlFile {
 						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();
 
 						break;
-					
+
 					// up
 					case "1.14.0":
 						// adjust parameter raw to eng as seen in example 2
@@ -760,11 +768,11 @@ public abstract class CdmFileBase extends XmlFile {
 								}
 							}
 						}
-						
+
 						break;
 				}
 				break;
-				
+
 			case "1.14.0":
 				switch (dest) {
 					// down
@@ -797,7 +805,7 @@ public abstract class CdmFileBase extends XmlFile {
 								}
 							}
 						}
-						
+
 						break;
 				}
 				break;
