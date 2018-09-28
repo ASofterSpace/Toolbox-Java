@@ -67,7 +67,7 @@ public class CdmCtrl {
 	private static final String TMPL_ROOT_ROUTE_SAP_SHORT = "root_route_sap";
 	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE = "Root Element with Route, SAP and Example Data Type";
 	private static final String TMPL_ROOT_ROUTE_SAP_EX_TYPE_SHORT = "root_route_sap_ex_type";
-	
+
 	static final String CI_MCM = "configurationcontrol:McmCI";
 	static final String CI_SCRIPT = "configurationcontrol:ScriptCI";
 	static final String CI_SCRIPT_TO_ACTIVITY = "configurationcontrol:Script2ActivityMapperCI";
@@ -111,24 +111,24 @@ public class CdmCtrl {
 
 	private static Directory lastLoadedDirectory;
 
-	
+
 	private static void initCdmCtrl() {
-	
+
 		fileList = new HashSet<>();
 		ciMap = new HashMap<>();
 	}
-	
+
 	private static void initFullModel() {
-	
+
 		xmiIdMap = new HashMap<>();
-		
+
 		mces = new HashSet<>();
 		activities = new HashSet<>();
 		scripts = new HashSet<>();
 		scriptToActivityMappings = new HashSet<>();
 		procedures = new HashSet<>();
 		procedureToActivityMappings = new HashSet<>();
-		
+
 		mcmTreeRoots = new HashSet<>();
 	}
 
@@ -137,7 +137,7 @@ public class CdmCtrl {
 	public static void loadCdmDirectory(Directory cdmDir, ProgressIndicator progress) throws AttemptingEmfException, CdmLoadingException {
 
 		loadCdmDirectoryFaster(cdmDir, progress);
-		
+
 		// reload the model once, after all the CDM files have been loaded
 		reloadModel();
 	}
@@ -149,11 +149,11 @@ public class CdmCtrl {
 	// afterwards exit (so will never use the full model, including a full MCM tree etc.), then you can call
 	// this one here :)
 	public static void loadCdmDirectoryFaster(Directory cdmDir, ProgressIndicator progress) throws AttemptingEmfException, CdmLoadingException {
-	
+
 		cdmLoaded = false;
-		
+
 		initCdmCtrl();
-		
+
 		List<File> cdmFiles = cdmDir.getAllFiles(true);
 
 		double i = 0;
@@ -181,14 +181,14 @@ public class CdmCtrl {
 			progress.done();
 		}
 	}
-	
+
 	/**
 	 * Loads just one CDM file and reloads all the models, pretending that our entire CDM was just this one file
 	 */
 	public static void loadJustOneCdmFile(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
 
 		cdmLoaded = false;
-		
+
 		initCdmCtrl();
 
 		if (cdmFile.getFilename().toLowerCase().endsWith(".cdm")) {
@@ -200,7 +200,7 @@ public class CdmCtrl {
 		lastLoadedDirectory = cdmFile.getParentDirectory();
 
 		cdmLoaded = true;
-	
+
 		// reload the model once, after all the CDM file has been loaded
 		reloadModel();
 	}
@@ -216,7 +216,7 @@ public class CdmCtrl {
 		// as this function was called from - gasp! - the outside world, we have to reload the model now...
 		// at least for this one file ;)
 		reloadAnotherModel(result);
-		
+
 		return result;
 	}
 
@@ -242,11 +242,11 @@ public class CdmCtrl {
 		// loadCdmFileViaEMF(cdmFile);
 
 		fileList.add(result);
-		
+
 		String ciType = result.getCiType();
-		
+
 		Set<CdmFile> thisCiMap = ciMap.get(ciType);
-		
+
 		if (thisCiMap == null) {
 			thisCiMap = new HashSet<>();
 			thisCiMap.add(result);
@@ -311,54 +311,54 @@ public class CdmCtrl {
 	 * Reload the entire internal model of the CDM
 	 */
 	private static void reloadModel() {
-	
+
 		initFullModel();
-	
+
 		// load the model for each file individually
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.addContentsToCdmCtrl();
 		}
-		
+
 		// load the entire merged model (e.g. building the entire MCM tree across all files)
 		reloadMergedModel();
 	}
-	
+
 	/**
 	 * Reload the internal model of the CDM for one particular file, in addition to all others that are already there
 	 */
 	private static void reloadAnotherModel(CdmFile cdmFile) {
 
 		cdmFile.addContentsToCdmCtrl();
-		
+
 		// load the entire merged model (e.g. building the entire MCM tree across all files)
 		reloadMergedModel();
 	}
-	
+
 	/**
 	 * Adds one node to our internal model - called from cdmFile, after we call it in addContentsToCdmCtrl
 	 */
 	static void addToModel(CdmNode cdmNode) {
-	
+
 		if (cdmNode instanceof CdmScript) {
 			scripts.add((CdmScript) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmScript2Activity) {
 			scriptToActivityMappings.add((CdmScript2Activity) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmProcedure) {
 			procedures.add((CdmProcedure) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmProcedure2Activity) {
 			procedureToActivityMappings.add((CdmProcedure2Activity) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmMonitoringControlElement) {
 			mces.add((CdmMonitoringControlElement) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmActivity) {
 			activities.add((CdmActivity) cdmNode);
 		}
@@ -366,29 +366,29 @@ public class CdmCtrl {
 		// in any case, add this node to the map of all nodes
 		xmiIdMap.put(cdmNode.getId(), cdmNode);
 	}
-	
+
 	static void removeFromModel(CdmNode cdmNode) {
-	
+
 		if (cdmNode instanceof CdmScript) {
 			scripts.remove((CdmScript) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmScript2Activity) {
 			scriptToActivityMappings.remove((CdmScript2Activity) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmProcedure) {
 			procedures.remove((CdmProcedure) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmProcedure2Activity) {
 			procedureToActivityMappings.remove((CdmProcedure2Activity) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmMonitoringControlElement) {
 			mces.remove((CdmMonitoringControlElement) cdmNode);
 		}
-	
+
 		if (cdmNode instanceof CdmActivity) {
 			activities.remove((CdmActivity) cdmNode);
 		}
@@ -402,17 +402,17 @@ public class CdmCtrl {
 		// figure out what the MCM Tree Roots might be
 		reloadTreeRoots();
 	}
-	
+
 	private static void reloadTreeRoots() {
-		
+
 		// first get a list of all MCEs
 		Set<CdmMonitoringControlElement> leftOverMces = new HashSet<>(mces);
-		
+
 		// set all MCEs to being roots
 		for (CdmMonitoringControlElement mce : leftOverMces) {
 			mce.setContainingElement(null);
 		}
-		
+
 		// now let each MCE find a path towards its children
 		// (each MCE if it is root gets its children fast from our internal id map and tells them that they are not root anymore,
 		// and they tell their children - unless they already know - and update their own internal link up such that they know
@@ -428,7 +428,7 @@ public class CdmCtrl {
 			}
 		}
 	}
-	
+
 	public static boolean hasCdmBeenLoaded() {
 		return cdmLoaded;
 	}
@@ -602,17 +602,17 @@ public class CdmCtrl {
 	}
 
 	public static Set<CdmFile> getCIs(String ciName) {
-		
+
 		if (!cdmLoaded) {
 			return new HashSet<>();
 		}
-		
+
 		Set<CdmFile> result = ciMap.get(ciName);
-		
+
 		if (result == null) {
 			return new HashSet<>();
 		}
-		
+
 		return result;
 	}
 
@@ -1077,20 +1077,20 @@ public class CdmCtrl {
 
 		return true;
 	}
-	
+
 	/**
 	 * This is the quick-access version of getAllMcmTreeRoots() - here assuming that there is exactly one to be returned
 	 */
 	public static CdmMonitoringControlElement getMcmTreeRoot() {
-		
+
 		if (mcmTreeRoots == null) {
 			return null;
 		}
-		
+
 		if (mcmTreeRoots.size() > 0) {
 			return mcmTreeRoots.iterator().next();
 		}
-		
+
 		return null;
 	}
 
@@ -1099,11 +1099,11 @@ public class CdmCtrl {
 	 * one element, otherwise something is very wrong with our lovely CDM ;)
 	 */
 	public static Set<CdmMonitoringControlElement> getAllMcmTreeRoots() {
-		
+
 		if (mcmTreeRoots == null) {
 			return new HashSet<>();
 		}
-		
+
 		return mcmTreeRoots;
 	}
 
@@ -1113,54 +1113,63 @@ public class CdmCtrl {
 	 * as they should be, this here also works and is much faster - so use this function for internal access!
 	 */
 	public static CdmNode getByUuid(String ecoreUuid) {
+
+		if (ecoreUuid == null) {
+			return null;
+		}
+
+		ecoreUuid = UuidEncoderDecoder.getIdFromEcoreLink(ecoreUuid);
+
 		return xmiIdMap.get(ecoreUuid);
 	}
-	
+
 	/**
 	 * In the interest of speed when calling this function, you have to ensure that the UUID
 	 * is also an Ecore one! No passing Java UUIDs to this function, you! :P
 	 */
 	public static List<CdmNode> findByUuid(String ecoreUuid) {
-	
+
+		ecoreUuid = UuidEncoderDecoder.getIdFromEcoreLink(ecoreUuid);
+
 		List<CdmNode> result = new ArrayList<>();
-		
+
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.findByUuid(ecoreUuid, result);
 		}
-		
+
 		return result;
 	}
-	
+
 	public static List<CdmNode> findByName(String name) {
-	
+
 		List<CdmNode> result = new ArrayList<>();
-		
+
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.findByName(name, result);
 		}
-		
+
 		return result;
 	}
-	
+
 	public static List<CdmNode> findByType(String type) {
-	
+
 		List<CdmNode> result = new ArrayList<>();
-		
+
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.findByType(type, result);
 		}
-		
+
 		return result;
 	}
-	
+
 	public static List<CdmNode> findByXmlTag(String xmlTag) {
-	
+
 		List<CdmNode> result = new ArrayList<>();
-		
+
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.findByXmlTag(xmlTag, result);
 		}
-		
+
 		return result;
 	}
 

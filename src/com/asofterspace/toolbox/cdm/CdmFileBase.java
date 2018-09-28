@@ -627,9 +627,37 @@ public abstract class CdmFileBase extends XmlFile {
 							for (Element argument : elems) {
 								Node argname = argument.getAttributes().getNamedItem("name");
 								if (argname == null) {
-									// TODO :: get the name of the definition instead, if there is one available
-									// (however, also sanitize that name for Automation - so only ASCII letters,
-									// and in positions other than the first ASCII digits)
+
+									// try getting the name from the definition, any definition will do - this is REALLY HELPFUL,
+									// as then then automation scripts keep working!
+									CdmNode node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "engineeringArgumentDefinition"));
+									if (node == null) {
+										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "repeatArgumentDefinition"));
+									}
+									if (node == null) {
+										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "deducedArgumentDefinition"));
+									}
+									if (node == null) {
+										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "activityCallArgumentDefinition"));
+									}
+									if (node == null) {
+										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "aggregateArgumentDefinition"));
+									}
+									if (node == null) {
+										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "matrixArgumentDefinition"));
+									}
+									if (node == null) {
+										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "selectionArgumentDefinition"));
+									}
+
+									if (node != null) {
+										if (node.getName() != null) {
+											argument.setAttribute("name", node.getName());
+											continue;
+										}
+									}
+
+									// if no name could be found, set a silly default name
 									argument.setAttribute("name", "argument_" + newargcounter);
 									newargcounter++;
 								}
@@ -784,6 +812,30 @@ public abstract class CdmFileBase extends XmlFile {
 							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantitiesCI");
 						}
 
+						// update automation imports
+						// (could also be a 1.14.0b > 1.14.0 change instead!)
+						// TODO :: also update the internal procedure cdm nodes!
+						if ("configurationcontrol:ProcedureCI".equals(getCiType())) {
+
+							List<Element> procedures = domGetElems("procedure");
+
+							for (Element procedure : procedures) {
+								Node procedureContent = procedure.getAttributes().getNamedItem("procedureContent");
+
+								if (procedureContent == null) {
+									continue;
+								}
+
+								String content = procedureContent.getNodeValue();
+
+								if (content.contains("esa.egscc.test.area.IA08.")) {
+									content = content.replaceAll("esa.egscc.test.area.IA08.", "esa.egscc.mcm.");
+
+									procedure.setAttribute("procedureContent", content);
+								}
+							}
+						}
+
 						// do not remove the namespace for containers and friends, as the field still exists in 1.14.0b
 
 						break;
@@ -891,6 +943,30 @@ public abstract class CdmFileBase extends XmlFile {
 						// rename units and quantities CI back
 						if ("configurationcontrol:UnitsAndQuantitiesCI".equals(getCiType())) {
 							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantatiesCI");
+						}
+
+						// update automation imports back
+						// (could also be a 1.14.0b > 1.14.0 change instead!)
+						// TODO :: also update the internal procedure cdm nodes!
+						if ("configurationcontrol:ProcedureCI".equals(getCiType())) {
+
+							List<Element> procedures = domGetElems("procedure");
+
+							for (Element procedure : procedures) {
+								Node procedureContent = procedure.getAttributes().getNamedItem("procedureContent");
+
+								if (procedureContent == null) {
+									continue;
+								}
+
+								String content = procedureContent.getNodeValue();
+
+								if (content.contains("esa.egscc.mcm.")) {
+									content = content.replaceAll("esa.egscc.mcm.", "esa.egscc.test.area.IA08.");
+
+									procedure.setAttribute("procedureContent", content);
+								}
+							}
 						}
 
 						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();

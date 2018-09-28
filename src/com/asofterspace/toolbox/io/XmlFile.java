@@ -52,7 +52,7 @@ public class XmlFile extends File {
 
 		regularFile.copyTo(this);
 	}
-	
+
 	/**
 	 * By default, the DOM stuff in Java does NOT intern strings that are often found again and again, leading to
 	 * insanely large memory requirements... however, with this helper method we can intern at least some often-
@@ -61,25 +61,25 @@ public class XmlFile extends File {
 	 * TODO :: in the foreseeable future, write our own, even-much-better XML parser :D
 	 */
 	private void internAllStrings(Element curNode) {
-	
+
 		if (!curNode.getNodeName().contains(":")) {
 			getDocument().renameNode(curNode, null, curNode.getNodeName().intern());
 		}
-		
+
 		NamedNodeMap attrs = curNode.getAttributes();
-		
+
 		if (attrs != null) {
 			for (int i = 0; i < attrs.getLength(); i++) {
 				curNode.setAttribute(attrs.item(i).getNodeName().intern(), attrs.item(i).getNodeValue().intern());
 			}
 		}
-		
+
 		NodeList children = curNode.getChildNodes();
-		
+
 		if (children == null) {
 			return;
 		}
-		
+
 		int childrenLen = children.getLength();
 
 		for (int j = 0; j < childrenLen; j++) {
@@ -105,11 +105,11 @@ public class XmlFile extends File {
 			xmlcontents.getDocumentElement().normalize();
 
 			mode = XmlMode.XML_LOADED;
-			
+
 			internAllStrings(xmlcontents.getDocumentElement());
 
 		} catch (Exception xE) {
-		
+
 			// oh no - REGULAR xml, this was not!
 			// maybe it is a binary file...
 			// we can try to decode EMF binary manually - let's see how well we are doing!
@@ -171,7 +171,7 @@ public class XmlFile extends File {
 							((j == 7) && (cur != (byte)0x0a))) {
 							throw new IOException("The file is neither valid XML nor a valid EMF binary file (the signature is invalid)!");
 						}
-						
+
 						// sooo we encountered an EMF file... but that is all, we do not attempt to parse it!
 						if (j > 7) {
 							mode = XmlMode.EMF_LOADED;
@@ -360,14 +360,14 @@ public class XmlFile extends File {
 	}
 
 	public XmlMode getMode() {
-	
+
 		if (xmlcontents == null) {
 			loadXmlContents();
 		}
 
 		return mode;
 	}
-	
+
 	/**
 	 * Checks if there are any elements in the current DOM whose tag starts with the given prefix;
 	 * returns true if such elements can be found and false otherwise
@@ -376,25 +376,25 @@ public class XmlFile extends File {
 
 		return domIsTagPrefixInUseForSubTree(prefix, getRoot());
 	}
-	
+
 	private boolean domIsTagPrefixInUseForSubTree(String prefix, Node subTreeRoot) {
-	
+
 		if (subTreeRoot.getNodeName().startsWith(prefix)) {
 			return true;
 		}
-	
+
 		NodeList children = subTreeRoot.getChildNodes();
-		
+
 		if (children == null) {
 			return false;
 		}
-		
+
 		int childrenLen = children.getLength();
 
 		for (int i = 0; i < childrenLen; i++) {
-			
+
 			Node childNode = children.item(i);
-			
+
 			// ignore children that are not full elements
 			if (childNode instanceof Element) {
 				if (domIsTagPrefixInUseForSubTree(prefix, childNode)) {
@@ -402,7 +402,7 @@ public class XmlFile extends File {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -538,6 +538,39 @@ public class XmlFile extends File {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Assuming that we have <element attrOrChildName="_bla"/> or
+	 * <element><attrOrChildName href="_bla"/></element>, this function
+	 * returns _bla (or null if it finds neither)
+	 */
+	public String domGetLinkFromAttrOrChild(Node element, String attrOrChildName) {
+
+		Node elAttr = element.getAttributes().getNamedItem(attrOrChildName);
+
+		if (elAttr != null) {
+			return elAttr.getNodeValue();
+		}
+
+		// if we did not find an attrOrChildName as attribute, maybe we can find one as child?
+		NodeList children = element.getChildNodes();
+		if (children != null) {
+			int childrenLen = children.getLength();
+
+			for (int j = 0; j < childrenLen; j++) {
+				Node childNode = children.item(j);
+				if (attrOrChildName.equals(childNode.getNodeName())) {
+					Node href = childNode.getAttributes().getNamedItem("href");
+
+					if (href != null) {
+						return href.getNodeValue();
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public void domSetAttributeForElems(String tagName, String setAttributeName, String setAttributeValue) {
@@ -794,6 +827,7 @@ public class XmlFile extends File {
 	}
 
 	public void domRenameElems(String fromTagName, String toTagName) {
+
 		NodeList elems = getDocument().getElementsByTagName(fromTagName);
 		if (elems != null) {
 			int len = elems.getLength();
@@ -806,6 +840,7 @@ public class XmlFile extends File {
 	}
 
 	public void domRenameElems(String fromTagName, String hasAttributeName, String hasAttributeValue, String toTagName) {
+
 		NodeList elems = getDocument().getElementsByTagName(fromTagName);
 		if (elems != null) {
 			int len = elems.getLength();
@@ -878,6 +913,7 @@ public class XmlFile extends File {
 	}
 
 	public void domRenameAttributes(String tagName, String fromAttributeName, String toAttributeName) {
+
 		NodeList elems = getDocument().getElementsByTagName(tagName);
 		if (elems != null) {
 			int len = elems.getLength();
@@ -897,6 +933,7 @@ public class XmlFile extends File {
 	}
 
 	public void domRenameAttributes(String tagName, String hasAttributeName, String hasAttributeValue, String fromAttributeName, String toAttributeName) {
+
 		NodeList elems = getDocument().getElementsByTagName(tagName);
 		if (elems != null) {
 			int len = elems.getLength();
@@ -924,7 +961,7 @@ public class XmlFile extends File {
 
 		saveTo(this);
 	}
-	
+
 	public void saveTo(File newLocation) {
 
 		saveTo(newLocation.filename);
@@ -936,7 +973,7 @@ public class XmlFile extends File {
 
 		// create parent directories
 		getJavaFile().getParentFile().mkdirs();
-				
+
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
