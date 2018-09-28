@@ -20,9 +20,9 @@ public class CdmScript extends CdmNode {
 		this.content = getValue("scriptContent");
 	}
 	
-	public CdmScript(CdmFile parentFile, Node thisNode) {
+	public CdmScript(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
 
-		this(new CdmNode(parentFile, thisNode));
+		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
 
 	public String getSourceCode() {
@@ -52,7 +52,7 @@ public class CdmScript extends CdmNode {
 
 		Set<CdmScript2Activity> results = new HashSet<>();
 
-		Set<CdmScript2Activity> script2Activities = CdmCtrl.getScriptToActivityMappings();
+		Set<CdmScript2Activity> script2Activities = cdmCtrl.getScriptToActivityMappings();
 
 		for (CdmScript2Activity script2Activity : script2Activities) {
 			// check if a script to activity mapper maps the script id of this particular script!

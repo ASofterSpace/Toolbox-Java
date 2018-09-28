@@ -26,9 +26,11 @@ public class CdmNode {
 	protected String type;
 
 	protected String id;
+	
+	protected CdmCtrl cdmCtrl;
 
 
-	public CdmNode(CdmFile parentFile, Node thisNode) {
+	public CdmNode(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
 
 		this.parentFile = parentFile;
 
@@ -43,6 +45,8 @@ public class CdmNode {
 		this.type = getValue("xsi:type");
 		
 		this.id = getValue("xmi:id");
+		
+		this.cdmCtrl = cdmCtrl;
 	}
 	
 	public CdmNode(CdmNode other) {
@@ -53,6 +57,7 @@ public class CdmNode {
 		namespace = other.namespace;
 		type = other.type;
 		id = other.id;
+		cdmCtrl = other.cdmCtrl;
 	}
 
 	public String getValue(String key) {
@@ -118,7 +123,7 @@ public class CdmNode {
 		thisNode.getParentNode().removeChild(thisNode);
 		
 		// delete this from the full model in the controller
-		CdmCtrl.removeFromModel(this);
+		cdmCtrl.removeFromModel(this);
 	}
 
 	/**

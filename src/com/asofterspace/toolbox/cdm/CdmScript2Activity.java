@@ -62,9 +62,9 @@ public class CdmScript2Activity extends CdmNode {
 		}
 	}
 
-	public CdmScript2Activity(CdmFile parentFile, Node thisNode) {
+	public CdmScript2Activity(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
 
-		this(new CdmNode(parentFile, thisNode));
+		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
 
 	public boolean mapsScript(String scriptId) {
@@ -101,7 +101,7 @@ public class CdmScript2Activity extends CdmNode {
 			return null;
 		}
 		
-		Set<CdmActivity> activities = CdmCtrl.getActivities();
+		Set<CdmActivity> activities = cdmCtrl.getActivities();
 		
 		if (activities == null) {
 			return null;

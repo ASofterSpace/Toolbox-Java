@@ -21,6 +21,8 @@ import org.w3c.dom.NodeList;
  */
 public abstract class CdmFileBase extends XmlFile {
 
+	protected CdmCtrl cdmCtrl;
+
 	protected boolean deleted = false;
 
 	protected String ciType;
@@ -28,9 +30,11 @@ public abstract class CdmFileBase extends XmlFile {
 	/**
 	 * You can construct a CdmFile instance by basing it on an existing file object.
 	 */
-	public CdmFileBase(File regularFile) {
+	public CdmFileBase(File regularFile, CdmCtrl cdmCtrl) {
 
 		super(regularFile);
+
+		this.cdmCtrl = cdmCtrl;
 
 		Node root = getRoot();
 
@@ -630,24 +634,24 @@ public abstract class CdmFileBase extends XmlFile {
 
 									// try getting the name from the definition, any definition will do - this is REALLY HELPFUL,
 									// as then then automation scripts keep working!
-									CdmNode node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "engineeringArgumentDefinition"));
+									CdmNode node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "engineeringArgumentDefinition"));
 									if (node == null) {
-										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "repeatArgumentDefinition"));
+										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "repeatArgumentDefinition"));
 									}
 									if (node == null) {
-										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "deducedArgumentDefinition"));
+										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "deducedArgumentDefinition"));
 									}
 									if (node == null) {
-										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "activityCallArgumentDefinition"));
+										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "activityCallArgumentDefinition"));
 									}
 									if (node == null) {
-										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "aggregateArgumentDefinition"));
+										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "aggregateArgumentDefinition"));
 									}
 									if (node == null) {
-										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "matrixArgumentDefinition"));
+										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "matrixArgumentDefinition"));
 									}
 									if (node == null) {
-										node = CdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "selectionArgumentDefinition"));
+										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "selectionArgumentDefinition"));
 									}
 
 									if (node != null) {
@@ -757,7 +761,7 @@ public abstract class CdmFileBase extends XmlFile {
 											}
 
 											// get that pktParameter instance from CdmCtrl
-											CdmNode pktParameterNode = CdmCtrl.getByUuid(parameterAttr.getNodeValue());
+											CdmNode pktParameterNode = cdmCtrl.getByUuid(parameterAttr.getNodeValue());
 
 											if (pktParameterNode == null) {
 												continue;
@@ -904,7 +908,7 @@ public abstract class CdmFileBase extends XmlFile {
 								}
 
 								// get that pktParameter instance from CdmCtrl
-								CdmNode pktParameterNode = CdmCtrl.getByUuid(parameterAttr.getNodeValue());
+								CdmNode pktParameterNode = cdmCtrl.getByUuid(parameterAttr.getNodeValue());
 
 								if (pktParameterNode == null) {
 									continue;

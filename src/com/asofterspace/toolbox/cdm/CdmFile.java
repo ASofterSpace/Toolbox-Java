@@ -26,9 +26,9 @@ public class CdmFile extends CdmFileBase {
 	/**
 	 * You can construct a CdmFile instance by basing it on an existing file object.
 	 */
-	public CdmFile(File regularFile) {
+	public CdmFile(File regularFile, CdmCtrl cdmCtrl) {
 
-		super(regularFile);
+		super(regularFile, cdmCtrl);
 	}
 
 	void addContentsToCdmCtrl() {
@@ -72,7 +72,7 @@ public class CdmFile extends CdmFileBase {
 		// now actually add the current node to the internal model in the controller - first to specialized lists, and then to the full id map...
 		String nodeName = curNode.getNodeName();
 
-		CdmNode cdmNode = new CdmNode(this, curNode);
+		CdmNode cdmNode = new CdmNode(this, curNode, cdmCtrl);
 
 		switch (ciType) {
 
@@ -119,7 +119,7 @@ public class CdmFile extends CdmFileBase {
 		}
 
 		// update cdm ctrl model with the new node
-		CdmCtrl.addToModel(cdmNode);
+		cdmCtrl.addToModel(cdmNode);
 
 		// it has been confirmed, this node is of interest to us... let's recursively call ourselves for all the children
 		NodeList children = curNode.getChildNodes();
@@ -134,7 +134,7 @@ public class CdmFile extends CdmFileBase {
 
 	public String getPathRelativeToCdmRoot() {
 
-		Directory cdmRootDir = CdmCtrl.getLastLoadedDirectory();
+		Directory cdmRootDir = cdmCtrl.getLastLoadedDirectory();
 		Path cdmRootPath = cdmRootDir.getJavaFile().toPath().toAbsolutePath();
 		Path cdmFilePath = getJavaFile().toPath().toAbsolutePath();
 
@@ -170,10 +170,10 @@ public class CdmFile extends CdmFileBase {
 
 		getRoot().appendChild(newMapping);
 
-		CdmScript2Activity newNode = new CdmScript2Activity(this, newMapping);
+		CdmScript2Activity newNode = new CdmScript2Activity(this, newMapping, cdmCtrl);
 		
 		// update cdm ctrl model with the new node
-		CdmCtrl.addToModel(newNode);
+		cdmCtrl.addToModel(newNode);
 		
 		return newNode;
 	}
@@ -202,7 +202,7 @@ public class CdmFile extends CdmFileBase {
 			Node resultNode = attributes.getNamedItem(key);
 			if (resultNode != null) {
 				if (value.equals(resultNode.getNodeValue())) {
-						result.add(new CdmNode(this, currentNode));
+						result.add(new CdmNode(this, currentNode, cdmCtrl));
 				}
 			}
 		}
@@ -221,7 +221,7 @@ public class CdmFile extends CdmFileBase {
 		int len = elements.getLength();
 
 		for (int i = 0; i < len; i++) {
-			result.add(new CdmNode(this, elements.item(i)));
+			result.add(new CdmNode(this, elements.item(i), cdmCtrl));
 		}
 	}
 

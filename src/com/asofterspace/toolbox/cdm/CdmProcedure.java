@@ -20,9 +20,9 @@ public class CdmProcedure extends CdmNode {
 		this.content = getValue("procedureContent");
 	}
 	
-	public CdmProcedure(CdmFile parentFile, Node thisNode) {
+	public CdmProcedure(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
 
-		this(new CdmNode(parentFile, thisNode));
+		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
 
 	public String getSourceCode() {
@@ -52,7 +52,7 @@ public class CdmProcedure extends CdmNode {
 
 		Set<CdmProcedure2Activity> results = new HashSet<>();
 
-		Set<CdmProcedure2Activity> procedure2Activities = CdmCtrl.getProcedureToActivityMappings();
+		Set<CdmProcedure2Activity> procedure2Activities = cdmCtrl.getProcedureToActivityMappings();
 
 		for (CdmProcedure2Activity procedure2Activity : procedure2Activities) {
 			// check if a procedure to activity mapper maps the procedure id of this particular procedure!

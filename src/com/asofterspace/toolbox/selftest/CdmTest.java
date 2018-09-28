@@ -35,13 +35,15 @@ public class CdmTest implements Test {
 	public void createAndValidateCdmTest() {
 
 		TestUtils.start("Create and Validate CDM");
+		
+		CdmCtrl cdmCtrl = new CdmCtrl();
 
 		// ensure the directory is clear
 		Directory testDir = new Directory("test");
 		testDir.clear();
 
 		try {
-			Boolean creationResult = CdmCtrl.createNewCdm(CDM_TEST_PATH, "1.14.0", "http://www.esa.int/egscc/", "root_route_sap_ex_type");
+			Boolean creationResult = cdmCtrl.createNewCdm(CDM_TEST_PATH, "1.14.0", "http://www.esa.int/egscc/", "root_route_sap_ex_type");
 
 			if (!(creationResult == true)) {
 				TestUtils.fail("We tried to create a new CDM, the creation result was not true!");
@@ -50,7 +52,7 @@ public class CdmTest implements Test {
 
 			List<String> problems = new ArrayList<>();
 
-			int valid = CdmCtrl.checkValidity(problems);
+			int valid = cdmCtrl.checkValidity(problems);
 
 			if (valid != 0) {
 				TestUtils.fail("We tried to create a new CDM, but when validating the created CDM it seemed invalid!");
@@ -68,19 +70,21 @@ public class CdmTest implements Test {
 
 		TestUtils.start("Find Entity in CDM");
 
+		CdmCtrl cdmCtrl = new CdmCtrl();
+
 		// we know that the previous test just ran, so we can attempt to read stuff out from that test... :)
 
 		Directory cdmDir = new Directory(CDM_TEST_PATH);
 		ProgressIndicator noProgress = new NoOpProgressIndicator();
 
 		try {
-			CdmCtrl.loadCdmDirectory(cdmDir, noProgress);
+			cdmCtrl.loadCdmDirectory(cdmDir, noProgress);
 		} catch (AttemptingEmfException | CdmLoadingException e) {
 			TestUtils.fail("We tried to load a CDM, but got this exception: " + e.getMessage());
 			return;
 		}
 
-		List<CdmNode> foundNodes = CdmCtrl.findByName("mcmRoot");
+		List<CdmNode> foundNodes = cdmCtrl.findByName("mcmRoot");
 		CdmNode foundNode;
 
 		if (foundNodes.size() == 1) {
@@ -98,21 +102,21 @@ public class CdmTest implements Test {
 			return;
 		}
 
-		foundNodes = CdmCtrl.findByUuid(foundNode.getId());
+		foundNodes = cdmCtrl.findByUuid(foundNode.getId());
 
 		if (foundNodes.size() != 1) {
 			TestUtils.fail("We wanted to find one node with a specific UUID, but we found " + foundNodes.size() + "!");
 			return;
 		}
 
-		foundNode = CdmCtrl.getByUuid(foundNode.getId());
+		foundNode = cdmCtrl.getByUuid(foundNode.getId());
 
 		if (foundNode == null) {
 			TestUtils.fail("We wanted to find one node with a specific UUID, but we could not actually find it!");
 			return;
 		}
 
-		foundNodes = CdmCtrl.findByXmlTag("monitoringControlElementDefinition");
+		foundNodes = cdmCtrl.findByXmlTag("monitoringControlElementDefinition");
 
 		if (foundNodes.size() == 1) {
 			foundNode = foundNodes.get(0);
@@ -136,26 +140,28 @@ public class CdmTest implements Test {
 		
 		TestUtils.start("Convert CDM Packet CIs");
 
+		CdmCtrl cdmCtrl = new CdmCtrl();
+
 		// convert from 1.13.0bd1 to 1.14.0b
 		Directory cdmDir = new Directory("testdata/cdm/convertCdmPacketCIsTest1");
 		ProgressIndicator noProgress = new NoOpProgressIndicator();
 
 		try {
-			CdmCtrl.loadCdmDirectory(cdmDir, noProgress);
+			cdmCtrl.loadCdmDirectory(cdmDir, noProgress);
 		} catch (AttemptingEmfException | CdmLoadingException e) {
 			TestUtils.fail("We tried to load a CDM, but got this exception: " + e.getMessage());
 			return;
 		}
 		
-		CdmCtrl.convertTo("1.14.0b", null);
+		cdmCtrl.convertTo("1.14.0b", null);
 		
-		Set<CdmFile> files = CdmCtrl.getCdmFiles();
+		Set<CdmFile> files = cdmCtrl.getCdmFiles();
 		
 		CdmFile file = files.iterator().next();
 		
 		List<Element> packets = file.domGetElems("packet");
 		for (Element packet : packets) {
-			CdmNode cdmPacket = new CdmNode(file, packet);
+			CdmNode cdmPacket = new CdmNode(file, packet, cdmCtrl);
 			switch (cdmPacket.getName()) {
 				case "PacketWithTMOnly":
 				case "PacketWithTMandTC":
@@ -181,21 +187,21 @@ public class CdmTest implements Test {
 		noProgress = new NoOpProgressIndicator();
 
 		try {
-			CdmCtrl.loadCdmDirectory(cdmDir, noProgress);
+			cdmCtrl.loadCdmDirectory(cdmDir, noProgress);
 		} catch (AttemptingEmfException | CdmLoadingException e) {
 			TestUtils.fail("We tried to load a CDM, but got this exception: " + e.getMessage());
 			return;
 		}
 		
-		CdmCtrl.convertTo("1.13.0bd1", null);
+		cdmCtrl.convertTo("1.13.0bd1", null);
 		
-		files = CdmCtrl.getCdmFiles();
+		files = cdmCtrl.getCdmFiles();
 		
 		file = files.iterator().next();
 		
 		List<Element> pktParameters = file.domGetElems("pktParameter");
 		for (Element pktParameter : pktParameters) {
-			CdmNode cdmPktParameter = new CdmNode(file, pktParameter);
+			CdmNode cdmPktParameter = new CdmNode(file, pktParameter, cdmCtrl);
 			if (cdmPktParameter.getName().startsWith("paraTM")) {
 				if (!"Telemetry".equals(cdmPktParameter.getValue("sourceType"))) {
 					TestUtils.fail("While converting the PacketCI, the pktParameter " + cdmPktParameter.getName() + " did not receive the expected sourceType!");

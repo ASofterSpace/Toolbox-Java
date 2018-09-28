@@ -78,9 +78,9 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		this.subElements = new ArrayList<>();
 	}
 	
-	public CdmMonitoringControlElement(CdmFile parentFile, Node thisNode) {
+	public CdmMonitoringControlElement(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
 
-		this(new CdmNode(parentFile, thisNode));
+		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
 
 	public List<String> getSubElementIds() {
@@ -133,10 +133,10 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		
 		thisNode.appendChild(newActivity);
 		
-		CdmActivity activityNode = new CdmActivity(getParentFile(), newActivity);
+		CdmActivity activityNode = new CdmActivity(getParentFile(), newActivity, cdmCtrl);
 		
 		// update cdm ctrl model with the new node
-		CdmCtrl.addToModel(activityNode);
+		cdmCtrl.addToModel(activityNode);
 		
 		return activityNode;
 	}
@@ -168,7 +168,7 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 	// that is asked for later for the validation to validate that no node has two parents!)
 	public void initSubTreeFromHere() {
 		for (String id : subElementIds) {
-			CdmNode subNode = CdmCtrl.getByUuid(id);
+			CdmNode subNode = cdmCtrl.getByUuid(id);
 			if (subNode instanceof CdmMonitoringControlElement) {
 				((CdmMonitoringControlElement) subNode).setContainingElement(this);
 				subElements.add((CdmMonitoringControlElement) subNode);

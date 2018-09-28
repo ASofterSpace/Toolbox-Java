@@ -62,9 +62,9 @@ public class CdmProcedure2Activity extends CdmNode {
 		}
 	}
 
-	public CdmProcedure2Activity(CdmFile parentFile, Node thisNode) {
+	public CdmProcedure2Activity(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
 
-		this(new CdmNode(parentFile, thisNode));
+		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
 
 	public boolean mapsProcedure(String procedureId) {
@@ -101,7 +101,7 @@ public class CdmProcedure2Activity extends CdmNode {
 			return null;
 		}
 		
-		Set<CdmActivity> activities = CdmCtrl.getActivities();
+		Set<CdmActivity> activities = cdmCtrl.getActivities();
 		
 		if (activities == null) {
 			return null;
