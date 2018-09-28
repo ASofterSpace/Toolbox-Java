@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 
+
 /**
  * An xml file object describes a single xml file and enables simple access to
  * its contents.
@@ -665,57 +666,89 @@ public class XmlFile extends File {
 		}
 	}
 
+	/**
+	 * This is a quite optimized way for removing children of elemens... please make sure that
+	 * you never remove children inside removed children, as this function will not perform any
+	 * checks against that!
+	 */
 	public void domRemoveChildrenFromElems(String tagName, String removeChildName) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
+		// search for the children first, and then for each one check if the parents are correct...
+		NodeList elems = getDocument().getElementsByTagName(removeChildName);
+
 		if (elems != null) {
 			int len = elems.getLength();
 
+			// create a buffer of elements, speeding this function call up from 6 minutes to 1 second
+			List<Element> elemBuffer = new ArrayList<>(len);
+
 			for (int i = 0; i < len; i++) {
+
 				Node elem = elems.item(i);
-				NodeList children = elem.getChildNodes();
-				if (children == null) {
-					break;
-				}
-				int childrenLen = children.getLength();
 
-				for (int j = childrenLen - 1; j >= 0; j--) {
-					Node childNode = children.item(j);
-					if (removeChildName.equals(childNode.getNodeName())) {
-						elem.removeChild(childNode);
-					}
+				if (elem instanceof Element) {
+					elemBuffer.add((Element) elem);
+				}
+			}
+
+			// use the buffer to actually remove the elements in question
+			for (Element elem : elemBuffer) {
+
+				Node parent = elem.getParentNode();
+
+				if (parent == null) {
+					continue;
 				}
 
+				if (tagName.equals(parent.getNodeName())) {
+					parent.removeChild(elem);
+				}
 			}
 		}
 	}
 
+	/**
+	 * This is a quite optimized way for removing children of elemens... please make sure that
+	 * you never remove children inside removed children, as this function will not perform any
+	 * checks against that!
+	 */
 	public void domRemoveChildrenFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeChildName) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
+		// search for the children first, and then for each one check if the parents are correct...
+		NodeList elems = getDocument().getElementsByTagName(removeChildName);
+
 		if (elems != null) {
 			int len = elems.getLength();
 
-			for (int i = 0; i < len; i++) {
-				Node elem = elems.item(i);
-				Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-				if (elemAttr != null) {
-					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-						NodeList children = elem.getChildNodes();
-						if (children == null) {
-							break;
-						}
-						int childrenLen = children.getLength();
+			// create a buffer of elements, speeding this function call up from 6 minutes to 1 second
+			List<Element> elemBuffer = new ArrayList<>(len);
 
-						for (int j = childrenLen - 1; j >= 0; j--) {
-							Node childNode = children.item(j);
-							if (removeChildName.equals(childNode.getNodeName())) {
-								elem.removeChild(childNode);
-							}
+			for (int i = 0; i < len; i++) {
+
+				Node elem = elems.item(i);
+
+				if (elem instanceof Element) {
+					elemBuffer.add((Element) elem);
+				}
+			}
+
+			// use the buffer to actually remove the elements in question
+			for (Element elem : elemBuffer) {
+
+				Node parent = elem.getParentNode();
+
+				if (parent == null) {
+					continue;
+				}
+
+				if (tagName.equals(parent.getNodeName())) {
+					Node parentAttr = parent.getAttributes().getNamedItem(hasAttributeName);
+					if (parentAttr != null) {
+						if (hasAttributeValue.equals(parentAttr.getNodeValue())) {
+							parent.removeChild(elem);
 						}
 					}
 				}
-
 			}
 		}
 	}
