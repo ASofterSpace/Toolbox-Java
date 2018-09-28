@@ -19,6 +19,7 @@ import javax.xml.transform.TransformerFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 
@@ -51,6 +52,43 @@ public class XmlFile extends File {
 
 		regularFile.copyTo(this);
 	}
+	
+	/**
+	 * By default, the DOM stuff in Java does NOT intern strings that are often found again and again, leading to
+	 * insanely large memory requirements... however, with this helper method we can intern at least some often-
+	 * used strings in the XML, and this means that we can e.g. convert GAIA merged (which is 191 MB XML) from
+	 * one version to the next using no more than 1 GB heap (such that this even works with 32-Bit JAVA)
+	 * TODO :: in the foreseeable future, write our own, even-much-better XML parser :D
+	 */
+	private void internAllStrings(Element curNode) {
+	
+		if (!curNode.getNodeName().contains(":")) {
+			getDocument().renameNode(curNode, null, curNode.getNodeName().intern());
+		}
+		
+		NamedNodeMap attrs = curNode.getAttributes();
+		
+		if (attrs != null) {
+			for (int i = 0; i < attrs.getLength(); i++) {
+				curNode.setAttribute(attrs.item(i).getNodeName().intern(), attrs.item(i).getNodeValue().intern());
+			}
+		}
+		
+		NodeList children = curNode.getChildNodes();
+		
+		if (children == null) {
+			return;
+		}
+		
+		int childrenLen = children.getLength();
+
+		for (int j = 0; j < childrenLen; j++) {
+			Node childNode = children.item(j);
+			if (childNode instanceof Element) {
+				internAllStrings((Element) childNode);
+			}
+		}
+	}
 
 	private void loadXmlContents() {
 
@@ -67,6 +105,8 @@ public class XmlFile extends File {
 			xmlcontents.getDocumentElement().normalize();
 
 			mode = XmlMode.XML_LOADED;
+			
+			internAllStrings(xmlcontents.getDocumentElement());
 
 		} catch (Exception xE) {
 		
