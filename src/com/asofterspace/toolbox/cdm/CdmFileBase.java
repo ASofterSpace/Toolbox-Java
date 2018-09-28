@@ -453,19 +453,19 @@ public abstract class CdmFileBase extends XmlFile {
 				switch (dest) {
 					// up
 					case "1.12.1":
-					
+
 						// set name for the CI
 						switch (getCiType()) {
 							case "configurationcontrol:DataTypesCI":
 							case "configurationcontrol:McmCI":
 							case "configurationcontrol:ScriptCI":
-							
+
 								String defaultCiName = getLocalFilename();
-								
+
 								if (defaultCiName.toLowerCase().endsWith(".cdm")) {
 									defaultCiName = defaultCiName.substring(0, defaultCiName.length() - 4);
 								}
-							
+
 								domSetAttributeForElemsIfAttrIsMissing(getCiType(), "name", defaultCiName);
 								domSetAttributeForElemsIfAttrIsMissing(getCiType(), "isModified", "false");
 						}
@@ -484,7 +484,7 @@ public abstract class CdmFileBase extends XmlFile {
 					// down
 					case "1.12":
 						// TODO :: do we need to un-do adding names? (or are names for McmCIs etc. allowed, but optional in 1.12?)
-						
+
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							// rename expression back to grammarBasedExpression
 							domRenameChildrenOfElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:SyntheticParameter", "expression", "grammarBasedExpression");
@@ -628,7 +628,9 @@ public abstract class CdmFileBase extends XmlFile {
 								Node argname = argument.getAttributes().getNamedItem("name");
 								if (argname == null) {
 									// TODO :: get the name of the definition instead, if there is one available
-									argument.setAttribute("name", "Argument " + newargcounter);
+									// (however, also sanitize that name for Automation - so only ASCII letters,
+									// and in positions other than the first ASCII digits)
+									argument.setAttribute("name", "argument_" + newargcounter);
 									newargcounter++;
 								}
 							}
@@ -684,9 +686,80 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// adjust packets - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
-							// add the packetType to the packets based on the sourceType of a contained pktParameter
-							// (use TM by default, if none are contained)
-							domRemoveAttributeFromElems("packet", "packetType");
+							// Sooo a <packet> contains possibly several <parameterValues>, and each <parameterValues> has a parameter
+							// attribute with the ID of a <pktParameter>.
+							// In 1.13.0bd1, each <pktParameter> has a mandatory sourceType attribute, with the value "Telemetry",
+							// "Command" or "TelemetryAndCommand".
+							// In 1.14.0b, each <packet> has a packetType attribute with the value "TM" or "TC".
+							// So mapping from 1.14.0b back to 1.13.0bd1 is easy - set Telemetry or Command to all pktParameters depending on their
+							//   containing packet. The ones that are not contained in a packet can be Telemetry as a fine default.
+							// However, mapping from 1.13.0bd1 to 1.14.0 is potentially lossy - if a pktParameter is TelemetryAndCommand,
+							//   or if several pktParameters disagree, then the packet cannot be set to a perfect value - again, let's take
+							//   TM as default for those cases.
+
+							// So, in this direction, go through all <packet>s and get the sourceTypes of their <pktParameter>s
+							List<Element> packets = domGetElems("packet");
+							for (Element packet : packets) {
+
+								// we now iterate over all <parameterValue>s and resolve the <pktParameter>s, checking if we
+								// find "Telemetry" or "Command" or "TelemetryOrCommand" anywhere (in the end, if we found
+								// Command but nothing else, assign TC, or else if we found no Command or if we also found
+								// other entries, then assign TM)
+								boolean foundCommand = false;
+								boolean foundTelemetryOrElse = false;
+
+								// get all associated <parameterValue>s...
+								NodeList children = packet.getChildNodes();
+								if (children == null) {
+									break;
+								}
+								int childrenLen = children.getLength();
+
+								for (int j = 0; j < childrenLen; j++) {
+									Node childNode = children.item(j);
+									if (childNode instanceof Element) {
+										if ("parameterValues".equals(childNode.getNodeName())) {
+											Element parameterValue = (Element) childNode;
+
+											// get attribute "parameter"
+											Node parameterAttr = parameterValue.getAttributes().getNamedItem("parameter");
+
+											if (parameterAttr == null) {
+												continue;
+											}
+
+											// get that pktParameter instance from CdmCtrl
+											CdmNode pktParameterNode = CdmCtrl.getByUuid(parameterAttr.getNodeValue());
+
+											if (pktParameterNode == null) {
+												continue;
+											}
+
+											if (!"pktParameter".equals(pktParameterNode.getTagName())) {
+												continue;
+											}
+
+											// set the pktParameter instance sourceType accordingly
+											String sourceType = pktParameterNode.getValue("sourceType");
+
+											if ("Command".equals(sourceType)) {
+												// if we ONLY find Commands for all pktParameters, assign TC - so check further
+												foundCommand = true;
+											} else {
+												// if we found at least one pktParameter with Telemetry, assign TM - so no need for more checking
+												foundTelemetryOrElse = true;
+												break;
+											}
+										}
+									}
+								}
+
+								if (foundCommand && !foundTelemetryOrElse) {
+									packet.setAttribute("packetType", "TC");
+								} else {
+									packet.setAttribute("packetType", "TM");
+								}
+							}
 
 							domRemoveAttributeFromElems("pktParameter", "sourceType");
 						}
@@ -741,9 +814,62 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// adjust packets back - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
-							// TODO :: this could also be set to "Command" - to figure out which one it is,
-							// check which container this is used in, and which packet that one is used in,
-							// until you get up to the <packet> element with packetType="TM" or packetType="TC"
+							// Sooo a <packet> contains possibly several <parameterValues>, and each <parameterValues> has a parameter
+							// attribute with the ID of a <pktParameter>.
+							// In 1.13.0bd1, each <pktParameter> has a mandatory sourceType attribute, with the value "Telemetry",
+							// "Command" or "TelemetryAndCommand".
+							// In 1.14.0b, each <packet> has a packetType attribute with the value "TM" or "TC".
+							// So mapping from 1.14.0b back to 1.13.0bd1 is easy - set Telemetry or Command to all pktParameters depending on their
+							//   containing packet. The ones that are not contained in a packet can be Telemetry as a fine default.
+							// However, mapping from 1.13.0bd1 to 1.14.0 is potentially lossy - if a pktParameter is TelemetryAndCommand,
+							//   or if several pktParameters disagree, then the packet cannot be set to a perfect value - again, let's take
+							//   TM as default for those cases.
+
+							// So, in this direction, go through all <packets> and their <parameterValues> and set the <pktParameter> sourceType accordingly...
+							List<Element> parameterValues = domGetChildrenOfElems("packet", "parameterValues");
+							for (Element parameterValue : parameterValues) {
+
+								// figure out to what value we actually want to set the pktParameter sourceType...
+								Node packetType = parameterValue.getParentNode().getAttributes().getNamedItem("packetType");
+
+								if (packetType == null) {
+									continue;
+								}
+
+								// by default, use Telemetry...
+								String targetSourceType = "Telemetry";
+
+								// ... in case of TC, use Command!
+								if ("TC".equals(packetType.getNodeValue())) {
+									targetSourceType = "Command";
+								}
+
+								// get attribute "parameter"
+								Node parameterAttr = parameterValue.getAttributes().getNamedItem("parameter");
+
+								if (parameterAttr == null) {
+									continue;
+								}
+
+								// get that pktParameter instance from CdmCtrl
+								CdmNode pktParameterNode = CdmCtrl.getByUuid(parameterAttr.getNodeValue());
+
+								if (pktParameterNode == null) {
+									continue;
+								}
+
+								if (!"pktParameter".equals(pktParameterNode.getTagName())) {
+									continue;
+								}
+
+								// set the pktParameter instance sourceType accordingly
+								if (pktParameterNode.getNode() instanceof Element) {
+									Element pktParameterElem = (Element) pktParameterNode.getNode();
+									pktParameterElem.setAttribute("sourceType", targetSourceType);
+								}
+							}
+
+							// ... then set it to the default value for all the <pktParameter>s that are still left after this
 							domSetAttributeForElemsIfAttrIsMissing("pktParameter", "sourceType", "Telemetry");
 
 							// remove the packetType from the packets after we used it to figure out the correct sourceType for the pktParameter

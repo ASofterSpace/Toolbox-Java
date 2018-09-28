@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationcontrol:PacketCI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:configurationcontrol="http://www.esa.int/ConfigurationTracking/1.13.0bd1" xmlns:parameter="http://www.esa.int/MonitoringControlImplementation/Packetization/Packetization/Parameter/1.13.0bd1" xmi:id="______AAAAAAAAAAAAAAAAA" externalVersionLabel="A Softer Space Test Data" onlineRevisionIdentifier="0" name="PacketCI">
+  <packet xmi:id="______AAAAAAAAAAAAAAAAB" name="PacketWithTMOnly" namespace="DefaultNamespace" trailer="______AAAAAAAAAAAAAAAAC" packetTimeStamp="______AAAAAAAAAAAAAAAAD" header="______AAAAAAAAAAAAAAAAE">
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAAAF" parameter="______PPPPPPPPPPPPPPPPA">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAAAG" name="parval1" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAAAH" parameter="______PPPPPPPPPPPPPPPPB">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAAAI" name="parval2" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAAAJ" parameter="______PPPPPPPPPPPPPPPPC">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAAAK" name="parval3" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+  </packet>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPA" name="paraTM1" namespace="DefaultNamespace" sourceType="Telemetry"/>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPB" name="paraTM2" namespace="DefaultNamespace" sourceType="Telemetry"/>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPC" name="paraTM3" namespace="DefaultNamespace" sourceType="Telemetry"/>
+  <packet xmi:id="______AAAAAAAAAAAAAAAAL" name="PacketWithTCOnly" namespace="DefaultNamespace" trailer="______AAAAAAAAAAAAAAAAM" packetTimeStamp="______AAAAAAAAAAAAAAAAN" header="______AAAAAAAAAAAAAAAAO">
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAAAP" parameter="______PPPPPPPPPPPPPPPPD">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAAAQ" name="parval1" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAAAR" parameter="______PPPPPPPPPPPPPPPPE">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAAAS" name="parval2" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAAAT" parameter="______PPPPPPPPPPPPPPPPF">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAAAU" name="parval3" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+  </packet>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPD" name="paraTC1" namespace="DefaultNamespace" sourceType="Command"/>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPE" name="paraTC2" namespace="DefaultNamespace" sourceType="Command"/>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPF" name="paraTC3" namespace="DefaultNamespace" sourceType="Command"/>
+  <packet xmi:id="______AAAAAAAAAAAAAAAAV" name="PacketWithTMandTC" namespace="DefaultNamespace" trailer="______AAAAAAAAAAAAAAAAW" packetTimeStamp="______AAAAAAAAAAAAAAAAX" header="______AAAAAAAAAAAAAAAAY">
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAAAZ" parameter="______PPPPPPPPPPPPPPPPG">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAABA" name="parval1" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAABB" parameter="______PPPPPPPPPPPPPPPPH">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAABC" name="parval2" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+    <parameterValues xmi:id="______AAAAAAAAAAAAAAABD" parameter="______PPPPPPPPPPPPPPPPI">
+      <parameterValue xsi:type="parameter:PktParameterSourceValue" xmi:id="______AAAAAAAAAAAAAAABE" name="parval3" namespace="DefaultNamespace" value="1"/>
+    </parameterValues>
+  </packet>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPG" name="paraTM4" namespace="DefaultNamespace" sourceType="Telemetry"/>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPH" name="paraTC4" namespace="DefaultNamespace" sourceType="Command"/>
+  <pktParameter xsi:type="parameter:SimplePktParameter" xmi:id="______PPPPPPPPPPPPPPPPI" name="paraTMTC" namespace="DefaultNamespace" sourceType="TelemetryOrCommand"/>
+</configurationcontrol:PacketCI>

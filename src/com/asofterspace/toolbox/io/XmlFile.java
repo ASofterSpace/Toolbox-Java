@@ -436,6 +436,36 @@ public class XmlFile extends File {
 		return result;
 	}
 
+	public List<Element> domGetChildrenOfElems(String tagName, String childName) {
+
+		List<Element> result = new ArrayList<Element>();
+
+		NodeList elems = getDocument().getElementsByTagName(tagName);
+		if (elems != null) {
+			int len = elems.getLength();
+
+			for (int i = 0; i < len; i++) {
+				Node elemNode = elems.item(i);
+				NodeList children = elemNode.getChildNodes();
+				if (children == null) {
+					break;
+				}
+				int childrenLen = children.getLength();
+
+				for (int j = 0; j < childrenLen; j++) {
+					Node childNode = children.item(j);
+					if (childNode instanceof Element) {
+						if (childName.equals(childNode.getNodeName())) {
+							result.add((Element) childNode);
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
 	public List<Element> domGetChildrenOfElems(String tagName, String hasAttributeName, String hasAttributeValue) {
 
 		List<Element> result = new ArrayList<Element>();

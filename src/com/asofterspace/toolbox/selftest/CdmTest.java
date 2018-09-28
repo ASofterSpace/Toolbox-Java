@@ -1,6 +1,7 @@
 package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.cdm.CdmCtrl;
+import com.asofterspace.toolbox.cdm.CdmFile;
 import com.asofterspace.toolbox.cdm.CdmNode;
 import com.asofterspace.toolbox.cdm.exceptions.AttemptingEmfException;
 import com.asofterspace.toolbox.cdm.exceptions.CdmLoadingException;
@@ -12,6 +13,9 @@ import com.asofterspace.toolbox.utils.ProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import org.w3c.dom.Element;
 
 
 public class CdmTest implements Test {
@@ -24,6 +28,8 @@ public class CdmTest implements Test {
 		createAndValidateCdmTest();
 
 		findEntityInCdmTest();
+		
+		convertCdmPacketCIsTest();
 	}
 
 	public void createAndValidateCdmTest() {
@@ -123,6 +129,87 @@ public class CdmTest implements Test {
 			return;
 		}
 
+		TestUtils.succeed();
+	}
+	
+	public void convertCdmPacketCIsTest() {
+		
+		TestUtils.start("Convert CDM Packet CIs");
+
+		// convert from 1.13.0bd1 to 1.14.0b
+		Directory cdmDir = new Directory("testdata/cdm/convertCdmPacketCIsTest1");
+		ProgressIndicator noProgress = new NoOpProgressIndicator();
+
+		try {
+			CdmCtrl.loadCdmDirectory(cdmDir, noProgress);
+		} catch (AttemptingEmfException | CdmLoadingException e) {
+			TestUtils.fail("We tried to load a CDM, but got this exception: " + e.getMessage());
+			return;
+		}
+		
+		CdmCtrl.convertTo("1.14.0b", null);
+		
+		Set<CdmFile> files = CdmCtrl.getCdmFiles();
+		
+		CdmFile file = files.iterator().next();
+		
+		List<Element> packets = file.domGetElems("packet");
+		for (Element packet : packets) {
+			CdmNode cdmPacket = new CdmNode(file, packet);
+			switch (cdmPacket.getName()) {
+				case "PacketWithTMOnly":
+				case "PacketWithTMandTC":
+					if (!"TM".equals(cdmPacket.getValue("packetType"))) {
+						TestUtils.fail("While converting the PacketCI, the packet " + cdmPacket.getName() + " did not receive the expected packetType!");
+						return;
+					}
+					break;
+				case "PacketWithTCOnly":
+					if (!"TC".equals(cdmPacket.getValue("packetType"))) {
+						TestUtils.fail("While converting the PacketCI, the packet " + cdmPacket.getName() + " did not receive the expected packetType!");
+						return;
+					}
+					break;
+				default:
+					TestUtils.fail("While converting the PacketCI, a wonky new packet (" + cdmPacket.getName() + ") appeared!");
+					return;
+			}
+		}
+
+		// convert from 1.14.0b to 1.13.0bd1
+		cdmDir = new Directory("testdata/cdm/convertCdmPacketCIsTest2");
+		noProgress = new NoOpProgressIndicator();
+
+		try {
+			CdmCtrl.loadCdmDirectory(cdmDir, noProgress);
+		} catch (AttemptingEmfException | CdmLoadingException e) {
+			TestUtils.fail("We tried to load a CDM, but got this exception: " + e.getMessage());
+			return;
+		}
+		
+		CdmCtrl.convertTo("1.13.0bd1", null);
+		
+		files = CdmCtrl.getCdmFiles();
+		
+		file = files.iterator().next();
+		
+		List<Element> pktParameters = file.domGetElems("pktParameter");
+		for (Element pktParameter : pktParameters) {
+			CdmNode cdmPktParameter = new CdmNode(file, pktParameter);
+			if (cdmPktParameter.getName().startsWith("paraTM")) {
+				if (!"Telemetry".equals(cdmPktParameter.getValue("sourceType"))) {
+					TestUtils.fail("While converting the PacketCI, the pktParameter " + cdmPktParameter.getName() + " did not receive the expected sourceType!");
+					return;
+				}
+			}
+			if (cdmPktParameter.getName().startsWith("paraTC")) {
+				if (!"Command".equals(cdmPktParameter.getValue("sourceType"))) {
+					TestUtils.fail("While converting the PacketCI, the pktParameter " + cdmPktParameter.getName() + " did not receive the expected sourceType!");
+					return;
+				}
+			}
+		}
+		
 		TestUtils.succeed();
 	}
 

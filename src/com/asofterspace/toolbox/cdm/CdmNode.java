@@ -55,7 +55,7 @@ public class CdmNode {
 		id = other.id;
 	}
 
-	protected String getValue(String key) {
+	public String getValue(String key) {
 
 		Node resultNode = attributes.getNamedItem(key);
 		
@@ -72,6 +72,13 @@ public class CdmNode {
 
 	public Node getNode() {
 		return thisNode;
+	}
+	
+	public String getTagName() {
+		if (thisNode == null) {
+			return null;
+		}
+		return thisNode.getNodeName();
 	}
 
 	public String getName() {
