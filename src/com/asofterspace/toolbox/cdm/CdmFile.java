@@ -1,12 +1,10 @@
 package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
-import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlFile;
 import com.asofterspace.toolbox.Utils;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,17 +128,6 @@ public class CdmFile extends CdmFileBase {
 			// how sad that Java does not know tail call optimization! this would be beautiful! :D
 			recursivelyAddToCdmCtrl(children.item(i), ciType);
 		}
-	}
-
-	public String getPathRelativeToCdmRoot() {
-
-		Directory cdmRootDir = cdmCtrl.getLastLoadedDirectory();
-		Path cdmRootPath = cdmRootDir.getJavaFile().toPath().toAbsolutePath();
-		Path cdmFilePath = getJavaFile().toPath().toAbsolutePath();
-
-		Path relativePath = cdmRootPath.relativize(cdmFilePath);
-
-		return relativePath.toString();
 	}
 
 	/**

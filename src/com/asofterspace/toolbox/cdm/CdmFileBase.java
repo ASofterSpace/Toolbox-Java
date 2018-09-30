@@ -1,10 +1,12 @@
 package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlFile;
 import com.asofterspace.toolbox.Utils;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1049,6 +1051,115 @@ public abstract class CdmFileBase extends XmlFile {
 				}
 				break;
 		}
+	}
+	
+	// this one is right, the other one is left
+	public List<String> findDifferencesFrom(CdmFileBase otherFile) {
+	
+		List<String> result = new ArrayList<>();
+		
+		Element thisRoot = getRoot();
+		Element otherRoot = otherFile.getRoot();
+		
+		// do not complain if both files do not contain root elements
+		if ((thisRoot == null) && (otherRoot == null)) {
+			return result;
+		}
+		
+		// do complain if only one does not contain a root element
+		if (thisRoot == null) {
+			result.add(getPathRelativeToCdmRoot() + " in the right CDM does not contain a root element.");
+		}
+		if (otherRoot == null) {
+			result.add(otherFile.getPathRelativeToCdmRoot() + " in the left CDM does not contain a root element.");
+		}
+		
+		findDifferencesRecursivelyFrom("", otherFile.getRoot(), "", getRoot(), result);
+		
+		return result;
+	}
+	
+	private void findDifferencesRecursivelyFrom(String otherPath, Element otherEl, String curPath, Element curEl, List<String> outResult) {
+	
+		// check this node's name
+		if (!curEl.getNodeName().equals(otherEl.getNodeName())) {
+			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getNodeName() + ", which has the name " + otherPath + otherEl.getNodeName() + " in the left CDM.");
+		}
+		
+		// check this node's attributes
+		NamedNodeMap curAttrs = curEl.getAttributes();
+		NamedNodeMap otherAttrs = otherEl.getAttributes();
+		for (int i = 0; i < curAttrs.getLength(); i++) {
+			Node otherNode = otherAttrs.getNamedItem(curAttrs.item(i).getNodeName());
+			if (otherNode == null) {
+				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + ", which in the right CDM contains the attribute \"" + curAttrs.item(i).getNodeName() + "\" that is missing from the left CDM.");
+			} else {
+				if (!curAttrs.item(i).getNodeValue().equals(otherNode.getNodeValue())) {
+					outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + " with the attribute \"" + curAttrs.item(i).getNodeName() + "\", which in the right CDM has the value \"" + curAttrs.item(i).getNodeValue() + "\" as opposed to the value \"" + otherNode.getNodeValue() + "\" in the left CDM.");
+				}
+			}
+		}
+		for (int i = 0; i < otherAttrs.getLength(); i++) {
+			Node curNode = curAttrs.getNamedItem(curAttrs.item(i).getNodeName());
+			if (curNode == null) {
+				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + otherPath + otherEl.getNodeName() + ", which in the left CDM contains the attribute \"" + otherAttrs.item(i).getNodeName() + "\" that is missing from the right CDM.");
+			}
+			// no need for the else here - if there was a different value, then it was already reported a few lines above ^^
+		}
+		
+		// check this node's children
+		NodeList curChildren = curEl.getChildNodes();
+		NodeList otherChildren = otherEl.getChildNodes();
+		
+		List<Element> rightChildEls = new ArrayList<>();		
+		List<Element> leftChildEls = new ArrayList<>();
+		
+		if (curChildren != null) {
+			for (int i = 0; i < curChildren.getLength(); i++) {
+				Node child = curChildren.item(i);
+				if (child instanceof Element) {
+					rightChildEls.add((Element) child);
+				}
+			}
+		}
+		
+		if (otherChildren != null) {
+			for (int i = 0; i < otherChildren.getLength(); i++) {
+				Node child = otherChildren.item(i);
+				if (child instanceof Element) {
+					leftChildEls.add((Element) child);
+				}
+			}
+		}
+		
+		int childrenLen = rightChildEls.size();
+		
+		if (rightChildEls.size() > leftChildEls.size()) {
+			childrenLen = leftChildEls.size();
+			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getNodeName() + ", which has more children than the corresponding element in the left CDM.");
+		}
+		
+		if (leftChildEls.size() > rightChildEls.size()) {
+			outResult.add(getPathRelativeToCdmRoot() + " in the left CDM contains the element " + otherPath + otherEl.getNodeName() + ", which has more children than the corresponding element in the right CDM.");
+		}
+		
+		curPath += curEl.getNodeName() + ".";
+		otherPath += otherEl.getNodeName() + ".";
+	
+		for (int i = 0; i < childrenLen; i++) {	
+			findDifferencesRecursivelyFrom(otherPath, leftChildEls.get(i), curPath, rightChildEls.get(i), outResult);
+		}
+	}
+
+	public String getPathRelativeToCdmRoot() {
+
+		Directory cdmRootDir = cdmCtrl.getLastLoadedDirectory();
+		Path cdmRootPath = cdmRootDir.getJavaFile().toPath().toAbsolutePath();
+		Path cdmFilePath = getJavaFile().toPath().toAbsolutePath();
+
+		Path relativePath = cdmRootPath.relativize(cdmFilePath);
+
+		return relativePath.toString();
 	}
 
 	/**

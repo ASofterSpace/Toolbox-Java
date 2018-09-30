@@ -8,6 +8,7 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.XmlMode;
 import com.asofterspace.toolbox.utils.NoOpProgressIndicator;
+import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.ProgressIndicator;
 import com.asofterspace.toolbox.Utils;
 
@@ -1168,6 +1169,57 @@ public class CdmCtrl {
 			cdmFile.findByXmlTag(xmlTag, result);
 		}
 
+		return result;
+	}
+	
+	// this one is right, the other one is left
+	public List<String> findDifferencesFrom(CdmCtrl otherCdm) {
+	
+		List<String> result = new ArrayList<>();
+		
+		List<CdmFile> onlyLeft = new ArrayList<>(otherCdm.getCdmFiles());
+		List<CdmFile> onlyRight = new ArrayList<>(getCdmFiles());
+		List<Pair<CdmFile, CdmFile>> both = new ArrayList<>();
+		
+		for (CdmFile file : getCdmFiles()) {
+			String relativePath = file.getPathRelativeToCdmRoot();
+			
+			for (CdmFile otherFile : otherCdm.getCdmFiles()) {
+				if (relativePath.equals(otherFile.getPathRelativeToCdmRoot())) {
+					both.add(new Pair<>(otherFile, file));
+					onlyLeft.remove(otherFile);
+					onlyRight.remove(file);
+					break;
+				}
+			}
+		}
+		
+		if (onlyLeft.size() > 0) {
+			if (onlyLeft.size() == 1) {
+				result.add("This file is only contained in the left CDM:");
+			} else {
+				result.add("These files are only contained in the left CDM:");
+			}
+			for (CdmFile onlyLeftFile : onlyLeft) {
+				result.add("  " + onlyLeftFile.getPathRelativeToCdmRoot());
+			}
+		}
+		
+		if (onlyRight.size() > 0) {
+			if (onlyRight.size() == 1) {
+				result.add("This file is only contained in the right CDM:");
+			} else {
+				result.add("These files are only contained in the right CDM:");
+			}
+			for (CdmFile onlyRightFile : onlyRight) {
+				result.add("  " + onlyRightFile.getPathRelativeToCdmRoot());
+			}
+		}
+		
+		for (Pair<CdmFile, CdmFile> filePair : both) {
+			result.addAll(filePair.getRight().findDifferencesFrom(filePair.getLeft()));
+		}
+		
 		return result;
 	}
 
