@@ -497,6 +497,10 @@ public abstract class CdmFileBase extends XmlFile {
 							domRenameElems("SimplePktParameter", "pktParameter");
 						}
 
+						if ("configurationcontrol:UserDefinedDisplay2MceMapperCI".equals(getCiType())) {
+							domRenameChildrenOfElems("udd2mceMapper", "monitoringControlElement", "displayContext");
+						}
+
 						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();
 
 						break;
@@ -571,6 +575,10 @@ public abstract class CdmFileBase extends XmlFile {
 							if (!domIsTagPrefixInUse("parameter:")) {
 								domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
 							}
+						}
+						
+						if ("configurationcontrol:UserDefinedDisplay2MceMapperCI".equals(getCiType())) {
+							domRenameChildrenOfElems("udd2mceMapper", "displayContext", "monitoringControlElement");
 						}
 
 						// some namespaces have to be removed, as they do not exist in 1.12.1
