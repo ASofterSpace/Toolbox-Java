@@ -1,126 +1,76 @@
 package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
+import com.asofterspace.toolbox.io.XmlElement;
 
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 
 /**
  * A generic CDM Node, that could really literally be anything...
  * Everything else kind of derives from this :)
  */
-public class CdmNode {
+public class CdmNode extends XmlElement {
 
 	protected CdmFile parentFile;
 
-	protected Node thisNode;
-	
-	protected NamedNodeMap attributes;
-
-	protected String name;
-
-	protected String namespace;
-	
-	protected String type;
-
-	protected String id;
-	
 	protected CdmCtrl cdmCtrl;
 
 
-	public CdmNode(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
+	public CdmNode(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
+		super();
+		
 		this.parentFile = parentFile;
 
-		this.thisNode = thisNode;
-
-		this.attributes = thisNode.getAttributes();
-
-		this.name = getValue("name");
-		
-		this.namespace = getValue("namespace");
-		
-		this.type = getValue("xsi:type");
-		
-		this.id = getValue("xmi:id");
-		
 		this.cdmCtrl = cdmCtrl;
+		
+		thisNode.copyTo(this);
 	}
 	
 	public CdmNode(CdmNode other) {
+	
+		super();
+	
 		parentFile = other.parentFile;
-		thisNode = other.thisNode;
-		attributes = other.attributes;
-		name = other.name;
-		namespace = other.namespace;
-		type = other.type;
-		id = other.id;
+		
 		cdmCtrl = other.cdmCtrl;
-	}
-
-	public String getValue(String key) {
-
-		Node resultNode = attributes.getNamedItem(key);
 		
-		if (resultNode == null) {
-			return null;
-		}
-		
-		return resultNode.getNodeValue();
+		other.copyTo(this);
 	}
 
 	public CdmFile getParentFile() {
 		return parentFile;
 	}
 
-	public Node getNode() {
-		return thisNode;
-	}
-	
 	public String getTagName() {
-		if (thisNode == null) {
-			return null;
-		}
-		return thisNode.getNodeName();
+		return getNodeName();
 	}
 
 	public String getName() {
-		return name;
+		return getAttribute("name");
 	}
 
 	public String getNamespace() {
-		return namespace;
+		return getAttribute("namespace");
 	}
 
 	public String getType() {
-		return type;
+		return getAttribute("xsi:type");
 	}
 
 	public String getId() {
-		return id;
+		return getAttribute("xmi:id");
 	}
 
 	public void setName(String newName) {
-
-		NamedNodeMap nodeAttributes = thisNode.getAttributes();
-
-		Node nameNode = nodeAttributes.getNamedItem("name");
-
-		if (nameNode == null) {
-			return;
-		}
-
-		nameNode.setNodeValue(newName);
-
-		name = newName;
+		setAttribute("name", newName);
 	}
 
 	public void delete() {
 
 		// delete this itself from the parent
-		thisNode.getParentNode().removeChild(thisNode);
+		getXmlParent().removeChild(this);
 		
 		// delete this from the full model in the controller
 		cdmCtrl.removeFromModel(this);
@@ -130,6 +80,11 @@ public class CdmNode {
 	 * Prints information about this node to System.out
 	 */
 	public void print() {
+		
+		String name = getName();
+		String namespace = getNamespace();
+		String type = getType();
+		String id = getId();
 		
 		if (id == null) {
 			System.out.println("ID: none");
@@ -149,14 +104,13 @@ public class CdmNode {
 			System.out.println("Namespace: " + namespace);
 		}
 		
-		String type = getValue("xsi:type");
 		if (type == null) {
 			System.out.println("Type: none");
 		} else {
 			System.out.println("Type: " + type);
 		}
 		
-		String xmlTag = thisNode.getNodeName();
+		String xmlTag = getNodeName();
 		if (xmlTag == null) {
 			System.out.println("XML Tag: none");
 		} else {

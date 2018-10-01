@@ -1,11 +1,10 @@
 package com.asofterspace.toolbox.cdm;
 
+import com.asofterspace.toolbox.io.XmlElement;
+
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 
 public class CdmScript extends CdmNode {
@@ -17,10 +16,10 @@ public class CdmScript extends CdmNode {
 
 		super(baseNode);
 		
-		this.content = getValue("scriptContent");
+		this.content = getAttribute("scriptContent");
 	}
 	
-	public CdmScript(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
+	public CdmScript(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
@@ -31,16 +30,8 @@ public class CdmScript extends CdmNode {
 	
 	public void setSourceCode(String scriptContent) {
 	
-		NamedNodeMap scriptNodeAttributes = thisNode.getAttributes();
-		
-		Node scriptContentNode = scriptNodeAttributes.getNamedItem("scriptContent");
-		
-		if (scriptContentNode == null) {
-			return;
-		}
-		
-		scriptContentNode.setNodeValue(scriptContent);
-		
+		setAttribute("scriptContent", scriptContent);
+
 		content = scriptContent;
 	}
 
@@ -54,6 +45,8 @@ public class CdmScript extends CdmNode {
 
 		Set<CdmScript2Activity> script2Activities = cdmCtrl.getScriptToActivityMappings();
 
+		String id = getId();
+		
 		for (CdmScript2Activity script2Activity : script2Activities) {
 			// check if a script to activity mapper maps the script id of this particular script!
 			// TODO :: also check if the filename maps (however, this is complicated, as the file
@@ -87,28 +80,11 @@ public class CdmScript extends CdmNode {
 		super.delete();
 
 		// check if there are still elements left now, and if not, delete the entire parent file
-		NodeList elements = getParentFile().getRoot().getChildNodes();
-		
-		// assume there are no elements left...
-		boolean noElementsLeft = true;
-		
-		// ... iterate over all nodes...
-		int len = elements.getLength();
-		
-		for (int i = 0; i < len; i++) {
-			Node elem = elements.item(i);
-		
-			// ... ignoring text nodes...
-			if (!"#text".equals(elem.getNodeName())) {
-				// ... but if there are any others, then elements are actually left!
-				noElementsLeft = false;
-				break;
-			}
-		}
+		List<XmlElement> elements = getParentFile().getRoot().getChildNodes();
 		
 		// delete the entire parent file
 		// (or actually set a deleted flag, to delete it when save() is called ^^)
-		if (noElementsLeft) {
+		if (elements.size() < 1) {
 			getParentFile().delete();
 		}
 	}

@@ -1,11 +1,13 @@
 package com.asofterspace.toolbox;
 
+import java.util.Date;
 import java.util.List;
+import java.text.SimpleDateFormat;
 
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 23;
+	public final static int TOOLBOX_VERSION_NUMBER = 24;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -82,5 +84,74 @@ public class Utils {
 		}
 		
 		return i + "th";
+	}
+	
+	/**
+	 * Writes a log line to standard out together with debug information (the current time and JVM heap size)
+	 */
+	public static void debuglog(String logline) {
+	
+		long curHeap = Runtime.getRuntime().totalMemory();
+		
+		String heapStr = curHeap + " B";
+		
+		if (curHeap > 5000l) {
+			heapStr = (curHeap / 1000l) + " KB";
+		}
+		if (curHeap > 5000000l) {
+			heapStr = (curHeap / 1000000l) + " MB";
+		}
+		if (curHeap > 5000000000l) {
+			heapStr = (curHeap / 1000000000l) + " GB";
+		}
+	
+		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
+		System.out.println(format.format(new Date()) + " [heap " + heapStr + "]: " + logline);
+	}
+	
+	public static String xmlEscape(String text) {
+	
+		StringBuilder result = new StringBuilder();
+		
+		for (int i = 0; i < text.length(); i++) {
+		
+			char c = text.charAt(i);
+			
+			switch (c) {
+				case '<':
+					result.append("&lt;");
+					break;
+				case '>':
+					result.append("&gt;");
+					break;
+				case '\n':
+					result.append("&#10;");
+					break;
+				case '\r':
+					break;
+				case '\t':
+					result.append("&#9;");
+					break;
+				case '&':
+					result.append("&amp;");
+					break;
+				case '\'':
+					result.append("&apos;");
+					break;
+				case '\"':
+					result.append("&quot;");
+					break;
+			default:
+				if (c > 0x7e) {
+					result.append("&#");
+					result.append((int) c);
+					result.append(";");
+				} else {
+					result.append(c);
+				}
+			}
+		}
+
+		return result.toString();
 	}
 }

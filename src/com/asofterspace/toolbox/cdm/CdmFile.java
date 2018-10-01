@@ -2,17 +2,12 @@ package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 
 /**
@@ -39,7 +34,7 @@ public class CdmFile extends CdmFileBase {
 		recursivelyAddToCdmCtrl(getRoot(), getCiType());
 	}
 
-	private void recursivelyAddToCdmCtrl(Node curNode, String ciType) {
+	private void recursivelyAddToCdmCtrl(XmlElement curNode, String ciType) {
 
 		// TODO :: also update the xmiIdMap when elements are added dynamically (e.g. activities, scripts, mappers, etc.),
 		// or when they are removed
@@ -49,19 +44,7 @@ public class CdmFile extends CdmFileBase {
 			return;
 		}
 
-		NamedNodeMap attributes = curNode.getAttributes();
-
-		if (attributes == null) {
-			return;
-		}
-
-		Node idNode = attributes.getNamedItem("xmi:id");
-
-		if (idNode == null) {
-			return;
-		}
-
-		String nodeId = idNode.getNodeValue();
+		String nodeId = curNode.getAttribute("xmi:id");
 
 		if (nodeId == null) {
 			return;
@@ -120,13 +103,11 @@ public class CdmFile extends CdmFileBase {
 		cdmCtrl.addToModel(cdmNode);
 
 		// it has been confirmed, this node is of interest to us... let's recursively call ourselves for all the children
-		NodeList children = curNode.getChildNodes();
+		List<XmlElement> children = curNode.getChildNodes();
 
-		int len = children.getLength();
-
-		for (int i = 0; i < len; i++) {
+		for (XmlElement child : children) {
 			// how sad that Java does not know tail call optimization! this would be beautiful! :D
-			recursivelyAddToCdmCtrl(children.item(i), ciType);
+			recursivelyAddToCdmCtrl(child, ciType);
 		}
 	}
 
@@ -142,20 +123,16 @@ public class CdmFile extends CdmFileBase {
 		String mappingId = UuidEncoderDecoder.generateEcoreUUID();
 
 		// actually create the element
-		Element newMapping = createElement("scriptActivityImpl");
+		XmlElement newMapping = getRoot().createChild("scriptActivityImpl");
 		newMapping.setAttribute("xmi:id", mappingId);
 		newMapping.setAttribute("name", mappingName);
 		newMapping.setAttribute("namespace", mappingNamespace);
 
-		Element newMappedActivity = createElement("activity");
+		XmlElement newMappedActivity = newMapping.createChild("activity");
 		newMappedActivity.setAttribute("href", activityFile + "#" + activityId);
-		newMapping.appendChild(newMappedActivity);
 
-		Element newMappedScript = createElement("script");
+		XmlElement newMappedScript = newMapping.createChild("script");
 		newMappedScript.setAttribute("href", scriptFile + "#" + scriptId);
-		newMapping.appendChild(newMappedScript);
-
-		getRoot().appendChild(newMapping);
 
 		CdmScript2Activity newNode = new CdmScript2Activity(this, newMapping, cdmCtrl);
 		
@@ -181,34 +158,26 @@ public class CdmFile extends CdmFileBase {
 		recursivelyFindByKey(getRoot(), "xsi:type", type, result);
 	}
 
-	private void recursivelyFindByKey(Node currentNode, String key, String value, List<CdmNode> result) {
+	private void recursivelyFindByKey(XmlElement currentNode, String key, String value, List<CdmNode> result) {
 
-		NamedNodeMap attributes = currentNode.getAttributes();
+		String resultStr = currentNode.getAttribute(key);
 
-		if (attributes != null) {
-			Node resultNode = attributes.getNamedItem(key);
-			if (resultNode != null) {
-				if (value.equals(resultNode.getNodeValue())) {
-						result.add(new CdmNode(this, currentNode, cdmCtrl));
-				}
-			}
+		if (value.equals(resultStr)) {
+				result.add(new CdmNode(this, currentNode, cdmCtrl));
 		}
 
-		NodeList children = currentNode.getChildNodes();
-		int len = children.getLength();
-		for (int i = 0; i < len; i++) {
-			recursivelyFindByKey(children.item(i), key, value, result);
+		List<XmlElement> children = currentNode.getChildNodes();
+		for (XmlElement child : children) {
+			recursivelyFindByKey(child, key, value, result);
 		}
 	}
 
 	public void findByXmlTag(String xmlTag, List<CdmNode> result) {
 
-		NodeList elements = getDocument().getElementsByTagName(xmlTag);
+		List<XmlElement> elements = getRoot().getElementsByTagName(xmlTag);
 
-		int len = elements.getLength();
-
-		for (int i = 0; i < len; i++) {
-			result.add(new CdmNode(this, elements.item(i), cdmCtrl));
+		for (XmlElement element : elements) {
+			result.add(new CdmNode(this, element, cdmCtrl));
 		}
 	}
 
@@ -218,18 +187,12 @@ public class CdmFile extends CdmFileBase {
 	 */
 	public int getRoughSize() {
 
-		Node root = getRoot();
+		XmlElement root = getRoot();
 
 		if (root == null) {
 			return 0;
 		}
 
-		NodeList children = root.getChildNodes();
-
-		if (children == null) {
-			return 0;
-		}
-
-		return children.getLength();
+		return root.getChildNodes().size();
 	}
 }

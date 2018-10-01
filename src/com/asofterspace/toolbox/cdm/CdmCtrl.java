@@ -222,6 +222,12 @@ public class CdmCtrl {
 	private CdmFile loadCdmFileInternally(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
 
 		CdmFile result = loadCdmFileViaXML(cdmFile);
+		
+		String there_was_a_problem = "There was a problem while loading the CDM file " + cdmFile.getLocalFilename() + ".";
+		
+		if (result == null) {
+			throw new CdmLoadingException(there_was_a_problem);
+		}
 
 		switch (result.getMode()) {
 
@@ -234,7 +240,7 @@ public class CdmCtrl {
 
 			case NONE_LOADED:
 			default:
-				throw new CdmLoadingException("There was a problem while loading the CDM file " + cdmFile.getLocalFilename() + ".");
+				throw new CdmLoadingException(there_was_a_problem);
 		}
 
 		// TODO - also get the EMF stuff to work ;)
@@ -265,7 +271,7 @@ public class CdmCtrl {
 			return cdm;
 
 		} catch (Exception e) {
-			System.err.println(e);
+			e.printStackTrace(System.out);
 		}
 
 		return null;

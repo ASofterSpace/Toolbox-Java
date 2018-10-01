@@ -2,6 +2,7 @@ package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.utils.EnumeratedCollection;
+import com.asofterspace.toolbox.io.XmlElement;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -9,22 +10,19 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 
 public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 
 	// delayed initialization - ready to be used after CdmCtrl.reloadTreeRoots()
 	private CdmMonitoringControlElement containingElement;
 
+	/*
 	private String definitionId;
 
 	private String defaultRouteId;
 
 	private String defaultServiceAccessPointId;
+	*/
 	
 	private List<String> subElementIds;
 	
@@ -39,11 +37,13 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		// this means that we are the mcm tree root element - for now ;)
 		this.containingElement = null;
 		
-		this.definitionId = getValue("definition");
+		/*
+		this.definitionId = getAttribute("definition");
 		
-		this.defaultRouteId = getValue("defaultRoute");
+		this.defaultRouteId = getAttribute("defaultRoute");
 		
-		this.defaultServiceAccessPointId = getValue("defaultServiceAccessPoint");
+		this.defaultServiceAccessPointId = getAttribute("defaultServiceAccessPoint");
+		*/
 		
 		// subelements can be stored in an attribute such as:
 		// subElements="_AAAAAA _AAAAAA"
@@ -56,7 +56,7 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 
 		this.subElementIds = new ArrayList<>();
 		
-		String subStrs = getValue("subElements");
+		String subStrs = getAttribute("subElements");
 		if (subStrs != null) {
 			String[] subStrsArr = subStrs.split(" ");
 			for (String subStr : subStrsArr) {
@@ -64,21 +64,18 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 			}
 		}
 		
-		NodeList subElementList = thisNode.getChildNodes();
+		List<XmlElement> subElementList = getChildNodes();
 
-		int len = subElementList.getLength();
-
-		for (int i = 0; i < len; i++) {
-			Node subElement = subElementList.item(i);
+		for (XmlElement subElement : subElementList) {
 			if ("subElements".equals(subElement.getNodeName())) {
-				this.subElementIds.add(UuidEncoderDecoder.getIdFromEcoreLink(subElement.getAttributes().getNamedItem("href").getNodeValue()));
+				this.subElementIds.add(UuidEncoderDecoder.getIdFromEcoreLink(subElement.getAttribute("href")));
 			}
 		}
 		
 		this.subElements = new ArrayList<>();
 	}
 	
-	public CdmMonitoringControlElement(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
+	public CdmMonitoringControlElement(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
@@ -96,10 +93,10 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		CdmMonitoringControlElement containedIn = getContainingElement();
 		
 		if (containedIn == null) {
-			return name;
+			return getName();
 		}
 		
-		return containedIn.getPath() + CdmCtrl.MCM_PATH_DELIMITER + name;
+		return containedIn.getPath() + CdmCtrl.MCM_PATH_DELIMITER + getName();
 	}
 	
 	public CdmActivity addActivity(String newActivityName, String newActivityAlias) {
@@ -116,7 +113,7 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		String activityId = UuidEncoderDecoder.generateEcoreUUID();
 
 		// actually create the element
-		Element newActivity = getParentFile().createElement("monitoringControlElementAspects");
+		XmlElement newActivity = createChild("monitoringControlElementAspects");
 		newActivity.setAttribute("xsi:type", "monitoringcontrolmodel:Activity");
 		newActivity.setAttribute("xmi:id", activityId);
 		newActivity.setAttribute("name", newActivityName);
@@ -124,14 +121,11 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 
 		if ((newActivityAlias != null) && !("".equals(newActivityAlias))) {
 			String newAliasId = UuidEncoderDecoder.generateEcoreUUID();
-			Element newAlias = getParentFile().createElement("aliases");
+			XmlElement newAlias = newActivity.createChild("aliases");
 			newAlias.setAttribute("xsi:type", "monitoringcontrolcommon:MonitoringAndControlAlias");
 			newAlias.setAttribute("xmi:id", newAliasId);
 			newAlias.setAttribute("alias", newActivityAlias);
-			newActivity.appendChild(newAlias);
 		}
-		
-		thisNode.appendChild(newActivity);
 		
 		CdmActivity activityNode = new CdmActivity(getParentFile(), newActivity, cdmCtrl);
 		

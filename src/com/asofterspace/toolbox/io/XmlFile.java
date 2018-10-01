@@ -1,27 +1,22 @@
 package com.asofterspace.toolbox.io;
 
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -30,9 +25,11 @@ import org.w3c.dom.Node;
  */
 public class XmlFile extends File {
 
-	protected Document xmlcontents = null;
-
 	protected XmlMode mode = XmlMode.NONE_LOADED;
+
+	private XmlElement rootElement = null;
+	
+	private XmlElement currentElement = null;
 
 
 	/**
@@ -52,44 +49,51 @@ public class XmlFile extends File {
 
 		regularFile.copyTo(this);
 	}
+	
+    private class XmlHandler extends DefaultHandler {
 
-	/**
-	 * By default, the DOM stuff in Java does NOT intern strings that are often found again and again, leading to
-	 * insanely large memory requirements... however, with this helper method we can intern at least some often-
-	 * used strings in the XML, and this means that we can e.g. convert GAIA merged (which is 191 MB XML) from
-	 * one version to the next using no more than 1 GB heap (such that this even works with 32-Bit JAVA)
-	 * TODO :: in the foreseeable future, write our own, even-much-better XML parser :D
-	 */
-	private void internAllStrings(Element curNode) {
-
-		if (!curNode.getNodeName().contains(":")) {
-			getDocument().renameNode(curNode, null, curNode.getNodeName().intern());
-		}
-
-		NamedNodeMap attrs = curNode.getAttributes();
-
-		if (attrs != null) {
-			for (int i = 0; i < attrs.getLength(); i++) {
-				curNode.setAttribute(attrs.item(i).getNodeName().intern(), attrs.item(i).getNodeValue().intern());
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+			XmlElement newElement = new XmlElement(qName, attributes);
+			if (currentElement == null) {
+				rootElement = newElement;
+			} else {
+				currentElement.addChild(newElement);
 			}
+			currentElement = newElement;
+        }
+		
+		@Override
+		public void characters(char ch[], int start, int length) throws SAXException {
+			currentElement.setInnerText(new String(ch, start, length));
 		}
-
-		NodeList children = curNode.getChildNodes();
-
-		if (children == null) {
-			return;
-		}
-
-		int childrenLen = children.getLength();
-
-		for (int j = 0; j < childrenLen; j++) {
-			Node childNode = children.item(j);
-			if (childNode instanceof Element) {
-				internAllStrings((Element) childNode);
-			}
+		
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+			currentElement = currentElement.getXmlParent();
 		}
 	}
+	
+	private void loadXmlContents() {
 
+		try {
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			factory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+			SAXParser parser = factory.newSAXParser();
+
+			currentElement = null;
+			
+			XmlHandler handler = new XmlHandler();
+			parser.parse(getJavaFile(), handler);
+			
+			mode = XmlMode.XML_LOADED;
+
+		} catch (SAXException | ParserConfigurationException | IOException e) {
+			e.printStackTrace(System.out);
+		}
+	}
+	
+	/*
 	private void loadXmlContents() {
 
 		try {
@@ -105,8 +109,6 @@ public class XmlFile extends File {
 			xmlcontents.getDocumentElement().normalize();
 
 			mode = XmlMode.XML_LOADED;
-
-			internAllStrings(xmlcontents.getDocumentElement());
 
 		} catch (Exception xE) {
 
@@ -296,6 +298,7 @@ public class XmlFile extends File {
 			}
 		}
 	}
+	*/
 
 	private String namespaceToElement(String namespace) {
 
@@ -324,44 +327,18 @@ public class XmlFile extends File {
 		return "unknown(" + namespace + ")";
 	}
 
-	public Element createElement(String name) {
+	public XmlElement getRoot() {
 
-		if (xmlcontents == null) {
+		if (rootElement == null) {
 			loadXmlContents();
 		}
 
-		if (xmlcontents == null) {
-			return null;
-		}
-
-		return xmlcontents.createElement(name);
-	}
-
-	public Document getDocument() {
-
-		if (xmlcontents == null) {
-			loadXmlContents();
-		}
-
-		return xmlcontents;
-	}
-
-	public Element getRoot() {
-
-		if (xmlcontents == null) {
-			loadXmlContents();
-		}
-
-		if (xmlcontents == null) {
-			return null;
-		}
-
-		return xmlcontents.getDocumentElement();
+		return rootElement;
 	}
 
 	public XmlMode getMode() {
 
-		if (xmlcontents == null) {
+		if (rootElement == null) {
 			loadXmlContents();
 		}
 
@@ -377,47 +354,38 @@ public class XmlFile extends File {
 		return domIsTagPrefixInUseForSubTree(prefix, getRoot());
 	}
 
-	private boolean domIsTagPrefixInUseForSubTree(String prefix, Node subTreeRoot) {
+	private boolean domIsTagPrefixInUseForSubTree(String prefix, XmlElement subTreeRoot) {
 
 		if (subTreeRoot.getNodeName().startsWith(prefix)) {
 			return true;
 		}
 
-		NodeList children = subTreeRoot.getChildNodes();
+		List<XmlElement> children = subTreeRoot.getChildNodes();
 
-		if (children == null) {
-			return false;
-		}
-
-		int childrenLen = children.getLength();
-
-		for (int i = 0; i < childrenLen; i++) {
-
-			Node childNode = children.item(i);
-
-			// ignore children that are not full elements
-			if (childNode instanceof Element) {
-				if (domIsTagPrefixInUseForSubTree(prefix, childNode)) {
-					return true;
-				}
+		for (XmlElement child : children) {
+			if (domIsTagPrefixInUseForSubTree(prefix, child)) {
+				return true;
 			}
 		}
 
 		return false;
 	}
 
-	public List<Element> domGetElems(String tagName) {
+	public List<XmlElement> domGetElems(String tagName) {
 
-		List<Element> result = new ArrayList<Element>();
+		return getRoot().getElementsByTagName(tagName);
+	}
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
+	public List<XmlElement> domGetElems(String tagName, String hasAttributeName, String hasAttributeValue) {
 
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					result.add((Element) elemNode);
+		List<XmlElement> result = new ArrayList<>();
+
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		for (XmlElement elem : elems) {
+			String elemAttr = elem.getAttribute(hasAttributeName);
+			if (elemAttr != null) {
+				if (hasAttributeValue.equals(elemAttr)) {
+					result.add(elem);
 				}
 			}
 		}
@@ -425,23 +393,27 @@ public class XmlFile extends File {
 		return result;
 	}
 
-	public List<Element> domGetElems(String tagName, String hasAttributeName, String hasAttributeValue) {
+	public List<XmlElement> domGetChildrenOfElems(String tagName) {
 
-		List<Element> result = new ArrayList<Element>();
+		List<XmlElement> result = new ArrayList<XmlElement>();
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		for (XmlElement elem : elems) {
+			result.addAll(elem.getChildNodes());
+		}
 
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Node elemAttr = elemNode.getAttributes().getNamedItem(hasAttributeName);
-					if (elemAttr != null) {
-						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-							result.add((Element) elemNode);
-						}
-					}
+		return result;
+	}
+
+	public List<XmlElement> domGetChildrenOfElems(String tagName, String childName) {
+
+		List<XmlElement> result = new ArrayList<XmlElement>();
+
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		for (XmlElement elem : elems) {
+			for (XmlElement child : elem.getChildNodes()) {
+				if (childName.equals(child.getNodeName())) {
+					result.add(child);
 				}
 			}
 		}
@@ -449,94 +421,19 @@ public class XmlFile extends File {
 		return result;
 	}
 
-	public List<Element> domGetChildrenOfElems(String tagName) {
+	public List<XmlElement> domGetChildrenOfElems(String tagName, String hasAttributeName, String hasAttributeValue) {
 
-		List<Element> result = new ArrayList<Element>();
+		List<XmlElement> result = new ArrayList<XmlElement>();
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				NodeList children = elemNode.getChildNodes();
-				if (children == null) {
-					break;
-				}
-				int childrenLen = children.getLength();
-
-				for (int j = 0; j < childrenLen; j++) {
-					Node childNode = children.item(j);
-					if (childNode instanceof Element) {
-						result.add((Element) childNode);
-					}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		for (XmlElement elem : elems) {
+			for (XmlElement child : elem.getChildNodes()) {
+				if (hasAttributeValue.equals(child.getAttribute(hasAttributeName))) {
+					result.add(child);
 				}
 			}
 		}
-
-		return result;
-	}
-
-	public List<Element> domGetChildrenOfElems(String tagName, String childName) {
-
-		List<Element> result = new ArrayList<Element>();
-
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				NodeList children = elemNode.getChildNodes();
-				if (children == null) {
-					break;
-				}
-				int childrenLen = children.getLength();
-
-				for (int j = 0; j < childrenLen; j++) {
-					Node childNode = children.item(j);
-					if (childNode instanceof Element) {
-						if (childName.equals(childNode.getNodeName())) {
-							result.add((Element) childNode);
-						}
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
-	public List<Element> domGetChildrenOfElems(String tagName, String hasAttributeName, String hasAttributeValue) {
-
-		List<Element> result = new ArrayList<Element>();
-
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elem = elems.item(i);
-				Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-				if (elemAttr != null) {
-					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-						NodeList children = elem.getChildNodes();
-						if (children == null) {
-							break;
-						}
-						int childrenLen = children.getLength();
-
-						for (int j = 0; j < childrenLen; j++) {
-							Node childNode = children.item(j);
-							if (childNode instanceof Element) {
-								result.add((Element) childNode);
-							}
-						}
-					}
-				}
-			}
-		}
-
+		
 		return result;
 	}
 
@@ -545,27 +442,22 @@ public class XmlFile extends File {
 	 * <element><attrOrChildName href="_bla"/></element>, this function
 	 * returns _bla (or null if it finds neither)
 	 */
-	public String domGetLinkFromAttrOrChild(Node element, String attrOrChildName) {
+	public String domGetLinkFromAttrOrChild(XmlElement element, String attrOrChildName) {
 
-		Node elAttr = element.getAttributes().getNamedItem(attrOrChildName);
+		String elAttr = element.getAttribute(attrOrChildName);
 
 		if (elAttr != null) {
-			return elAttr.getNodeValue();
+			return elAttr;
 		}
 
 		// if we did not find an attrOrChildName as attribute, maybe we can find one as child?
-		NodeList children = element.getChildNodes();
-		if (children != null) {
-			int childrenLen = children.getLength();
+		List<XmlElement> children = element.getChildNodes();
+		for (XmlElement child : children) {
+			if (attrOrChildName.equals(child.getNodeName())) {
+				String href = child.getAttribute("href");
 
-			for (int j = 0; j < childrenLen; j++) {
-				Node childNode = children.item(j);
-				if (attrOrChildName.equals(childNode.getNodeName())) {
-					Node href = childNode.getAttributes().getNamedItem("href");
-
-					if (href != null) {
-						return href.getNodeValue();
-					}
+				if (href != null) {
+					return href;
 				}
 			}
 		}
@@ -575,79 +467,43 @@ public class XmlFile extends File {
 
 	public void domSetAttributeForElems(String tagName, String setAttributeName, String setAttributeValue) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					elem.setAttribute(setAttributeName, setAttributeValue);
-				}
-			}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			elem.setAttribute(setAttributeName, setAttributeValue);
 		}
 	}
-
+	
 	public void domSetAttributeForElems(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-					if (elemAttr != null) {
-						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-							elem.setAttribute(setAttributeName, setAttributeValue);
-						}
-					}
-				}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				elem.setAttribute(setAttributeName, setAttributeValue);
 			}
 		}
 	}
 
 	public void domSetAttributeForElemsIfAttrIsMissing(String tagName, String setAttributeName, String setAttributeValue) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
-					if (elemAttr == null) {
-						elem.setAttribute(setAttributeName, setAttributeValue);
-					}
-				}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			if (elem.getAttribute(setAttributeName) == null) {
+				elem.setAttribute(setAttributeName, setAttributeValue);
 			}
 		}
 	}
 
 	public void domSetAttributeForElemsIfAttrIsMissing(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-					if (elemAttr != null) {
-						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-							elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
-							if (elemAttr == null) {
-								elem.setAttribute(setAttributeName, setAttributeValue);
-							}
-						}
-					}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				if (elem.getAttribute(setAttributeName) == null) {
+					elem.setAttribute(setAttributeName, setAttributeValue);
 				}
 			}
 		}
@@ -655,21 +511,12 @@ public class XmlFile extends File {
 
 	public void domSetAttributeForNonHrefElemsIfAttrIsMissing(String tagName, String setAttributeName, String setAttributeValue) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node hrefAttr = elem.getAttributes().getNamedItem("href");
-					if (hrefAttr == null) {
-						Node elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
-						if (elemAttr == null) {
-							elem.setAttribute(setAttributeName, setAttributeValue);
-						}
-					}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			if (elem.getAttribute("href") == null) {
+				if (elem.getAttribute(setAttributeName) == null) {
+					elem.setAttribute(setAttributeName, setAttributeValue);
 				}
 			}
 		}
@@ -677,25 +524,13 @@ public class XmlFile extends File {
 
 	public void domSetAttributeForNonHrefElemsIfAttrIsMissing(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node hrefAttr = elem.getAttributes().getNamedItem("href");
-					if (hrefAttr == null) {
-						Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-						if (elemAttr != null) {
-							if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-								elemAttr = elem.getAttributes().getNamedItem(setAttributeName);
-								if (elemAttr == null) {
-									elem.setAttribute(setAttributeName, setAttributeValue);
-								}
-							}
-						}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				if (elem.getAttribute("href") == null) {
+					if (elem.getAttribute(setAttributeName) == null) {
+						elem.setAttribute(setAttributeName, setAttributeValue);
 					}
 				}
 			}
@@ -704,37 +539,20 @@ public class XmlFile extends File {
 
 	public void domRemoveAttributeFromElems(String tagName, String removeAttributeName) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					elem.removeAttribute(removeAttributeName);
-				}
-			}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			elem.removeAttribute(removeAttributeName);
 		}
 	}
 
 	public void domRemoveAttributeFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeAttributeName) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-					if (elemAttr != null) {
-						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-							elem.removeAttribute(removeAttributeName);
-						}
-					}
-				}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				elem.removeAttribute(removeAttributeName);
 			}
 		}
 	}
@@ -746,36 +564,17 @@ public class XmlFile extends File {
 	 */
 	public void domRemoveChildrenFromElems(String tagName, String removeChildName) {
 
-		// search for the children first, and then for each one check if the parents are correct...
-		NodeList elems = getDocument().getElementsByTagName(removeChildName);
+		List<XmlElement> elems = getRoot().getElementsByTagName(removeChildName);
+		
+		for (XmlElement elem : elems) {
+			XmlElement parent = elem.getXmlParent();
 
-		if (elems != null) {
-			int len = elems.getLength();
-
-			// create a buffer of elements, speeding this function call up from 6 minutes to 1 second
-			List<Element> elemBuffer = new ArrayList<>(len);
-
-			for (int i = 0; i < len; i++) {
-
-				Node elem = elems.item(i);
-
-				if (elem instanceof Element) {
-					elemBuffer.add((Element) elem);
-				}
+			if (parent == null) {
+				continue;
 			}
 
-			// use the buffer to actually remove the elements in question
-			for (Element elem : elemBuffer) {
-
-				Node parent = elem.getParentNode();
-
-				if (parent == null) {
-					continue;
-				}
-
-				if (tagName.equals(parent.getNodeName())) {
-					parent.removeChild(elem);
-				}
+			if (tagName.equals(parent.getNodeName())) {
+				parent.removeChild(elem);
 			}
 		}
 	}
@@ -787,40 +586,18 @@ public class XmlFile extends File {
 	 */
 	public void domRemoveChildrenFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeChildName) {
 
-		// search for the children first, and then for each one check if the parents are correct...
-		NodeList elems = getDocument().getElementsByTagName(removeChildName);
+		List<XmlElement> elems = getRoot().getElementsByTagName(removeChildName);
+		
+		for (XmlElement elem : elems) {
+			XmlElement parent = elem.getXmlParent();
 
-		if (elems != null) {
-			int len = elems.getLength();
-
-			// create a buffer of elements, speeding this function call up from 6 minutes to 1 second
-			List<Element> elemBuffer = new ArrayList<>(len);
-
-			for (int i = 0; i < len; i++) {
-
-				Node elem = elems.item(i);
-
-				if (elem instanceof Element) {
-					elemBuffer.add((Element) elem);
-				}
+			if (parent == null) {
+				continue;
 			}
 
-			// use the buffer to actually remove the elements in question
-			for (Element elem : elemBuffer) {
-
-				Node parent = elem.getParentNode();
-
-				if (parent == null) {
-					continue;
-				}
-
-				if (tagName.equals(parent.getNodeName())) {
-					Node parentAttr = parent.getAttributes().getNamedItem(hasAttributeName);
-					if (parentAttr != null) {
-						if (hasAttributeValue.equals(parentAttr.getNodeValue())) {
-							parent.removeChild(elem);
-						}
-					}
+			if (tagName.equals(parent.getNodeName())) {
+				if (hasAttributeValue.equals(parent.getAttribute(hasAttributeName))) {
+					parent.removeChild(elem);
 				}
 			}
 		}
@@ -828,130 +605,83 @@ public class XmlFile extends File {
 
 	public void domRenameElems(String fromTagName, String toTagName) {
 
-		NodeList elems = getDocument().getElementsByTagName(fromTagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				getDocument().renameNode(elemNode, null, toTagName);
-			}
+		List<XmlElement> elems = getRoot().getElementsByTagName(fromTagName);
+		
+		for (XmlElement elem : elems) {
+			elem.setNodeName(toTagName);
 		}
 	}
 
 	public void domRenameElems(String fromTagName, String hasAttributeName, String hasAttributeValue, String toTagName) {
 
-		NodeList elems = getDocument().getElementsByTagName(fromTagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				Node elemAttr = elemNode.getAttributes().getNamedItem(hasAttributeName);
-				if (elemAttr != null) {
-					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-						getDocument().renameNode(elemNode, null, toTagName);
-					}
-				}
+		List<XmlElement> elems = getRoot().getElementsByTagName(fromTagName);
+		
+		for (XmlElement elem : elems) {
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				elem.setNodeName(toTagName);
 			}
 		}
 	}
 
 	public void domRenameChildrenOfElems(String tagName, String fromChildName, String toChildName) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
+		List<XmlElement> elems = getRoot().getElementsByTagName(fromChildName);
+		
+		for (XmlElement elem : elems) {
+			XmlElement parent = elem.getXmlParent();
 
-			for (int i = 0; i < len; i++) {
-				Node elem = elems.item(i);
-				NodeList children = elem.getChildNodes();
-				if (children == null) {
-					break;
-				}
-				int childrenLen = children.getLength();
+			if (parent == null) {
+				continue;
+			}
 
-				for (int j = childrenLen - 1; j >= 0; j--) {
-					Node childNode = children.item(j);
-					if (fromChildName.equals(childNode.getNodeName())) {
-						getDocument().renameNode(childNode, null, toChildName);
-					}
-				}
-
+			if (tagName.equals(parent.getNodeName())) {
+				elem.setNodeName(toChildName);
 			}
 		}
 	}
 
 	public void domRenameChildrenOfElems(String tagName, String hasAttributeName, String hasAttributeValue, String fromChildName, String toChildName) {
+	
+		List<XmlElement> elems = getRoot().getElementsByTagName(fromChildName);
+		
+		for (XmlElement elem : elems) {
+			XmlElement parent = elem.getXmlParent();
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
+			if (parent == null) {
+				continue;
+			}
 
-			for (int i = 0; i < len; i++) {
-				Node elem = elems.item(i);
-				Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-				if (elemAttr != null) {
-					if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-						NodeList children = elem.getChildNodes();
-						if (children == null) {
-							break;
-						}
-						int childrenLen = children.getLength();
-
-						for (int j = childrenLen - 1; j >= 0; j--) {
-							Node childNode = children.item(j);
-							if (fromChildName.equals(childNode.getNodeName())) {
-								getDocument().renameNode(childNode, null, toChildName);
-							}
-						}
-					}
+			if (tagName.equals(parent.getNodeName())) {
+				if (hasAttributeValue.equals(parent.getAttribute(hasAttributeName))) {
+					elem.setNodeName(toChildName);
 				}
-
 			}
 		}
 	}
 
 	public void domRenameAttributes(String tagName, String fromAttributeName, String toAttributeName) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node origAttr = elem.getAttributes().getNamedItem(fromAttributeName);
-					if (origAttr != null) {
-						elem.setAttribute(toAttributeName, origAttr.getNodeValue());
-						elem.removeAttribute(fromAttributeName);
-					}
-				}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			String attrVal = elem.getAttribute(fromAttributeName);
+			if (attrVal != null) {
+				elem.removeAttribute(fromAttributeName);
+				elem.setAttribute(toAttributeName, attrVal);
 			}
 		}
 	}
 
 	public void domRenameAttributes(String tagName, String hasAttributeName, String hasAttributeValue, String fromAttributeName, String toAttributeName) {
 
-		NodeList elems = getDocument().getElementsByTagName(tagName);
-		if (elems != null) {
-			int len = elems.getLength();
-
-			for (int i = 0; i < len; i++) {
-				Node elemNode = elems.item(i);
-				if (elemNode instanceof Element) {
-					Element elem = (Element) elemNode;
-					Node elemAttr = elem.getAttributes().getNamedItem(hasAttributeName);
-					if (elemAttr != null) {
-						if (hasAttributeValue.equals(elemAttr.getNodeValue())) {
-							Node origAttr = elem.getAttributes().getNamedItem(fromAttributeName);
-							if (origAttr != null) {
-								elem.setAttribute(toAttributeName, origAttr.getNodeValue());
-								elem.removeAttribute(fromAttributeName);
-							}
-						}
-					}
+		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
+		
+		for (XmlElement elem : elems) {
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				String attrVal = elem.getAttribute(fromAttributeName);
+				if (attrVal != null) {
+					elem.removeAttribute(fromAttributeName);
+					elem.setAttribute(toAttributeName, attrVal);
 				}
 			}
 		}
@@ -970,24 +700,20 @@ public class XmlFile extends File {
 	public void saveTo(String newLocation) {
 
 		filename = newLocation;
+		
+		java.io.File javaFile = getJavaFile();
 
 		// create parent directories
-		getJavaFile().getParentFile().mkdirs();
+		javaFile.getParentFile().mkdirs();
 
-		try {
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-			transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
-			transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			Result output = new StreamResult(getJavaFile());
-			xmlcontents.setXmlStandalone(true);
-			Source input = new DOMSource(xmlcontents);
-
-			transformer.transform(input, output);
-
-		} catch (TransformerException e) {
-			System.err.println(e);
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(javaFile), StandardCharsets.UTF_8)) {
+			
+			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+			
+			getRoot().writeToFile(writer);
+			
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + getFilename() + " - inconceivable!");
 		}
 	}
 

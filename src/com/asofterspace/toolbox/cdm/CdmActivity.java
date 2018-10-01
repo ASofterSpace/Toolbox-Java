@@ -1,19 +1,14 @@
 package com.asofterspace.toolbox.cdm;
 
+import com.asofterspace.toolbox.io.XmlElement;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 
 public class CdmActivity extends CdmNode {
 
-	// TODO :: keep track of the base element / activity definition explicitly
-	// (however - take care; right now, we only get the real activities, NOT the activity definitions inside mce definitions,
-	// so the definition activities right now are not given to us by the CdmCtrl, and if we change that then we need to change many other
-	// places, so ideally we would like to keep it this way - just never display activities from inside mce definitions anywhere!)
+	/*
 	private String baseElementId;
 
 	private String hasPredictedValue;
@@ -23,6 +18,7 @@ public class CdmActivity extends CdmNode {
 	private String defaultRouteId;
 
 	private String defaultServiceAccessPointId;
+	*/
 
 	private String alias;
 	
@@ -35,28 +31,27 @@ public class CdmActivity extends CdmNode {
 
 		super(baseNode);
 		
-		this.baseElementId = getValue("baseElement");
+		/*
+		this.baseElementId = getAttribute("baseElement");
 		
-		this.hasPredictedValue = getValue("hasPredictedValue");
+		this.hasPredictedValue = getAttribute("hasPredictedValue");
 		
-		this.permittedRouteId = getValue("permittedRoute");
+		this.permittedRouteId = getAttribute("permittedRoute");
 		
-		this.defaultRouteId = getValue("defaultRoute");
+		this.defaultRouteId = getAttribute("defaultRoute");
 		
-		this.defaultServiceAccessPointId = getValue("defaultServiceAccessPoint");
+		this.defaultServiceAccessPointId = getAttribute("defaultServiceAccessPoint");
+		*/
 		
-		NodeList aliassesAndArgs = thisNode.getChildNodes();
+		List<XmlElement> aliassesAndArgs = getChildNodes();
 
-		int len = aliassesAndArgs.getLength();
-
-		for (int i = 0; i < len; i++) {
-			Node aliasOrArg = aliassesAndArgs.item(i);
+		for (XmlElement aliasOrArg : aliassesAndArgs) {
 			if ("aliases".equals(aliasOrArg.getNodeName())) {
-				this.alias = aliasOrArg.getAttributes().getNamedItem("alias").getNodeValue();
+				this.alias = aliasOrArg.getAttribute("alias");
 			}
 		}
 		
-		this.isDefinition = "monitoringControlElementDefinition".equals(thisNode.getParentNode().getNodeName());
+		this.isDefinition = "monitoringControlElementDefinition".equals(getXmlParent().getNodeName());
 
 		// TODO :: also take care of arguments, e.g.
 		// <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_AAAAACqUzEIAAAAAAAABoA" engineeringArgumentDefinition="______91W8zUAAAAAAAAB8w">
@@ -64,7 +59,7 @@ public class CdmActivity extends CdmNode {
 		// </arguments>
 	}
 	
-	public CdmActivity(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
+	public CdmActivity(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}

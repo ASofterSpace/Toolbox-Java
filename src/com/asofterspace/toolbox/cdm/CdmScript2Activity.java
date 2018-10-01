@@ -1,10 +1,9 @@
 package com.asofterspace.toolbox.cdm;
 
-import java.util.Set;
+import com.asofterspace.toolbox.io.XmlElement;
 
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.util.List;
+import java.util.Set;
 
 
 public class CdmScript2Activity extends CdmNode {
@@ -22,26 +21,11 @@ public class CdmScript2Activity extends CdmNode {
 
 		super(baseNode);
 		
-		NodeList elements = thisNode.getChildNodes();
+		List<XmlElement> elements = getChildNodes();
 
-		int len = elements.getLength();
-
-		for (int i = 0; i < len; i++) {
+		for (XmlElement elem : elements) {
 			
-			Node elem = elements.item(i);
-			NamedNodeMap elemAttributes = elem.getAttributes();
-			
-			if (elemAttributes == null) {
-				continue;
-			}
-			
-			Node hrefNode = elemAttributes.getNamedItem("href");
-			
-			if (hrefNode == null) {
-				continue;
-			}
-			
-			String href = hrefNode.getNodeValue();
+			String href = elem.getAttribute("href");
 			
 			if (href == null) {
 				continue;
@@ -62,7 +46,7 @@ public class CdmScript2Activity extends CdmNode {
 		}
 	}
 
-	public CdmScript2Activity(CdmFile parentFile, Node thisNode, CdmCtrl cdmCtrl) {
+	public CdmScript2Activity(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}

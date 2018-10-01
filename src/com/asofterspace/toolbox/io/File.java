@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A file object describes a single file and enables simple access to
+ * A file object describes a single line-oriented text file and enables simple access to
  * its contents.
  */
 public class File {
 
-	String filename;
+	protected String filename;
 
-	List<String> filecontents;
+	protected List<String> filecontents;
 
 
 	/**

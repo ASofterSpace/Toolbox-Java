@@ -6,6 +6,7 @@ import com.asofterspace.toolbox.cdm.CdmNode;
 import com.asofterspace.toolbox.cdm.exceptions.AttemptingEmfException;
 import com.asofterspace.toolbox.cdm.exceptions.CdmLoadingException;
 import com.asofterspace.toolbox.io.Directory;
+import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 import com.asofterspace.toolbox.utils.NoOpProgressIndicator;
@@ -159,19 +160,19 @@ public class CdmTest implements Test {
 		
 		CdmFile file = files.iterator().next();
 		
-		List<Element> packets = file.domGetElems("packet");
-		for (Element packet : packets) {
+		List<XmlElement> packets = file.domGetElems("packet");
+		for (XmlElement packet : packets) {
 			CdmNode cdmPacket = new CdmNode(file, packet, cdmCtrl);
 			switch (cdmPacket.getName()) {
 				case "PacketWithTMOnly":
 				case "PacketWithTMandTC":
-					if (!"TM".equals(cdmPacket.getValue("packetType"))) {
+					if (!"TM".equals(cdmPacket.getAttribute("packetType"))) {
 						TestUtils.fail("While converting the PacketCI, the packet " + cdmPacket.getName() + " did not receive the expected packetType!");
 						return;
 					}
 					break;
 				case "PacketWithTCOnly":
-					if (!"TC".equals(cdmPacket.getValue("packetType"))) {
+					if (!"TC".equals(cdmPacket.getAttribute("packetType"))) {
 						TestUtils.fail("While converting the PacketCI, the packet " + cdmPacket.getName() + " did not receive the expected packetType!");
 						return;
 					}
@@ -199,17 +200,17 @@ public class CdmTest implements Test {
 		
 		file = files.iterator().next();
 		
-		List<Element> pktParameters = file.domGetElems("pktParameter");
-		for (Element pktParameter : pktParameters) {
+		List<XmlElement> pktParameters = file.domGetElems("pktParameter");
+		for (XmlElement pktParameter : pktParameters) {
 			CdmNode cdmPktParameter = new CdmNode(file, pktParameter, cdmCtrl);
 			if (cdmPktParameter.getName().startsWith("paraTM")) {
-				if (!"Telemetry".equals(cdmPktParameter.getValue("sourceType"))) {
+				if (!"Telemetry".equals(cdmPktParameter.getAttribute("sourceType"))) {
 					TestUtils.fail("While converting the PacketCI, the pktParameter " + cdmPktParameter.getName() + " did not receive the expected sourceType!");
 					return;
 				}
 			}
 			if (cdmPktParameter.getName().startsWith("paraTC")) {
-				if (!"Command".equals(cdmPktParameter.getValue("sourceType"))) {
+				if (!"Command".equals(cdmPktParameter.getAttribute("sourceType"))) {
 					TestUtils.fail("While converting the PacketCI, the pktParameter " + cdmPktParameter.getName() + " did not receive the expected sourceType!");
 					return;
 				}

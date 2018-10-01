@@ -3,18 +3,14 @@ package com.asofterspace.toolbox.cdm;
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
+import com.asofterspace.toolbox.utils.TinyMap;
 import com.asofterspace.toolbox.Utils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 
 /**
@@ -38,7 +34,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 		this.cdmCtrl = cdmCtrl;
 
-		Node root = getRoot();
+		XmlElement root = getRoot();
 
 		if (root != null) {
 			ciType = root.getNodeName();
@@ -74,86 +70,70 @@ public abstract class CdmFileBase extends XmlFile {
 			toPrefix = toPrefix.substring(0, toPrefix.length() - 1);
 		}
 
-		// we need to switch out THIS namespace first, as otherwise root elements cannot be renamed in the next step
-		conversionSwitchConfigurationControlNamespace(toVersion, toPrefix);
-
 		// step through the detailed version changes
 		conversionStepThroughChanges(origVersion, toVersion);
 
-		// switch out the other, more volatile namespaces (namespaces can be modified in the previous step,
+		// switch out the namespaces (namespaces can be modified in the previous step,
 		// e.g. xmlns:PUSServicegeneric being added or removed, so this one has to come afterwards!)
-		conversionSwitchOtherNamespaces(toVersion, toPrefix);
+		conversionSwitchNamespaces(toVersion, toPrefix);
 	}
 
-	private void conversionSwitchConfigurationControlNamespace(String toVersion, String toPrefix) {
+	private void conversionSwitchNamespaces(String toVersion, String toPrefix) {
 
-		Node root = getRoot();
+		XmlElement root = getRoot();
 
 		if (root == null) {
 			return;
 		}
-
-		NamedNodeMap scriptAttributes = root.getAttributes();
-
-		Node configurationcontrol = scriptAttributes.getNamedItem("xmlns:configurationcontrol");
+		
+		String configurationcontrol = root.getAttribute("xmlns:configurationcontrol");
 		if (configurationcontrol != null) {
-			configurationcontrol.setNodeValue(toPrefix + "/" + CdmCtrl.CDM_NAMESPACE_MIDDLE + toVersion);
+			root.setAttribute("xmlns:configurationcontrol", toPrefix + "/" + CdmCtrl.CDM_NAMESPACE_MIDDLE + toVersion);
 		}
-	}
-
-	private void conversionSwitchOtherNamespaces(String toVersion, String toPrefix) {
-
-		Node root = getRoot();
-
-		if (root == null) {
-			return;
-		}
-
-		NamedNodeMap scriptAttributes = root.getAttributes();
-
-		Node mcmimplementationitems = scriptAttributes.getNamedItem("xmlns:mcmimplementationitems");
+		
+		String mcmimplementationitems = root.getAttribute("xmlns:mcmimplementationitems");
 		if (mcmimplementationitems != null) {
-			mcmimplementationitems.setNodeValue(toPrefix + "/MonitoringControl/MCMImplementationItems/" + toVersion);
+			root.setAttribute("xmlns:mcmimplementationitems", toPrefix + "/MonitoringControl/MCMImplementationItems/" + toVersion);
 		}
 
-		Node monitoringcontrolcommon = scriptAttributes.getNamedItem("xmlns:monitoringcontrolcommon");
+		String monitoringcontrolcommon = root.getAttribute("xmlns:monitoringcontrolcommon");
 		if (monitoringcontrolcommon != null) {
-			monitoringcontrolcommon.setNodeValue(toPrefix + "/MonitoringControl/MonitoringControlCommon/" + toVersion);
+			root.setAttribute("xmlns:monitoringcontrolcommon", toPrefix + "/MonitoringControl/MonitoringControlCommon/" + toVersion);
 		}
 
-		Node monitoringcontrolmodel = scriptAttributes.getNamedItem("xmlns:monitoringcontrolmodel");
+		String monitoringcontrolmodel = root.getAttribute("xmlns:monitoringcontrolmodel");
 		if (monitoringcontrolmodel != null) {
-			monitoringcontrolmodel.setNodeValue(toPrefix + "/MonitoringControl/MonitoringControlModel/" + toVersion);
+			root.setAttribute("xmlns:monitoringcontrolmodel", toPrefix + "/MonitoringControl/MonitoringControlModel/" + toVersion);
 		}
 
-		Node container = scriptAttributes.getNamedItem("xmlns:container");
+		String container = root.getAttribute("xmlns:container");
 		if (container != null) {
-			container.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Container/" + toVersion);
+			root.setAttribute("xmlns:container", toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Container/" + toVersion);
 		}
 
-		Node mapping_mcm2packet = scriptAttributes.getNamedItem("xmlns:mapping_mcm2packet");
+		String mapping_mcm2packet = root.getAttribute("xmlns:mapping_mcm2packet");
 		if (mapping_mcm2packet != null) {
-			mapping_mcm2packet.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Mapping_MCM2Packet/" + toVersion);
+			root.setAttribute("xmlns:mapping_mcm2packet", toPrefix + "/MonitoringControlImplementation/Packetization/Mapping_MCM2Packet/" + toVersion);
 		}
 
-		Node mappingservicepacket = scriptAttributes.getNamedItem("xmlns:mapping_service2packet");
+		String mappingservicepacket = root.getAttribute("xmlns:mapping_service2packet");
 		if (mappingservicepacket != null) {
-			mappingservicepacket.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Mapping_Service2Packet/" + toVersion);
+			root.setAttribute("xmlns:mapping_service2packet", toPrefix + "/MonitoringControlImplementation/Packetization/Mapping_Service2Packet/" + toVersion);
 		}
 
-		Node parameter = scriptAttributes.getNamedItem("xmlns:parameter");
+		String parameter = root.getAttribute("xmlns:parameter");
 		if (parameter != null) {
-			parameter.setNodeValue(toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Parameter/" + toVersion);
+			root.setAttribute("xmlns:parameter", toPrefix + "/MonitoringControlImplementation/Packetization/Packetization/Parameter/" + toVersion);
 		}
 
-		Node pusservicegeneric = scriptAttributes.getNamedItem("xmlns:PUSServicegeneric");
+		String pusservicegeneric = root.getAttribute("xmlns:PUSServicegeneric");
 		if (pusservicegeneric != null) {
-			pusservicegeneric.setNodeValue(toPrefix + "/MonitoringControlImplementation/PusServiceLayer/PUS_Service_generic/" + toVersion);
+			root.setAttribute("xmlns:PUSServicegeneric", toPrefix + "/MonitoringControlImplementation/PusServiceLayer/PUS_Service_generic/" + toVersion);
 		}
 
-		Node packetprocessing = scriptAttributes.getNamedItem("xmlns:packetprocessing");
+		String packetprocessing = root.getAttribute("xmlns:packetprocessing");
 		if (packetprocessing != null) {
-			packetprocessing.setNodeValue(toPrefix + "/PacketProcessing/" + toVersion);
+			root.setAttribute("xmlns:packetprocessing", toPrefix + "/PacketProcessing/" + toVersion);
 		}
 
 		// TODO :: also convert the UDD xmlns, at least these exist in 1.12 (but we do not know the xmlns name right now)
@@ -192,14 +172,14 @@ public abstract class CdmFileBase extends XmlFile {
 				break;
 		}
 
-		Node qudvBlocksExtModel = scriptAttributes.getNamedItem("xmlns:qudv.blocks_extModel");
+		String qudvBlocksExtModel = root.getAttribute("xmlns:qudv.blocks_extModel");
 		if (qudvBlocksExtModel != null) {
-			qudvBlocksExtModel.setNodeValue(qudvPrefix + "blocks/1.5");
+			root.setAttribute("xmlns:qudv.blocks_extModel", qudvPrefix + "blocks/1.5");
 		}
 
-		Node qudvConceptExtModel = scriptAttributes.getNamedItem("xmlns:qudv.conceptualmodel_extModel");
+		String qudvConceptExtModel = root.getAttribute("xmlns:qudv.conceptualmodel_extModel");
 		if (qudvConceptExtModel != null) {
-			qudvConceptExtModel.setNodeValue(qudvPrefix + "conceptualmodel/1.5");
+			root.setAttribute("xmlns:qudv.conceptualmodel_extModel", qudvPrefix + "conceptualmodel/1.5");
 		}
 	}
 
@@ -231,29 +211,6 @@ public abstract class CdmFileBase extends XmlFile {
 			applyChangesFromVersionToVersion(knownVersions.get(origIndex), knownVersions.get(origIndex - 1));
 			origIndex--;
 		}
-	}
-
-	private void conversionRenameRoot(String prevNamespace, String newNamespace, String newCiName) {
-
-		Node root = getRoot();
-
-		if (root == null) {
-			return;
-		}
-
-		// store the original namespace
-		NamedNodeMap scriptAttributes = root.getAttributes();
-		Node configurationcontrol = scriptAttributes.getNamedItem("xmlns:" + prevNamespace);
-		if (configurationcontrol != null) {
-			// get the actual namespace string (including http:// and all) that we assigned
-			prevNamespace = configurationcontrol.getNodeValue();
-		}
-
-		// actually register the namespace formally
-		// getDocument().createElementNS(prevNamespace, newNamespace + ":" + newCiName);
-
-		// assign the CI name, using the namespace we just registered
-		getDocument().renameNode(root, prevNamespace, newNamespace + ":" + newCiName);
 	}
 
 	// add these namespaces both when going up from 1.12.1 and when going down from 1.14.0bd1 :)
@@ -552,8 +509,8 @@ public abstract class CdmFileBase extends XmlFile {
 					case "1.12.1":
 						// let's add the isModified attribute with default false (see example 1) in case it is missing!
 						{
-							Element root = getRoot();
-							Node isModified = root.getAttributes().getNamedItem("isModified");
+							XmlElement root = getRoot();
+							String isModified = root.getAttribute("isModified");
 							if (isModified == null) {
 								root.setAttribute("isModified", "false");
 							}
@@ -629,9 +586,9 @@ public abstract class CdmFileBase extends XmlFile {
 
 							int newargcounter = 1;
 
-							List<Element> elems = domGetElems("arguments");
-							for (Element argument : elems) {
-								Node argname = argument.getAttributes().getNamedItem("name");
+							List<XmlElement> elems = domGetElems("arguments");
+							for (XmlElement argument : elems) {
+								String argname = argument.getAttribute("name");
 								if (argname == null) {
 
 									// try getting the name from the definition, any definition will do - this is REALLY HELPFUL,
@@ -689,31 +646,26 @@ public abstract class CdmFileBase extends XmlFile {
 								"defaultText", "default");
 
 							// add a default enumerationLiteral, if there is none there
-							List<Element> enumerations = domGetElems("abstractDataType", "xsi:type", "monitoringcontrolcommon:EnumerationDataType");
-							for (Element enumeration : enumerations) {
+							List<XmlElement> enumerations = domGetElems("abstractDataType", "xsi:type", "monitoringcontrolcommon:EnumerationDataType");
+							for (XmlElement enumeration : enumerations) {
 								boolean hasLiteralChild = false;
 
-								NodeList children = enumeration.getChildNodes();
-								if (children != null) {
-									int childrenLen = children.getLength();
-
-									for (int j = 0; j < childrenLen; j++) {
-										Node childNode = children.item(j);
-										if ("enumerationLiterals".equals(childNode.getNodeName())) {
-											hasLiteralChild = true;
-											break;
-										}
+								List<XmlElement> children = enumeration.getChildNodes();
+								for (XmlElement child : children) {
+									if ("enumerationLiterals".equals(child.getNodeName())) {
+										hasLiteralChild = true;
+										break;
 									}
 								}
 
 								// no child has been found... create one! :)
 								if (!hasLiteralChild) {
-									Element newLiteral = createElement("enumerationLiterals");
+									XmlElement newLiteral = enumeration.createChild("enumerationLiterals");
 									// just add a mapping f(1) = "one" - what possible harm could be done? ^^
 									newLiteral.setAttribute("x", "1");
 									newLiteral.setAttribute("y", "one");
 									newLiteral.setAttribute("xmi:id", UuidEncoderDecoder.generateEcoreUUID());
-									enumeration.appendChild(newLiteral);
+									// TODO :: add the new element to CdmCtrl
 								}
 							}
 						}
@@ -732,8 +684,8 @@ public abstract class CdmFileBase extends XmlFile {
 							//   TM as default for those cases.
 
 							// So, in this direction, go through all <packet>s and get the sourceTypes of their <pktParameter>s
-							List<Element> packets = domGetElems("packet");
-							for (Element packet : packets) {
+							List<XmlElement> packets = domGetElems("packet");
+							for (XmlElement packet : packets) {
 
 								// we now iterate over all <parameterValue>s and resolve the <pktParameter>s, checking if we
 								// find "Telemetry" or "Command" or "TelemetryOrCommand" anywhere (in the end, if we found
@@ -743,47 +695,39 @@ public abstract class CdmFileBase extends XmlFile {
 								boolean foundTelemetryOrElse = false;
 
 								// get all associated <parameterValue>s...
-								NodeList children = packet.getChildNodes();
-								if (children == null) {
-									break;
-								}
-								int childrenLen = children.getLength();
+								List<XmlElement> children = packet.getChildNodes();
 
-								for (int j = 0; j < childrenLen; j++) {
-									Node childNode = children.item(j);
-									if (childNode instanceof Element) {
-										if ("parameterValues".equals(childNode.getNodeName())) {
-											Element parameterValue = (Element) childNode;
+								for (XmlElement child : children) {
+									if ("parameterValues".equals(child.getNodeName())) {
 
-											// get attribute "parameter"
-											Node parameterAttr = parameterValue.getAttributes().getNamedItem("parameter");
+										// get attribute "parameter"
+										String parameterAttr = child.getAttribute("parameter");
 
-											if (parameterAttr == null) {
-												continue;
-											}
+										if (parameterAttr == null) {
+											continue;
+										}
 
-											// get that pktParameter instance from CdmCtrl
-											CdmNode pktParameterNode = cdmCtrl.getByUuid(parameterAttr.getNodeValue());
+										// get that pktParameter instance from CdmCtrl
+										CdmNode pktParameterNode = cdmCtrl.getByUuid(parameterAttr);
 
-											if (pktParameterNode == null) {
-												continue;
-											}
+										if (pktParameterNode == null) {
+											continue;
+										}
 
-											if (!"pktParameter".equals(pktParameterNode.getTagName())) {
-												continue;
-											}
+										if (!"pktParameter".equals(pktParameterNode.getTagName())) {
+											continue;
+										}
 
-											// set the pktParameter instance sourceType accordingly
-											String sourceType = pktParameterNode.getValue("sourceType");
+										// set the pktParameter instance sourceType accordingly
+										String sourceType = pktParameterNode.getAttribute("sourceType");
 
-											if ("Command".equals(sourceType)) {
-												// if we ONLY find Commands for all pktParameters, assign TC - so check further
-												foundCommand = true;
-											} else {
-												// if we found at least one pktParameter with Telemetry, assign TM - so no need for more checking
-												foundTelemetryOrElse = true;
-												break;
-											}
+										if ("Command".equals(sourceType)) {
+											// if we ONLY find Commands for all pktParameters, assign TC - so check further
+											foundCommand = true;
+										} else {
+											// if we found at least one pktParameter with Telemetry, assign TM - so no need for more checking
+											foundTelemetryOrElse = true;
+											break;
 										}
 									}
 								}
@@ -815,7 +759,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// rename units and quantities CI
 						if ("configurationcontrol:UnitsAndQuantatiesCI".equals(getCiType())) {
-							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantitiesCI");
+							getRoot().setNodeName("configurationcontrol:UnitsAndQuantitiesCI");
 						}
 
 						// update automation imports
@@ -823,21 +767,19 @@ public abstract class CdmFileBase extends XmlFile {
 						// TODO :: also update the internal procedure cdm nodes!
 						if ("configurationcontrol:ProcedureCI".equals(getCiType())) {
 
-							List<Element> procedures = domGetElems("procedure");
+							List<XmlElement> procedures = domGetElems("procedure");
 
-							for (Element procedure : procedures) {
-								Node procedureContent = procedure.getAttributes().getNamedItem("procedureContent");
+							for (XmlElement procedure : procedures) {
+								String procedureContent = procedure.getAttribute("procedureContent");
 
 								if (procedureContent == null) {
 									continue;
 								}
 
-								String content = procedureContent.getNodeValue();
+								if (procedureContent.contains("esa.egscc.test.area.IA08.")) {
+									procedureContent = procedureContent.replaceAll("esa.egscc.test.area.IA08.", "esa.egscc.mcm.");
 
-								if (content.contains("esa.egscc.test.area.IA08.")) {
-									content = content.replaceAll("esa.egscc.test.area.IA08.", "esa.egscc.mcm.");
-
-									procedure.setAttribute("procedureContent", content);
+									procedure.setAttribute("procedureContent", procedureContent);
 								}
 							}
 						}
@@ -884,11 +826,11 @@ public abstract class CdmFileBase extends XmlFile {
 							//   TM as default for those cases.
 
 							// So, in this direction, go through all <packets> and their <parameterValues> and set the <pktParameter> sourceType accordingly...
-							List<Element> parameterValues = domGetChildrenOfElems("packet", "parameterValues");
-							for (Element parameterValue : parameterValues) {
+							List<XmlElement> parameterValues = domGetChildrenOfElems("packet", "parameterValues");
+							for (XmlElement parameterValue : parameterValues) {
 
 								// figure out to what value we actually want to set the pktParameter sourceType...
-								Node packetType = parameterValue.getParentNode().getAttributes().getNamedItem("packetType");
+								String packetType = parameterValue.getXmlParent().getAttribute("packetType");
 
 								if (packetType == null) {
 									continue;
@@ -898,19 +840,19 @@ public abstract class CdmFileBase extends XmlFile {
 								String targetSourceType = "Telemetry";
 
 								// ... in case of TC, use Command!
-								if ("TC".equals(packetType.getNodeValue())) {
+								if ("TC".equals(packetType)) {
 									targetSourceType = "Command";
 								}
 
 								// get attribute "parameter"
-								Node parameterAttr = parameterValue.getAttributes().getNamedItem("parameter");
+								String parameterAttr = parameterValue.getAttribute("parameter");
 
 								if (parameterAttr == null) {
 									continue;
 								}
 
 								// get that pktParameter instance from CdmCtrl
-								CdmNode pktParameterNode = cdmCtrl.getByUuid(parameterAttr.getNodeValue());
+								CdmNode pktParameterNode = cdmCtrl.getByUuid(parameterAttr);
 
 								if (pktParameterNode == null) {
 									continue;
@@ -921,10 +863,7 @@ public abstract class CdmFileBase extends XmlFile {
 								}
 
 								// set the pktParameter instance sourceType accordingly
-								if (pktParameterNode.getNode() instanceof Element) {
-									Element pktParameterElem = (Element) pktParameterNode.getNode();
-									pktParameterElem.setAttribute("sourceType", targetSourceType);
-								}
+								pktParameterNode.setAttribute("sourceType", targetSourceType);
 							}
 
 							// ... then set it to the default value for all the <pktParameter>s that are still left after this
@@ -948,7 +887,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// rename units and quantities CI back
 						if ("configurationcontrol:UnitsAndQuantitiesCI".equals(getCiType())) {
-							conversionRenameRoot("configurationcontrol", "configurationcontrol", "UnitsAndQuantatiesCI");
+							getRoot().setNodeName("configurationcontrol:UnitsAndQuantatiesCI");
 						}
 
 						// update automation imports back
@@ -956,16 +895,14 @@ public abstract class CdmFileBase extends XmlFile {
 						// TODO :: also update the internal procedure cdm nodes!
 						if ("configurationcontrol:ProcedureCI".equals(getCiType())) {
 
-							List<Element> procedures = domGetElems("procedure");
+							List<XmlElement> procedures = domGetElems("procedure");
 
-							for (Element procedure : procedures) {
-								Node procedureContent = procedure.getAttributes().getNamedItem("procedureContent");
+							for (XmlElement procedure : procedures) {
+								String content = procedure.getAttribute("procedureContent");
 
-								if (procedureContent == null) {
+								if (content == null) {
 									continue;
 								}
-
-								String content = procedureContent.getNodeValue();
 
 								if (content.contains("esa.egscc.mcm.")) {
 									content = content.replaceAll("esa.egscc.mcm.", "esa.egscc.test.area.IA08.");
@@ -986,24 +923,21 @@ public abstract class CdmFileBase extends XmlFile {
 
 							// do this both for engineeringDefaultValue > value
 							// and defaultValue xsi:type=monitoringcontrolmodel:EngineeringArgumentValue > value
-							List<Element> children = domGetChildrenOfElems("engineeringDefaultValue");
+							List<XmlElement> children = domGetChildrenOfElems("engineeringDefaultValue");
 							children.addAll(domGetChildrenOfElems("defaultValue",
 								"xsi:type", "monitoringcontrolmodel:EngineeringArgumentValue"));
 							// also add defaultValues that are children of EngineeringParameters, see example 6
 							children.addAll(domGetChildrenOfElems("monitoringControlElementAspects",
 								"xsi:type", "monitoringcontrolmodel:EngineeringParameter"));
-							for (Element argValue : children) {
+							for (XmlElement argValue : children) {
 								// for example 2, take value, and for example 6, take defaultValue
 								if (("value".equals(argValue.getNodeName())) || ("defaultValue".equals(argValue.getNodeName()))) {
-									Node argValueType = argValue.getAttributes().getNamedItem("xsi:type");
+									String argValueType = argValue.getAttribute("xsi:type");
 									if (argValueType == null) {
-										if (argValue instanceof Element) {
-											Element argValueEl = (Element) argValue;
-											argValueEl.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterEngValue");
-										}
+										argValue.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterEngValue");
 									} else {
-										if ("monitoringcontrolmodel:ParameterRawValue".equals(argValueType.getNodeValue())) {
-											argValueType.setNodeValue("monitoringcontrolmodel:ParameterEngValue");
+										if ("monitoringcontrolmodel:ParameterRawValue".equals(argValueType)) {
+											argValue.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterEngValue");
 										}
 									}
 								}
@@ -1023,24 +957,21 @@ public abstract class CdmFileBase extends XmlFile {
 
 							// do this both for engineeringDefaultValue > value
 							// and defaultValue xsi:type=monitoringcontrolmodel:EngineeringArgumentValue > value
-							List<Element> children = domGetChildrenOfElems("engineeringDefaultValue");
+							List<XmlElement> children = domGetChildrenOfElems("engineeringDefaultValue");
 							children.addAll(domGetChildrenOfElems("defaultValue",
 								"xsi:type", "monitoringcontrolmodel:EngineeringArgumentValue"));
 							// also add defaultValues that are children of EngineeringParameters, see example 6
 							children.addAll(domGetChildrenOfElems("monitoringControlElementAspects",
 								"xsi:type", "monitoringcontrolmodel:EngineeringParameter"));
-							for (Element argValue : children) {
+							for (XmlElement argValue : children) {
 								// for example 2, take value, and for example 6, take defaultValue
 								if (("value".equals(argValue.getNodeName())) || ("defaultValue".equals(argValue.getNodeName()))) {
-									Node argValueType = argValue.getAttributes().getNamedItem("xsi:type");
+									String argValueType = argValue.getAttribute("xsi:type");
 									if (argValueType == null) {
-										if (argValue instanceof Element) {
-											Element argValueEl = (Element) argValue;
-											argValueEl.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterRawValue");
-										}
+										argValue.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterRawValue");
 									} else {
-										if ("monitoringcontrolmodel:ParameterEngValue".equals(argValueType.getNodeValue())) {
-											argValueType.setNodeValue("monitoringcontrolmodel:ParameterRawValue");
+										if ("monitoringcontrolmodel:ParameterEngValue".equals(argValueType)) {
+											argValue.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterRawValue");
 										}
 									}
 								}
@@ -1058,8 +989,8 @@ public abstract class CdmFileBase extends XmlFile {
 	
 		List<String> result = new ArrayList<>();
 		
-		Element thisRoot = getRoot();
-		Element otherRoot = otherFile.getRoot();
+		XmlElement thisRoot = getRoot();
+		XmlElement otherRoot = otherFile.getRoot();
 		
 		// do not complain if both files do not contain root elements
 		if ((thisRoot == null) && (otherRoot == null)) {
@@ -1079,7 +1010,7 @@ public abstract class CdmFileBase extends XmlFile {
 		return result;
 	}
 	
-	private void findDifferencesRecursivelyFrom(String otherPath, Element otherEl, String curPath, Element curEl, List<String> outResult) {
+	private void findDifferencesRecursivelyFrom(String otherPath, XmlElement otherEl, String curPath, XmlElement curEl, List<String> outResult) {
 	
 		// check this node's name
 		if (!curEl.getNodeName().equals(otherEl.getNodeName())) {
@@ -1087,50 +1018,29 @@ public abstract class CdmFileBase extends XmlFile {
 		}
 		
 		// check this node's attributes
-		NamedNodeMap curAttrs = curEl.getAttributes();
-		NamedNodeMap otherAttrs = otherEl.getAttributes();
-		for (int i = 0; i < curAttrs.getLength(); i++) {
-			Node otherNode = otherAttrs.getNamedItem(curAttrs.item(i).getNodeName());
+		TinyMap curAttrs = curEl.getAttributes();
+		TinyMap otherAttrs = otherEl.getAttributes();
+		for (int i = 0; i < curAttrs.size(); i++) {
+			String otherNode = otherAttrs.get(curAttrs.getKey(i));
 			if (otherNode == null) {
-				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + ", which in the right CDM contains the attribute \"" + curAttrs.item(i).getNodeName() + "\" that is missing from the left CDM.");
+				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + ", which in the right CDM contains the attribute \"" + curAttrs.getKey(i) + "\" that is missing from the left CDM.");
 			} else {
-				if (!curAttrs.item(i).getNodeValue().equals(otherNode.getNodeValue())) {
-					outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + " with the attribute \"" + curAttrs.item(i).getNodeName() + "\", which in the right CDM has the value \"" + curAttrs.item(i).getNodeValue() + "\" as opposed to the value \"" + otherNode.getNodeValue() + "\" in the left CDM.");
+				if (!curAttrs.get(i).equals(otherNode)) {
+					outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + " with the attribute \"" + curAttrs.getKey(i) + "\", which in the right CDM has the value \"" + curAttrs.get(i) + "\" as opposed to the value \"" + otherNode + "\" in the left CDM.");
 				}
 			}
 		}
-		for (int i = 0; i < otherAttrs.getLength(); i++) {
-			Node curNode = curAttrs.getNamedItem(curAttrs.item(i).getNodeName());
+		for (int i = 0; i < otherAttrs.size(); i++) {
+			String curNode = curAttrs.get(otherAttrs.getKey(i));
 			if (curNode == null) {
-				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + otherPath + otherEl.getNodeName() + ", which in the left CDM contains the attribute \"" + otherAttrs.item(i).getNodeName() + "\" that is missing from the right CDM.");
+				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + otherPath + otherEl.getNodeName() + ", which in the left CDM contains the attribute \"" + otherAttrs.getKey(i) + "\" that is missing from the right CDM.");
 			}
 			// no need for the else here - if there was a different value, then it was already reported a few lines above ^^
 		}
 		
 		// check this node's children
-		NodeList curChildren = curEl.getChildNodes();
-		NodeList otherChildren = otherEl.getChildNodes();
-		
-		List<Element> rightChildEls = new ArrayList<>();		
-		List<Element> leftChildEls = new ArrayList<>();
-		
-		if (curChildren != null) {
-			for (int i = 0; i < curChildren.getLength(); i++) {
-				Node child = curChildren.item(i);
-				if (child instanceof Element) {
-					rightChildEls.add((Element) child);
-				}
-			}
-		}
-		
-		if (otherChildren != null) {
-			for (int i = 0; i < otherChildren.getLength(); i++) {
-				Node child = otherChildren.item(i);
-				if (child instanceof Element) {
-					leftChildEls.add((Element) child);
-				}
-			}
-		}
+		List<XmlElement> rightChildEls = curEl.getChildNodes();
+		List<XmlElement> leftChildEls = otherEl.getChildNodes();
 		
 		int childrenLen = rightChildEls.size();
 		
@@ -1168,10 +1078,9 @@ public abstract class CdmFileBase extends XmlFile {
 	public String getCdmVersion() {
 
 		try {
-			Node root = getRoot();
+			XmlElement root = getRoot();
 
-			NamedNodeMap scriptAttributes = root.getAttributes();
-			String cdmVersion = scriptAttributes.getNamedItem("xmlns:configurationcontrol").getNodeValue();
+			String cdmVersion = root.getAttribute("xmlns:configurationcontrol");
 
 			String searchFor = "/" + CdmCtrl.CDM_NAMESPACE_MIDDLE;
 
@@ -1193,10 +1102,9 @@ public abstract class CdmFileBase extends XmlFile {
 	public String getCdmVersionPrefix() {
 
 		try {
-			Node root = getRoot();
+			XmlElement root = getRoot();
 
-			NamedNodeMap scriptAttributes = root.getAttributes();
-			String cdmVersionPrefix = scriptAttributes.getNamedItem("xmlns:configurationcontrol").getNodeValue();
+			String cdmVersionPrefix = root.getAttribute("xmlns:configurationcontrol");
 
 			String searchFor = "/" + CdmCtrl.CDM_NAMESPACE_MIDDLE;
 
