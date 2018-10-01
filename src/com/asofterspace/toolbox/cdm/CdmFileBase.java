@@ -462,6 +462,38 @@ public abstract class CdmFileBase extends XmlFile {
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							// rename activityInhibtionPeriod to activityInhibitionPeriod
 							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibtionPeriod", "activityInhibitionPeriod");
+
+							// rename callibration to calibration - observed for xsi:type="monitoringcontrolmodel:EngineeringArgumentDefinition"
+							domRenameAttributes("monitoringControlElementAspects", "callibration", "calibration");
+
+							// set hasPredictedValue which became mandatory
+							domSetAttributeForElemsIfAttrIsMissing("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "hasPredictedValue", "false");
+							domSetAttributeForElemsIfAttrIsMissing("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:EngineeringArgumentDefinition", "hasPredictedValue", "false");
+
+							// iterate over all events and set their eventtype also for their definitions
+							// (this should have also already been part of 1.12.1, but apparently in some CDMs this was missing anyway...)
+							List<XmlElement> elems = domGetElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event");
+							for (XmlElement event : elems) {
+								String baseHref = null;
+								String typeHref = null;
+							
+								for (XmlElement child : event.getChildNodes()) {
+									if ("baseElement".equals(child.getNodeName())) {
+										baseHref = child.getAttribute("href");
+									}
+									if ("eventType".equals(child.getNodeName())) {
+										typeHref = child.getAttribute("href");
+									}
+								}
+
+								if ((baseHref != null) && (typeHref != null)) {
+									CdmNode eventDef = cdmCtrl.getByUuid(baseHref);
+									XmlElement eventTypeEl = eventDef.createChild("eventType");
+									// TODO :: actually resolve the proper local path in the link - here we just copy the path from the other file,
+									// which might not be right!
+									eventTypeEl.setAttribute("href", typeHref);
+								}
+							}
 						}
 
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
@@ -480,11 +512,23 @@ public abstract class CdmFileBase extends XmlFile {
 							// innerParameters became innerElements with xsi:type container:InnerParameter (see example 4)
 							domSetAttributeForElems("innerParameters", "xsi:type", "container:InnerParameter");
 							domRenameElems("innerParameters", "innerElements");
+
+							// add the name to containers (see example 4 - in 1.12 optional, in 1.13.0bd1 required)
+							int containercounter = 1;
+							List<XmlElement> elems = domGetElems("container");
+							for (XmlElement container : elems) {
+								String contname = container.getAttribute("name");
+								if (contname == null) {
+									container.setAttribute("name", "container_" + containercounter);
+									containercounter++;
+								}
+							}
 						}
 
 						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
 							// rename globalWaitingMagin to globalWaitingMargin
 							domRenameAttributes("applicationProcess", "globalWaitingMagin", "globalWaitingMargin");
+							domSetAttributeForElemsIfAttrIsMissing("applicationProcess", "globalWaitingMargin", "0");
 
 							// rename checksStartOfExectuion to checksStartOfExecution
 							domRenameAttributes("applicationProcess", "checksStartOfExectuion", "checksStartOfExecution");
@@ -504,6 +548,14 @@ public abstract class CdmFileBase extends XmlFile {
 						// rename procedure mapper CI
 						if ("configurationcontrol:Procedure2ActivityMapperCI".equals(getCiType())) {
 							getRoot().setNodeName("configurationcontrol:Procedure2McmMapperCI");
+						}
+
+						if ("configurationcontrol:Packet2ActivityMapperCI".equals(getCiType())) {
+							domRemoveChildrenFromElems("packetActivityImpl", "serviceAccessPoint");
+						}
+
+						if ("configurationcontrol:Script2ActivityMapperCI".equals(getCiType())) {
+							domRemoveChildrenFromElems("scriptActivityImpl", "serviceAccessPoint");
 						}
 
 						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();
@@ -528,6 +580,11 @@ public abstract class CdmFileBase extends XmlFile {
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							// rename activityInhibitionPeriod back to activityInhibtionPeriod
 							domRenameAttributes("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "activityInhibitionPeriod", "activityInhibtionPeriod");
+
+							// rename calibration back to callibration - observed for xsi:type="monitoringcontrolmodel:EngineeringArgumentDefinition"
+							domRenameAttributes("monitoringControlElementAspects", "calibration", "callibration");
+
+							// hasPredictedValue does not need to be removed from events and engineering argument definitions, as it was optional in 1.12.1
 						}
 
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
@@ -562,6 +619,8 @@ public abstract class CdmFileBase extends XmlFile {
 								"innerParameters");
 							domRemoveAttributeFromElems("innerParameters", "xsi:type");
 							*/
+
+							// no need to remove container name - as the name was optional, but present, in 1.12.1
 						}
 
 						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
@@ -589,6 +648,18 @@ public abstract class CdmFileBase extends XmlFile {
 						// rename procedure mapper CI back
 						if ("configurationcontrol:Procedure2McmMapperCI".equals(getCiType())) {
 							getRoot().setNodeName("configurationcontrol:Procedure2ActivityMapperCI");
+						}
+
+						if ("configurationcontrol:Packet2ActivityMapperCI".equals(getCiType())) {
+							// TODO :: for each element with tag name packetActivityImpl, add a child with tag name serviceAccessPoint
+							// with attribute href pointing (correctly, going over file boundaries and quoting whitespace in the name)
+							// to a useful default service acces point xmi:id
+						}
+
+						if ("configurationcontrol:Script2ActivityMapperCI".equals(getCiType())) {
+							// TODO :: for each element with tag name scriptActivityImpl, add a child with tag name serviceAccessPoint
+							// with attribute href pointing (correctly, going over file boundaries and quoting whitespace in the name)
+							// to a useful default service acces point xmi:id
 						}
 
 						// some namespaces have to be removed, as they do not exist in 1.12.1

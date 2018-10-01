@@ -421,16 +421,16 @@ public class XmlFile extends File {
 		return result;
 	}
 
+	// here we are matching children of (elements with tagName and given attribute),
+	// NOT (children with given attribute) of elements with tagName
 	public List<XmlElement> domGetChildrenOfElems(String tagName, String hasAttributeName, String hasAttributeValue) {
 
 		List<XmlElement> result = new ArrayList<XmlElement>();
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
 		for (XmlElement elem : elems) {
-			for (XmlElement child : elem.getChildNodes()) {
-				if (hasAttributeValue.equals(child.getAttribute(hasAttributeName))) {
-					result.add(child);
-				}
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				result.addAll(elem.getChildNodes());
 			}
 		}
 		

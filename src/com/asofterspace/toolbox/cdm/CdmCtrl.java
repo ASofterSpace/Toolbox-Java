@@ -796,6 +796,7 @@ public class CdmCtrl {
 			if (!addScriptToActivityCI()) {
 				return null;
 			}
+			scriptToActivityMapperCis = getCIs(CI_SCRIPT_TO_ACTIVITY);
 		}
 
 		// add a new script to activity mapping to the largest script to activity mapping CI that comes into our hands
