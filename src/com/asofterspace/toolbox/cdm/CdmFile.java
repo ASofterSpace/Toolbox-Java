@@ -79,6 +79,7 @@ public class CdmFile extends CdmFileBase {
 				break;
 
 			case CdmCtrl.CI_PROCEDURE_TO_ACTIVITY:
+			case CdmCtrl.CI_PROCEDURE_TO_ACTIVITY_OLD:
 				if ("procedureActivityImpl".equals(nodeName)) {
 					cdmNode = new CdmProcedure2Activity(cdmNode);
 					break;

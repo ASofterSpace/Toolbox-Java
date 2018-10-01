@@ -71,7 +71,8 @@ public class CdmCtrl {
 	static final String CI_SCRIPT = "configurationcontrol:ScriptCI";
 	static final String CI_SCRIPT_TO_ACTIVITY = "configurationcontrol:Script2ActivityMapperCI";
 	static final String CI_PROCEDURE = "configurationcontrol:ProcedureCI";
-	static final String CI_PROCEDURE_TO_ACTIVITY = "configurationcontrol:Procedure2McmMapperCI";
+	static final String CI_PROCEDURE_TO_ACTIVITY = "configurationcontrol:Procedure2McmMapperCI"; // from 1.13.0bd1 onwards
+	static final String CI_PROCEDURE_TO_ACTIVITY_OLD = "configurationcontrol:Procedure2ActivityMapperCI"; // until 1.12.1
 
 	private static final List<String> CDM_TEMPLATES = Arrays.asList(
 		TMPL_JUST_ROOT,

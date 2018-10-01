@@ -501,6 +501,11 @@ public abstract class CdmFileBase extends XmlFile {
 							domRenameChildrenOfElems("udd2mceMapper", "monitoringControlElement", "displayContext");
 						}
 
+						// rename procedure mapper CI
+						if ("configurationcontrol:Procedure2ActivityMapperCI".equals(getCiType())) {
+							getRoot().setNodeName("configurationcontrol:Procedure2McmMapperCI");
+						}
+
 						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();
 
 						break;
@@ -579,6 +584,11 @@ public abstract class CdmFileBase extends XmlFile {
 						
 						if ("configurationcontrol:UserDefinedDisplay2MceMapperCI".equals(getCiType())) {
 							domRenameChildrenOfElems("udd2mceMapper", "displayContext", "monitoringControlElement");
+						}
+
+						// rename procedure mapper CI back
+						if ("configurationcontrol:Procedure2McmMapperCI".equals(getCiType())) {
+							getRoot().setNodeName("configurationcontrol:Procedure2ActivityMapperCI");
 						}
 
 						// some namespaces have to be removed, as they do not exist in 1.12.1
