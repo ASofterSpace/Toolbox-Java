@@ -158,7 +158,7 @@ public class TinyMap implements Map<String, String> {
 				String prevval = heap[(i*2)+1];
 				// TODO :: check if this is correct
 				System.arraycopy(heap, (i*2)+2, heap, i*2, (length-i-1)*2);
-				length -= 2;
+				length -= 1;
 				return prevval;
 			}
 		}
