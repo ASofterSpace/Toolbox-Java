@@ -111,11 +111,19 @@ public class CdmCtrl {
 
 	private Directory lastLoadedDirectory;
 
+	// counters that can be used by the individual CDM files, but that count across the whole CDM
+	private int argumentCounter;
+	private int containerCounter;
+	private int fieldCounter;
+	private List<String> mceAspectNames;
+
 
 	private void initCdmCtrl() {
 
 		fileList = new HashSet<>();
 		ciMap = new HashMap<>();
+
+		resetUniqueCounters();
 	}
 
 	private void initFullModel() {
@@ -482,9 +490,41 @@ public class CdmCtrl {
 			toPrefix = getCdmVersionPrefix();
 		}
 
+		// reset the unique counters so that all the files can use them
+		resetUniqueCounters();
+
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.convertTo(toVersion, toPrefix);
 		}
+
+		// reset the unique counters again so they can be garbage collected
+		resetUniqueCounters();
+	}
+
+	private void resetUniqueCounters() {
+
+		argumentCounter = 0;
+		containerCounter = 0;
+		fieldCounter = 0;
+
+		mceAspectNames = new ArrayList<>();
+	}
+
+	public int getArgumentCounter() {
+		return argumentCounter++;
+	}
+
+	public int getContainerCounter() {
+		return containerCounter++;
+	}
+
+	public int getFieldCounter() {
+		return fieldCounter++;
+	}
+
+	// return an editable (!) list - the consumer is supposed to be able to change it, and changes are reflected in here!
+	public List<String> getKnownMceAspectNames() {
+		return mceAspectNames;
 	}
 
 	/**

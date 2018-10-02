@@ -437,34 +437,6 @@ public class XmlFile extends File {
 		return result;
 	}
 
-	/**
-	 * Assuming that we have <element attrOrChildName="_bla"/> or
-	 * <element><attrOrChildName href="_bla"/></element>, this function
-	 * returns _bla (or null if it finds neither)
-	 */
-	public String domGetLinkFromAttrOrChild(XmlElement element, String attrOrChildName) {
-
-		String elAttr = element.getAttribute(attrOrChildName);
-
-		if (elAttr != null) {
-			return elAttr;
-		}
-
-		// if we did not find an attrOrChildName as attribute, maybe we can find one as child?
-		List<XmlElement> children = element.getChildNodes();
-		for (XmlElement child : children) {
-			if (attrOrChildName.equals(child.getNodeName())) {
-				String href = child.getAttribute("href");
-
-				if (href != null) {
-					return href;
-				}
-			}
-		}
-
-		return null;
-	}
-
 	public void domSetAttributeForElems(String tagName, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);

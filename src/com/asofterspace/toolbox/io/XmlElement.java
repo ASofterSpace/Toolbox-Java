@@ -148,6 +148,34 @@ public class XmlElement {
 	public void setInnerText(String innerText) {
 		this.innerText = innerText;
 	}
+
+	/**
+	 * Assuming that we have <element attrOrChildName="_bla"/> or
+	 * <element><attrOrChildName href="_bla"/></element>, this function
+	 * returns _bla (or null if it finds neither)
+	 */
+	public String getLinkFromAttrOrChild(String attrOrChildName) {
+
+		String elAttr = getAttribute(attrOrChildName);
+
+		if (elAttr != null) {
+			return elAttr;
+		}
+
+		// if we did not find an attrOrChildName as attribute, maybe we can find one as child?
+		List<XmlElement> children = getChildNodes();
+		for (XmlElement child : children) {
+			if (attrOrChildName.equals(child.getNodeName())) {
+				String href = child.getAttribute("href");
+
+				if (href != null) {
+					return href;
+				}
+			}
+		}
+
+		return null;
+	}
 	
 	public void writeToFile(OutputStreamWriter writer) throws IOException {
 		writer.write("<" + name + attributes.toXmlAttributesStr());

@@ -256,6 +256,24 @@ public abstract class CdmFileBase extends XmlFile {
 		}
 	}
 
+	private String sanitizeForAut(String identifier) {
+
+		// replace all non-word characters with underscores - so all non-a-zA-Z_0-9 characters
+		identifier = identifier.trim().replaceAll("\\W", "_");
+
+		// if the identifier starts with a number, don't let it start with a number
+		if (identifier.matches("^\\d")) {
+			identifier = "_" + identifier;
+		}
+
+		// if the identifier is empty, don't let it be empty
+		if (identifier.length() < 1) {
+			identifier = "_";
+		}
+
+		return identifier;
+	}
+
 	/**
 	 * Go from one version to another - the version strings have already been changed,
 	 * this here only changes the actual layout of the CIs themselves such that they
@@ -472,8 +490,8 @@ public abstract class CdmFileBase extends XmlFile {
 
 							// iterate over all events and set their eventtype also for their definitions
 							// (this should have also already been part of 1.12.1, but apparently in some CDMs this was missing anyway...)
-							List<XmlElement> elems = domGetElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event");
-							for (XmlElement event : elems) {
+							List<XmlElement> events = domGetElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event");
+							for (XmlElement event : events) {
 								String baseHref = null;
 								String typeHref = null;
 							
@@ -493,6 +511,53 @@ public abstract class CdmFileBase extends XmlFile {
 									// which might not be right!
 									eventTypeEl.setAttribute("href", typeHref);
 								}
+							}
+
+							// rename all fields, giving them names that the automation component is happy with...
+							List<XmlElement> fields = domGetElems("fields");
+							for (XmlElement field : fields) {
+								String name = field.getAttribute("name");
+								if (name == null) {
+									field.setAttribute("name", "field_" + cdmCtrl.getFieldCounter());
+								} else {
+									field.setAttribute("name", sanitizeForAut(name));
+								}
+							}
+
+							// iterate over all mce aspects, and make their names unique - probably having them non-unique was not a problem
+							// before IR3, as AUT was not really in use / not using them all, but definitely from IR3 onwards having these
+							// names non-unique was troublesome!
+							List<String> knownMceAspectNames = cdmCtrl.getKnownMceAspectNames();
+
+							// only uniquify the mce aspects, NOT the mce definition aspects - however, if the definitions are actually
+							// attached to the mce aspects as they should be, then they will be updated accordingly anyway
+							List<XmlElement> mceAspects = domGetChildrenOfElems("monitoringControlElement", "monitoringControlElementAspects");
+
+							for (XmlElement mceAspect : mceAspects) {
+
+								String name = mceAspect.getAttribute("name");
+
+								if (knownMceAspectNames.contains(name)) {
+
+									int i = 2;
+
+									while (knownMceAspectNames.contains(name + "_" + i)) {
+										i++;
+									}
+
+									name = name + "_" + i;
+
+									mceAspect.setAttribute("name", name);
+
+									// also set the name of the definition, if there is one...
+									CdmNode baseElement = cdmCtrl.getByUuid(mceAspect.getLinkFromAttrOrChild("baseElement"));
+
+									if (baseElement != null) {
+										baseElement.setAttribute("name", name);
+									}
+								}
+
+								knownMceAspectNames.add(name);
 							}
 						}
 
@@ -514,13 +579,11 @@ public abstract class CdmFileBase extends XmlFile {
 							domRenameElems("innerParameters", "innerElements");
 
 							// add the name to containers (see example 4 - in 1.12 optional, in 1.13.0bd1 required)
-							int containercounter = 1;
 							List<XmlElement> elems = domGetElems("container");
 							for (XmlElement container : elems) {
 								String contname = container.getAttribute("name");
 								if (contname == null) {
-									container.setAttribute("name", "container_" + containercounter);
-									containercounter++;
+									container.setAttribute("name", "container_" + cdmCtrl.getContainerCounter());
 								}
 							}
 						}
@@ -621,6 +684,10 @@ public abstract class CdmFileBase extends XmlFile {
 							*/
 
 							// no need to remove container name - as the name was optional, but present, in 1.12.1
+
+							// no need to rename the fields back
+
+							// no need to un-uniquify the mce aspect names
 						}
 
 						if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
@@ -673,8 +740,6 @@ public abstract class CdmFileBase extends XmlFile {
 						// adjust names of arguments as seen in example 2
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 
-							int newargcounter = 1;
-
 							List<XmlElement> elems = domGetElems("arguments");
 							for (XmlElement argument : elems) {
 								String argname = argument.getAttribute("name");
@@ -682,24 +747,24 @@ public abstract class CdmFileBase extends XmlFile {
 
 									// try getting the name from the definition, any definition will do - this is REALLY HELPFUL,
 									// as then then automation scripts keep working!
-									CdmNode node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "engineeringArgumentDefinition"));
+									CdmNode node = cdmCtrl.getByUuid(argument.getLinkFromAttrOrChild("engineeringArgumentDefinition"));
 									if (node == null) {
-										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "repeatArgumentDefinition"));
+										node = cdmCtrl.getByUuid(argument.getLinkFromAttrOrChild("repeatArgumentDefinition"));
 									}
 									if (node == null) {
-										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "deducedArgumentDefinition"));
+										node = cdmCtrl.getByUuid(argument.getLinkFromAttrOrChild("deducedArgumentDefinition"));
 									}
 									if (node == null) {
-										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "activityCallArgumentDefinition"));
+										node = cdmCtrl.getByUuid(argument.getLinkFromAttrOrChild("activityCallArgumentDefinition"));
 									}
 									if (node == null) {
-										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "aggregateArgumentDefinition"));
+										node = cdmCtrl.getByUuid(argument.getLinkFromAttrOrChild("aggregateArgumentDefinition"));
 									}
 									if (node == null) {
-										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "matrixArgumentDefinition"));
+										node = cdmCtrl.getByUuid(argument.getLinkFromAttrOrChild("matrixArgumentDefinition"));
 									}
 									if (node == null) {
-										node = cdmCtrl.getByUuid(domGetLinkFromAttrOrChild(argument, "selectionArgumentDefinition"));
+										node = cdmCtrl.getByUuid(argument.getLinkFromAttrOrChild("selectionArgumentDefinition"));
 									}
 
 									if (node != null) {
@@ -710,8 +775,7 @@ public abstract class CdmFileBase extends XmlFile {
 									}
 
 									// if no name could be found, set a silly default name
-									argument.setAttribute("name", "argument_" + newargcounter);
-									newargcounter++;
+									argument.setAttribute("name", "argument_" + cdmCtrl.getArgumentCounter());
 								}
 							}
 
