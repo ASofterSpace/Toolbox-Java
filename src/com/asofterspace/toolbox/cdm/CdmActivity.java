@@ -59,7 +59,7 @@ public class CdmActivity extends CdmNode {
 		// </arguments>
 	}
 	
-	public CdmActivity(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
+	public CdmActivity(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}

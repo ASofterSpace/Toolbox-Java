@@ -75,7 +75,7 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		this.subElements = new ArrayList<>();
 	}
 	
-	public CdmMonitoringControlElement(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
+	public CdmMonitoringControlElement(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}

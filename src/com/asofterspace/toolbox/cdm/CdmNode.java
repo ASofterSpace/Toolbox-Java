@@ -12,12 +12,12 @@ import org.xml.sax.Attributes;
  */
 public class CdmNode extends XmlElement {
 
-	protected CdmFile parentFile;
+	protected CdmFileBase parentFile;
 
 	protected CdmCtrl cdmCtrl;
 
 
-	public CdmNode(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
+	public CdmNode(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		super();
 		
@@ -39,7 +39,7 @@ public class CdmNode extends XmlElement {
 		other.copyTo(this);
 	}
 
-	public CdmFile getParentFile() {
+	public CdmFileBase getParentFile() {
 		return parentFile;
 	}
 

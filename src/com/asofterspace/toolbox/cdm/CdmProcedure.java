@@ -19,7 +19,7 @@ public class CdmProcedure extends CdmNode {
 		this.content = getAttribute("procedureContent");
 	}
 	
-	public CdmProcedure(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
+	public CdmProcedure(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}

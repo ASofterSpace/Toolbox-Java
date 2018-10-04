@@ -46,7 +46,7 @@ public class CdmScript2Activity extends CdmNode {
 		}
 	}
 
-	public CdmScript2Activity(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
+	public CdmScript2Activity(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}

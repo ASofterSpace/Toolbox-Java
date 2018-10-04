@@ -45,6 +45,13 @@ public abstract class CdmFileBase extends XmlFile {
 		return ciType;
 	}
 
+	public void setCiType(String newType) {
+
+		getRoot().setNodeName(newType);
+
+		ciType = newType;
+	}
+
 	/**
 	 * Convert this CDM file to the given version and prefix - if either is null,
 	 * keep the current one
@@ -99,6 +106,16 @@ public abstract class CdmFileBase extends XmlFile {
 		String monitoringcontrolcommon = root.getAttribute("xmlns:monitoringcontrolcommon");
 		if (monitoringcontrolcommon != null) {
 			root.setAttribute("xmlns:monitoringcontrolcommon", toPrefix + "/MonitoringControl/MonitoringControlCommon/" + toVersion);
+		}
+
+		String checkandcondition = root.getAttribute("xmlns:checkandcondition");
+		if (checkandcondition != null) {
+			root.setAttribute("xmlns:checkandcondition", toPrefix + "/MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + toVersion);
+		}
+
+		String activitylist = root.getAttribute("xmlns:activitylist");
+		if (activitylist != null) {
+			root.setAttribute("xmlns:activitylist", toPrefix + "/MonitoringControlImplementation/ActivityList/" + toVersion);
 		}
 
 		String monitoringcontrolmodel = root.getAttribute("xmlns:monitoringcontrolmodel");
@@ -219,6 +236,9 @@ public abstract class CdmFileBase extends XmlFile {
 		// add namespace for containers and friends
 		final String nsp = "namespace";
 		final String dnsp = "defaultNamespace";
+		if ("configurationcontrol:McmCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("value", "xsi:type", "parameter:RawPktParameterValue", nsp, dnsp);
+		}
 		if ("configurationcontrol:PacketCI".equals(getCiType())) {
 			domSetAttributeForNonHrefElemsIfAttrIsMissing("container", nsp, dnsp);
 			domSetAttributeForNonHrefElemsIfAttrIsMissing("pktParameter", nsp, dnsp);
@@ -238,6 +258,12 @@ public abstract class CdmFileBase extends XmlFile {
 			domSetAttributeForNonHrefElemsIfAttrIsMissing("packetEventImpl", nsp, dnsp);
 			domSetAttributeForNonHrefElemsIfAttrIsMissing("packetParameterMCMParameterImpl", nsp, dnsp);
 		}
+		if ("configurationcontrol:Procedure2McmMapperCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("procedureActivityImpl", nsp, dnsp);
+		}
+		if ("configurationcontrol:ProcedureCI".equals(getCiType())) {
+			domSetAttributeForNonHrefElemsIfAttrIsMissing("procedure", nsp, dnsp);
+		}
 		if ("configurationcontrol:PUSServicesCI".equals(getCiType())) {
 			domSetAttributeForNonHrefElemsIfAttrIsMissing("applicationProcess", nsp, dnsp);
 			domSetAttributeForNonHrefElemsIfAttrIsMissing("pUSService", nsp, dnsp);
@@ -253,6 +279,17 @@ public abstract class CdmFileBase extends XmlFile {
 		}
 		if ("configurationcontrol:Script2ActivityMapperCI".equals(getCiType())) {
 			domSetAttributeForElemsIfAttrIsMissing("scriptActivityImpl", nsp, dnsp);
+		}
+		if ("configurationcontrol:SharedPacketCI".equals(getCiType())) {
+			domSetAttributeForElemsIfAttrIsMissing("container", nsp, dnsp);
+			domSetAttributeForElemsIfAttrIsMissing("packet", nsp, dnsp);
+			domSetAttributeForElemsIfAttrIsMissing("pktParameter", nsp, dnsp);
+		}
+		if ("configurationcontrol:UserDefinedDisplay2MceMapperCI".equals(getCiType())) {
+			domSetAttributeForElemsIfAttrIsMissing("udd2mceMapper", nsp, dnsp);
+		}
+		if ("configurationcontrol:UserDefinedDisplayCI".equals(getCiType())) {
+			domSetAttributeForElemsIfAttrIsMissing("userDefinedDisplay", nsp, dnsp);
 		}
 	}
 
@@ -484,6 +521,11 @@ public abstract class CdmFileBase extends XmlFile {
 							// rename callibration to calibration - observed for xsi:type="monitoringcontrolmodel:EngineeringArgumentDefinition"
 							domRenameAttributes("monitoringControlElementAspects", "callibration", "calibration");
 
+							// rename deducableArguments to deducibleArguments - observed for monitoringcontrolmodel:DeducedArgumentDefinition
+							domRenameAttributes("monitoringControlElementAspects", "deducableArguments", "deducibleArguments");
+
+							domRenameAttributes("applicationReference", "aplicationIdentifier", "applicationIdentifier");
+
 							// set hasPredictedValue which became mandatory
 							domSetAttributeForElemsIfAttrIsMissing("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:Event", "hasPredictedValue", "false");
 							domSetAttributeForElemsIfAttrIsMissing("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:EngineeringArgumentDefinition", "hasPredictedValue", "false");
@@ -559,6 +601,15 @@ public abstract class CdmFileBase extends XmlFile {
 
 								knownMceAspectNames.add(name);
 							}
+
+							// add a referenceValue to all ValueDeltaCheckDefinitions
+							List<XmlElement> vdcdefs = domGetElems("monitoringControlElementAspects", "xsi:type", "checkandcondition:ValueDeltaCheckDefinition");
+
+							for (XmlElement vdcdef : vdcdefs) {
+								XmlElement refVal = vdcdef.createChild("referenceValue");
+								refVal.setAttribute("xmi:id", UuidEncoderDecoder.generateEcoreUUID());
+								cdmCtrl.addToModel(new CdmNode(this, refVal, cdmCtrl));
+							}
 						}
 
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
@@ -610,7 +661,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// rename procedure mapper CI
 						if ("configurationcontrol:Procedure2ActivityMapperCI".equals(getCiType())) {
-							getRoot().setNodeName("configurationcontrol:Procedure2McmMapperCI");
+							setCiType("configurationcontrol:Procedure2McmMapperCI");
 						}
 
 						if ("configurationcontrol:Packet2ActivityMapperCI".equals(getCiType())) {
@@ -619,6 +670,11 @@ public abstract class CdmFileBase extends XmlFile {
 
 						if ("configurationcontrol:Script2ActivityMapperCI".equals(getCiType())) {
 							domRemoveChildrenFromElems("scriptActivityImpl", "serviceAccessPoint");
+						}
+
+						if ("configurationcontrol:DataTypesCI".equals(getCiType())) {
+							domSetAttributeForElemsIfAttrIsMissing("abstractDataType", "xsi:type", "monitoringcontrolcommon:BitStream", "bitLength", "1");
+							domSetAttributeForElemsIfAttrIsMissing("abstractDataType", "xsi:type", "monitoringcontrolcommon:ByteStream", "byteLength", "1");
 						}
 
 						addNamespacesIfMissingFor1130bd1AsItLovesNamespaces();
@@ -647,7 +703,16 @@ public abstract class CdmFileBase extends XmlFile {
 							// rename calibration back to callibration - observed for xsi:type="monitoringcontrolmodel:EngineeringArgumentDefinition"
 							domRenameAttributes("monitoringControlElementAspects", "calibration", "callibration");
 
+							// rename deducibleArguments back to deducableArguments - observed for monitoringcontrolmodel:DeducedArgumentDefinition
+							domRenameAttributes("monitoringControlElementAspects", "deducibleArguments", "deducableArguments");
+
+							domRenameAttributes("applicationReference", "applicationIdentifier", "aplicationIdentifier");
+
 							// hasPredictedValue does not need to be removed from events and engineering argument definitions, as it was optional in 1.12.1
+
+							// remove referenceValue from all ValueDeltaCheckDefinitions
+							domRemoveChildrenFromElems("monitoringControlElementAspects", "xsi:type", "checkandcondition:ValueDeltaCheckDefinition", "referenceValue");
+							// TODO :: remove from cdm ctrl model (maybe add return value to the previous function for that)
 						}
 
 						if ("configurationcontrol:PacketCI".equals(getCiType())) {
@@ -714,20 +779,22 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// rename procedure mapper CI back
 						if ("configurationcontrol:Procedure2McmMapperCI".equals(getCiType())) {
-							getRoot().setNodeName("configurationcontrol:Procedure2ActivityMapperCI");
+							setCiType("configurationcontrol:Procedure2ActivityMapperCI");
 						}
 
 						if ("configurationcontrol:Packet2ActivityMapperCI".equals(getCiType())) {
 							// TODO :: for each element with tag name packetActivityImpl, add a child with tag name serviceAccessPoint
 							// with attribute href pointing (correctly, going over file boundaries and quoting whitespace in the name)
-							// to a useful default service acces point xmi:id
+							// to a useful default service access point xmi:id
 						}
 
 						if ("configurationcontrol:Script2ActivityMapperCI".equals(getCiType())) {
 							// TODO :: for each element with tag name scriptActivityImpl, add a child with tag name serviceAccessPoint
 							// with attribute href pointing (correctly, going over file boundaries and quoting whitespace in the name)
-							// to a useful default service acces point xmi:id
+							// to a useful default service access point xmi:id
 						}
+
+						// bytestream and bitstream lengths do not need to be removed, as they were optional in 1.12.1
 
 						// some namespaces have to be removed, as they do not exist in 1.12.1
 						// TODO :: figure out which ones have to be removed! (we do not get validation
@@ -818,7 +885,7 @@ public abstract class CdmFileBase extends XmlFile {
 									newLiteral.setAttribute("x", "1");
 									newLiteral.setAttribute("y", "one");
 									newLiteral.setAttribute("xmi:id", UuidEncoderDecoder.generateEcoreUUID());
-									// TODO :: add the new element to CdmCtrl
+									cdmCtrl.addToModel(new CdmNode(this, newLiteral, cdmCtrl));
 								}
 							}
 						}
@@ -912,7 +979,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// rename units and quantities CI
 						if ("configurationcontrol:UnitsAndQuantatiesCI".equals(getCiType())) {
-							getRoot().setNodeName("configurationcontrol:UnitsAndQuantitiesCI");
+							setCiType("configurationcontrol:UnitsAndQuantitiesCI");
 						}
 
 						// update automation imports
@@ -1040,7 +1107,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 						// rename units and quantities CI back
 						if ("configurationcontrol:UnitsAndQuantitiesCI".equals(getCiType())) {
-							getRoot().setNodeName("configurationcontrol:UnitsAndQuantatiesCI");
+							setCiType("configurationcontrol:UnitsAndQuantatiesCI");
 						}
 
 						// update automation imports back

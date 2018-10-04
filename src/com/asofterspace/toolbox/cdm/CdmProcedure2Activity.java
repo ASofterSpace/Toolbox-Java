@@ -45,7 +45,7 @@ public class CdmProcedure2Activity extends CdmNode {
 		}
 	}
 
-	public CdmProcedure2Activity(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
+	public CdmProcedure2Activity(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}

@@ -19,7 +19,7 @@ public class CdmScript extends CdmNode {
 		this.content = getAttribute("scriptContent");
 	}
 	
-	public CdmScript(CdmFile parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
+	public CdmScript(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
 		this(new CdmNode(parentFile, thisNode, cdmCtrl));
 	}
