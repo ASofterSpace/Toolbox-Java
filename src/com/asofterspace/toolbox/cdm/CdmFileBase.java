@@ -892,6 +892,9 @@ public abstract class CdmFileBase extends XmlFile {
 							// (could also be a 1.14.0b > 1.14.0 change instead!)
 							// TODO :: implement the opposite for the other direction somehow
 							domRemoveAttributeFromElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:DeducedArgumentDefinition", "availableArguments");
+
+							// make all reference values external ones, unless they are already something else
+							domSetAttributeForElemsIfAttrIsMissing("referenceValue", "xsi:type", "checkandcondition:ExternalReferenceValue");
 						}
 
 						// adjust enumerations (see example 5)
@@ -924,6 +927,18 @@ public abstract class CdmFileBase extends XmlFile {
 									cdmCtrl.addToModel(new CdmNode(this, newLiteral, cdmCtrl));
 								}
 							}
+
+							// add bitLength to reals, enums, ints, specials, ...
+							domSetAttributeForElemsIfAttrIsMissing("abstractDataType",
+								"xsi:type", "monitoringcontrolcommon:Real", "bitLength", "32");
+							domSetAttributeForElemsIfAttrIsMissing("abstractDataType",
+								"xsi:type", "monitoringcontrolcommon:EnumerationDataType", "bitLength", "8");
+							domSetAttributeForElemsIfAttrIsMissing("abstractDataType",
+								"xsi:type", "monitoringcontrolcommon:SignedInteger", "bitLength", "32");
+							domSetAttributeForElemsIfAttrIsMissing("abstractDataType",
+								"xsi:type", "monitoringcontrolcommon:Special32bits", "bitLength", "32");
+							domSetAttributeForElemsIfAttrIsMissing("abstractDataType",
+								"xsi:type", "monitoringcontrolcommon:UnsignedInteger", "bitLength", "32");
 						}
 
 						// adjust packets - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
@@ -1053,6 +1068,8 @@ public abstract class CdmFileBase extends XmlFile {
 						// adjust names of arguments back as seen in example 2 - by removing them cold-bloodedly ;)
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							domRemoveAttributeFromElems("arguments", "name");
+
+							// no need to un-do making all reference values external ones, as this is optionally available in 1.13.0bd1
 						}
 
 						// adjust enumerations back (see example 5)
@@ -1066,6 +1083,8 @@ public abstract class CdmFileBase extends XmlFile {
 							domRemoveChildrenFromElems("abstractDataType",
 								"xsi:type", "monitoringcontrolcommon:EnumerationDataType",
 								"enumerationLiterals");
+
+							// do not remove bitLength from reals, enums, ints, specials, ... - as that was optional in 1.13.0bd1
 						}
 
 						// adjust packets back - this here applies at least to the xsi:type="parameter:SimplePktParameter", but possibly all of them...
