@@ -230,12 +230,49 @@ public abstract class CdmFileBase extends XmlFile {
 		}
 	}
 
+	// remove namespaces when going from 1.13.0bd1 down to 1.12.1
+	private void removeNamespacesDownTo1121() {
+
+		final String nsp = "namespace";
+
+		if ("configurationcontrol:McmCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("value", "xsi:type", "parameter:RawPktParameterValue", nsp);
+		}
+		if ("configurationcontrol:Packet2ActivityMapperCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("packetActivityImpl", nsp);
+		}
+		if ("configurationcontrol:Procedure2ActivityMapperCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("procedureActivityImpl", nsp);
+		}
+		if ("configurationcontrol:ProcedureCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("procedure", nsp);
+		}
+		if ("configurationcontrol:ScriptCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("script", nsp);
+		}
+		if ("configurationcontrol:Script2ActivityMapperCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("scriptActivityImpl", nsp);
+		}
+		if ("configurationcontrol:SharedPacketCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("container", nsp);
+			domRemoveAttributeFromElems("packet", nsp);
+			domRemoveAttributeFromElems("pktParameter", nsp);
+		}
+		if ("configurationcontrol:UserDefinedDisplay2MceMapperCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("udd2mceMapper", nsp);
+		}
+		if ("configurationcontrol:UserDefinedDisplayCI".equals(getCiType())) {
+			domRemoveAttributeFromElems("userDefinedDisplay", nsp);
+		}
+	}
+
 	// add these namespaces both when going up from 1.12.1 and when going down from 1.14.0bd1 :)
 	private void addNamespacesIfMissingFor1130bd1AsItLovesNamespaces() {
 
 		// add namespace for containers and friends
 		final String nsp = "namespace";
 		final String dnsp = "defaultNamespace";
+
 		if ("configurationcontrol:McmCI".equals(getCiType())) {
 			domSetAttributeForNonHrefElemsIfAttrIsMissing("value", "xsi:type", "parameter:RawPktParameterValue", nsp, dnsp);
 		}
@@ -797,8 +834,7 @@ public abstract class CdmFileBase extends XmlFile {
 						// bytestream and bitstream lengths do not need to be removed, as they were optional in 1.12.1
 
 						// some namespaces have to be removed, as they do not exist in 1.12.1
-						// TODO :: figure out which ones have to be removed! (we do not get validation
-						// errors in the mcde, as it just ignores additional attributes...)
+						removeNamespacesDownTo1121();
 
 						break;
 
