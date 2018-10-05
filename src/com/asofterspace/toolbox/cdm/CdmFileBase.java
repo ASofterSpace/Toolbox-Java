@@ -2,6 +2,7 @@ package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.Directory;
+import com.asofterspace.toolbox.io.EmfFile;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
@@ -17,7 +18,7 @@ import java.util.List;
  * This is the base of a CdmFile; we have put all the conversion stuff in here, which is A LOT, to not clutter up the
  * rest - so please only ever actually use the full CdmFile which extends this here :)
  */
-public abstract class CdmFileBase extends XmlFile {
+public abstract class CdmFileBase extends EmfFile {
 
 	protected CdmCtrl cdmCtrl;
 

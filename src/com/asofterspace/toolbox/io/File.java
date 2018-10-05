@@ -38,6 +38,15 @@ public class File {
 	}
 
 	/**
+	 * Create a new file instance based on another File
+	 * @param File
+	 */
+	public File(File regularFile) {
+
+		regularFile.copyTo(this);
+	}
+
+	/**
 	 * Create a new file instance based on a Java File
 	 * @param javaFile
 	 */
