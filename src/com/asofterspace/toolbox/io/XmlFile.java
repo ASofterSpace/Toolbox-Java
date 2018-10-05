@@ -457,6 +457,26 @@ public class XmlFile extends File {
 		}
 	}
 
+	public void domSetAttributeForElems(String[] tagNames, String setAttributeName, String setAttributeValue) {
+
+		List<XmlElement> elems = getRoot().getElementsByTagNames(tagNames);
+		
+		for (XmlElement elem : elems) {
+			elem.setAttribute(setAttributeName, setAttributeValue);
+		}
+	}
+	
+	public void domSetAttributeForElems(String[] tagNames, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
+
+		List<XmlElement> elems = getRoot().getElementsByTagNames(tagNames);
+		
+		for (XmlElement elem : elems) {
+			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
+				elem.setAttribute(setAttributeName, setAttributeValue);
+			}
+		}
+	}
+
 	public void domSetAttributeForElemsIfAttrIsMissing(String tagName, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);

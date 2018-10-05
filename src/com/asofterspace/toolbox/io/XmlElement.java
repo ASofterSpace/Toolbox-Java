@@ -110,6 +110,25 @@ public class XmlElement {
 		return xmlParent;
 	}
 	
+	public List<XmlElement> getElementsByTagNames(String[] tagNames) {
+		List<XmlElement> result = new ArrayList<>();
+		getElementsByTagNames(tagNames, result);
+		return result;
+	}
+	
+	private void getElementsByTagNames(String[] tagNames, List<XmlElement> outResult) {
+		for (String tagName : tagNames) {
+			if (name.equals(tagName)) {
+				outResult.add(this);
+				break;
+			}
+		}
+		
+		for (XmlElement child : xmlChildren) {
+			child.getElementsByTagNames(tagNames, outResult);
+		}
+	}
+
 	public List<XmlElement> getElementsByTagName(String tagName) {
 		List<XmlElement> result = new ArrayList<>();
 		getElementsByTagName(tagName, result);

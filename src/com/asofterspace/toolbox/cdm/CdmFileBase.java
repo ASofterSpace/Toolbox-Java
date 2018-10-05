@@ -1196,6 +1196,7 @@ public abstract class CdmFileBase extends XmlFile {
 						// adjust parameter raw to eng as seen in example 2
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 
+							/*
 							// do this both for engineeringDefaultValue > value
 							// and defaultValue xsi:type=monitoringcontrolmodel:EngineeringArgumentValue > value
 							List<XmlElement> children = domGetChildrenOfElems("engineeringDefaultValue");
@@ -1217,6 +1218,13 @@ public abstract class CdmFileBase extends XmlFile {
 									}
 								}
 							}
+							*/
+
+							// muuuch simpler: ParameterRawValue AND ParameterUncalibratedValue become ParameterSourceValue
+							// and YES, there are ParameterRawValue instances inside engineering parameters, but that makes sense: engineering means they can have both raw and engineering, not just one OR the other!
+							String[] tags = {"value", "defaultValue", "expectedValue", "highLimit", "lowLimit", "highDeltaThreshold", "lowDeltaThreshold"};
+							domSetAttributeForElems(tags, "xsi:type", "monitoringcontrolmodel:ParameterRawValue", "xsi:type", "monitoringcontrolmodel:ParameterSourceValue");
+							domSetAttributeForElems(tags, "xsi:type", "monitoringcontrolmodel:ParameterUncalibratedValue", "xsi:type", "monitoringcontrolmodel:ParameterSourceValue");
 						}
 
 						break;
@@ -1230,6 +1238,7 @@ public abstract class CdmFileBase extends XmlFile {
 						// adjust parameters eng back to raw as seen in example 2
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 
+							/*
 							// do this both for engineeringDefaultValue > value
 							// and defaultValue xsi:type=monitoringcontrolmodel:EngineeringArgumentValue > value
 							List<XmlElement> children = domGetChildrenOfElems("engineeringDefaultValue");
@@ -1251,6 +1260,11 @@ public abstract class CdmFileBase extends XmlFile {
 									}
 								}
 							}
+							*/
+
+							// muuuch simpler: ParameterRawValue AND ParameterUncalibratedValue become ParameterSourceValue, so on the way back Source to Raw, and nothing to Uncal - never saw anyone use that ^^
+							String[] tags = {"value", "defaultValue", "expectedValue", "highLimit", "lowLimit", "highDeltaThreshold", "lowDeltaThreshold"};
+							domSetAttributeForElems(tags, "xsi:type", "monitoringcontrolmodel:ParameterSourceValue", "xsi:type", "monitoringcontrolmodel:ParameterRawValue");
 						}
 
 						break;
