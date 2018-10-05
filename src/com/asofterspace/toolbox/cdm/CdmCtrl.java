@@ -40,21 +40,21 @@ public class CdmCtrl {
 	private static final List<String> KNOWN_CDM_VERSIONS = Arrays.asList(
 		"1.14.0",
 		"1.14.0b",
-		// we are also aware of 1.13.0
+		"1.13",
 		"1.13.0bd1",
 		"1.12.1",
-		"1.12"
-		// we are also aware of 1.11.3
+		"1.12",
+		"1.11.3"
 	);
 
 	private static final List<String> KNOWN_CDM_PREFIXES = Arrays.asList(
-		"http://www.esa.int/egscc/",
-		"http://www.esa.int/dme/",
-		// 1.13.0 used... huh... no idea what it used ^^
-		"http://www.esa.int/",
-		"http://www.esa.int/dme/",
-		"http://www.scopeset.de/"
-		// 1.11.3 used scopeset.de as well, we think
+		"http://www.esa.int/egscc/", // 1.14.0
+		"http://www.esa.int/dme/", // 1.14.0b
+		"http://www.esa.int/", // 1.13
+		"http://www.esa.int/", // 1.13.0bd1
+		"http://www.esa.int/dme/", // 1.12.1
+		"http://www.scopeset.de/", // 1.12
+		"http://www.scopeset.de/" // 1.11.3
 	);
 
 	// a reasonable default CDM prefix to be used in case a user-supplied CDM version is not known
@@ -554,12 +554,27 @@ public class CdmCtrl {
 		final String NOT_A_RELEASE = "(not included in any official EGS-CC release)";
 
 		switch (version) {
+			case "1.11.3":
+				if ("http://www.scopeset.de/".equals(prefix)) {
+					return "DR16, IR1, IR1h1, IR1h2";
+				}
+				return NOT_A_RELEASE;
+			case "1.12":
+				if ("http://www.scopeset.de/".equals(prefix)) {
+					return "IR2";
+				}
+				return NOT_A_RELEASE;
+			case "1.12.1":
+				if ("http://www.esa.int/dme/".equals(prefix)) {
+					return "IR2d1, IR2d2";
+				}
+				return NOT_A_RELEASE;
 			case "1.13.0bd1":
 				if ("http://www.esa.int/".equals(prefix)) {
 					return "IR3, IR3p1, IR3p2";
 				}
 				return NOT_A_RELEASE;
-			case "1.13.0":
+			case "1.13":
 				return NOT_A_RELEASE;
 			case "1.14.0b":
 				return NOT_A_RELEASE;

@@ -163,9 +163,11 @@ public abstract class CdmFileBase extends XmlFile {
 		// qudv examples that seem to be correct:
 		// for 1.14.0: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5" (note: NOT aligned with generic version prefix of 1.14.0!)
 		// for 1.14.0b: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5"
+		// for 1.13: unknown!
 		// for 1.13.0bd1: "http://www.esa.int/core/qudv/conceptualmodel/1.5"
 		// for 1.12.1: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5" (TODO: there also seems to be something like http://www.esa.int/dme/core/1.5!)
 		// for 1.12: "http://www.scopeset.de/core/qudv/conceptualmodel/1.5" (TODO: there also seems to be something like http://www.scopeset.de/core/1.5!)
+		// for 1.11.3: unknown!
 
 		String qudvPrefix = "http://www.esa.int/dme/core/qudv/";
 
@@ -175,6 +177,8 @@ public abstract class CdmFileBase extends XmlFile {
 			case "1.14.0b":
 				qudvPrefix = "http://www.esa.int/dme/core/qudv/";
 				break;
+
+			// case "1.13": TODO :: UNKNOWN
 
 			case "1.13.0bd1":
 				qudvPrefix = "http://www.esa.int/core/qudv/";
@@ -187,6 +191,8 @@ public abstract class CdmFileBase extends XmlFile {
 			case "1.12":
 				qudvPrefix = "http://www.scopeset.de/core/qudv/";
 				break;
+
+			// case "1.11.3": TODO :: UNKNOWN
 		}
 
 		String qudvBlocksExtModel = root.getAttribute("xmlns:qudv.blocks_extModel");
@@ -356,7 +362,6 @@ public abstract class CdmFileBase extends XmlFile {
 	 * all the changes are applied gradually
 	 */
 	private void applyChangesFromVersionToVersion(String orig, String dest) {
-
 		/*
 		Examples for same CDM expressed in different versions:
 
@@ -504,8 +509,20 @@ public abstract class CdmFileBase extends XmlFile {
 
 		switch (orig) {
 
+			case "1.11.3":
+				switch (dest) {
+					// up
+					case "1.12":
+						break;
+				}
+				break;
+
 			case "1.12":
 				switch (dest) {
+					// down
+					case "1.11.3":
+						break;
+
 					// up
 					case "1.12.1":
 
@@ -661,6 +678,7 @@ public abstract class CdmFileBase extends XmlFile {
 
 							// remove the xsi:type from containers (see example 4)
 							domRemoveAttributeFromElems("container", "xsi:type");
+							domRemoveAttributeFromElems("dataField", "xsi:type");
 
 							// innerParameters became innerElements with xsi:type container:InnerParameter (see example 4)
 							domSetAttributeForElems("innerParameters", "xsi:type", "container:InnerParameter");
@@ -836,6 +854,18 @@ public abstract class CdmFileBase extends XmlFile {
 						// some namespaces have to be removed, as they do not exist in 1.12.1
 						removeNamespacesDownTo1121();
 
+						break;
+
+					// up
+					case "1.13":
+						break;
+				}
+				break;
+
+			case "1.13":
+				switch (dest) {
+					// down
+					case "1.13.0bd1":
 						break;
 
 					// up
@@ -1064,7 +1094,7 @@ public abstract class CdmFileBase extends XmlFile {
 			case "1.14.0b":
 				switch (dest) {
 					// down
-					case "1.13.0bd1":
+					case "1.13":
 						// adjust names of arguments back as seen in example 2 - by removing them cold-bloodedly ;)
 						if ("configurationcontrol:McmCI".equals(getCiType())) {
 							domRemoveAttributeFromElems("arguments", "name");
@@ -1111,12 +1141,12 @@ public abstract class CdmFileBase extends XmlFile {
 									continue;
 								}
 
-								// by default, use Telemetry...
-								String targetSourceType = "Telemetry";
+								// by default, use Command (as TC is the default in 1.14.0b that sometimes is actually left out)...
+								String targetSourceType = "Command";
 
-								// ... in case of TC, use Command!
-								if ("TC".equals(packetType)) {
-									targetSourceType = "Command";
+								// ... in case of TM, use Telemetry!
+								if ("TM".equals(packetType)) {
+									targetSourceType = "Telemetry";
 								}
 
 								// get attribute "parameter"
