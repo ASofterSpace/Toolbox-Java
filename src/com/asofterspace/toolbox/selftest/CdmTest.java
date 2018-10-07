@@ -32,10 +32,11 @@ public class CdmTest implements Test {
 		
 		convertCdmPacketCIsTest();
 
-		parseBinaryCDM("Mcm 1");
-		parseBinaryCDM("Mcm 2");
-		parseBinaryCDM("Script 1");
-		parseBinaryCDM("Packet 1");
+		parseBinaryCDM("Mcm 1"); // contains McmCI, one MCE, one MCE Def
+		parseBinaryCDM("Mcm 2"); // contains just an McmCI (invalid CDM, but valid EMF!)
+		parseBinaryCDM("Script 1"); // contains ScriptCI, one script
+		parseBinaryCDM("Script 2"); // contains ScriptCI, one script with loooong length!
+		parseBinaryCDM("Packet 1"); // contains PacketCI (valid CDM!)
 	}
 
 	public void createAndValidateCdmTest() {

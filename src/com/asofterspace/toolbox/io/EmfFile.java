@@ -22,6 +22,16 @@ import java.util.List;
  */
 public class EmfFile extends XmlFile {
 
+	// the binary content of the EMF file
+	byte[] binaryContent;
+
+	// the byte that is currently being read
+	byte cur;
+
+	// the current position inside binaryContent
+	int i;
+
+
 	/**
 	 * You can construct a EmfFile instance by directly from a path name.
 	 */
@@ -68,7 +78,7 @@ public class EmfFile extends XmlFile {
 		TinyMap curAttributes = new TinyMap();
 
 		try {
-			byte[] binaryContent = Files.readAllBytes(Paths.get(this.filename));
+			binaryContent = Files.readAllBytes(Paths.get(this.filename));
 			int len = binaryContent.length;
 
 			boolean debug = false; // TODO :: remove debug switch
@@ -92,9 +102,9 @@ public class EmfFile extends XmlFile {
 			int styleLength = 0;
 			byte nextElementId = 0;
 
-			for (int i = 8; i < 12 + styleLength; i++) {
+			for (i = 8; i < 12 + styleLength; i++) {
 
-				byte cur = binaryContent[i];
+				cur = binaryContent[i];
 
 				// ... following the signature, we have:
 				// the version (1 byte)
@@ -168,10 +178,9 @@ public class EmfFile extends XmlFile {
 			boolean wroteElementStart = false;
 			boolean beforeEquals = true;
 			byte xmlnsId = 0;
-			byte tokenLength = 0;
-			byte tokenCurPos = 0;
+			int tokenLength = 0;
+			int tokenCurPos = 0;
 			int curEObjectNum = 0;
-			boolean ignored040already = false;
 
 			// ... finally come the EObjects themselves, with each EObject being:
 			//   its ID (compressed int)
@@ -182,9 +191,9 @@ public class EmfFile extends XmlFile {
 			// however, in the beginning we first have the xmlns namespace, then the
 			// actual element name (however, expressed as namespace), followed by
 			// the namespace prefix for everything that is following / contained!
-			for (int i = 12 + styleLength; i < len; i++) {
+			for (i = 12 + styleLength; i < len; i++) {
 
-				byte cur = binaryContent[i];
+				cur = binaryContent[i];
 
 				// if (inToken) {
 				if (debug) {
@@ -194,13 +203,13 @@ public class EmfFile extends XmlFile {
 				}
 
 				if (tokenCurPos == 0) {
-					// ignore one 0x40 (64d) - does this have something to do with compressed integers?
-					if ((cur == (byte)0x40) && !ignored040already) {
-						ignored040already = true;
-						continue;
-					}
-					tokenLength = cur;
+					// read a compressed integer as length, whoop whoop! we can do it!
+					tokenLength = readCompressedInteger();
 				} else {
+					// TODO :: do not iterate over every character, but instead do an array copy
+					// and create a new String based on the array? (on the other hand, internally
+					// it will have to iterate still... meh... maybe time it, see if that improves
+					// anything or not)
 					if (cur == (byte)0x18) {
 						tokenBuilder.append('#');
 					} else {
@@ -292,7 +301,6 @@ public class EmfFile extends XmlFile {
 							}
 						}
 					}
-					ignored040already = false;
 					tokenCurPos = 0;
 					tokenLength = 0;
 					tokenBuilder = new StringBuilder();
@@ -308,11 +316,27 @@ public class EmfFile extends XmlFile {
 				mode = XmlMode.EMF_UNSUPPORTED;
 			}
 
-		} catch (IOException bE) {
-			System.out.println(bE);
+		} catch (IOException | ArrayIndexOutOfBoundsException e) {
+			System.out.println(e);
 
-			mode = XmlMode.NONE_LOADED;
+			mode = XmlMode.EMF_UNSUPPORTED;
 		}
+	}
+
+	// TODO :: improve this function - we think it can go up to 4 bytes? (currently it only works for one or two bytes)
+	private int readCompressedInteger() {
+
+		// if we have a byte below 0x40, then that is just the actual integer - very short, very simple!
+		if (cur < (byte)64) {
+			return cur;
+		}
+
+		// if we have a byte at 0x40, then that means the next byte contains the actual integer (pretty pointless,
+		//   but needed to "escape" the following integer)
+		// if we have a byte at 0x41, then that means the next byte contains the actual integer, but add 256!
+		//   etc.
+		i++;
+		return binaryContent[i] + (256 * (cur - 64));
 	}
 
 	private String namespaceAndTagToQName(String namespace, String tag) {

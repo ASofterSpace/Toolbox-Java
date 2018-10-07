@@ -154,10 +154,6 @@ public abstract class CdmFileBase extends EmfFile {
 			root.setAttribute("xmlns:packetprocessing", toPrefix + "/PacketProcessing/" + toVersion);
 		}
 
-		// TODO :: also convert the UDD xmlns, at least these exist in 1.12 (but we do not know the xmlns name right now)
-		// prefix /MonitoringControlImplementation/UserDefinedDisplays/Mapping_UDD2MCM/ version
-		// prefix /MonitoringControlImplementation/UserDefinedDisplays/ version
-
 		// TODO :: if the version here ever differs from 1.5, we will need to start keeping track of that version relative to the CDM version too
 		// (and start keeping that in mind for validation, etc.)
 

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationcontrol:ScriptCI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:configurationcontrol="http://www.esa.int/egscc/ConfigurationTracking/1.14.0" xmi:id="_W-TYcMoNEeiZxJYVHHnV3A" externalVersionLabel="some label" onlineRevisionIdentifier="0" name="Name of the script CI">
+  <script xmi:id="_dhoikMoNEeiZxJYVHHnV3A" name="ScriptName" scriptContent="This is a very long text.&#xA;&#xA;Do you hear me?&#xA;&#xA;It is... wait for it... VERY LONG!&#xA;&#xA;Like, SO LONG THAT IT DOES NOT FIT INTO 255 CHARACTERS!&#xA;&#xA;Therefore, it is longer than the length field of an attribute name (which has a length of one byte) in the binary version of the CDM.&#xA;&#xA;Aaand this means that we are VERY interested in seeing how this is actually encoded. :)"/>
+</configurationcontrol:ScriptCI>
