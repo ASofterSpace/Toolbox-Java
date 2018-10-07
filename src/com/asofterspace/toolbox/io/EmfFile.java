@@ -323,20 +323,28 @@ public class EmfFile extends XmlFile {
 		}
 	}
 
-	// TODO :: improve this function - we think it can go up to 4 bytes? (currently it only works for one or two bytes)
+	// TODO :: improve this function - we think it can go up to 4 bytes? (currently it only works for one, two or three bytes)
 	private int readCompressedInteger() {
 
+		int intCur = cur;
+
 		// if we have a byte below 0x40, then that is just the actual integer - very short, very simple!
-		if (cur < (byte)64) {
+		if (intCur < 64) {
 			return cur;
 		}
 
-		// if we have a byte at 0x40, then that means the next byte contains the actual integer (pretty pointless,
-		//   but needed to "escape" the following integer)
-		// if we have a byte at 0x41, then that means the next byte contains the actual integer, but add 256!
-		//   etc.
-		i++;
-		return binaryContent[i] + (256 * (cur - 64));
+		if (intCur < 128) {
+			// if we have a byte at 0x40, then that means the next byte contains the actual integer (pretty pointless,
+			//   but needed to "escape" the following integer)
+			// if we have a byte at 0x41, then that means the next byte contains the actual integer, but add 256!
+			//   etc.
+			i++;
+			return (int)binaryContent[i] + (256 * (intCur - 64));
+		}
+
+		// if we have a byte at 0x80, then that means the same as for 0x40, just with two bytes following
+		i = i+2;
+		return (int)binaryContent[i] + (256 * (int)binaryContent[i-1]) + (256*256 * (intCur - 128));
 	}
 
 	private String namespaceAndTagToQName(String namespace, String tag) {
