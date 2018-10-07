@@ -14,7 +14,7 @@ import org.xml.sax.Attributes;
 
 public class XmlElement {
 
-	private String name;
+	private String name = null;
 	
 	private String innerText;
 	
@@ -26,13 +26,8 @@ public class XmlElement {
 
 	
 	public XmlElement(String name, Attributes attributes) {
-	
-		// internalize the node names
-		this.name = name.intern();
-		
-		this.innerText = null;
-		
-		this.attributes = new TinyMap(attributes.getLength());
+
+		TinyMap attrMap = new TinyMap(attributes.getLength());
 		
 		for (int i = 0; i < attributes.getLength(); i++) {
 		
@@ -47,9 +42,28 @@ public class XmlElement {
 				val = val.intern();
 			}
 			
-			this.attributes.putFast(key, val);
+			attrMap.putFast(key, val);
+		}
+
+		construct(name, attrMap);
+	}
+
+	public XmlElement(String name, TinyMap attributes) {
+
+		construct(name, attributes);
+	}
+
+	private void construct(String name, TinyMap attributes) {
+	
+		// internalize the node names
+		if (name != null) {
+			this.name = name.intern();
 		}
 		
+		this.innerText = null;
+		
+		this.attributes = attributes;
+
 		this.xmlParent = null;
 		
 		this.xmlChildren = new ArrayList<>();

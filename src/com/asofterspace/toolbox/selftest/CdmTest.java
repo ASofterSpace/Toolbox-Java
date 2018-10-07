@@ -31,6 +31,11 @@ public class CdmTest implements Test {
 		findEntityInCdmTest();
 		
 		convertCdmPacketCIsTest();
+
+		parseBinaryCDM("Mcm 1");
+		parseBinaryCDM("Mcm 2");
+		parseBinaryCDM("Script 1");
+		parseBinaryCDM("Packet 1");
 	}
 
 	public void createAndValidateCdmTest() {
@@ -217,6 +222,45 @@ public class CdmTest implements Test {
 			}
 		}
 		
+		TestUtils.succeed();
+	}
+
+	public void parseBinaryCDM(String which) {
+
+		TestUtils.start("Parse Binary CDM " + which);
+
+		which = which.toLowerCase().replaceAll(" ", "");
+
+		CdmCtrl cdmCtrl = new CdmCtrl();
+
+		Directory cdmDir = new Directory("testdata/cdm/parseBinaryCDMsTest/" + which);
+		ProgressIndicator noProgress = new NoOpProgressIndicator();
+
+		try {
+			cdmCtrl.loadCdmDirectory(cdmDir, noProgress);
+		} catch (AttemptingEmfException | CdmLoadingException e) {
+			TestUtils.fail("We tried to load a binary CDM, but got this exception: " + e.getMessage());
+			return;
+		}
+
+		CdmCtrl xmlCdmCtrl = new CdmCtrl();
+
+		cdmDir = new Directory("testdata/cdm/parseBinaryCDMsTest/" + which + "_xml");
+
+		try {
+			xmlCdmCtrl.loadCdmDirectory(cdmDir, noProgress);
+		} catch (AttemptingEmfException | CdmLoadingException e) {
+			TestUtils.fail("We tried to load an XML CDM, but got this exception: " + e.getMessage());
+			return;
+		}
+		
+		List<String> differences = cdmCtrl.findDifferencesFrom(xmlCdmCtrl);
+		
+		if (differences.size() > 0) {
+			TestUtils.fail("There were differences between the parsed binary and XML versions of the same CDM!");
+			return;
+		}
+
 		TestUtils.succeed();
 	}
 

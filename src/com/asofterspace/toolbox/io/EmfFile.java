@@ -1,5 +1,7 @@
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.TinyMap;
+
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -40,186 +42,271 @@ public class EmfFile extends XmlFile {
 
 		loadEmfContents();
 
-		// if the EMF loading did not work ...
-		if (!XmlMode.EMF_LOADED.equals(mode)) {
+		// if this file does not seem to be EMF, so nothing has been loaded yet...
+		if (XmlMode.NONE_LOADED.equals(mode)) {
 
 			// ... then try loading XML instead!
 			super.loadXmlContents();
 		}
+		// (btw. - this is DIFFERENT from the case of having seen this as valid EMF,
+		// but not having understood it on our side - in that case, the mode is
+		// EMF_UNSUPPORTED, and we do NOT want to parse as plain XML then, as we
+		// know it is EMF and we are just too silly to read it!)
 	}
 
 	protected void loadEmfContents() {
 
+		// in general, an EMF binary file consists of the following parts:
+		// Signature
+		// Metadata
+		// eObjects and their attributes
+		// id block containing the UUIDs
+
+		rootElement = null;
+		currentElement = null;
+
+		TinyMap curAttributes = new TinyMap();
+
 		try {
 			byte[] binaryContent = Files.readAllBytes(Paths.get(this.filename));
-
-			StringBuilder cB = new StringBuilder();
-
-			cB.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-
 			int len = binaryContent.length;
-			int eObjectAmount = 0;
-			byte attrCounter = 0;
-			byte attrLength = 0;
-			byte attrCurPos = 0;
-			boolean inAttribute = false;
-			StringBuilder attrBuilder = new StringBuilder();
-			String element = null;
-			String xmlns = null;
-			String containedNamespace = null;
-			boolean wroteElementStart = false;
-			boolean beforeEquals = true;
-			byte attrAmountTotal = 0;
-			byte attrAmountCurrent = 0;
-			byte xmlnsId = 0;
-			int styleLength = 0;
-			byte nextElementId = 0;
+
 			boolean debug = false; // TODO :: remove debug switch
 
-			for (int i = 0; i < len; i++) {
+			// we first have the signature (8 bytes) ...
+			// (ensure that we are starting with ‰emf.... - the exact signature that NEEDS to be intact for this to be valid)
+			if ((len < 8) ||
+				(binaryContent[0] != (byte)0x89) ||
+				(binaryContent[1] != (byte)0x65) ||
+				(binaryContent[2] != (byte)0x6d) ||
+				(binaryContent[3] != (byte)0x66) ||
+				(binaryContent[4] != (byte)0x0a) ||
+				(binaryContent[5] != (byte)0x0d) ||
+				(binaryContent[6] != (byte)0x1a) ||
+				(binaryContent[7] != (byte)0x0a)) {
+				// try loading XML instead, as this is not an EMF binary file
+				mode = XmlMode.NONE_LOADED;
+				return;
+			}
+
+			int styleLength = 0;
+			byte nextElementId = 0;
+
+			for (int i = 8; i < 12 + styleLength; i++) {
 
 				byte cur = binaryContent[i];
 
-				// we first have the signature (8 bytes)
-				// then the version (1 byte)
+				// ... following the signature, we have:
+				// the version (1 byte)
 				// then the style (4 bytes) if version is above 0 (nothing otherwise)
 				// then the amount of EObjects (compressed integer - between 1 and 4 bytes)
-				// then the EObjects themselves, with each EObject being:
-				//   its ID (compressed int)
-				//   its feature ID (compressed int, but -1 from the value in the file)
-				//   and, until the feature ID that is read out is -1:
-				//	 a structure
-				//	 the feature ID of the structure
-				// however, in the beginning we first have the xmlns namespace, then the
-				// actual element name (however, expressed as namespace), followed by
-				// the namespace prefix for everything that is following / contained!
 
-				if (i < 12 + styleLength) {
-					// ensure that we are starting with ‰emf.... - the exact signature that NEEDS to be intact for this to be valid
-					int j = i + styleLength;
-					if (((j == 0) && (cur != (byte)0x89)) ||
-						((j == 1) && (cur != (byte)0x65)) ||
-						((j == 2) && (cur != (byte)0x6d)) ||
-						((j == 3) && (cur != (byte)0x66)) ||
-						((j == 4) && (cur != (byte)0x0a)) ||
-						((j == 5) && (cur != (byte)0x0d)) ||
-						((j == 6) && (cur != (byte)0x1a)) ||
-						((j == 7) && (cur != (byte)0x0a))) {
-						// try loading XML instead, as this is not an EMF binary file
-						mode = XmlMode.NONE_LOADED;
-						return;
-					}
+				int j = i - styleLength;
 
-					switch (j) {
-						case 8:
-							// all CDM files we have seen so far were using version 0
-							if (cur != (byte)0x00) {
-								// however, for version 1, we know that an additional integer should follow describing
-								// the styles that are being used...
-								styleLength = 4;
-								i = i + styleLength;
-								System.out.println("The binary CDM file you are attempting to load is using a newer version than I ever encountered... trying to get it to work anyway...");
-							}
-							break;
-						case 9:
-							// TODO :: actually read a compressed integer, not just a byte and hope for the best!
-							eObjectAmount = cur;
-							break;
-						case 10:
-							nextElementId = (byte)(cur + 1);
-							break;
-					}
-				} else {
-					// if (inAttribute) {
-					if (debug) {
-						System.out.println("attrCurPos: " + attrCurPos);
-						System.out.println("attrLength: " + attrLength);
-						System.out.println("cur: " + cur);
-					}
-
-					if (attrCurPos == 0) {
-						attrLength = cur;
-						// ignore 0x40 (64d) - does this have something to do with compressed integers?
-						if (cur == (byte)0x40) {
-							continue;
+				switch (j) {
+					case 8:
+						// all CDM files we have seen so far were using version 0
+						if (cur != (byte)0x00) {
+							// however, for version 1, we know that an additional integer should follow describing
+							// the styles that are being used... (buuut we ignore those styles? at least this
+							// code here looks like we do xD)
+							styleLength = 4;
+							i = i + styleLength;
+							System.out.println("The binary CDM file you are attempting to load is using a newer version than I ever encountered... trying to get it to work anyway...");
 						}
-					} else {
-						if (cur == (byte)0x18) {
-							attrBuilder.append('#');
-						} else {
-							attrBuilder.append((char)cur);
-						}
-					}
-
-					attrCurPos++;
-
-					if (attrLength == attrCurPos) {
-						inAttribute = false;
-						if (xmlns == null) {
-							xmlns = attrBuilder.toString();
-							System.out.println("found xmlns: " + xmlns);
-							i++;
-							xmlnsId = binaryContent[i];
-						} else {
-							if (element == null) {
-								element = attrBuilder.toString();
-								System.out.println("found element: " + element);
-							} else {
-								if (containedNamespace == null) {
-									containedNamespace = attrBuilder.toString();
-									containedNamespace = containedNamespace.replaceAll("/", ".");
-									System.out.println("found contained namespace: " + containedNamespace);
-									// no idea what the next byte means
-									i++;
-								} else {
-									if (wroteElementStart) {
-										if (beforeEquals) {
-											if ((binaryContent[i+1] == nextElementId) && (binaryContent[i+2] == nextElementId)) {
-												cB.append(">\n");
-												beforeEquals = true;
-												wroteElementStart = false;
-												element = null;
-												xmlns = null;
-												containedNamespace = null;
-												i = i + 2;
-												// swallow further nextElementIds (we have observed 28, 22, 222, ...)
-												while (binaryContent[i+1] == nextElementId) {
-													i++;
-												}
-												nextElementId++;
-											} else {
-												cB.append(' ');
-												cB.append(attrBuilder);
-												cB.append('=');
-											}
-										} else {
-											cB.append('"');
-											cB.append(attrBuilder);
-											cB.append('"');
-											i++;
-											cB.append("(" + binaryContent[i] + ")");
-										}
-										beforeEquals = !beforeEquals;
-									} else {
-										i++;
-										cB.append("<" + namespaceToElement(element) + ":" + attrBuilder.toString() + "(" + binaryContent[i] + ") xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:" + namespaceToElement(xmlns) + "=\"" + xmlns + "(" + xmlnsId + ")\"");
-										wroteElementStart = true;
-										beforeEquals = true;
-									}
-								}
-							}
-						}
-						attrCurPos = 0;
-						attrLength = 0;
-						attrBuilder = new StringBuilder();
-					}
+						break;
+					case 9:
+						// here, we should have a compressed integer telling us the amount of eObjects,
+						// but in the examples we looked at this number here was not reliable at all
+						// and e.g. 02 in case of one or three eObjects in the file... meh...
+						// TODO :: actually read a compressed integer, not just one byte!
+						break;
+					case 10:
+						nextElementId = (byte)(cur + 1);
+						break;
 				}
 			}
 
-			System.out.println("");
-			System.out.println(cB.toString());
+			// to read out the eObjectAmount, we go into the id block and read out the last id
+			// (each id is reported as number + byte 18 + underscore + 22 ecore UUID letters)
+			// TODO :: what if there is not a single id in the id block (as e.g. the file is
+			// empty except for the signature)?
+			// TODO :: what if there are more than 255 ids inside this file (then reading one
+			// byte will definitely stop working!)
+			int eObjectAmount = binaryContent[len - 25];
 
-			mode = XmlMode.EMF_LOADED;
+			// this is the length, in bytes, of the block describing the various ids
+			// it is the last block in the file, but to make everything easier for us,
+			// we want to read it out already NOW! :D
+			// TODO :: again, what if there are none / more than 255 ids?
+			// (the 2 here comes because the id block starts with 01xx where xx is the
+			// eObjectAmount, again, and then these two bytes are followed by 25 bytes
+			// for each eObject, as described in the comment block just above this one)
+			int idBlockLength = 2 + 25 * eObjectAmount;
+
+			// we reduce the length, as we do not want to read into the id block
+			int idBlockOffset = len - idBlockLength;
+
+			String[] eObjectIds = new String[eObjectAmount];
+			byte[] bytesOfId = new byte[23];
+
+			for (int eNumber = 0; eNumber < eObjectAmount; eNumber++) {
+				System.arraycopy(binaryContent, idBlockOffset + 2 + (eNumber*25) + 2, bytesOfId, 0, 23);
+				String eObjectId = new String(bytesOfId, StandardCharsets.UTF_8);
+				eObjectIds[eNumber] = eObjectId;
+			}
+
+			// we reduce the length, as we do not want to read into the id block
+			len -= idBlockLength;
+
+			boolean inToken = false;
+			StringBuilder tokenBuilder = new StringBuilder();
+			String element = null;
+			String xmlns = null;
+			String containedNamespace = null;
+			String curAttrKey = null;
+			boolean wroteElementStart = false;
+			boolean beforeEquals = true;
+			byte xmlnsId = 0;
+			byte tokenLength = 0;
+			byte tokenCurPos = 0;
+			int curEObjectNum = 0;
+			boolean ignored040already = false;
+
+			// ... finally come the EObjects themselves, with each EObject being:
+			//   its ID (compressed int)
+			//   its feature ID (compressed int, but -1 from the value in the file)
+			//   and, until the feature ID that is read out is -1:
+			//	 a structure
+			//	 the feature ID of the structure
+			// however, in the beginning we first have the xmlns namespace, then the
+			// actual element name (however, expressed as namespace), followed by
+			// the namespace prefix for everything that is following / contained!
+			for (int i = 12 + styleLength; i < len; i++) {
+
+				byte cur = binaryContent[i];
+
+				// if (inToken) {
+				if (debug) {
+					System.out.println("tokenCurPos: " + tokenCurPos);
+					System.out.println("tokenLength: " + tokenLength);
+					System.out.println("cur: " + cur);
+				}
+
+				if (tokenCurPos == 0) {
+					// ignore one 0x40 (64d) - does this have something to do with compressed integers?
+					if ((cur == (byte)0x40) && !ignored040already) {
+						ignored040already = true;
+						continue;
+					}
+					tokenLength = cur;
+				} else {
+					if (cur == (byte)0x18) {
+						tokenBuilder.append('#');
+					} else {
+						tokenBuilder.append((char)cur);
+					}
+				}
+
+				tokenCurPos++;
+
+				if (tokenLength == tokenCurPos) {
+					inToken = false;
+					if (xmlns == null) {
+						xmlns = tokenBuilder.toString();
+						// System.out.println("found xmlns: " + xmlns);
+						i++;
+						xmlnsId = binaryContent[i];
+					} else {
+						if (element == null) {
+							element = tokenBuilder.toString();
+							// System.out.println("found element: " + element);
+						} else {
+							if (containedNamespace == null) {
+								containedNamespace = tokenBuilder.toString();
+								containedNamespace = containedNamespace.replaceAll("/", ".");
+								// System.out.println("found contained namespace: " + containedNamespace);
+								// no idea what the next byte means
+								i++;
+							} else {
+								if (wroteElementStart) {
+									if (beforeEquals) {
+										if ((binaryContent[i+1] == nextElementId) && (binaryContent[i+2] == nextElementId)) {
+											beforeEquals = true;
+											wroteElementStart = false;
+											element = null;
+											xmlns = null;
+											containedNamespace = null;
+											i = i + 2;
+											// swallow further nextElementIds (we have observed 28, 22, 222, ...)
+											while (binaryContent[i+1] == nextElementId) {
+												i++;
+											}
+											nextElementId++;
+										} else {
+											curAttrKey = tokenBuilder.toString();
+										}
+
+										// TODO :: also some others are links...
+										// like baseElement? and subElements is even a list of links?
+										if ("definition".equals(curAttrKey)) {
+											// TODO :: think about case of link to other resource
+											// TODO :: think about case above id 255
+											i++;
+											int linkedEObject = binaryContent[i];
+											curAttributes.put(curAttrKey, eObjectIds[linkedEObject-1]);
+											//i++;
+
+											// keep beforeEquals true (and as it is switched in a few lines,
+											// assign the opposite for now)
+											beforeEquals = false;
+										}
+									} else {
+										// just jump over this one (it is an increasing number?)
+										i++;
+										curAttributes.put(curAttrKey, tokenBuilder.toString());
+									}
+									beforeEquals = !beforeEquals;
+								} else {
+									i++;
+									wroteElementStart = true;
+									beforeEquals = true;
+
+									curAttributes = new TinyMap();
+									XmlElement newEl = new XmlElement(namespaceAndTagToQName(element, tokenBuilder.toString()), curAttributes);
+									if (rootElement == null) {
+										rootElement = newEl;
+										curAttributes.put("xmi:version", "2.0");
+										curAttributes.put("xmlns:xmi", "http://www.omg.org/XMI");
+										curAttributes.put("xmlns:" + namespaceToElement(xmlns), xmlns);
+									} else {
+										currentElement.addChild(newEl);
+									}
+									currentElement = newEl;
+
+									// assign one of the IDs that we previously read out
+									curAttributes.put("xmi:id", eObjectIds[curEObjectNum]);
+
+									curEObjectNum++;
+								}
+							}
+						}
+					}
+					ignored040already = false;
+					tokenCurPos = 0;
+					tokenLength = 0;
+					tokenBuilder = new StringBuilder();
+				}
+			}
+
+			if (wroteElementStart && beforeEquals && (tokenLength == 0) && (tokenCurPos == 0)) {
+				// looks like we understood this fully, whoop whoop!
+				mode = XmlMode.EMF_LOADED;
+			} else {
+				// looks like we got caught right in the middle of interpreting stuff by the end of the file...
+				// meaning that probably we understood nothing, oops!
+				mode = XmlMode.EMF_UNSUPPORTED;
+			}
 
 		} catch (IOException bE) {
 			System.out.println(bE);
@@ -228,13 +315,30 @@ public class EmfFile extends XmlFile {
 		}
 	}
 
+	private String namespaceAndTagToQName(String namespace, String tag) {
+
+		// some elements are actually encountered without namespace
+		// TODO :: is this always true? does it depend on the context?
+		// (enough if it is true for CDM files, not for EMF in general...)
+		switch (tag) {
+			case "Script":
+				return "script";
+		}
+
+		// for CIs, this is what we do:
+		return namespaceToElement(namespace) + ":" + tag;
+	}
+
 	private String namespaceToElement(String namespace) {
 
 		switch (namespace) {
+			// TODO :: make this more generic and get all the information from CdmCtrl
 			case "http://www.scopeset.de/ConfigurationTracking/1.12":
+			case "http://www.esa.int/egscc/ConfigurationTracking/1.14.0":
 				return "configurationcontrol";
 			case "http://www.scopeset.de/MonitoringControl/MonitoringControlModel/1.12":
 			case "http://www.scopeset.de/MonitoringControl/1.12":
+			case "http://www.esa.int/egscc/MonitoringControl/1.14.0":
 				return "monitoringControlElement";
 			case "http://www.scopeset.de/MonitoringControlImplementation/UserDefinedDisplays/1.12":
 				return "userDefinedDisplay";

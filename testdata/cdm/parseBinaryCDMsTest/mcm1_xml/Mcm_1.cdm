@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationcontrol:McmCI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:configurationcontrol="http://www.esa.int/egscc/ConfigurationTracking/1.14.0" xmi:id="_0_7cgMiuEeilW8ZhQH2pcg" externalVersionLabel="extVerLab" isModified="true" onlineRevisionIdentifier="onlineRevId" readOnly="true" name="McmCIName">
+  <monitoringControlElement xmi:id="_2p-jgMiuEeilW8ZhQH2pcg" name="mcmRoot" definition="_7NWoEMiuEeilW8ZhQH2pcg"/>
+  <monitoringControlElementDefinition xmi:id="_7NWoEMiuEeilW8ZhQH2pcg" name="mcmRootDef"/>
+</configurationcontrol:McmCI>

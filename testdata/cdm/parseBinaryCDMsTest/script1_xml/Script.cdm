@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationcontrol:ScriptCI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:configurationcontrol="http://www.esa.int/egscc/ConfigurationTracking/1.14.0" xmi:id="_1GBe0MjtEeiZxJYVHHnV3A" externalVersionLabel="extverlab" isModified="true" onlineRevisionIdentifier="orefid" readOnly="true" name="ScriptCIName">
+  <script xmi:id="_4AdPoMjtEeiZxJYVHHnV3A" name="somescriptname" namespace="namespace" scriptContent="this is the content"/>
+</configurationcontrol:ScriptCI>

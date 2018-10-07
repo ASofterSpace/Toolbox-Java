@@ -12,5 +12,8 @@ public enum XmlMode {
 	XML_LOADED,
 
 	// an EMF binary file has been loaded
-	EMF_LOADED
+	EMF_LOADED,
+
+	// an EMF binary file has been loaded but was not supported
+	EMF_UNSUPPORTED
 }

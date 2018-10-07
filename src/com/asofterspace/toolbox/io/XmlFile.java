@@ -27,9 +27,9 @@ public class XmlFile extends File {
 
 	protected XmlMode mode = XmlMode.NONE_LOADED;
 
-	private XmlElement rootElement = null;
+	protected XmlElement rootElement = null;
 	
-	private XmlElement currentElement = null;
+	protected XmlElement currentElement = null;
 
 
 	/**
@@ -105,6 +105,7 @@ public class XmlFile extends File {
 			factory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 			SAXParser parser = factory.newSAXParser();
 
+			rootElement = null;
 			currentElement = null;
 			
 			XmlHandler handler = new XmlHandler();
@@ -451,6 +452,21 @@ public class XmlFile extends File {
 		}
 	}
 
+	public void print() {
+
+		try (OutputStreamWriter printout = new OutputStreamWriter(System.out)) {
+
+			printout.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+			getRoot().writeToFile(printout);
+
+			printout.flush();
+
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to print the file " + getFilename() + " - inconceivable!");
+		}
+	}
+
 	public void save() {
 
 		saveTo(this);
@@ -475,6 +491,8 @@ public class XmlFile extends File {
 			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			
 			getRoot().writeToFile(writer);
+
+			writer.flush();
 			
 		} catch (IOException e) {
 			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + getFilename() + " - inconceivable!");

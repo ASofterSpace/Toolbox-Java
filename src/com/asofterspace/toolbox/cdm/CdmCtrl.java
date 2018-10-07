@@ -6,7 +6,6 @@ import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
-import com.asofterspace.toolbox.io.XmlMode;
 import com.asofterspace.toolbox.utils.NoOpProgressIndicator;
 import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.ProgressIndicator;
@@ -21,13 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/* // TAKE OUT EMF DEPENDENCIES
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.emf.ecore.xmi.XMIResource;
-import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl;
-import org.eclipse.emf.ecore.resource.Resource;
-*/ // TAKE OUT EMF DEPENDENCIES
 
 public class CdmCtrl {
 
@@ -110,6 +102,8 @@ public class CdmCtrl {
 	private Set<CdmMonitoringControlElement> mcmTreeRoots;
 
 	private Directory lastLoadedDirectory;
+
+	private CdmFile lastFailedCdmFile;
 
 	// counters that can be used by the individual CDM files, but that count across the whole CDM
 	private int argumentCounter;
@@ -230,8 +224,15 @@ public class CdmCtrl {
 
 	private CdmFile loadCdmFileInternally(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
 
-		CdmFile result = loadCdmFileViaXML(cdmFile);
+		CdmFile result = null;
 		
+		try {
+			result = new CdmFile(cdmFile, this);
+
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
+
 		String there_was_a_problem = "There was a problem while loading the CDM file " + cdmFile.getLocalFilename() + ".";
 		
 		if (result == null) {
@@ -241,19 +242,19 @@ public class CdmCtrl {
 		switch (result.getMode()) {
 
 			case XML_LOADED:
+			case EMF_LOADED:
 				// all is good!;
 				break;
 
-			case EMF_LOADED:
-				throw new AttemptingEmfException("The CDM file " + cdmFile.getLocalFilename() + " is an EMF binary file, which is not yet supported.\nPlease only use CDM files in XML format.");
+			case EMF_UNSUPPORTED:
+				lastFailedCdmFile = result;
+				throw new AttemptingEmfException("The CDM file " + cdmFile.getLocalFilename() + " is an EMF binary file, which is not yet fully supported.\nThis particular file sadly could not be parsed.\nPlease only use CDM files in XML format.");
 
 			case NONE_LOADED:
 			default:
+				lastFailedCdmFile = result;
 				throw new CdmLoadingException(there_was_a_problem);
 		}
-
-		// TODO - also get the EMF stuff to work ;)
-		// loadCdmFileViaEMF(cdmFile);
 
 		fileList.add(result);
 
@@ -270,55 +271,6 @@ public class CdmCtrl {
 		}
 
 		return result;
-	}
-
-	private CdmFile loadCdmFileViaXML(File cdmFile) {
-
-		try {
-			CdmFile cdm = new CdmFile(cdmFile, this);
-
-			return cdm;
-
-		} catch (Exception e) {
-			e.printStackTrace(System.out);
-		}
-
-		return null;
-	}
-
-	private void loadCdmFileViaEMF(File cdmFile) {
-
-/* // TAKE OUT EMF DEPENDENCIES
-		// TODO - load the CDM File using EMF: https://www.eclipse.org/modeling/emf/
-		// you can get EMF from here: http://www.eclipse.org/modeling/emf/downloads/
-		// TODO - add CDM namespaces... we need some .ecore files or somesuch?
-		// do this similar to: EPackage.Registry.INSTANCE.put("schemas.xmlsoap.org/wsdl/", "file:/C:/workspace/Trans/bin/metamodels/WSDL.ecore");
-		// or similar to: Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("ecore", new XMIResourceFactoryImpl());
-		// also see: http://www.vogella.com/tutorials/EclipseEMF/article.html (so apparently we need .ecore and genmodel files, but genmodel can be created from ecore)
-		// >> as all of this is rather cumbersome, maybe go for plain XML for now after all...
-
-		System.out.println(cdmFile); // debug
-		java.net.URI cdmURI = cdmFile.getURI();
-		System.out.println(cdmURI); // debug
-
-		// try to read an XML CDM...
-		XMIResource xResource = new XMIResourceImpl(URI.createURI(cdmURI.toString()));
-		try {
-			xResource.load(null);
-			System.out.println(xResource.getContents().get(0)); // debug
-		} catch (IOException ex) {
-			// ... there was an exception! Must be binary then...
-			System.out.println(ex); // debug
-			Resource bResource = new BinaryResourceImpl(URI.createURI(cdmURI.toString()));
-			try {
-				bResource.load(null);
-				System.out.println(bResource.getContents().get(0)); // debug
-			} catch (IOException eb) {
-				// ... oh wow; not binary either. Is this a CDM encoded in Morse code?
-				System.out.println(eb); // debug
-			}
-		}
-*/ // TAKE OUT EMF DEPENDENCIES
 	}
 
 	/**
@@ -1284,6 +1236,21 @@ public class CdmCtrl {
 		}
 		
 		return result;
+	}
+
+	public void debugPrintAll() {
+
+		Set<CdmFile> files = getCdmFiles();
+
+		if (files.size() < 1) {
+			if (lastFailedCdmFile != null) {
+				lastFailedCdmFile.print();
+			}
+		} else {
+			for (CdmFile cdmFile : files) {
+				cdmFile.print();
+			}
+		}
 	}
 
 }
