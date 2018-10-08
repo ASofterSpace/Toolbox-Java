@@ -490,7 +490,11 @@ public class XmlFile extends File {
 			
 			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			
-			getRoot().writeToFile(writer);
+			XmlElement root = getRoot();
+
+			if (root != null) {
+				root.writeToFile(writer);
+			}
 
 			writer.flush();
 			

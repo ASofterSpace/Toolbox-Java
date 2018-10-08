@@ -361,34 +361,15 @@ public class EmfFile extends XmlFile {
 		return namespaceToElement(namespace) + ":" + tag;
 	}
 
-	private String namespaceToElement(String namespace) {
-
-		switch (namespace) {
-			// TODO :: make this more generic and get all the information from CdmCtrl
-			case "http://www.scopeset.de/ConfigurationTracking/1.12":
-			case "http://www.esa.int/egscc/ConfigurationTracking/1.14.0":
-				return "configurationcontrol";
-			case "http://www.scopeset.de/MonitoringControl/MonitoringControlModel/1.12":
-			case "http://www.scopeset.de/MonitoringControl/1.12":
-			case "http://www.esa.int/egscc/MonitoringControl/1.14.0":
-				return "monitoringControlElement";
-			case "http://www.scopeset.de/MonitoringControlImplementation/UserDefinedDisplays/1.12":
-				return "userDefinedDisplay";
-			case "http://www.scopeset.de/MonitoringControlImplementation/UserDefinedDisplays/Mapping_UDD2MCM/1.12":
-				return "udd2mceMapper";
-			case "http://www.scopeset.de/core/qudv/conceptualmodel/1.5":
-				return "qudv.conceptualmodel_extModel";
-			case "http://www.scopeset.de/core/1.5":
-				return "xmi";
-			case "http://www.esa.int/dme/ConfigurationTracking/1.12.1":
-			case "http://www.esa.int/dme/MonitoringControlImplementation/ProcedureScriptSwFunction/1.12.1":
-			case "http://www.esa.int/dme/MonitoringControlImplementation/1.12.1":
-			case "http://www.scopeset.de/PacketProcessing/1.0.0":
-			case "http://www.scopeset.de/MonitoringControlImplementation/ProcedureScriptSwFunction/1.12":
-			case "http://www.scopeset.de/MonitoringControlImplementation/Packetization/Packetization/Parameter/1.12":
-				return "unknown";
-		}
-		return "unknown(" + namespace + ")";
+	/**
+	 * This function converts a namespace to an actual element tag;
+	 * this is part of the Ecore configuration that a real EMF parser
+	 * would have; in our case, we have no configuration, but if you
+	 * are using this EmfFile class anywhere, extend it and overwrite
+	 * this method with namespaces that you actually know about!
+	 */
+	protected String namespaceToElement(String namespace) {
+		return "unknown";
 	}
 
 	/*
@@ -408,8 +389,14 @@ public class EmfFile extends XmlFile {
 			
 			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			
-			getRoot().writeToFile(writer);
-			
+			XmlElement root = getRoot();
+
+			if (root != null) {
+				root.writeToFile(writer);
+			}
+
+			writer.flush();
+
 		} catch (IOException e) {
 			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + getFilename() + " - inconceivable!");
 		}
@@ -421,7 +408,16 @@ public class EmfFile extends XmlFile {
 	 */
 	@Override
 	public String toString() {
-		return "com.asofterspace.toolbox.io.EmfFile: " + filename + " (root element: " + this.getRoot().getNodeName() + ")";
+
+		String rootName = "(none)";
+
+		XmlElement root = this.getRoot();
+
+		if (root != null) {
+			rootName = root.getNodeName();
+		}
+
+		return "com.asofterspace.toolbox.io.EmfFile: " + filename + " (root element: " + rootName + ")";
 	}
 
 }

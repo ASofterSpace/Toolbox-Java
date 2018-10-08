@@ -26,6 +26,10 @@ public abstract class CdmFileBase extends EmfFile {
 
 	protected String ciType;
 
+	private static List<String> KNOWN_CDM_VERSIONS;
+	private static List<String> KNOWN_CDM_PREFIXES;
+
+
 	/**
 	 * You can construct a CdmFile instance by basing it on an existing file object.
 	 */
@@ -1451,6 +1455,48 @@ public abstract class CdmFileBase extends EmfFile {
 			// actually save the file for real :)
 			super.save();
 		}
+	}
+
+	@Override
+	protected String namespaceToElement(String namespace) {
+
+		// TODO :: optimize this entire function if stuff is slow, as it seems... well... slow just code-wise xD
+
+		if (KNOWN_CDM_VERSIONS == null) {
+			KNOWN_CDM_VERSIONS = CdmCtrl.getKnownCdmVersions();
+		}
+		if (KNOWN_CDM_PREFIXES == null) {
+			KNOWN_CDM_PREFIXES = CdmCtrl.getKnownCdmPrefixes();
+		}
+
+		for (int i = 0; i < KNOWN_CDM_VERSIONS.size(); i++) {
+			String p = KNOWN_CDM_PREFIXES.get(i);
+			String v = KNOWN_CDM_VERSIONS.get(i);
+			if (namespace.equals(p + "ConfigurationTracking/" + v)) {
+					return "configurationcontrol";
+			}
+			if (namespace.equals(p + "MonitoringControl/" + v)) {
+					return "monitoringControlElement";
+			}
+			if (namespace.equals(p + "MonitoringControl/MonitoringControlModel/" + v)) {
+					return "monitoringControlElement";
+			}
+			if (namespace.equals(p + "MonitoringControlImplementation/UserDefinedDisplays/" + v)) {
+					return "userDefinedDisplay";
+			}
+			if (namespace.equals(p + "MonitoringControlImplementation/UserDefinedDisplays/Mapping_UDD2MCM/" + v)) {
+					return "udd2mceMapper";
+			}
+		}
+
+		switch (namespace) {
+			// TODO :: also get all the different qudv versions
+			case "http://www.scopeset.de/core/qudv/conceptualmodel/1.5":
+				return "qudv.conceptualmodel_extModel";
+			case "http://www.scopeset.de/core/1.5":
+				return "xmi";
+		}
+		return "unknown(" + namespace + ")";
 	}
 
 }
