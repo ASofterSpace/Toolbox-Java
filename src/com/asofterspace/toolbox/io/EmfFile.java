@@ -25,9 +25,6 @@ public class EmfFile extends XmlFile {
 	// the binary content of the EMF file
 	byte[] binaryContent;
 
-	// the byte that is currently being read
-	byte cur;
-
 	// the current position inside binaryContent
 	int i;
 
@@ -99,43 +96,46 @@ public class EmfFile extends XmlFile {
 				return;
 			}
 
-			int styleLength = 0;
 			byte nextElementId = 0;
 
-			for (i = 8; i < 12 + styleLength; i++) {
+			i = 8;
 
-				cur = binaryContent[i];
+			// ... following the signature, we have:
+			// the version (1 byte)
+			// then the style (4 bytes) if version is above 0 (nothing otherwise)
+			// then the amount of EObjects (compressed integer - between 1 and 4 bytes)
 
-				// ... following the signature, we have:
-				// the version (1 byte)
-				// then the style (4 bytes) if version is above 0 (nothing otherwise)
-				// then the amount of EObjects (compressed integer - between 1 and 4 bytes)
-
-				int j = i - styleLength;
-
-				switch (j) {
-					case 8:
-						// all CDM files we have seen so far were using version 0
-						if (cur != (byte)0x00) {
-							// however, for version 1, we know that an additional integer should follow describing
-							// the styles that are being used... (buuut we ignore those styles? at least this
-							// code here looks like we do xD)
-							styleLength = 4;
-							i = i + styleLength;
-							System.out.println("The binary CDM file you are attempting to load is using a newer version than I ever encountered... trying to get it to work anyway...");
-						}
-						break;
-					case 9:
-						// here, we should have a compressed integer telling us the amount of eObjects,
-						// but in the examples we looked at this number here was not reliable at all
-						// and e.g. 02 in case of one or three eObjects in the file... meh...
-						// TODO :: actually read a compressed integer, not just one byte!
-						break;
-					case 10:
-						nextElementId = (byte)(cur + 1);
-						break;
-				}
+			// all CDM files we have seen so far were using version 0
+			if (binaryContent[i] != (byte)0x00) {
+				// however, for version 1, we know that an additional integer should follow describing
+				// the styles that are being used... (buuut we ignore those styles? at least this
+				// code here looks like we do xD - oh, and no one thought about versions above 1, should they ever exist!)
+				i = i + 4;
+				System.out.println("The binary CDM file you are attempting to load is using a newer version than I ever encountered... trying to get it to work anyway...");
 			}
+
+			i++;
+
+			// here, we should have a compressed integer telling us the amount of eObjects,
+			// but in the examples we looked at this number here was not reliable at all
+			// and e.g. 02 in case of one or three eObjects in the file... meh...
+			// (however, we read it out anyway, as it is a compressed integer and we
+			// need to jump over the right amount of bytes!)
+			int somenumber = readCompressedInteger();
+
+			i++;
+
+			// we get the id of the NEXT element - so the current id plus one...
+			// (is this a compressed integer?)
+			nextElementId = (byte)(binaryContent[i] + 1);
+
+			i++;
+
+			// no idea what this number means either (usually it is 01, it MIGHT
+			// be the depth of the root element and therefore always 01 as the
+			// root element is always at depth 1...)
+
+			i++;
 
 			// to read out the eObjectAmount, we go into the id block and read out the last id
 			// (each id is reported as number + byte 18 + underscore + 22 ecore UUID letters)
@@ -191,9 +191,9 @@ public class EmfFile extends XmlFile {
 			// however, in the beginning we first have the xmlns namespace, then the
 			// actual element name (however, expressed as namespace), followed by
 			// the namespace prefix for everything that is following / contained!
-			for (i = 12 + styleLength; i < len; i++) {
+			for (; i < len; i++) {
 
-				cur = binaryContent[i];
+				byte cur = binaryContent[i];
 
 				// if (inToken) {
 				if (debug) {
@@ -326,11 +326,11 @@ public class EmfFile extends XmlFile {
 	// TODO :: improve this function - we think it can go up to 4 bytes? (currently it only works for one, two or three bytes)
 	private int readCompressedInteger() {
 
-		int intCur = cur;
+		int intCur = binaryContent[i];
 
 		// if we have a byte below 0x40, then that is just the actual integer - very short, very simple!
 		if (intCur < 64) {
-			return cur;
+			return intCur;
 		}
 
 		if (intCur < 128) {
