@@ -31,7 +31,7 @@ public class CsvFile extends File {
 	
 		super();
 		
-		regularFile.copyTo(this);
+		regularFile.copyToFileObject(this);
 	}
 	
 	public String getHeadLine() {

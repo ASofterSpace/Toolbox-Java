@@ -53,6 +53,14 @@ public class Directory {
 	}
 	
 	/**
+	 * Get a Java Path object representing this directory
+	 */
+	public Path getJavaPath() {
+
+		return Paths.get(dirname);
+	}
+	
+	/**
 	 * Creates this directory on the underlying file system
 	 */
 	public void create() {
@@ -143,12 +151,12 @@ public class Directory {
 		Directory oldDir = this;
 		
 		// express new file relative to old dir
-        Path oldFilePath = Paths.get(oldFile.getFilename()).toAbsolutePath();
-        Path oldDirPath = Paths.get(oldDir.dirname).toAbsolutePath();
+        Path oldFilePath = oldFile.getJavaPath().toAbsolutePath();
+        Path oldDirPath = oldDir.getJavaPath().toAbsolutePath();
         Path filePathRelative = oldDirPath.relativize(oldFilePath);
 
 		// append relative file path to new dir
-        Path newDirPath = Paths.get(newDir.dirname);
+        Path newDirPath = newDir.getJavaPath();
 		
 		java.io.File newJavaFile = newDirPath.resolve(filePathRelative).toFile();
 		return new File(newJavaFile);
@@ -162,8 +170,8 @@ public class Directory {
 	 */
 	public String getRelativePath(File file) {
 	
-        Path filePath = Paths.get(file.getFilename());
-        Path dirPath = Paths.get(dirname);
+        Path filePath = file.getJavaPath();
+        Path dirPath = this.getJavaPath();
         return dirPath.relativize(filePath).toString();
 	}
 

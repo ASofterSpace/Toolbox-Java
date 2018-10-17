@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * A file object describes a single line-oriented text file and enables simple access to
@@ -43,7 +46,7 @@ public class File {
 	 */
 	public File(File regularFile) {
 
-		regularFile.copyTo(this);
+		regularFile.copyToFileObject(this);
 	}
 
 	/**
@@ -63,7 +66,7 @@ public class File {
 	 */
 	public File(Directory directory, String filename) {
 
-		this.filename = Paths.get(directory.getDirname()).resolve(filename).toAbsolutePath().toString();
+		this.filename = directory.getJavaPath().resolve(filename).toAbsolutePath().toString();
 	}
 	
 	/**
@@ -106,6 +109,14 @@ public class File {
 	}
 	
 	/**
+	 * Get a Java Path object representing this file
+	 */
+	public Path getJavaPath() {
+
+		return Paths.get(filename);
+	}
+	
+	/**
 	 * Get a URI object representing this file
 	 */
 	public java.net.URI getURI() {
@@ -136,7 +147,7 @@ public class File {
 	public List<String> loadContents(boolean complainIfMissing) {
 		
 		try {
-			byte[] binaryContent = Files.readAllBytes(Paths.get(filename));
+			byte[] binaryContent = Files.readAllBytes(this.getJavaPath());
 
 			String newContent = new String(binaryContent, StandardCharsets.UTF_8);
 			  
@@ -341,7 +352,7 @@ public class File {
 	/**
 	 * Copy this file to another another file instance
 	 */
-	public void copyTo(File other) {
+	public void copyToFileObject(File other) {
 
 		other.filename = this.filename;
 		
@@ -349,6 +360,35 @@ public class File {
 			other.filecontents = null;
 		} else {
 			other.filecontents = new ArrayList<>(this.filecontents);
+		}
+	}
+	
+	/**
+	 * Actually copy this file's contents to a new location on the disk
+	 */
+	public void copyToDisk(String destination) {
+	
+		this.copyToDisk(new File(destination));
+	}
+	
+	/**
+	 * Actually copy this file's contents to a new location on the disk
+	 */
+	public void copyToDisk(File destination) {
+	
+		java.io.File destinationFile = destination.getJavaFile();
+		
+		// create parent directories
+		if (destinationFile.getParentFile() != null) {
+			destinationFile.getParentFile().mkdirs();
+		}
+		
+		try {
+
+			Files.copy(this.getJavaPath(), destination.getJavaPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		} catch (IOException e) {
+			System.err.println("[ERROR] The file " + filename + " could not be copied to " + destination + "!");
 		}
 	}
 	
