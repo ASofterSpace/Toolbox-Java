@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -152,20 +153,31 @@ public class ZipFile extends File {
 		
 		zippedFiles = result;
 	}
-	
-	public void save() {
-
-		saveTo(this);
-	}
-
-	public void saveTo(File newLocation) {
-
-		saveTo(newLocation.filename);
-	}
 
 	public void saveTo(String newLocation) {
 
-		// TODO :: zip up the files again, be happy...
+		java.io.File outputFile = new java.io.File(newLocation);
+		
+		try (ZipOutputStream data = new ZipOutputStream(new FileOutputStream(outputFile))) {
+
+			if (zippedFiles == null) {
+				loadZipContents();
+			}
+			
+			for (ZippedFile zippedFile : zippedFiles) {
+			
+				data.putNextEntry(new ZipEntry(zippedFile.getName()));
+
+				byte[] binaryContent = Files.readAllBytes(zippedFile.getUnzippedFile().getJavaPath());
+
+				data.write(binaryContent, 0, binaryContent.length);
+				
+				data.closeEntry();
+			}
+			
+		} catch (IOException e) {
+			System.err.println("Ooops! The zip file " + filename + " could not be created as something is wrong:\n" + e);
+		}
 	}
 	
 	/**

@@ -85,21 +85,6 @@ public class XlsxFile extends ZipFile {
 			}
 		}
 	}
-	
-	public void save() {
-
-		saveTo(this);
-	}
-
-	public void saveTo(File newLocation) {
-
-		saveTo(newLocation.filename);
-	}
-
-	public void saveTo(String newLocation) {
-
-		// TODO :: zip up the files again, be happy...
-	}
 
 	/**
 	 * Gives back a string representation of the xlsx file object
