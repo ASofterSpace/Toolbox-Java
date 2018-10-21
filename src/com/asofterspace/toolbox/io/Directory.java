@@ -38,6 +38,19 @@ public class Directory {
 	}
 	
 	/**
+	 * Creates a child directory inside this directory, ensures it exists on disk,
+	 * and returns that instance
+	 */
+	public Directory createChildDir(String name) {
+		
+		Directory child = new Directory(dirname + "/" + name);
+		
+		child.create();
+		
+		return child;
+	}
+	
+	/**
 	 * Get the path of the directory
 	 */
 	public String getDirname() {

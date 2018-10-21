@@ -2,6 +2,7 @@ package com.asofterspace.toolbox.io;
 
 import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -100,6 +101,14 @@ public class XmlFile extends File {
 	
 	protected void loadXmlContents() {
 
+		parseXml(getJavaFile());
+	}
+	
+	/**
+	 * The source can be a Java File object or an InputStream
+	 */
+	protected void parseXml(Object source) {
+
 		try {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			factory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
@@ -109,15 +118,26 @@ public class XmlFile extends File {
 			currentElement = null;
 			
 			XmlHandler handler = new XmlHandler();
-			parser.parse(getJavaFile(), handler);
+			
+			if (source instanceof java.io.File) {
+			
+				parser.parse((java.io.File) source, handler);
+			
+			} else if (source instanceof InputStream) {
+			
+				parser.parse((InputStream) source, handler);
+			
+			} else {
+				System.err.println("Could not parse XML as the source was neither a File nor an InputStream!");
+			}
 			
 			mode = XmlMode.XML_LOADED;
 
 		} catch (SAXException | ParserConfigurationException | IOException e) {
-			e.printStackTrace(System.out);
+			e.printStackTrace(System.err);
 		}
 	}
-	
+
 	/**
 	 * Checks if there are any elements in the current DOM whose tag starts with the given prefix;
 	 * returns true if such elements can be found and false otherwise

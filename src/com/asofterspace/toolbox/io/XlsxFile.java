@@ -14,8 +14,7 @@ import java.util.List;
  * An xlsx file object describes a single xlsx file and enables simple access to
  * its contents.
  */
-// TODO :: maybe let this extend something like ZipFile?
-public class XlsxFile extends File {
+public class XlsxFile extends ZipFile {
 
 	private List<XlsxSheet> xlsxSheets;
 
@@ -41,11 +40,11 @@ public class XlsxFile extends File {
 	 * not getContents() / setContents() as for a regular File (the
 	 * regular File-based stuff will work, technically, but will be
 	 * much less efficient and if you use both all hell might break
-	 * loose... so yeah, only use the getRoot() function as entry-
+	 * loose... so yeah, only use the getSheets() function as entry-
 	 * point for XLSX files, kthxbye!)
 	 */
 	public List<XlsxSheet> getSheets() {
-
+	
 		if (xlsxSheets == null) {
 			loadXlsxContents();
 		}
@@ -55,11 +54,36 @@ public class XlsxFile extends File {
 
 	protected void loadXlsxContents() {
 
-		// TODO :: load the file
+		xlsxSheets = new ArrayList<>();
 		
-		// TODO :: unzip it
+		XmlFile workbook = getZippedFile("xl/workbook.xml").getUnzippedFileAsXml();
+		List<XmlElement> sheets = workbook.getRoot().getElementsByTagNameHierarchy("workbook", "sheets", "sheet");
 		
-		// TODO :: actually load the contained sheets etc.
+		XmlFile workbookRels = getZippedFile("xl/_rels/workbook.xml.rels").getUnzippedFileAsXml();
+		List<XmlElement> sheetRels = workbookRels.getRoot().getElementsByTagNameHierarchy("Relationships", "Relationship");
+
+		for (XmlElement sheet : sheets) {
+		
+			String title = sheet.getAttribute("name");
+			String rId = sheet.getAttribute("r:id");
+			// sheets also have a sheetId, but we have not figured out what that does, so we are just ignoring it for now... =)
+			
+			if (rId == null) {
+				continue;
+			}
+			
+			for (XmlElement sheetRel : sheetRels) {
+			
+				if (rId.equals(sheetRel.getAttribute("Id"))) {
+
+					XmlFile sheetXml = getZippedFile("xl/" + sheetRel.getAttribute("Target")).getUnzippedFileAsXml();
+					
+					xlsxSheets.add(new XlsxSheet(title, sheetXml));
+			
+					break;
+				}
+			}
+		}
 	}
 	
 	public void save() {

@@ -133,6 +133,18 @@ public class File {
 	}
 
 	/**
+	 * Gets the directory containing this file and ensures that it actually exists
+	 */
+	public Directory createParentDirectory() {
+	
+		Directory parentDir = getParentDirectory();
+		
+		parentDir.create();
+		
+		return parentDir;
+	}
+
+	/**
 	 * Returns true if something exists under this name (which does NOT need to be a file, btw.!)
 	 */
 	public boolean exists() {
