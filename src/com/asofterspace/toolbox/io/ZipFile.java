@@ -150,22 +150,22 @@ public class ZipFile extends File {
 		} catch (IOException e) {
 			System.err.println("Ooops! The zip file " + filename + " could not be opened as something is wrong:\n" + e);
 		}
-		
+
 		zippedFiles = result;
 	}
 
 	public void saveTo(String newLocation) {
 
 		java.io.File outputFile = new java.io.File(newLocation);
-		
+
 		try (ZipOutputStream data = new ZipOutputStream(new FileOutputStream(outputFile))) {
 
 			if (zippedFiles == null) {
 				loadZipContents();
 			}
-			
+
 			for (ZippedFile zippedFile : zippedFiles) {
-			
+
 				data.putNextEntry(new ZipEntry(zippedFile.getName()));
 
 				byte[] binaryContent = Files.readAllBytes(zippedFile.getUnzippedFile().getJavaPath());

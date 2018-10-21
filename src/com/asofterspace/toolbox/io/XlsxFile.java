@@ -18,6 +18,10 @@ public class XlsxFile extends ZipFile {
 
 	private List<XlsxSheet> xlsxSheets;
 
+	private XmlFile workbook;
+	private XmlFile workbookRels;
+	private XmlFile sharedStrings;
+		
 
 	/**
 	 * You can construct a XlsxFile instance by directly from a path name.
@@ -56,11 +60,13 @@ public class XlsxFile extends ZipFile {
 
 		xlsxSheets = new ArrayList<>();
 		
-		XmlFile workbook = getZippedFile("xl/workbook.xml").getUnzippedFileAsXml();
+		workbook = getZippedFile("xl/workbook.xml").getUnzippedFileAsXml();
 		List<XmlElement> sheets = workbook.getRoot().getElementsByTagNameHierarchy("workbook", "sheets", "sheet");
 		
-		XmlFile workbookRels = getZippedFile("xl/_rels/workbook.xml.rels").getUnzippedFileAsXml();
+		workbookRels = getZippedFile("xl/_rels/workbook.xml.rels").getUnzippedFileAsXml();
 		List<XmlElement> sheetRels = workbookRels.getRoot().getElementsByTagNameHierarchy("Relationships", "Relationship");
+
+		sharedStrings = getZippedFile("xl/sharedStrings.xml").getUnzippedFileAsXml();
 
 		for (XmlElement sheet : sheets) {
 		
@@ -71,21 +77,40 @@ public class XlsxFile extends ZipFile {
 			if (rId == null) {
 				continue;
 			}
-			
+	
 			for (XmlElement sheetRel : sheetRels) {
 			
 				if (rId.equals(sheetRel.getAttribute("Id"))) {
 
 					XmlFile sheetXml = getZippedFile("xl/" + sheetRel.getAttribute("Target")).getUnzippedFileAsXml();
 					
-					xlsxSheets.add(new XlsxSheet(title, sheetXml));
+					xlsxSheets.add(new XlsxSheet(title, sheetXml, this));
 			
 					break;
 				}
 			}
 		}
 	}
+	
+	XmlFile getSharedStrings() {
+		return sharedStrings;
+	}
 
+	public void saveTo(String newLocation) {
+	
+		workbook.save();
+		
+		workbookRels.save();
+		
+		sharedStrings.save();
+		
+		for (XlsxSheet xlsxSheet : xlsxSheets) {
+			xlsxSheet.save();
+		}
+		
+		super.saveTo(newLocation);
+	}
+	
 	/**
 	 * Gives back a string representation of the xlsx file object
 	 */

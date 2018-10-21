@@ -125,6 +125,18 @@ public class XmlElement {
 	}
 	
 	/**
+	 * Get one child with the given tag name, if any such child exists
+	 */
+	public XmlElement getChild(String tagName) {
+		for (XmlElement child : xmlChildren) {
+			if (tagName.equals(child.name)) {
+				return child;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Recursively get elements by any of several tag names
 	 */
 	public List<XmlElement> getElementsByTagNames(String[] tagNames) {
@@ -230,6 +242,10 @@ public class XmlElement {
 	
 	public void removeAttribute(String key) {
 		attributes.remove(key);
+	}
+	
+	public String getInnerText() {
+		return innerText;
 	}
 	
 	public void setInnerText(String innerText) {

@@ -506,12 +506,14 @@ public class XmlFile extends File {
 		// create parent directories
 		javaFile.getParentFile().mkdirs();
 
+		// get the root element before creating the writer (in case of this being the first time that the XML content
+		// is loaded in some sort of automated setting)
+		XmlElement root = getRoot();
+
 		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(javaFile), StandardCharsets.UTF_8)) {
 			
 			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			
-			XmlElement root = getRoot();
-
 			if (root != null) {
 				root.writeToFile(writer);
 			}
