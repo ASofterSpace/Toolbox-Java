@@ -248,6 +248,15 @@ public class XmlElement {
 		return innerText;
 	}
 	
+	public void appendInnerText(String furtherInnerText) {
+		
+		if (this.innerText == null) {
+			this.innerText = furtherInnerText;
+		} else {
+			this.innerText += furtherInnerText;
+		}
+	}
+
 	public void setInnerText(String innerText) {
 		this.innerText = innerText;
 	}

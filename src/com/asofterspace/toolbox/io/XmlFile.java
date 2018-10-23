@@ -90,7 +90,7 @@ public class XmlFile extends File {
 		
 		@Override
 		public void characters(char ch[], int start, int length) throws SAXException {
-			currentElement.setInnerText(new String(ch, start, length));
+			currentElement.appendInnerText(new String(ch, start, length));
 		}
 		
 		@Override
