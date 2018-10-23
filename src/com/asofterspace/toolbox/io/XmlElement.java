@@ -306,4 +306,13 @@ public class XmlElement {
 		}
 	}
 
+	/**
+	 * Removes this element, unless it is the root (the root cannot be removed, as it has no parent that it could be removed from...)
+	 */
+	public void remove() {
+		if (xmlParent != null) {
+			xmlParent.removeChild(this);
+		}
+	}
+
 }

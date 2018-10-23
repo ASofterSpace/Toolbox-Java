@@ -5,6 +5,8 @@ import java.util.List;
 
 public class XlsxSheet {
 
+	private final static char[] COLS = new char[] {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+	
 	private String title;
 
 	private XmlFile sheetFile;
@@ -78,6 +80,98 @@ public class XlsxSheet {
 		// the cell does not yet exist, so we have to manually add it to the sheet file
 		// TODO
 		System.err.println("setCellContent was called for cell " + cellName + " but that cell does not yet exist and no code exists that can add a new cell");
+	}
+	
+	private String colRowToName(int col, int row) {
+
+		// TODO :: also handle more than Z columns
+		String result = ""+COLS[col];
+		
+		return result + row;
+	}
+	
+	public void deleteCell(String cellName) {
+		
+		List<XmlElement> matchingCells = sheetFile.domGetElems("c", "r", cellName);
+		
+		for (XmlElement cell : matchingCells) {
+			cell.remove();
+		}
+	}
+	
+	public void deleteCell(int col, int row) {
+		
+		deleteCell(colRowToName(col, row));
+	}
+	
+	public void deleteCellBlock(String topLeftCellName, String bottomRightCellName) {
+	
+		System.out.println("delete cell block (" + topLeftCellName + ", " + bottomRightCellName);
+		
+		int leftCol = nameToColI(topLeftCellName);
+		int rightCol = nameToColI(bottomRightCellName);
+		int topRow = nameToRowI(topLeftCellName);
+		int bottomRow = nameToRowI(bottomRightCellName);
+		
+		System.out.println("delete cell block (" + leftCol + ", " + rightCol + ", " + topRow + ", " + bottomRow);
+		
+		for (int row = topRow; row <= bottomRow; row++) {
+			for (int col = leftCol; col <= rightCol; col++) {
+				deleteCell(col, row);
+			}
+		}
+	}
+	
+	private String nameToCol(String cellName) {
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < cellName.length(); i++) {
+			if (Character.isLetter(cellName.charAt(i))) {
+				result.append(cellName.charAt(i));
+			}
+		}
+		return result.toString();
+	}
+	
+	private int nameToColI(String cellName) {
+		// TODO :: for the love of St. Michael, do this better .o.
+		int result = 0;
+		while (cellName.length() > 0) {
+			boolean found = false;
+			for (int i = 0; i < COLS.length; i++) {
+				if (COLS[i] == cellName.charAt(0)) {
+					result *= COLS.length;
+					result += i;
+					cellName = cellName.substring(1);
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				break;
+			}
+		}
+		return result;
+	}
+	
+	private String nameToRow(String cellName) {
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < cellName.length(); i++) {
+			if (Character.isDigit(cellName.charAt(i))) {
+				result.append(cellName.charAt(i));
+			}
+		}
+		return result.toString();
+	}
+	
+	private int nameToRowI(String cellName) {
+		return Integer.valueOf(nameToRow(cellName));
+	}
+	
+	public boolean hasFooter() {
+	
+		List<XmlElement> oddFooters = sheetFile.getRoot().getElementsByTagNameHierarchy("worksheet", "headerFooter", "oddFooter");
+
+		return oddFooters.size() < 1;
 	}
 	
 	/**
