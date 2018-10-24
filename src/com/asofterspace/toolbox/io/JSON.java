@@ -48,6 +48,16 @@ public class JSON {
 	}
 
 	/**
+	* Create a JSON object based on a long value
+	*/
+	public JSON(Long longValue) {
+
+		kind = JSONkind.NUMBER;
+
+		simpleContents = longValue;
+	}
+
+	/**
 	* Create a JSON object based on a double value
 	*/
 	public JSON(Double doubleValue) {
@@ -259,9 +269,9 @@ public class JSON {
 
 		} else {
 
-			// create an integer
+			// create a long
 
-			simpleContents = Integer.valueOf(numStr);
+			simpleContents = Long.valueOf(numStr);
 		}
 
 		return jsonString;
@@ -460,7 +470,7 @@ public class JSON {
 	}
 
 	/**
-	 * Gets an integer value stored in a key of a JSON object
+	 * Gets an int value stored in a key of a JSON object
 	 * @param key  the key to be searched for
 	 * @return the integer value stored in the key
 	 */
@@ -473,7 +483,15 @@ public class JSON {
 		}
 
 		if (result.kind == JSONkind.NUMBER) {
-			return (Integer) result.simpleContents;
+			if (result.simpleContents instanceof Long) {
+				return (Integer) (int) (long) ((Long) result.simpleContents);
+			}
+			if (result.simpleContents instanceof Integer) {
+				return (Integer) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Double) {
+				return (Integer) (int) Math.round((Double) result.simpleContents);
+			}
 		}
 
 		if (result.kind == JSONkind.BOOLEAN) {
@@ -491,6 +509,85 @@ public class JSON {
 		return 0;
 	}
 
+	/**
+	 * Gets an long value stored in a key of a JSON object
+	 * @param key  the key to be searched for
+	 * @return the integer value stored in the key
+	 */
+	public Long getLong(String key) {
+
+		JSON result = get(key);
+
+		if (result == null) {
+			return null;
+		}
+
+		if (result.kind == JSONkind.NUMBER) {
+			if (result.simpleContents instanceof Long) {
+				return (Long) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Integer) {
+				return (Long) (long) (int) (Integer) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Double) {
+				return (Long) Math.round((Double) result.simpleContents);
+			}
+		}
+
+		if (result.kind == JSONkind.BOOLEAN) {
+			if ((Boolean) result.simpleContents) {
+				return 1L;
+			} else {
+				return 0L;
+			}
+		}
+
+		if (result.kind == JSONkind.NULL) {
+			return null;
+		}
+
+		return 0L;
+	}
+
+	/**
+	 * Gets an double value stored in a key of a JSON object
+	 * @param key  the key to be searched for
+	 * @return the integer value stored in the key
+	 */
+	public Double getDouble(String key) {
+
+		JSON result = get(key);
+
+		if (result == null) {
+			return null;
+		}
+
+		if (result.kind == JSONkind.NUMBER) {
+			if (result.simpleContents instanceof Long) {
+				return (Double) (double) (long) (Long) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Integer) {
+				return (Double) (double) (int) (Integer) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Double) {
+				return (Double) result.simpleContents;
+			}
+		}
+
+		if (result.kind == JSONkind.BOOLEAN) {
+			if ((Boolean) result.simpleContents) {
+				return 1.0;
+			} else {
+				return 0.0;
+			}
+		}
+
+		if (result.kind == JSONkind.NULL) {
+			return null;
+		}
+
+		return 0.0;
+	}
 	/**
 	 * Sets a key of the JSON object to the JSON value
 	 * @param key

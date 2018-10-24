@@ -261,6 +261,10 @@ public class XmlElement {
 		this.innerText = innerText;
 	}
 
+	public void setInnerText(int innerText) {
+		this.innerText = ""+innerText;
+	}
+
 	/**
 	 * Assuming that we have <element attrOrChildName="_bla"/> or
 	 * <element><attrOrChildName href="_bla"/></element>, this function

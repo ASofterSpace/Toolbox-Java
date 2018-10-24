@@ -28,7 +28,16 @@ public class XlsxSheet {
 		List<XmlElement> matchingCells = sheetFile.domGetElems("c", "r", cellName);
 		
 		for (XmlElement cell : matchingCells) {
-			if ("s".equals(cell.getAttribute("t"))) {
+			
+			String cellType = cell.getAttribute("t");
+			
+			// no cellType means integer
+			if (cellType == null) {
+				return cell.getChild("v").getInnerText();
+			}
+			
+			// cellType s means string (from the shared strings document)
+			if (cellType.equals("s")) {
 				// we have a string... and the strings are kept in a separate string file... so look there!
 				String sharedStringIndexStr = cell.getChild("v").getInnerText();
 				try {
@@ -44,6 +53,7 @@ public class XlsxSheet {
 					// ooops... the string could not be parsed, humm...
 				}
 			}
+			
 			return "unknown";
 		}
 
@@ -55,31 +65,82 @@ public class XlsxSheet {
 		List<XmlElement> matchingCells = sheetFile.domGetElems("c", "r", cellName);
 	
 		for (XmlElement cell : matchingCells) {
+		
+			// the cell already exists and we are just editing it in place
+			
+			if ("s".equals(cell.getAttribute("t"))) {
+				// edit the shared string itself - TODO :: actually, check if the string is in use anywhere else first!
+
+				// we just set this to string... and the strings are kept in a separate string file... so put it there!
+				String sharedStringIndexStr = cell.getChild("v").getInnerText();
+				try {
+					int sharedStringIndex = Integer.parseInt(sharedStringIndexStr);
+
+					List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
+
+					XmlElement actualStringElement = sharedStrings.get(sharedStringIndex).getChild("t");
+
+					actualStringElement.setInnerText(newContent);
+
+				} catch (NumberFormatException e) {
+					// ooops... the string could not be parsed, humm...
+				}
+
+			} else {
+				// create the shared string
+				
+				cell.setAttribute("t", "s");
+			
+				// we just set this to string... and the strings are kept in a separate string file... so put it there!
+				try {
+					List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
+
+					int newSharedStringIndex = sharedStrings.size();
+					
+					XmlElement actualStringElement = parent.getSharedStrings().getRoot().createChild("si").createChild("t");
+					
+					actualStringElement.setInnerText(newContent);
+					
+					cell.getChild("v").setInnerText(newSharedStringIndex);
+
+				} catch (NumberFormatException e) {
+					// ooops... the string could not be parsed, humm...
+				}
+			}
+		}
+		
+		if (matchingCells.size() < 1) {
+			// the cell does not yet exist, so we have to manually add it to the sheet file
+			// TODO
+			System.err.println("setCellContent was called for cell " + cellName + " but that cell does not yet exist and no code exists that can add a new cell");
+		}
+	}
+
+	public void setNumberCellContent(String cellName, String newContent) {
+	
+		List<XmlElement> matchingCells = sheetFile.domGetElems("c", "r", cellName);
+	
+		for (XmlElement cell : matchingCells) {
 			
 			// the cell already exists and we are just editing it in place
-			cell.setAttribute("t", "s");
-			
-			// we just set this to string... and the strings are kept in a separate string file... so put it there!
-			String sharedStringIndexStr = cell.getChild("v").getInnerText();
-			try {
-				int sharedStringIndex = Integer.parseInt(sharedStringIndexStr);
+			cell.removeAttribute("t");
 
-				List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
-
-				XmlElement actualStringElement = sharedStrings.get(sharedStringIndex);
-
-				actualStringElement.getChild("t").setInnerText(newContent);
-
-			} catch (NumberFormatException e) {
-				// ooops... the string could not be parsed, humm...
-			}
+			cell.getChild("v").setInnerText(newContent);
 
 			return;
 		}
 		
 		// the cell does not yet exist, so we have to manually add it to the sheet file
 		// TODO
-		System.err.println("setCellContent was called for cell " + cellName + " but that cell does not yet exist and no code exists that can add a new cell");
+		System.err.println("setNumberCellContent was called for cell " + cellName + " but that cell does not yet exist and no code exists that can add a new cell");
+	}
+	
+	public void setCellContent(String cellName, int newContent) {
+		setNumberCellContent(cellName, ""+newContent);
+	}
+	
+	public void setCellContent(String cellName, long newContent) {
+		setNumberCellContent(cellName, ""+newContent);
 	}
 	
 	private String colRowToName(int col, int row) {
@@ -106,14 +167,10 @@ public class XlsxSheet {
 	
 	public void deleteCellBlock(String topLeftCellName, String bottomRightCellName) {
 	
-		System.out.println("delete cell block (" + topLeftCellName + ", " + bottomRightCellName);
-		
 		int leftCol = nameToColI(topLeftCellName);
 		int rightCol = nameToColI(bottomRightCellName);
 		int topRow = nameToRowI(topLeftCellName);
 		int bottomRow = nameToRowI(bottomRightCellName);
-		
-		System.out.println("delete cell block (" + leftCol + ", " + rightCol + ", " + topRow + ", " + bottomRow);
 		
 		for (int row = topRow; row <= bottomRow; row++) {
 			for (int col = leftCol; col <= rightCol; col++) {
@@ -171,7 +228,7 @@ public class XlsxSheet {
 	
 		List<XmlElement> oddFooters = sheetFile.getRoot().getElementsByTagNameHierarchy("worksheet", "headerFooter", "oddFooter");
 
-		return oddFooters.size() < 1;
+		return oddFooters.size() > 0;
 	}
 	
 	/**
