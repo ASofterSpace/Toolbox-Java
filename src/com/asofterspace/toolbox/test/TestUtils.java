@@ -88,8 +88,31 @@ public class TestUtils {
 
 		System.out.println("------------------------------");
 		System.out.println("The test suite has finished!");
-		System.out.println(testsRun + " tests have been run.");
-		System.out.println("There were " + testsSuccess + " successes and " + testsFailed + " failures.");
+		String testsRunStr = "";
+		if (testsRun == 1) {
+			testsRunStr = "1 test has";
+		} else {
+			testsRunStr = testsRun + " tests have";
+		}
+		System.out.println(testsRunStr + " been run.");
+		String testResultStr = "There ";
+		if (testsSuccess + testsFailed == 1) {
+			testResultStr += "was ";
+		} else {
+			testResultStr += "were ";
+		}
+		if (testsSuccess == 1) {
+			testResultStr += "1 success";
+		} else {
+			testResultStr += testsSuccess + " successes";
+		}
+		testResultStr += " and ";
+		if (testsFailed == 1) {
+			testResultStr += "1 failure.";
+		} else {
+			testResultStr += testsFailed + " failures.";
+		}
+		System.out.println(testResultStr);
 		System.out.println("------------------------------");
 	}
 

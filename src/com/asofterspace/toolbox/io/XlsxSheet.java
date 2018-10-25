@@ -143,14 +143,6 @@ public class XlsxSheet {
 		setNumberCellContent(cellName, ""+newContent);
 	}
 	
-	private String colRowToName(int col, int row) {
-
-		// TODO :: also handle more than Z columns
-		String result = ""+COLS[col];
-		
-		return result + row;
-	}
-	
 	public void deleteCell(String cellName) {
 		
 		List<XmlElement> matchingCells = sheetFile.domGetElems("c", "r", cellName);
@@ -179,7 +171,22 @@ public class XlsxSheet {
 		}
 	}
 	
-	private String nameToCol(String cellName) {
+	public static String colRowToName(int col, int row) {
+
+		String result = "";
+		
+		// TODO :: also handle more than ZZ columns (which currently will NOT work, even catastrophically - an exception will be thrown!)
+		if (col >= COLS.length) {
+			result += COLS[(col / COLS.length) - 1];
+			col = col % COLS.length;
+		}
+		
+		result += COLS[col];
+		
+		return result + row;
+	}
+
+	public static String nameToCol(String cellName) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < cellName.length(); i++) {
 			if (Character.isLetter(cellName.charAt(i))) {
@@ -189,30 +196,29 @@ public class XlsxSheet {
 		return result.toString();
 	}
 	
-	private int nameToColI(String cellName) {
+	public static int nameToColI(String cellName) {
 		// TODO :: for the love of St. Michael, do this better .o.
-		// (btw., this does not work for anything beyond A..Z anyway right now...)
+		// TODO :: also handle more than ZZ columns (I mean... maybe this already works, but it was not tested so far)
 		int result = 0;
+		int offset = 1;
 		cellName = nameToCol(cellName);
-		while (cellName.length() > 0) {
-			boolean found = false;
-			for (int i = 0; i < COLS.length; i++) {
-				if (COLS[i] == cellName.charAt(0)) {
-					result *= COLS.length;
-					result += i;
-					cellName = cellName.substring(1);
-					found = true;
+		for (int i = cellName.length() - 1; i >= 0; i--) {
+			char curChar = cellName.charAt(i);
+			for (int j = 0; j < COLS.length; j++) {
+				if (COLS[j] == curChar) {
+					result += (j+1) * offset;
+					offset *= COLS.length;
 					break;
 				}
 			}
-			if (!found) {
-				break;
-			}
 		}
+		// we want A to be 0, not 1
+		result -= 1;
+
 		return result;
 	}
 	
-	private String nameToRow(String cellName) {
+	public static String nameToRow(String cellName) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < cellName.length(); i++) {
 			if (Character.isDigit(cellName.charAt(i))) {
@@ -222,7 +228,7 @@ public class XlsxSheet {
 		return result.toString();
 	}
 	
-	private int nameToRowI(String cellName) {
+	public static int nameToRowI(String cellName) {
 		return Integer.valueOf(nameToRow(cellName));
 	}
 	

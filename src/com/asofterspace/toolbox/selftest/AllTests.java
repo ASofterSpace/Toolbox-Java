@@ -12,6 +12,8 @@ public class AllTests {
 
 		TestUtils.run(new JSONTest());
 		
+		TestUtils.run(new XlsxTest());
+		
 		TestUtils.run(new ConverterTest());
 		
 		TestUtils.run(new UuidTest());
