@@ -191,7 +191,9 @@ public class XlsxSheet {
 	
 	private int nameToColI(String cellName) {
 		// TODO :: for the love of St. Michael, do this better .o.
+		// (btw., this does not work for anything beyond A..Z anyway right now...)
 		int result = 0;
+		cellName = nameToCol(cellName);
 		while (cellName.length() > 0) {
 			boolean found = false;
 			for (int i = 0; i < COLS.length; i++) {
