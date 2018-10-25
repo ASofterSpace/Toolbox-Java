@@ -101,6 +101,16 @@ public class File {
 	}
 	
 	/**
+	 * Get the absolute filename associated with this file object
+	 */
+	public String getAbsoluteFilename() {
+	
+		Path basePath = getJavaPath();
+
+		return basePath.toAbsolutePath().toString();
+	}
+	
+	/**
 	 * Get a Java File object representing this file
 	 */
 	public java.io.File getJavaFile() {
