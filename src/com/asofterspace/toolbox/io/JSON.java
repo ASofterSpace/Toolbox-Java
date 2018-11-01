@@ -470,6 +470,26 @@ public class JSON {
 	}
 
 	/**
+	 * Gets a boolean value stored in a key of a JSON object
+	 * @param key  the key to be searched for
+	 * @return the boolean value stored in the key
+	 */
+	public Boolean getBoolean(String key) {
+
+		JSON result = get(key);
+
+		if (result == null) {
+			return null;
+		}
+
+		if (result.kind == JSONkind.BOOLEAN) {
+			return (Boolean) result.simpleContents;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Gets an int value stored in a key of a JSON object
 	 * @param key  the key to be searched for
 	 * @return the integer value stored in the key

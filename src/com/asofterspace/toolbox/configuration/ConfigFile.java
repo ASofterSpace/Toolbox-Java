@@ -103,10 +103,48 @@ public class ConfigFile {
 	 */
 	public int getInteger(String key) {
 
+		return getInteger(key, 0);
+	}
+
+	/**
+	 * Gets the value stored with the given key
+	 * @param key
+	 * @param defaultValue
+	 * @return the value stored in the key, or defaultValue if it cannot be found
+	 */
+	public int getInteger(String key, int defaultValue) {
+
 		Integer result = content.getInteger(key);
 		
 		if (result == null) {
-			return 0;
+			return defaultValue;
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Gets the value stored with the given key
+	 * @param key
+	 * @return the value stored in the key, or false if it cannot be found
+	 */
+	public boolean getBoolean(String key) {
+
+		return getBoolean(key, false);
+	}
+
+	/**
+	 * Gets the value stored with the given key
+	 * @param key
+	 * @param defaultValue
+	 * @return the value stored in the key, or defaultValue if it cannot be found
+	 */
+	public boolean getBoolean(String key, boolean defaultValue) {
+
+		Boolean result = content.getBoolean(key);
+		
+		if (result == null) {
+			return defaultValue;
 		}
 		
 		return result;
@@ -141,6 +179,18 @@ public class ConfigFile {
 	 * @param value
 	 */
 	public void set(String key, Integer value) {
+
+		content.set(key, new JSON(value));
+		
+		saveToFile();
+	}
+
+	/**
+	 * Stores the value in the configuration with the given key
+	 * @param key
+	 * @param value
+	 */
+	public void set(String key, Boolean value) {
 
 		content.set(key, new JSON(value));
 		
