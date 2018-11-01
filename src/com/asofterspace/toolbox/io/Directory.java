@@ -38,6 +38,15 @@ public class Directory {
 	}
 	
 	/**
+	 * Gets a child directory inside this directory without ensuring that it exists on disk,
+	 * and returns that instance
+	 */
+	public Directory getChildDir(String name) {
+		
+		return new Directory(dirname + "/" + name);
+	}
+	
+	/**
 	 * Creates a child directory inside this directory, ensures it exists on disk,
 	 * and returns that instance
 	 */
