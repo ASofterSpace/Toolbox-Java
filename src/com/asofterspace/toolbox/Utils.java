@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 27;
+	public final static int TOOLBOX_VERSION_NUMBER = 28;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -109,6 +109,9 @@ public class Utils {
 		System.out.println(format.format(new Date()) + " [heap " + heapStr + "]: " + logline);
 	}
 	
+	/**
+	 * TODO :: This should be in the XmlFile class, or in an XmlEncoder, but not here, right? Who even uses this?
+	 */
 	public static String xmlEscape(String text) {
 	
 		StringBuilder result = new StringBuilder();

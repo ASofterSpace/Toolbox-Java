@@ -1,5 +1,7 @@
 package com.asofterspace.toolbox.web;
 
+import com.asofterspace.toolbox.coders.UrlDecoder;
+import com.asofterspace.toolbox.coders.UrlEncoder;
 import com.asofterspace.toolbox.io.JSON;
 
 import java.io.BufferedReader;
@@ -8,7 +10,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.util.Map;
+
 
 /**
  * This (hopefully) simplifies access to the web
@@ -48,6 +51,15 @@ public class WebAccessor {
 	}
 
 	/**
+	 * Get a web resource synchronously
+	 * @param url  The base url of the web resource (without parameters)
+	 * @param parameters  The parameters that should be appended to the url
+	 */
+	public static String get(String url, Map<String, String> parameters) {
+		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET");
+	}
+
+	/**
 	 * Put a web resource synchronously
 	 * @param url  The url of the web resource
 	 * @param messageBody The message body to be sent
@@ -57,12 +69,58 @@ public class WebAccessor {
 	}
 
 	/**
+	 * Put a web resource synchronously
+	 * @param url  The url of the web resource
+	 * @param parameters The parameters to be sent as message body
+	 */
+	public static String put(String url, Map<String, String> parameters) {
+		return getPutPost(url, mapToMessageBody(parameters), "PUT");
+	}
+
+	/**
 	 * Post a web resource synchronously
 	 * @param url  The url of the web resource
 	 * @param messageBody The message body to be sent
 	 */
 	public static String post(String url, String messageBody) {
 		return getPutPost(url, messageBody, "POST");
+	}
+
+	/**
+	 * Post a web resource synchronously
+	 * @param url  The url of the web resource
+	 * @param parameters The parameters to be sent as message body
+	 */
+	public static String post(String url, Map<String, String> parameters) {
+		return getPutPost(url, mapToMessageBody(parameters), "POST");
+	}
+	
+	private static String mapToUrlSuffix(Map<String, String> parameters) {
+		
+		String result = mapToMessageBody(parameters);
+		
+		if (result.length() > 0) {
+			return "?" + result;
+		}
+		
+		return "";
+	}
+	
+	private static String mapToMessageBody(Map<String, String> parameters) {
+	
+		StringBuilder result = new StringBuilder();
+		
+		String separator = "";
+		
+		for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+			result.append(separator);
+			separator = "&";
+			result.append(UrlEncoder.encodeFormData(parameter.getKey()));
+			result.append("=");
+			result.append(UrlEncoder.encodeFormData(parameter.getValue()));
+		}
+		
+		return result.toString();
 	}
 
 	private static String getPutPost(String url, String messageBody, String requestKind) {
@@ -124,30 +182,6 @@ public class WebAccessor {
 	 */
 	public static JSON getJSON(String url) {
 		return new JSON(get(url));
-	}
-	
-	/**
-	 * Takes http%3A%2F%2Fwww.foo.org%2Fsections%2Fbar
-	 * and converts to http://www.foo.org/sections/bar
-	 * @param url  The encoded url
-	 * @return The decoded url in plain text
-	 */
-	public static String urldecode(String url) {
-
-		// TODO :: improve!
-
-		url = url.replace("&amp;", "&");
-		url = url.replace("%3A", ":");
-		url = url.replace("%3a", ":");
-		url = url.replace("%2F", "/");
-		url = url.replace("%2f", "/");
-		url = url.replace("%3F", "?");
-		url = url.replace("%3f", "?");
-		url = url.replace("%3D", "=");
-		url = url.replace("%3d", "=");
-		url = url.replace("%26", "&");
-
-		return url;
 	}
 
 }
