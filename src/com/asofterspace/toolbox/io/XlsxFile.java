@@ -98,17 +98,51 @@ public class XlsxFile extends ZipFile {
 
 	public void saveTo(String newLocation) {
 	
-		workbook.save();
+		if (workbook != null) {
+			workbook.save();
+		}
 		
-		workbookRels.save();
+		if (workbookRels != null) {
+			workbookRels.save();
+		}
 		
-		sharedStrings.save();
+		if (sharedStrings != null) {
+			sharedStrings.save();
+		}
 		
-		for (XlsxSheet xlsxSheet : xlsxSheets) {
-			xlsxSheet.save();
+		if (xlsxSheets != null) {
+			for (XlsxSheet xlsxSheet : xlsxSheets) {
+				xlsxSheet.save();
+			}
 		}
 		
 		super.saveTo(newLocation);
+	}
+	
+	/**
+	 * To convert, create a new Xlsm file based on this object here... and then actually add whatever is necessary
+	 * to make it a full, regular Xlsm file!
+	 */
+	public XlsmFile convertToXlsm() {
+	
+		// create an XlsmFile naively based on this XlsxFile
+		XlsmFile result = new XlsmFile(this);
+		
+		// actually make the necessary changes to make it a proper XlsmFile
+		XmlFile contentTypes = result.getZippedFile("[Content_Types].xml").getUnzippedFileAsXml();
+		
+		// get all Override elements with PartName="/xl/workbook.xml"
+		List<XmlElement> workbookOverrides = contentTypes.domGetElems("Override", "PartName", "/xl/workbook.xml");
+		
+		// set the content type, which before was "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
+		for (XmlElement workbookOverride : workbookOverrides) {
+			workbookOverride.setAttribute("ContentType", "application/vnd.ms-excel.sheet.macroEnabled.main+xml");
+		}
+		
+		// ... aaand save our miraculous changes!
+		contentTypes.save();
+
+		return result;
 	}
 	
 	/**
