@@ -134,6 +134,14 @@ public class Directory {
 	}
 	
 	/**
+	 * Get a file inside this directory
+	 */
+	public File getFile(String filename) {
+	
+		return new File(this, filename);
+	}
+	
+	/**
 	 * Get all the files contained in the directory (and, if recursively
 	 * is set to true, in its sub-directories)
 	 */

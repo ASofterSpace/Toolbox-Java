@@ -18,6 +18,7 @@ public class XlsxFile extends ZipFile {
 
 	private List<XlsxSheet> xlsxSheets;
 
+	private XmlFile contentTypes;
 	private XmlFile workbook;
 	private XmlFile workbookRels;
 	private XmlFile sharedStrings;
@@ -60,6 +61,8 @@ public class XlsxFile extends ZipFile {
 
 		xlsxSheets = new ArrayList<>();
 		
+		contentTypes = getZippedFile("[Content_Types].xml").getUnzippedFileAsXml();
+		
 		workbook = getZippedFile("xl/workbook.xml").getUnzippedFileAsXml();
 		List<XmlElement> sheets = workbook.getRoot().getElementsByTagNameHierarchy("workbook", "sheets", "sheet");
 		
@@ -92,12 +95,39 @@ public class XlsxFile extends ZipFile {
 		}
 	}
 	
+	XmlFile getContentTypes() {
+	
+		if (contentTypes == null) {
+			loadXlsxContents();
+		}
+
+		return contentTypes;
+	}
+	
+	XmlFile getWorkbookRels() {
+	
+		if (workbookRels == null) {
+			loadXlsxContents();
+		}
+	
+		return workbookRels;
+	}
+	
 	XmlFile getSharedStrings() {
+
+		if (sharedStrings == null) {
+			loadXlsxContents();
+		}
+
 		return sharedStrings;
 	}
 
 	public void saveTo(String newLocation) {
 	
+		if (contentTypes != null) {
+			contentTypes.save();
+		}
+		
 		if (workbook != null) {
 			workbook.save();
 		}
@@ -129,10 +159,10 @@ public class XlsxFile extends ZipFile {
 		XlsmFile result = new XlsmFile(this);
 		
 		// actually make the necessary changes to make it a proper XlsmFile
-		XmlFile contentTypes = result.getZippedFile("[Content_Types].xml").getUnzippedFileAsXml();
+		XmlFile xlsmContentTypes = result.getContentTypes();
 		
 		// get all Override elements with PartName="/xl/workbook.xml"
-		List<XmlElement> workbookOverrides = contentTypes.domGetElems("Override", "PartName", "/xl/workbook.xml");
+		List<XmlElement> workbookOverrides = xlsmContentTypes.domGetElems("Override", "PartName", "/xl/workbook.xml");
 		
 		// set the content type, which before was "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
 		for (XmlElement workbookOverride : workbookOverrides) {
@@ -140,7 +170,7 @@ public class XlsxFile extends ZipFile {
 		}
 		
 		// ... aaand save our miraculous changes!
-		contentTypes.save();
+		xlsmContentTypes.save();
 
 		return result;
 	}

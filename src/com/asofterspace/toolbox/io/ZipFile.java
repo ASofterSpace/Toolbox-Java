@@ -78,6 +78,9 @@ public class ZipFile extends File {
 		return zippedFiles;
 	}
 	
+	/**
+	 * Get one particular file based on the relative path inside the zip file
+	 */
 	public ZippedFile getZippedFile(String zipRelativePath) {
 	
 		if (zippedFiles == null) {
@@ -91,6 +94,37 @@ public class ZipFile extends File {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Add one particular file to the zip file, storing it in a relative path
+	 * which identifies the internal folder only (!), but does NOT include the filename!
+	 * The zipRelativePath should NOT start with a slash/backslash, but it may or may not
+	 * end on one.
+	 */
+	public void addZippedFile(File fileToAdd, String zipRelativePath) {
+	
+		if (fileToAdd == null) {
+			return;
+		}
+		
+		if (zipRelativePath == null) {
+			return;
+		}
+		
+		if (!zipRelativePath.endsWith("/") && !zipRelativePath.endsWith("\\")) {
+			zipRelativePath += "/";
+		}
+		
+		if (zippedFiles == null) {
+			loadZipContents();
+		}
+		
+		Directory addFileInDirectory = workdir.createChildDir(zipRelativePath);
+		
+		File addedFile = fileToAdd.copyToDisk(addFileInDirectory);
+		
+		zippedFiles.add(new ZippedFile(zipRelativePath + addedFile.getLocalFilename(), addedFile));
 	}
 	
 	protected void loadZipContents() {

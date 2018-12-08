@@ -80,6 +80,8 @@ public class File {
 	/**
 	 * Get only the local part of the filename associated with this file object,
 	 * so just the name itself instead of the full path
+	 * TODO :: this here might have problems if the filename legitimately contains
+	 * slashes or backslashes! if that ever happens, be more clever! :)
 	 */
 	public String getLocalFilename() {
 
@@ -386,17 +388,28 @@ public class File {
 	}
 	
 	/**
-	 * Actually copy this file's contents to a new location on the disk
+	 * Actually copy this file's contents to a new location on the disk,
+	 * the location being given as a string filename
+	 * Returns a File object representing the target file location
 	 */
-	public void copyToDisk(String destination) {
+	public File copyToDisk(String destination) {
 	
-		this.copyToDisk(new File(destination));
+		File result = new File(destination);
+		
+		this.copyToDisk(result);
+		
+		return result;
 	}
 	
 	/**
-	 * Actually copy this file's contents to a new location on the disk
+	 * Actually copy this file's contents to a new location on the disk,
+	 * the location being given as a File object containing a filename
+	 * Returns a File object representing the target file location
+	 * (mostly for symmetry reasons with the other copyToDisk functions -
+	 * in this case, the returned File object is just the File object that
+	 * was given as argument... ^^)
 	 */
-	public void copyToDisk(File destination) {
+	public File copyToDisk(File destination) {
 	
 		java.io.File destinationFile = destination.getJavaFile();
 		
@@ -412,6 +425,21 @@ public class File {
 		} catch (IOException e) {
 			System.err.println("[ERROR] The file " + filename + " could not be copied to " + destination + "!");
 		}
+		
+		return destination;
+	}
+	
+	/**
+	 * Actually copy this file's contents to a new location on the disk,
+	 * the location being given as a Directory object into which the File
+	 * is to be copied
+	 * Returns a File object representing the target file location
+	 */
+	public File copyToDisk(Directory destination) {
+	
+		File destinationFile = destination.getFile(getLocalFilename());
+		
+		return copyToDisk(destinationFile);
 	}
 	
 	/**
