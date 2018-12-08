@@ -115,22 +115,39 @@ public class PdfFile extends File {
 		pdfLoaded = true;
 	}
 	
-	public void create() {
+	public void create(String text) {
 	
 		version = 0;
 		
 		objects = new ArrayList<PdfObject>();
 		
-		int objNum = 0;
+		int objNum = 1;
 		
 		PdfObject obj = new PdfObject(objNum++, 0);
 		obj.setType("Catalog");
+		obj.setContent("%/OpenAction\r\n/Pages 2 0 R"); // TODO :: use reference instead of hardcoded link
 		objects.add(obj);
 		
 		obj = new PdfObject(objNum++, 0);
 		obj.setType("Pages");
+		obj.setContent("/Count 1\r\n/Kids [3 0 R]"); // TODO :: use reference(s) instead of hardcoded link(s)
 		objects.add(obj);
 		
+		obj = new PdfObject(objNum++, 0);
+		obj.setType("Range");
+		obj.setContent("/Parent 2 0 R\r\n/Resources << /Font << /F1 5 0 R >>\r\n>>\r\n/MediaBox [0 0 612 792]\r\n/Contents 4 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
+		objects.add(obj);
+		
+		obj = new PdfObject(objNum++, 0);
+		int len = 32 + text.length();
+		obj.setContent("<< /Length " + len + " >>\r\nstream\r\nBT\r\n/F1 24 Tf\r\n250 700 Td (" + text + ") Tj\r\nET\r\nendstream");
+		objects.add(obj);
+		
+		obj = new PdfObject(objNum++, 0);
+		obj.setType("Font");
+		obj.setContent("/Subtype /Type1\r\n/BaseFont /Helvetica"); // TODO :: embed font inline
+		objects.add(obj);
+
 		pdfLoaded = true;
 	}
 
@@ -164,6 +181,8 @@ public class PdfFile extends File {
 		
 		pdf.append("%%EOF");
 		
-		super.saveContent(pdf.toString());
+		super.setContent(pdf.toString());
+		
+		super.save();
 	}
 }

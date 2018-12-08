@@ -16,6 +16,9 @@ public class PdfObject {
 	
 	private String type;
 	
+	// plain-text content for whatever is not contained in the rest... Übergangslösung or proper solution forever? hmmm...
+	private String content = "";
+	
 
 	/**
 	 * Create a pdf object based on the line defining it in a pdf file
@@ -72,10 +75,16 @@ public class PdfObject {
 				// pages = contents.substring
 			}
 		}
+		
+		this.content = contents;
 	}
 	
 	public void setType(String type) {
 		this.type = type;
+	}
+	
+	public void setContent(String content) {
+		this.content = content;
 	}
 	
 	public String toString() {
@@ -87,14 +96,20 @@ public class PdfObject {
 		result.append(generation);
 		result.append(" ");
 		result.append("obj");
-		result.append("<<\r\n");
 		
-		if (type != null) {
+		if (type == null) {
+			result.append(content);
+			result.append("\r\n");
+		} else {
+			result.append("<<\r\n");
 			result.append("/Type /");
 			result.append(type);
+			result.append("\r\n");
+			result.append(content);
+			result.append("\r\n");
+			result.append(">>\r\n");
 		}
 		
-		result.append(">>\r\n");
 		result.append("endobj\r\n");
 		
 		return result.toString();
