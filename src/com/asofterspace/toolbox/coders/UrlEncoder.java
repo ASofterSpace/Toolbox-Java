@@ -15,7 +15,10 @@ import java.net.URLEncoder;
  */
 public class UrlEncoder {
 
-	// encodes to regular string format
+	/**
+	 * Takes http://www.foo.org/sections/bar
+	 * and converts to http%3A%2F%2Fwww.foo.org%2Fsections%2Fbar
+	 */
 	public static String encode(String urlString) {
 		return encodeFormData(urlString).replace("+", "%20");
 	}
