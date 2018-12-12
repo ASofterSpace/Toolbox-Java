@@ -208,10 +208,18 @@ public class JSON {
 
 			jsonString = jsonString.substring(1);
 
-			// TODO :: also allow escaping " (basically, by checking here is simpleContents
-			// ends with \ - in which case we add the " instead and carry on searching forward)
-			simpleContents = jsonString.substring(0, jsonString.indexOf("\""));
+			String simpleContentsStr = jsonString.substring(0, jsonString.indexOf("\""));
 			jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
+			
+			// also allow escaping " (basically, by checking here is simpleContentsStr
+			// ends with \ - in which case we add the " instead and carry on searching forward)
+			while (simpleContentsStr.endsWith("\\")) {
+				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length()-1) + "\"";
+				simpleContentsStr += jsonString.substring(0, jsonString.indexOf("\""));
+				jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
+			}
+			
+			simpleContents = simpleContentsStr;
 
 			return jsonString;
 		}
@@ -243,18 +251,19 @@ public class JSON {
 		kind = JSONkind.NUMBER;
 
 		String numStr = "";
+		
+		int charPos = 0;
+		
+		while (charPos < jsonString.length()) {
 
-		while (jsonString.length() > 0) {
+			Character curChar = jsonString.charAt(charPos);
+			charPos++;
 
-			Character curChar = jsonString.charAt(0);
-
-			if (Character.isDigit(curChar) || curChar.equals('.') ||
-				curChar.equals(',') || curChar.equals('-') ||
+			if (Character.isDigit(curChar) ||
+				curChar.equals('.') || curChar.equals('-') ||
 				curChar.equals('e') || curChar.equals('E')) {
 
 				numStr += curChar;
-
-				jsonString = jsonString.substring(1);
 
 			} else {
 
@@ -262,6 +271,8 @@ public class JSON {
 				break;
 			}
 		}
+
+		jsonString = jsonString.substring(charPos);
 
 		numStr = numStr.replace(",", "");
 
@@ -275,7 +286,11 @@ public class JSON {
 
 			// create a long
 
-			simpleContents = Long.valueOf(numStr);
+			if (numStr.equals("")) {
+				simpleContents = (Long) 0L;
+			} else {
+				simpleContents = Long.valueOf(numStr);
+			}
 		}
 
 		return jsonString;
