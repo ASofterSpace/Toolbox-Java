@@ -265,6 +265,14 @@ public class File {
 	}
 	
 	/**
+	 * Clear the content (without saving)
+	 */
+	public void clearContent() {
+	
+		filecontents = new ArrayList<>();
+	}
+	
+	/**
 	 * Explicitly sets the contents of this file instance
 	 * (this does NOT automagically write them to the hard
 	 * drive - if that is wanted, use saveContents()!)
@@ -272,7 +280,7 @@ public class File {
 	 */
 	public void setContents(List<String> contents) {
 		
-		filecontents = contents;
+		filecontents = new ArrayList<>(contents);
 	}
 	
 	/**
@@ -308,6 +316,14 @@ public class File {
 			}
 			filecontents.add(line);
 		}
+	}
+	
+	/**
+	 * Append a single line to the contents (without saving)
+	 */
+	public void appendContent(String line) {
+	
+		filecontents.add(line);
 	}
 	
 	/**

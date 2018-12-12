@@ -51,7 +51,7 @@ public class WebAccessor {
 	 * @param url  The url of the web resource
 	 */
 	public static String get(String url) {
-		return getPutPost(url, "", "GET");
+		return getPutPost(url, "", "GET", null);
 	}
 
 	/**
@@ -60,7 +60,17 @@ public class WebAccessor {
 	 * @param parameters  The parameters that should be appended to the url
 	 */
 	public static String get(String url, Map<String, String> parameters) {
-		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET");
+		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", null);
+	}
+
+	/**
+	 * Get a web resource synchronously
+	 * @param url  The base url of the web resource (without parameters)
+	 * @param parameters  The parameters that should be appended to the url
+	 * @param extraHeaders  Extra header fields (and their values) that should be sent with the request
+	 */
+	public static String get(String url, Map<String, String> parameters, Map<String, String> extraHeaders) {
+		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders);
 	}
 
 	/**
@@ -69,7 +79,7 @@ public class WebAccessor {
 	 * @param messageBody The message body to be sent
 	 */
 	public static String put(String url, String messageBody) {
-		return getPutPost(url, messageBody, "PUT");
+		return getPutPost(url, messageBody, "PUT", null);
 	}
 
 	/**
@@ -78,7 +88,7 @@ public class WebAccessor {
 	 * @param parameters The parameters to be sent as message body
 	 */
 	public static String put(String url, Map<String, String> parameters) {
-		return getPutPost(url, mapToMessageBody(parameters), "PUT");
+		return getPutPost(url, mapToMessageBody(parameters), "PUT", null);
 	}
 
 	/**
@@ -87,7 +97,7 @@ public class WebAccessor {
 	 * @param messageBody The message body to be sent
 	 */
 	public static String post(String url, String messageBody) {
-		return getPutPost(url, messageBody, "POST");
+		return getPutPost(url, messageBody, "POST", null);
 	}
 
 	/**
@@ -96,7 +106,7 @@ public class WebAccessor {
 	 * @param parameters The parameters to be sent as message body
 	 */
 	public static String post(String url, Map<String, String> parameters) {
-		return getPutPost(url, mapToMessageBody(parameters), "POST");
+		return getPutPost(url, mapToMessageBody(parameters), "POST", null);
 	}
 	
 	private static String mapToUrlSuffix(Map<String, String> parameters) {
@@ -112,6 +122,10 @@ public class WebAccessor {
 	
 	private static String mapToMessageBody(Map<String, String> parameters) {
 	
+		if (parameters == null) {
+			return "";
+		}
+		
 		StringBuilder result = new StringBuilder();
 		
 		String separator = "";
@@ -127,7 +141,7 @@ public class WebAccessor {
 		return result.toString();
 	}
 
-	private static String getPutPost(String url, String messageBody, String requestKind) {
+	private static String getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders) {
 
 		try {
 			URL urlAsURL = new URL(url);
@@ -141,6 +155,12 @@ public class WebAccessor {
 			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent/Firefox
 			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:10.0) Gecko/20100101 Firefox/10.0");
 
+			if (extraHeaders != null) {
+				for (Map.Entry<String, String> extraHeader : extraHeaders.entrySet()) {
+					connection.setRequestProperty(extraHeader.getKey(), extraHeader.getValue());
+				}
+			}
+			
 			if ("GET".equals(requestKind)) {
 			} else {
 				connection.setDoOutput(true);

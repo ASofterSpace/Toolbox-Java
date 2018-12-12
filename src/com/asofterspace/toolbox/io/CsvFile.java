@@ -93,6 +93,42 @@ public class CsvFile extends File {
 		return result;
 	}
 	
+	public void setHeadLine(String headline) {
+
+		this.clearContent();
+		
+		this.appendContent(headline);
+	}
+	
+	public void setHeadLine(List<String> headlineColumns) {
+
+		this.setHeadLine(joinColumns(headlineColumns));
+	}
+	
+	public void appendContent(List<String> lineColumns) {
+		
+		this.appendContent(joinColumns(lineColumns));
+	}
+	
+	private String joinColumns(List<String> columns) {
+
+		if (columns == null) {
+			return "";
+		}
+		
+		StringBuilder result = new StringBuilder();
+		
+		String sep = "";
+		
+		for (String col : columns) {
+			result.append(sep);
+			result.append(col);
+			sep = ",";
+		}
+		
+		return result.toString();
+	}
+	
 	/**
 	 * Gives back a string representation of the csv file object
 	 */
