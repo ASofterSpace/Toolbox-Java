@@ -4,6 +4,9 @@
  */
 package com.asofterspace.toolbox.io;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,27 @@ public class PdfFile extends File {
 	private Integer version;
 	
 	private List<PdfObject> objects;
+	
+	private List<String> xrefs;
+	
+	private List<String> trailer;
+	
+	private String startxref;
+	
+	// the following enum and objects are used to keep track of internal state during the PDF slurping process
+	private enum PdfSection {
+		VERSION,
+		OBJECTS,
+		IN_OBJECT,
+		XREF,
+		TRAILER,
+		STARTXREF,
+		EOF
+	};
+	
+	private PdfSection currentSection;
+	
+	private PdfObject currentObject;
 
 	
 	/**
@@ -36,90 +60,183 @@ public class PdfFile extends File {
 		super(regularFile);
 	}
 	
-	private void loadPdfContents() {
+	private void initEmptyPdf() {
 	
 		// initialize to false, such that if we abort in the middle, we count as "non-loaded" (even if we loaded successfully before)
 		pdfLoaded = false;
-
-		boolean complainIfMissing = true;
-
-		List<String> contentList = loadContents(complainIfMissing);
-
-		if ((contentList == null) || (contentList.size() < 1)) {
-			System.err.println("[ERROR] Trying to load the file " + filename + ", but it contains no data - inconceivable!");
-			return;
-		}
 		
-		objects = new ArrayList<PdfObject>();
+		objects = new ArrayList<>();
 		
-		String line = contentList.get(0);
-		if (line.startsWith("%PDF-1.")) {
-			try {
-				version = Integer.valueOf(line.substring(7));
-			} catch (NumberFormatException e) {
-				System.err.println("[ERROR] The PDF file " + filename + " unexpectedly has an unexpected version!");
-				return;
-			}
-		} else {
-			System.err.println("[ERROR] The PDF file " + filename + " is unexpectedly missing a version!");
-			return;
-		}
-			
-		for (int i = 1; i < contentList.size(); i++) {
+		xrefs = new ArrayList<>();
 		
-			line = contentList.get(i);
+		trailer = new ArrayList<>();
+		
+		startxref = "";
+	}
+	
+	private void loadPdfContents() {
+	
+		initEmptyPdf();
 
-			if (line.equals("")) {
-				// ignore empty lines
-				continue;
-			}
+		currentSection = PdfSection.VERSION;
+
+		try {
+			byte[] binaryContent = Files.readAllBytes(Paths.get(this.filename));
+			int len = binaryContent.length;
+			int cur = 0;
 			
-			if (line.equals("%µµµµ")) {
-				// ignore this line... we have no idea what it means ^^
-				continue;
-			}
+			StringBuilder line = new StringBuilder();
 			
-			if (line.endsWith("obj")) {
-				try {
-					PdfObject newObj = new PdfObject(line);
-					objects.add(newObj);
-					i++;
-					StringBuilder objContents = new StringBuilder();
-					while (!(contentList.get(i).equals("endobj"))) {
-						objContents.append(contentList.get(i));
-						i++;
+			while (cur < len) {
+			
+				byte curByte = binaryContent[cur];
+				cur++;
+				
+				if ((curByte == '\n') || (curByte == '\r')) {
+					
+					if (gotLine(line)) {
+						return;
 					}
-					newObj.readContents(objContents.toString());
-					continue;
-
-				} catch (Exception e) {
-					System.err.println("[ERROR] The PDF file " + filename + " contains an unreadable object!");
-					return;
+					
+					// TODO 1 :: if we reached the end, break away (at least for now, as we do not handle multiple ends yet)
+					if (currentSection == PdfSection.EOF) {
+						break;
+					}
+					
+					line = new StringBuilder();
+					
+					// ignore the second line end marker in case of \r\n (which seems to actually be the PDF default!)
+					if (cur+1 < len) {
+						byte nextByte = binaryContent[cur+1];
+						
+						if ((nextByte == '\n') || (nextByte == '\r')) {
+							cur++;
+						}
+					}
+					
+				} else {
+					line.append((char) curByte);
 				}
 			}
 			
-			System.err.println("[ERROR] The PDF file " + filename + " contains some unexpected content!");
-			return;
+			pdfLoaded = true;
+
+		} catch (IOException | ArrayIndexOutOfBoundsException e) {
+			System.err.println("[ERROR] Trying to load the file " + filename + ", but there was an exception - inconceivable!\n" + e);
 		}
-		
-		if (version == null) {
-			System.err.println("[ERROR] The PDF file " + filename + " has no version!");
-		}
-		
-		// btw., be aware - there could be more than one %%EOF marker!
-		// this happens due to incremental updates, in which an original PDF is kept,
-		// and a new version's changes are simply appended at the end - see:
-		// https://stackoverflow.com/questions/11896858/does-the-eof-in-a-pdf-have-to-appear-within-the-last-1024-bytes-of-the-file
 		
 		// only set the PDF to loaded once we reached this line without errors
 		pdfLoaded = true;
 	}
 	
+	// returns true if there was an error, false if not
+	private boolean gotLine(StringBuilder lineBuilder) {
+	
+		String line = lineBuilder.toString();
+	
+		if (line.equals("")) {
+			// ignore empty lines
+			return false;
+		}
+
+		if (line.startsWith("%")) {
+			if (currentSection != PdfSection.VERSION) {
+				// ignore this line... as it is a comment ^^
+				return false;
+			}
+		}
+		
+		switch (currentSection) {
+
+			case VERSION:
+				if (line.startsWith("%PDF-1.")) {
+					try {
+						version = Integer.valueOf(line.substring(7));
+						currentSection = PdfSection.OBJECTS;
+						return false; // no error
+					} catch (NumberFormatException e) {
+						System.err.println("[ERROR] The PDF file " + filename + " unexpectedly has an unexpected version!");
+					}
+				} else {
+					System.err.println("[ERROR] The PDF file " + filename + " is unexpectedly missing a version!");
+				}
+				break;
+			
+			case OBJECTS:
+
+				if (line.endsWith("obj")) {
+					try {
+						currentObject = new PdfObject(line);
+						objects.add(currentObject);
+						currentSection = PdfSection.IN_OBJECT;
+						return false; // no error
+					} catch (Exception e) {
+						System.err.println("[ERROR] The PDF file " + filename + " contains an unreadable object!");
+					}
+				} else {
+					System.err.println("[ERROR] The PDF file " + filename + " contains some unexpected content!");
+				}
+
+				if (line.equals("xref")) {
+					currentSection = PdfSection.XREF;
+					return false; // no error
+				}
+
+				break;
+			
+			case IN_OBJECT:
+				if (line.equals("endobj")) {
+					currentObject.doneReadingContents();
+					currentSection = PdfSection.OBJECTS;
+				} else {
+					currentObject.readContents(line);
+				}
+				return false; // no error
+				
+			case XREF:
+				if (line.equals("trailer")) {
+					currentSection = PdfSection.TRAILER;
+					return false; // no error
+				}
+				
+				xrefs.add(line);
+
+				return false; // no error
+
+			case TRAILER:
+				if (line.equals("startxref")) {
+					currentSection = PdfSection.STARTXREF;
+					return false; // no error
+				}
+				
+				trailer.add(line);
+
+				return false; // no error
+				
+			case STARTXREF:
+				if (!line.equals("xref")) {
+					startxref = line;
+				}
+				
+				currentSection = PdfSection.EOF;
+				
+				return false; // no error
+		}
+		
+		// TODO 1 :: there could be more than one %%EOF marker!
+		// this happens due to incremental updates, in which an original PDF is kept,
+		// and a new version's changes are simply appended at the end - see:
+		// https://stackoverflow.com/questions/11896858/does-the-eof-in-a-pdf-have-to-appear-within-the-last-1024-bytes-of-the-file
+		// ... however, so far we are only reading out until the first startxref, get that value, and then stop instead of reading the whole file!
+		
+		return true;
+	}
+	
 	public void create(String text) {
 	
-		version = 0;
-		
-		objects = new ArrayList<PdfObject>();
+		initEmptyPdf();
+
+		this.version = 0;
 		
 		int objNum = 1;
 		
@@ -148,6 +265,14 @@ public class PdfFile extends File {
 		obj.setContent("/Subtype /Type1\r\n/BaseFont /Helvetica"); // TODO :: embed font inline
 		objects.add(obj);
 
+		int xrefSize = objects.size() + 1;
+		xrefs.add("0 " + xrefSize);
+		
+		trailer.add("<<");
+		trailer.add("/Size " + xrefSize);
+		trailer.add("/Root 1 0 R"); // TODO :: search objects, get the one with Type Catalog, and put its reference here (usually it is 1 0, but not necessarily)
+		trailer.add(">>");
+		
 		pdfLoaded = true;
 	}
 
@@ -163,21 +288,31 @@ public class PdfFile extends File {
 		pdf.append(version);
 		pdf.append("\r\n");
 		
+		// the PDF specification asks us to include a comment with at least four characters whose codes are 128 or higher
+		// we use the opportunity to mention who we are ^^
+		pdf.append("% µµµµµµµµµµµµµµµµµµµµµµµµµµµ %\r\n");
+		pdf.append("% Generated by A Softer Space %\r\n");
+		pdf.append("% µµµµµµµµµµµµµµµµµµµµµµµµµµµ %\r\n");
+		
 		for (PdfObject obj : objects) {
 			pdf.append(obj);
 		}
 		
-		int xrefSize = objects.size() + 1;
-		
 		pdf.append("xref\r\n");
-		pdf.append("0 " + xrefSize + "\r\n");
+		for (String xrefLine : xrefs) {
+			pdf.append(xrefLine + "\r\n");
+		}
 		
 		pdf.append("trailer\r\n");
-		pdf.append("<<\r\n");
-		pdf.append("Size " + xrefSize + "\r\n");
-		pdf.append("/Root 1 0 R\r\n"); // TODO :: search objects, get the one with Type Catalog, and put its reference here (usually it is 1 0, but not necessarily)
-		pdf.append(">>\r\n");
+		for (String trailerLine : trailer) {
+			pdf.append(trailerLine + "\r\n");
+		}
+		
 		pdf.append("startxref\r\n");
+		// TODO :: insert actual byte offset of the latest xref section... although some pdfviewers seem to not explode if we leave it out
+		// for now, we just keep startxref empty (instead of calculating it properly)
+		startxref = "";
+		pdf.append(startxref + "\r\n");
 		
 		pdf.append("%%EOF");
 		

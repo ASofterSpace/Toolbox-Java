@@ -19,6 +19,8 @@ public class PdfObject {
 	// plain-text content for whatever is not contained in the rest... Übergangslösung or proper solution forever? hmmm...
 	private String content = "";
 	
+	private StringBuilder contentReader = new StringBuilder();
+	
 
 	/**
 	 * Create a pdf object based on the line defining it in a pdf file
@@ -42,11 +44,21 @@ public class PdfObject {
 	}
 	
 	public void readContents(String contents) {
+		contentReader.append(contents + "\r\n");
+	}
 	
+	public void doneReadingContents() {
+	
+		String contents = contentReader.toString();
+	
+	/*
 		contents = contents.trim();
 		
 		if (contents.startsWith("<<")) {
 			contents = contents.substring(3).trim();
+		}
+		if (contents.endsWith(">>")) {
+			contents = contents.substring(0, contents.length()-2).trim();
 		}
 	
 		// we could now have something like /Type /Catalog, or /Type/Catalog/Pages
@@ -70,12 +82,14 @@ public class PdfObject {
 			}
 		}
 		
-		if (type.equals("Catalog")) {
-			if (contents.contains("/Pages ")) {
-				// pages = contents.substring
+		if (type != null) {
+			if (type.equals("Catalog")) {
+				if (contents.contains("/Pages ")) {
+					// pages = contents.substring
+				}
 			}
 		}
-		
+		*/
 		this.content = contents;
 	}
 	
@@ -96,6 +110,7 @@ public class PdfObject {
 		result.append(generation);
 		result.append(" ");
 		result.append("obj");
+		result.append("\r\n");
 		
 		if (type == null) {
 			result.append(content);
