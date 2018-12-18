@@ -44,6 +44,7 @@ public class PdfObject {
 	}
 	
 	public void readContents(String contents) {
+
 		contentReader.append(contents + "\r\n");
 	}
 	
@@ -114,7 +115,6 @@ public class PdfObject {
 		
 		if (type == null) {
 			result.append(content);
-			result.append("\r\n");
 		} else {
 			result.append("<<\r\n");
 			result.append("/Type /");

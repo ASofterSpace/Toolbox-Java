@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.io;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -326,12 +327,8 @@ public class File {
 		filecontents.add(line);
 	}
 	
-	/**
-	 * Saves the current file contents of this instance
-	 * to the file system
-	 */
-	public void save() {
-
+	private java.io.File initSave() {
+	
 		java.io.File thisFile = new java.io.File(filename);
 		
 		// create parent directories
@@ -348,15 +345,24 @@ public class File {
 			System.err.println("[ERROR] An IOException occurred when trying to create the file " + thisFile + " - inconceivable!");
 		}
 		
+		return thisFile;
+	}
+	
+	/**
+	 * Saves the current file contents of this instance
+	 * to the file system
+	 */
+	public void save() {
+
 		// fill file with data
-		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(thisFile), StandardCharsets.UTF_8)) {
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(initSave()), StandardCharsets.UTF_8)) {
 			
 			for (String line : filecontents) {
 				writer.write(line + "\n");
 			}
 			
 		} catch (IOException e) {
-			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + thisFile + " - inconceivable!");
+			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + filename + " - inconceivable!");
 		}
 	}
 	
@@ -382,6 +388,27 @@ public class File {
 		setContent(content);
 		
 		save();
+	}
+	
+	/**
+	 * Allows saving content directly, without it being interpreted as list of lines and acted upon
+	 * Attention: Due to the nature of this function, it does NOT change the content buffered in this
+	 * file instance; when reading content, it will be read from the buffer or disk, but not from the
+	 * string you just supplied!
+	 * Often used charsets are:
+	 * StandardCharsets.ISO_8859_1 (Latin-1, covers the entire byte range of ASCII)
+	 * StandardCharsets.UTF_8 (compatible with ASCII 0..127, but adds up to 4 byte wide character to get all of Unicode)
+	 */
+	public void saveContentDirectly(String content, Charset charset) {
+
+		// fill file with data
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(initSave()), charset)) {
+			
+			writer.write(content);
+			
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + filename + " - inconceivable!");
+		}
 	}
 	
 	/**
