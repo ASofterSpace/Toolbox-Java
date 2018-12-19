@@ -33,9 +33,11 @@ public class PdfFile extends File {
 	
 	private List<String> xrefs;
 	
-	private List<String> trailer;
+	private PdfDictionary trailer;
 	
 	private String startxref;
+	
+	private StringBuilder trailerText;
 	
 	// the following enum and objects are used to keep track of internal state during the PDF slurping process
 	private enum PdfSection {
@@ -78,7 +80,7 @@ public class PdfFile extends File {
 		
 		xrefs = new ArrayList<>();
 		
-		trailer = new ArrayList<>();
+		trailer = new PdfDictionary();
 		
 		startxref = "";
 	}
@@ -86,6 +88,8 @@ public class PdfFile extends File {
 	private void loadPdfContents() {
 	
 		initEmptyPdf();
+		
+		trailerText = new StringBuilder();
 
 		currentSection = PdfSection.VERSION;
 
@@ -165,6 +169,7 @@ public class PdfFile extends File {
 		if (line.startsWith("%")) {
 			if (currentSection != PdfSection.VERSION) {
 				// ignore this line... as it is a comment ^^
+				// TODO :: maybe it would be better to preserve comments if we open and close PDF files?
 				return false;
 			}
 		}
@@ -228,11 +233,12 @@ public class PdfFile extends File {
 
 			case TRAILER:
 				if (line.equals("startxref")) {
+					trailer.loadFromString(trailerText.toString());
 					currentSection = PdfSection.STARTXREF;
 					return false; // no error
 				}
 				
-				trailer.add(line);
+				trailerText.append(line + "\n");
 
 				return false; // no error
 				
@@ -264,42 +270,58 @@ public class PdfFile extends File {
 		int objNum = 1;
 		
 		PdfObject obj = new PdfObject(objNum++, 0);
-		obj.setType("Catalog");
-		obj.setContent("%/OpenAction\r\n/Pages 2 0 R"); // TODO :: use reference instead of hardcoded link
+		obj.setDictValue("/Type", "/Catalog");
+		obj.setDictValue("/Pages", "2 0 R"); // TODO :: use reference instead of hardcoded link
 		objects.add(obj);
 		
 		obj = new PdfObject(objNum++, 0);
-		obj.setType("Pages");
-		obj.setContent("/Count 1\r\n/Kids [3 0 R]"); // TODO :: use reference(s) instead of hardcoded link(s)
+		obj.setDictValue("/Type", "/Pages");
+		obj.setDictValue("/Count", "1");
+		obj.setDictValue("/Kids", "[3 0 R]"); // TODO :: use reference(s) instead of hardcoded link(s)
 		objects.add(obj);
 		
 		obj = new PdfObject(objNum++, 0);
-		obj.setType("Range");
-		obj.setContent("/Parent 2 0 R\r\n/Resources << /Font << /F1 5 0 R >> >>\r\n/MediaBox [0 0 612 792]\r\n/Contents 4 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
+		obj.setDictValue("/Type", "/Range");
+		obj.setDictValue("/Parent", "2 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
+		obj.setDictValue("/MediaBox", "[0 0 612 792]");
+		obj.setDictValue("/Contents", "4 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
+		PdfDictionary f1 = new PdfDictionary();
+		f1.set("/F1", "5 0 R");
+		PdfDictionary font = new PdfDictionary();
+		font.set("/Font", f1);
+		obj.setDictValue("/Resources", font);
 		objects.add(obj);
 		
 		obj = new PdfObject(objNum++, 0);
 		String streamContent = "BT\n/F1 24 Tf\n250 700 Td (" + text + ") Tj\nET";
-		obj.setContent("<< /Length " + streamContent.length() + " >>");
+		obj.setDictValue("/Length", "" + streamContent.length());
 		obj.setStreamContent(streamContent);
 		objects.add(obj);
 		
 		obj = new PdfObject(objNum++, 0);
-		obj.setType("Font");
-		obj.setContent("/Subtype /Type1\r\n/BaseFont /Helvetica"); // TODO :: embed font inline
+		obj.setDictValue("/Type", "/Font");
+		obj.setDictValue("/Subtype", "/Type1");
+		obj.setDictValue("/BaseFont", "/Helvetica"); // TODO :: embed font inline
 		objects.add(obj);
 
 		int xrefSize = objects.size() + 1;
 		xrefs.add("0 " + xrefSize);
 		
-		trailer.add("<<");
-		trailer.add("/Size " + xrefSize);
-		trailer.add("/Root 1 0 R"); // TODO :: search objects, get the one with Type Catalog, and put its reference here (usually it is 1 0, but not necessarily)
-		trailer.add(">>");
-		
+		trailer.set("/Size", "" + xrefSize);
+		trailer.set("/Root", "1 0 R"); // TODO :: search objects, get the one with Type Catalog, and put its reference here (usually it is 1 0, but not necessarily)
+
 		pdfLoaded = true;
 	}
 
+	public List<PdfObject> getObjects() {
+	
+		if (!pdfLoaded) {
+			loadPdfContents();
+		}
+		
+		return objects;
+	}
+	
 	public void save() {
 	
 		if (!pdfLoaded) {
@@ -321,7 +343,7 @@ public class PdfFile extends File {
 		pdf.append("\r\n");
 
 		for (PdfObject obj : objects) {
-			pdf.append(obj);
+			obj.appendToPdfFile(pdf);
 			pdf.append("\r\n");
 		}
 		
@@ -333,11 +355,9 @@ public class PdfFile extends File {
 		pdf.append("\r\n");
 		
 		pdf.append("trailer\r\n");
-		for (String trailerLine : trailer) {
-			pdf.append(trailerLine + "\r\n");
-		}
+		trailer.appendToPdfFile(pdf, "\r\n");
 		
-		pdf.append("startxref\r\n");
+		pdf.append("\r\nstartxref\r\n");
 		// TODO :: insert actual byte offset of the latest xref section... although some pdfviewers seem to not explode if we leave it out
 		// for now, we just keep startxref empty (instead of calculating it properly)
 		startxref = "";

@@ -14,16 +14,18 @@ public class PdfObject {
 	
 	private int generation;
 	
-	private String type;
-	
-	// plain-text content for whatever is not contained in the rest... Übergangslösung or proper solution forever? hmmm...
-	// ending on \r\n, as that is technologically simpler to achieve right now
-	private String content = "";
+	// plain-text content for whatever is not contained in the rest...
+	// e.g. for objects that only contain [1 2 3] - yes, just an array, outside of any dictionary!
+	// null if the object only contains dictionary and/or stream content
+	private String content = null;
+
+	// dictionary content, null if the object does not contain a dictionary
+	private PdfDictionary dictContent = null;
 
 	// plain-text stream content, null if the object does not contain a stream, NOT ending on \r\n
 	// as we want to have just the stream
 	private String streamContent = null;
-	
+
 	private StringBuilder contentReader = new StringBuilder();
 	
 
@@ -76,50 +78,17 @@ public class PdfObject {
 			return;
 		}
 
-		String contents = contentReader.toString();
+		String contents = contentReader.toString().trim();
 
 		contentReader = null;
-	
-	/*
-		contents = contents.trim();
-		
+
+		// oho, we have a dictionary! we actually know what to do with this! :)
 		if (contents.startsWith("<<")) {
-			contents = contents.substring(3).trim();
+			dictContent = new PdfDictionary();
+			dictContent.loadFromString(contents);
+		} else {
+			this.content = contents;
 		}
-		if (contents.endsWith(">>")) {
-			contents = contents.substring(0, contents.length()-2).trim();
-		}
-	
-		// we could now have something like /Type /Catalog, or /Type/Catalog/Pages
-		if (contents.startsWith("/Type")) {
-			contents = contents.substring(5).trim();
-			if (contents.startsWith("/Catalog")) {
-				type = "Catalog";
-				contents = contents.substring(8).trim();
-			} else if (contents.startsWith("/Pages")) {
-				type = "Pages";
-				contents = contents.substring(6).trim();
-			} else if (contents.startsWith("/Page")) {
-				type = "Page";
-				contents = contents.substring(5).trim();
-			} else if (contents.startsWith("/Range")) {
-				type = "Range";
-				contents = contents.substring(6).trim();
-			} else if (contents.startsWith("/Font")) {
-				type = "Font";
-				contents = contents.substring(5).trim();
-			}
-		}
-		
-		if (type != null) {
-			if (type.equals("Catalog")) {
-				if (contents.contains("/Pages ")) {
-					// pages = contents.substring
-				}
-			}
-		}
-		*/
-		this.content = contents;
 	}
 
 	/**
@@ -160,21 +129,36 @@ public class PdfObject {
 		}
 	}
 	
-	public void setType(String type) {
-		this.type = type;
-	}
-	
 	public void setContent(String content) {
-		this.content = content + "\r\n";
+		this.content = content;
 	}
 
+	public void setDictValue(String key, String value) {
+
+		if (this.dictContent == null) {
+			this.dictContent = new PdfDictionary();
+		}
+		
+		this.dictContent.set(key, value);
+	}
+	
+	public void setDictValue(String key, PdfDictionary value) {
+
+		if (this.dictContent == null) {
+			this.dictContent = new PdfDictionary();
+		}
+		
+		this.dictContent.set(key, value);
+	}
+	
 	public void setStreamContent(String streamContent) {
 		this.streamContent = streamContent;
 	}
 	
-	public String toString() {
-
-		StringBuilder result = new StringBuilder();
+	/**
+	 * Append the content of this PDF object to a PDF file that is in the process of being created
+	 */
+	public void appendToPdfFile(StringBuilder result) {
 
 		result.append(number);
 		result.append(" ");
@@ -182,16 +166,15 @@ public class PdfObject {
 		result.append(" ");
 		result.append("obj");
 		result.append("\r\n");
-		
-		if (type == null) {
+
+		if (content != null) {
 			result.append(content);
-		} else {
-			result.append("<<\r\n");
-			result.append("/Type /");
-			result.append(type);
 			result.append("\r\n");
-			result.append(content);
-			result.append(">>\r\n");
+		}
+
+		if (dictContent != null) {
+			dictContent.appendToPdfFile(result, "\r\n");
+			result.append("\r\n");
 		}
 
 		if (streamContent != null) {
@@ -201,7 +184,5 @@ public class PdfObject {
 		}
 		
 		result.append("endobj\r\n");
-		
-		return result.toString();
 	}
 }
