@@ -93,6 +93,44 @@ public class PdfObject {
 		*/
 		this.content = contents;
 	}
+
+	/**
+	 * Reads the length property of this object in case we have a stream
+	 * This method is used to read the stream and therefore needs to produce
+	 * results even before the object is fully read!
+	 * (Which is possible, because the length is always declared before the
+	 * stream contents themselves.)
+	 */
+	public Integer getStreamLength() {
+		
+		// do NOT rely on contentReader already being done with its thing!
+		String contents = contentReader.toString();
+
+		int index = contents.indexOf("/Length ");
+
+		if (index < 0) {
+			return null;
+		}
+
+		String lenStr = contents.substring(index + 8);
+
+		StringBuilder result = new StringBuilder();
+
+		for (int i = 0; i < lenStr.length(); i++) {
+			char curChar = lenStr.charAt(i);
+			if (Character.isDigit(curChar)) {
+				result.append(curChar);
+			} else {
+				break;
+			}
+		}
+
+		try {
+			return Integer.valueOf(result.toString());
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 	
 	public void setType(String type) {
 		this.type = type;

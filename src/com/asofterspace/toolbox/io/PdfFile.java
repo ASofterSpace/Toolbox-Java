@@ -115,7 +115,7 @@ public class PdfFile extends File {
 					if (currentSection == PdfSection.EOF) {
 						break;
 					}
-					
+
 					// ignore the second line end marker in case of \r\n (which seems to actually be the PDF default!)
 					if (cur+1 < len) {
 						byte nextByte = binaryContent[cur+1];
@@ -123,6 +123,20 @@ public class PdfFile extends File {
 						if ((nextByte == '\n') || (nextByte == '\r')) {
 							cur++;
 						}
+					}
+
+					// if we are starting a stream, read its length and then read its contents directly as
+					// streams are NOT line-based and any \r or \n in there is just a regular stream byte
+					if ((currentSection == PdfSection.IN_OBJECT) && line.endsWith("stream") && (!line.endsWith("endstream"))) {
+						lineLen = currentObject.getStreamLength();
+
+						buffer = new byte[lineLen];
+						System.arraycopy(binaryContent, cur+1, buffer, 0, lineLen);
+						line = new String(buffer, PDF_CHARSET);
+
+						currentObject.readContents(line);
+
+						cur += lineLen + 1;
 					}
 					
 					lineStart = cur;
