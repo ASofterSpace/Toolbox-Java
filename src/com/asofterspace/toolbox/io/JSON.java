@@ -402,6 +402,20 @@ public class JSON {
 				return "null";
 		}
 	}
+	
+	/**
+	 * Returns the value of this JSON object as string, without any surrounding " or somesuch;
+	 * meant to be used when you know that your JSON object is of the simple type String, and
+	 * you want to get that String
+	 */
+	public String asString() {
+	
+		if (simpleContents == null) {
+			return null;
+		}
+		
+		return simpleContents.toString();
+	}
 
 	/**
 	 * Get the kind of JSON object this is

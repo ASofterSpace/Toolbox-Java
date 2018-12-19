@@ -200,5 +200,17 @@ public class ConfigFile {
 		
 		saveToFile();
 	}
+
+	/**
+	 * Stores the value in the configuration with the given key
+	 * @param key
+	 * @param value
+	 */
+	public void set(String key, JSON value) {
+
+		content.set(key, value);
+		
+		saveToFile();
+	}
 	
 }
