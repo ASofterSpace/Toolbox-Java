@@ -17,7 +17,12 @@ public class PdfObject {
 	private String type;
 	
 	// plain-text content for whatever is not contained in the rest... Übergangslösung or proper solution forever? hmmm...
+	// ending on \r\n, as that is technologically simpler to achieve right now
 	private String content = "";
+
+	// plain-text stream content, null if the object does not contain a stream, NOT ending on \r\n
+	// as we want to have just the stream
+	private String streamContent = null;
 	
 	private StringBuilder contentReader = new StringBuilder();
 	
@@ -45,12 +50,35 @@ public class PdfObject {
 	
 	public void readContents(String contents) {
 
+		// stream reading already done? nothing more to do...
+		if (contentReader == null) {
+			return;
+		}
+
 		contentReader.append(contents + "\r\n");
+	}
+
+	public void readStreamContents(String streamContents) {
+
+		this.streamContent = streamContents;
+
+		// remove the word "stream" from the content
+		contentReader.setLength(contentReader.length() - "stream\r\n".length());
+
+		// aaand finalize everything already - nothing interesting happens after a stream anyway ;)
+		doneReadingContents();
 	}
 	
 	public void doneReadingContents() {
-	
+
+		// stream reading already done? nothing more to do...
+		if (contentReader == null) {
+			return;
+		}
+
 		String contents = contentReader.toString();
+
+		contentReader = null;
 	
 	/*
 		contents = contents.trim();
@@ -137,7 +165,11 @@ public class PdfObject {
 	}
 	
 	public void setContent(String content) {
-		this.content = content;
+		this.content = content + "\r\n";
+	}
+
+	public void setStreamContent(String streamContent) {
+		this.streamContent = streamContent;
 	}
 	
 	public String toString() {
@@ -159,8 +191,13 @@ public class PdfObject {
 			result.append(type);
 			result.append("\r\n");
 			result.append(content);
-			result.append("\r\n");
 			result.append(">>\r\n");
+		}
+
+		if (streamContent != null) {
+			result.append("stream\r\n");
+			result.append(streamContent);
+			result.append("\r\nendstream\r\n");
 		}
 		
 		result.append("endobj\r\n");

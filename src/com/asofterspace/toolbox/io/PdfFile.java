@@ -134,7 +134,7 @@ public class PdfFile extends File {
 						System.arraycopy(binaryContent, cur+1, buffer, 0, lineLen);
 						line = new String(buffer, PDF_CHARSET);
 
-						currentObject.readContents(line);
+						currentObject.readStreamContents(line);
 
 						cur += lineLen + 1;
 					}
@@ -275,12 +275,13 @@ public class PdfFile extends File {
 		
 		obj = new PdfObject(objNum++, 0);
 		obj.setType("Range");
-		obj.setContent("/Parent 2 0 R\r\n/Resources << /Font << /F1 5 0 R >>\r\n>>\r\n/MediaBox [0 0 612 792]\r\n/Contents 4 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
+		obj.setContent("/Parent 2 0 R\r\n/Resources << /Font << /F1 5 0 R >> >>\r\n/MediaBox [0 0 612 792]\r\n/Contents 4 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
 		objects.add(obj);
 		
 		obj = new PdfObject(objNum++, 0);
-		int len = 32 + text.length();
-		obj.setContent("<< /Length " + len + " >>\r\nstream\r\nBT\r\n/F1 24 Tf\r\n250 700 Td (" + text + ") Tj\r\nET\r\nendstream");
+		String streamContent = "BT\n/F1 24 Tf\n250 700 Td (" + text + ") Tj\nET";
+		obj.setContent("<< /Length " + streamContent.length() + " >>");
+		obj.setStreamContent(streamContent);
 		objects.add(obj);
 		
 		obj = new PdfObject(objNum++, 0);
