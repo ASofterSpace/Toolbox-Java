@@ -41,19 +41,34 @@ public class MarkdownCode extends Code {
 	private boolean curMultilineBold;
 	
 	// styles for the different kinds of text in the document
-	private static MutableAttributeSet attrBold;
+	private MutableAttributeSet attrBold;
 
 
 	public MarkdownCode(JTextPane editor) {
 
 		super(editor);
-
-		// initialize all the attribute sets, if they have not been initialized before
-		if (attrBold == null) {
-			attrBold = new SimpleAttributeSet();
-			StyleConstants.setForeground(attrBold, new Color(0, 0, 0));
-			StyleConstants.setBold(attrBold, true);
-		}
+	}
+	
+	@Override
+	public void setLightScheme() {
+	
+		// change the attribute 
+		attrBold = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrBold, new Color(0, 0, 0));
+		StyleConstants.setBold(attrBold, true);
+		
+		super.setLightScheme();
+	}
+	
+	@Override
+	public void setDarkScheme() {
+	
+		// change the attribute sets
+		attrBold = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrBold, new Color(255, 255, 255));
+		StyleConstants.setBold(attrBold, true);
+		
+		super.setDarkScheme();
 	}
 	
 	@Override

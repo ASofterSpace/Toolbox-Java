@@ -51,7 +51,7 @@ public abstract class Code extends DefaultStyledDocument {
 	
 	// the background color of all editors
 	static Color schemeBackgroundColor;
-	
+
 	// the font sizes, fonts and tab sets of all editors
 	static int fontSize = 15;
 	static String editorFontFamily;
@@ -59,7 +59,7 @@ public abstract class Code extends DefaultStyledDocument {
 	static TabSet lastTabSet;
 
 	// styles for the different kinds of text in the document
-	static MutableAttributeSet attrRegular;
+	MutableAttributeSet attrRegular;
 
 	
 	public Code(JTextPane editor) {
@@ -80,17 +80,12 @@ public abstract class Code extends DefaultStyledDocument {
 		// keep track of the root element
 		root = this.getDefaultRootElement();
 
-		schemeBackgroundColor = new Color(255, 255, 255);
+		// initialize all the attribute sets
+		setLightScheme();
 		
 		// actually style the editor with... us
 		decoratedEditor.setDocument(this);
 		applySchemeAndFontToOurEditor();
-		
-		// initialize all the attribute sets, if they have not been initialized before
-		if (attrRegular == null) {
-			attrRegular = new SimpleAttributeSet();
-			StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
-		}
 		
 		instances.add(this);
 	}
@@ -115,6 +110,29 @@ public abstract class Code extends DefaultStyledDocument {
 		applySchemeAndFontToAllEditors();
 	}
 
+	public void setLightScheme() {
+	
+		// change the attribute sets
+		attrRegular = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
+
+		// re-decorate the editor
+		schemeBackgroundColor = new Color(255, 255, 255);
+		applySchemeAndFontToAllEditors();
+	}
+	
+	public void setDarkScheme() {
+	
+		// change the attribute sets
+		attrRegular = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
+		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
+
+		// re-decorate the editor
+		schemeBackgroundColor = new Color(0, 0, 0);
+		applySchemeAndFontToAllEditors();
+	}
+	
 	static void applySchemeAndFontToAllEditors() {
 		
 		// ignore calls to this function before fonts have actually

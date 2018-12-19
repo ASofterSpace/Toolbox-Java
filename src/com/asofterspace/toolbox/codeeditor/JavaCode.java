@@ -67,25 +67,20 @@ public class JavaCode extends Code {
 	private boolean curMultilineComment;
 	
 	// styles for the different kinds of text in the document
-	private static MutableAttributeSet attrAnnotation;
-	private static MutableAttributeSet attrComment;
-	private static MutableAttributeSet attrKeyword;
-	private static MutableAttributeSet attrPrimitiveType;
-	private static MutableAttributeSet attrString;
+	private MutableAttributeSet attrAnnotation;
+	private MutableAttributeSet attrComment;
+	private MutableAttributeSet attrKeyword;
+	private MutableAttributeSet attrPrimitiveType;
+	private MutableAttributeSet attrString;
 
 
 	public JavaCode(JTextPane editor) {
 
 		super(editor);
-		
-		// initialize all the attribute sets, if they have not been initialized before
-		if (attrAnnotation == null) {
-			// yepp, nothing has been initialized before, so we go for a default scheme
-			setLightScheme();
-		}
 	}
 	
-	public static void setLightScheme() {
+	@Override
+	public void setLightScheme() {
 	
 		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
@@ -99,21 +94,17 @@ public class JavaCode extends Code {
 		StyleConstants.setForeground(attrKeyword, new Color(0, 0, 128));
 		StyleConstants.setBold(attrKeyword, true);
 
-		attrRegular = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
-
 		attrPrimitiveType = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrPrimitiveType, new Color(96, 0, 96));
 
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(128, 0, 0));
 		
-		// re-decorate the editor
-		schemeBackgroundColor = new Color(255, 255, 255);
-		applySchemeAndFontToAllEditors();
+		super.setLightScheme();
 	}
 	
-	public static void setDarkScheme() {
+	@Override
+	public void setDarkScheme() {
 	
 		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
@@ -130,10 +121,6 @@ public class JavaCode extends Code {
 		StyleConstants.setBackground(attrKeyword, new Color(0, 0, 0));
 		StyleConstants.setBold(attrKeyword, true);
 
-		attrRegular = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
-		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
-
 		attrPrimitiveType = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrPrimitiveType, new Color(255, 96, 255));
 		StyleConstants.setBackground(attrPrimitiveType, new Color(0, 0, 0));
@@ -142,9 +129,7 @@ public class JavaCode extends Code {
 		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
 		StyleConstants.setBackground(attrString, new Color(0, 0, 0));
 		
-		// re-decorate the editor
-		schemeBackgroundColor = new Color(0, 0, 0);
-		applySchemeAndFontToAllEditors();
+		super.setDarkScheme();
 	}
 	
 	@Override
