@@ -34,6 +34,8 @@ import javax.swing.text.TabStop;
 
 public class MarkdownCode extends Code {
 
+	private static final long serialVersionUID = 1L;
+
 	// indicates boldness
 	private static final char BOLD_INDICATOR = '*';
 

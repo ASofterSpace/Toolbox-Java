@@ -34,6 +34,8 @@ import javax.swing.text.TabStop;
 
 public class PlainText extends Code {
 
+	private static final long serialVersionUID = 1L;
+
 
 	public PlainText(JTextPane editor) {
 

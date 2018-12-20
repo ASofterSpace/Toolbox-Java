@@ -6,6 +6,9 @@ package com.asofterspace.toolbox.cdm.exceptions;
 
 public class AttemptingEmfException extends Exception {
 
+	private static final long serialVersionUID = 1L;
+
+
 	public AttemptingEmfException(String message) {
 		super(message);
 	}

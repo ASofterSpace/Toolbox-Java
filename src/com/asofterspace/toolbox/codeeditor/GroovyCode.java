@@ -9,6 +9,9 @@ import javax.swing.JTextPane;
 
 public class GroovyCode extends JavaCode {
 
+	private static final long serialVersionUID = 1L;
+
+
 	public GroovyCode(JTextPane editor) {
 
 		super(editor);

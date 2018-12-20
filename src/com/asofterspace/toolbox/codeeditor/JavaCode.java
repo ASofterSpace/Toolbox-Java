@@ -34,6 +34,8 @@ import javax.swing.text.TabStop;
 
 public class JavaCode extends Code {
 
+	private static final long serialVersionUID = 1L;
+
 	// all keywords of the Groovy language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
 		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "while"}

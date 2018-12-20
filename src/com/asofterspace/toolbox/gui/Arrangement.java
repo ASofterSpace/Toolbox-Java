@@ -14,6 +14,9 @@ import java.awt.GridBagConstraints;
  */
 public class Arrangement extends GridBagConstraints {
 
+	private static final long serialVersionUID = 1L;
+
+
 	public Arrangement(int gridx, int gridy, double weightx, double weighty) {
 
 		super();

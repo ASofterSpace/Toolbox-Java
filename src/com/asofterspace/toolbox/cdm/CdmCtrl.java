@@ -956,6 +956,7 @@ public class CdmCtrl {
 	 * Creates a new CDM at the indicated path and immediately opens it.
 	 * Returns true if it all worked, or false otherwise.
 	 */
+	@SuppressWarnings("fallthrough")
 	public boolean createNewCdm(String cdmPath, String version, String versionPrefix, String template) throws AttemptingEmfException, CdmLoadingException {
 
 		if ("".equals(cdmPath)) {

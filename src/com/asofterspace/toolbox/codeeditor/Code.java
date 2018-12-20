@@ -34,6 +34,9 @@ import javax.swing.text.TabStop;
 
 public abstract class Code extends DefaultStyledDocument {
 
+	private static final long serialVersionUID = 1L;
+
+
 	// the callback to be called when something changes
 	Callback onChangeCallback;
 

@@ -27,6 +27,7 @@ public class BinaryDecoder {
      * @param binaryStr  A string containing a representation of the (whole) number in binary
      * @return The integer which was encoded in binary in the string
      */
+	@SuppressWarnings("fallthrough")
     public static int decodeFromBinary(String binaryStr) {
 
         int result = 0;

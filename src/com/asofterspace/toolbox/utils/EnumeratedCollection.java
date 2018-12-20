@@ -15,12 +15,12 @@ import java.util.Iterator;
  *
  * @author Moya (a softer space), 2018
  */
-public class EnumeratedCollection implements Enumeration {
+public class EnumeratedCollection implements Enumeration<Object> {
 
-	private Iterator baseIterator;
+	private Iterator<? extends Object> baseIterator;
 
 
-	public EnumeratedCollection(Collection baseCollection) {
+	public EnumeratedCollection(Collection<? extends Object> baseCollection) {
 		this.baseIterator = baseCollection.iterator();
 	}
 	
