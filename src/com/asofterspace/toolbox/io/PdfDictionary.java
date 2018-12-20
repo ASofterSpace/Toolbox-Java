@@ -142,14 +142,39 @@ public class PdfDictionary {
 		}
 	}
 	
+	public String getAsString(String key) {
+	
+		String retStr = dictStrings.get(key);
+		if (retStr != null) {
+			return retStr;
+		}
+		
+		PdfDictionary retDict = dictInnerDicts.get(key);
+		if (retDict != null) {
+			return retDict.toString();
+		}
+		
+		return "";
+	}
+	
 	public void set(String key, String value) {
+		if (!dictStrings.containsKey(key)) {
+			ordering.add(key);
+		}
 		dictStrings.put(key, value);
-		ordering.add(key);
 	}
 	
 	public void set(String key, PdfDictionary value) {
+		if (!dictStrings.containsKey(key)) {
+			ordering.add(key);
+		}
 		dictInnerDicts.put(key, value);
-		ordering.add(key);
+	}
+	
+	public void remove(String key) {
+		ordering.remove(key);
+		dictStrings.remove(key);
+		dictInnerDicts.remove(key);
 	}
 	
 	/**

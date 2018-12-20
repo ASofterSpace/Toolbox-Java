@@ -23,7 +23,7 @@ public class PdfFile extends File {
 	// (if we just read and save we have no problem with Unicode characters either; if we actually set
 	// Unicode text for some reason, then we will have to think a bit harder and maybe manually convert
 	// the Unicode letters that we are aware of into their same-byte counterparts or whatever... ^^)
-	private static final Charset PDF_CHARSET = StandardCharsets.ISO_8859_1;
+	static final Charset PDF_CHARSET = BinaryFile.BINARY_CHARSET;
 
 	private boolean pdfLoaded = false;
 	
@@ -132,10 +132,11 @@ public class PdfFile extends File {
 					// if we are starting a stream, read its length and then read its contents directly as
 					// streams are NOT line-based and any \r or \n in there is just a regular stream byte
 					if ((currentSection == PdfSection.IN_OBJECT) && line.endsWith("stream") && (!line.endsWith("endstream"))) {
-						lineLen = currentObject.getStreamLength();
+						lineLen = currentObject.preGetStreamLength();
 
 						buffer = new byte[lineLen];
 						System.arraycopy(binaryContent, cur+1, buffer, 0, lineLen);
+
 						line = new String(buffer, PDF_CHARSET);
 
 						currentObject.readStreamContents(line);

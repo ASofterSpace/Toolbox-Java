@@ -4,6 +4,10 @@
  */
 package com.asofterspace.toolbox.io;
 
+import java.io.ByteArrayOutputStream;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
+
 
 /**
  * This class represents a single object inside a PDF file
@@ -90,7 +94,84 @@ public class PdfObject {
 			this.content = contents;
 		}
 	}
+	
+	public int getNumber() {
+		return number;
+	}
 
+	public String getDictValue(String key) {
+		ensureDictContent();
+		return this.dictContent.getAsString(key);
+	}
+	
+	/**
+	 * Gets the stream exactly as it is internally
+	 */
+	public String getStreamContent() {
+
+		return streamContent;
+	}
+	
+	/**
+	 * Gets the stream, possibly unzipping it if it is zipped
+	 * in a way that we are aware of - but if not, then just
+	 * getting it as is
+	 */
+	public String getPlainStreamContent() {
+
+		if (this.dictContent == null) {
+			this.dictContent = new PdfDictionary();
+		}
+
+		if ("/FlateDecode".equals(this.dictContent.getAsString("/Filter"))) {
+
+			Inflater inflater = new Inflater();
+
+			inflater.setInput(streamContent.getBytes(PdfFile.PDF_CHARSET), 0, streamContent.length());
+
+			// we create a buffer into which we unzip the stream - however, the stream might be zipped really really really
+			// well, and might exceed any specific buffer...
+			int bufferSize = streamContent.length();
+			if (bufferSize < 1024) {
+				bufferSize = 1024;
+			}
+			byte[] buffer = new byte[bufferSize];
+
+			// ... therefore we then copy the buffer into an (unbound) output stream, which we will convert back once we are
+			// done (and know how big the output in the end actually is)
+			ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+			while (!inflater.finished()) {
+				try {
+					int bufferSizeFilled = inflater.inflate(buffer);
+					if (bufferSizeFilled < 1) {
+						// aaand we are done! no more data incoming!
+						break;
+					}
+					output.write(buffer, 0, bufferSizeFilled);
+				} catch (DataFormatException e) {
+					System.err.println("[ERROR] Unzipping a PDF object stream failed - oh well!");
+					inflater.end();
+					return streamContent;
+				}
+			}
+			
+			inflater.end();
+			return new String(output.toByteArray(), PdfFile.PDF_CHARSET);
+		}
+
+		return streamContent;
+	}
+	
+	public Integer getStreamLength() {
+
+		if (streamContent == null) {
+			return null;
+		}
+
+		return streamContent.length();
+	}
+	
 	/**
 	 * Reads the length property of this object in case we have a stream
 	 * This method is used to read the stream and therefore needs to produce
@@ -98,7 +179,7 @@ public class PdfObject {
 	 * (Which is possible, because the length is always declared before the
 	 * stream contents themselves.)
 	 */
-	public Integer getStreamLength() {
+	public Integer preGetStreamLength() {
 		
 		// do NOT rely on contentReader already being done with its thing!
 		String contents = contentReader.toString();
@@ -132,27 +213,32 @@ public class PdfObject {
 	public void setContent(String content) {
 		this.content = content;
 	}
-
-	public void setDictValue(String key, String value) {
-
+	
+	private void ensureDictContent() {
 		if (this.dictContent == null) {
 			this.dictContent = new PdfDictionary();
 		}
-		
+	}
+
+	public void setDictValue(String key, String value) {
+		ensureDictContent();
 		this.dictContent.set(key, value);
 	}
 	
 	public void setDictValue(String key, PdfDictionary value) {
-
-		if (this.dictContent == null) {
-			this.dictContent = new PdfDictionary();
-		}
-		
+		ensureDictContent();
 		this.dictContent.set(key, value);
+	}
+	
+	public void removeDictValue(String key) {
+		ensureDictContent();
+		this.dictContent.remove(key);
 	}
 	
 	public void setStreamContent(String streamContent) {
 		this.streamContent = streamContent;
+		
+		setDictValue("/Length", ""+streamContent.length());
 	}
 	
 	/**
