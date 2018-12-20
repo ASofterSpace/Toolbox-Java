@@ -8,7 +8,7 @@ cd src
 
 find . -name "*.java" > sourcefiles.list
 
-javac -encoding utf8 -d ../bin @sourcefiles.list
+javac -deprecation -Xlint:all -encoding utf8 -d ../bin @sourcefiles.list
 
 cd ..
 
