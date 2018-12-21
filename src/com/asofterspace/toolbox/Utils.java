@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 30;
+	public final static int TOOLBOX_VERSION_NUMBER = 31;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards

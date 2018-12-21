@@ -53,13 +53,13 @@ public abstract class Code extends DefaultStyledDocument {
 	static List<Code> instances = new ArrayList<>();
 	
 	// the background color of all editors
-	static Color schemeBackgroundColor;
+	Color schemeBackgroundColor;
 
 	// the font sizes, fonts and tab sets of all editors
-	static int fontSize = 15;
+	int fontSize = 15;
 	static String editorFontFamily;
-	static Font lastFont;
-	static TabSet lastTabSet;
+	Font lastFont;
+	TabSet lastTabSet;
 
 	// styles for the different kinds of text in the document
 	MutableAttributeSet attrRegular;
@@ -71,24 +71,21 @@ public abstract class Code extends DefaultStyledDocument {
 		
 		// declare which end of line marker is to be used
 		putProperty(DefaultEditorKit.EndOfLineStringProperty, EOL);
-		
-		// initialize the font size, lastFont etc. if they have not been initialized before
-		if (lastFont == null) {
-			setFontSize(fontSize);
-		}
 
 		// keep track of the editor we are decorating (useful e.g. to get and set caret pos during insert operations)
 		decoratedEditor = editor;
 
 		// keep track of the root element
 		root = this.getDefaultRootElement();
+		
+		// initialize the font size, lastFont etc.
+		setFontSize(fontSize);
 
 		// initialize all the attribute sets
 		setLightScheme();
 		
 		// actually style the editor with... us
 		decoratedEditor.setDocument(this);
-		applySchemeAndFontToOurEditor();
 		
 		instances.add(this);
 	}
@@ -98,7 +95,7 @@ public abstract class Code extends DefaultStyledDocument {
 		onChangeCallback = callback;
 	}
 	
-	public static void setFontSize(int newSize) {
+	public void setFontSize(int newSize) {
 	
 		fontSize = newSize;
 		
@@ -108,41 +105,6 @@ public abstract class Code extends DefaultStyledDocument {
 			lastFont = new Font("", Font.PLAIN, fontSize);
 		} else {
 			lastFont = new Font(editorFontFamily, Font.PLAIN, fontSize);
-		}
-		
-		applySchemeAndFontToAllEditors();
-	}
-
-	public void setLightScheme() {
-	
-		// change the attribute sets
-		attrRegular = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
-
-		// re-decorate the editor
-		schemeBackgroundColor = new Color(255, 255, 255);
-		applySchemeAndFontToAllEditors();
-	}
-	
-	public void setDarkScheme() {
-	
-		// change the attribute sets
-		attrRegular = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
-		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
-
-		// re-decorate the editor
-		schemeBackgroundColor = new Color(0, 0, 0);
-		applySchemeAndFontToAllEditors();
-	}
-	
-	static void applySchemeAndFontToAllEditors() {
-		
-		// ignore calls to this function before fonts have actually
-		// been initialized (which can happen if a style is statically
-		// chosen already before the very first editor has been created)
-		if (lastFont == null) {
-			return;
 		}
 		
 		// calculate the correct tab stops
@@ -159,12 +121,63 @@ public abstract class Code extends DefaultStyledDocument {
 
 		lastTabSet = new TabSet(tabStops);
 		
-		// actually apply it all
+		decoratedEditor.setFont(lastFont);
+
+		Style style = decoratedEditor.getLogicalStyle();
+		StyleConstants.setTabSet(style, lastTabSet);
+		decoratedEditor.setLogicalStyle(style);
+		
+		highlightAllText();
+	}
+
+	public static void setFontSizeForAllEditors(int newSize) {
+	
 		for (Code instance : instances) {
 		
-			instance.applySchemeAndFontToOurEditor();
+			instance.setFontSize(newSize);
+		}
+	}
+	
+	public void setLightScheme() {
+	
+		// change the attribute sets
+		attrRegular = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
 
-			instance.highlightAllText();
+		// re-decorate the editor
+		schemeBackgroundColor = new Color(255, 255, 255);
+		decoratedEditor.setBackground(schemeBackgroundColor);
+		
+		highlightAllText();
+	}
+	
+	public static void setLightSchemeForAllEditors() {
+	
+		for (Code instance : instances) {
+		
+			instance.setLightScheme();
+		}
+	}
+	
+	public void setDarkScheme() {
+	
+		// change the attribute sets
+		attrRegular = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
+		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
+
+		// re-decorate the editor
+		schemeBackgroundColor = new Color(0, 0, 0);
+		decoratedEditor.setBackground(schemeBackgroundColor);
+		
+		highlightAllText();
+	}
+	
+	public static void setDarkSchemeForAllEditors() {
+	
+		for (Code instance : instances) {
+		
+			instance.setDarkScheme();
 		}
 	}
 	
@@ -206,17 +219,6 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
-	private void applySchemeAndFontToOurEditor() {
-		
-		decoratedEditor.setBackground(schemeBackgroundColor);
-
-		decoratedEditor.setFont(lastFont);
-
-		Style style = decoratedEditor.getLogicalStyle();
-		StyleConstants.setTabSet(style, lastTabSet);
-		decoratedEditor.setLogicalStyle(style);
-	}
-	
 	void highlightAllText() {
 		highlightText(0, this.getLength());
 	}
