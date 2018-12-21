@@ -51,29 +51,31 @@ public class JavaCode extends Code {
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the Groovy language
+	// operand characters in the Java language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
-		new Character[] {';', ':', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
+		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
 	));
-
-	// start of single line comments in the Groovy language
+	
+	// start of single line comments in the Java language
 	private static final String START_SINGLELINE_COMMENT = "//";
 
-	// start of multiline comments in the Groovy language
+	// start of multiline comments in the Java language
 	private static final String START_MULTILINE_COMMENT = "/*";
 
-	// end of multiline comments in the Groovy language
+	// end of multiline comments in the Java language
 	private static final String END_MULTILINE_COMMENT = "*/";
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 	
 	// styles for the different kinds of text in the document
-	private MutableAttributeSet attrAnnotation;
-	private MutableAttributeSet attrComment;
-	private MutableAttributeSet attrKeyword;
-	private MutableAttributeSet attrPrimitiveType;
-	private MutableAttributeSet attrString;
+	private MutableAttributeSet attrAnnotation; // @blubb
+	private MutableAttributeSet attrComment; // /* bla blubb */
+	private MutableAttributeSet attrKeyword; // this, null, ...
+	private MutableAttributeSet attrPrimitiveType; // int, bool, ...
+	private MutableAttributeSet attrString; // "meow!"
+	private MutableAttributeSet attrReservedChar; // ,.()[]...
+	private MutableAttributeSet attrFunction; // blubb()
 
 
 	public JavaCode(JTextPane editor) {
@@ -102,6 +104,13 @@ public class JavaCode extends Code {
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(128, 0, 0));
 		
+		attrReservedChar = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrReservedChar, new Color(48, 0, 112));
+		StyleConstants.setBold(attrReservedChar, true);
+
+		attrFunction = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrFunction, new Color(48, 0, 48));
+
 		super.setLightScheme();
 	}
 	
@@ -131,6 +140,13 @@ public class JavaCode extends Code {
 		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
 		StyleConstants.setBackground(attrString, new Color(0, 0, 0));
 		
+		attrReservedChar = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrReservedChar, new Color(192, 112, 225));
+		StyleConstants.setBold(attrReservedChar, true);
+
+		attrFunction = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrFunction, new Color(255, 178, 255));
+
 		super.setDarkScheme();
 	}
 	
@@ -157,56 +173,14 @@ public class JavaCode extends Code {
 				break;
 		}
 
-		try {
-			super.insertString(offset, insertedString, attrs);
-		} catch (BadLocationException e) {
-			// oops!
-		}
-
-		highlightText(offset, insertedString.length());
+		super.insertString(offset, insertedString, attrs);
 
 		if (overrideCaretPos) {
 			decoratedEditor.setCaretPosition(origCaretPos + 1);
 		}
-		
-		if (onChangeCallback != null) {
-			onChangeCallback.call();
-		}
 	}
 
-	@Override
-	protected void fireInsertUpdate(DocumentEvent event) {
-
-		super.fireInsertUpdate(event);
-
-		highlightText(event.getOffset(), event.getLength());
-	}
-
-	@Override
-	public void remove(int offset, int length) {
-
-		try {
-			super.remove(offset, length);
-		} catch (BadLocationException e) {
-			// oops!
-		}
-
-		highlightText(offset, 0);
-		
-		if (onChangeCallback != null) {
-			onChangeCallback.call();
-		}
-	}
-
-	@Override
-	protected void fireRemoveUpdate(DocumentEvent event) {
-
-		super.fireRemoveUpdate(event);
-
-		highlightText(event.getOffset(), event.getLength());
-	}
-
-	// this is the main function that... well... hightlights our text :)
+	// this is the main function that... well... highlights our text :)
 	@Override
 	void highlightText(int start, int length) {
 
@@ -226,25 +200,33 @@ public class JavaCode extends Code {
 			while (start <= end) {
 
 				// while we have a delimiter...
-				while (isDelimiter(content.charAt(start))) {
+				char curChar = content.charAt(start);
+				while (isDelimiter(curChar)) {
 				
-					// ... check for a comment (which starts with a delimiter) ...
+					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
 						start = highlightComment(content, start, end);
+					} else {
+						// please highlight the delimiter in the process ;)
+						if (!Character.isWhitespace(curChar)) {
+							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+						}
 					}
 
 					if (start < end) {
 
-						// ... or, if there is no comment, jump forward and try again1
+						// jump forward and try again!
 						start++;
 
 					} else {
 						return;
 					}
+					
+					curChar = content.charAt(start);
 				}
 
 				// now check what we have: a quoted string?
-				if (isStringDelimiter(content.charAt(start))) {
+				if (isStringDelimiter(curChar)) {
 
 					// then let's get that string!
 					start = highlightString(content, start, end);
@@ -288,7 +270,7 @@ public class JavaCode extends Code {
 			// apply single line comment highlighting
 			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 
-			return commentEnd - 1;
+			return commentEnd;
 		}
 		
 		// apply multiline comment highlighting
@@ -305,7 +287,7 @@ public class JavaCode extends Code {
 		// apply multiline comment highlighting
 		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 		
-		return commentEnd - 1;
+		return commentEnd;
 	}
 
 	private int highlightString(String content, int start, int end) {
@@ -364,8 +346,10 @@ public class JavaCode extends Code {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 		}
-
+			
 		return couldBeKeywordEnd;
 	}
 

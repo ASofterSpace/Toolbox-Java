@@ -42,57 +42,7 @@ public class PlainText extends Code {
 		super(editor);
 	}
 
-	@Override
-	public void insertString(int offset, String insertedString, AttributeSet attrs) {
-
-		int origCaretPos = decoratedEditor.getCaretPosition();
-
-		try {
-			super.insertString(offset, insertedString, attrs);
-		} catch (BadLocationException e) {
-			// oops!
-		}
-
-		highlightText(offset, insertedString.length());
-
-		if (onChangeCallback != null) {
-			onChangeCallback.call();
-		}
-	}
-
-	@Override
-	protected void fireInsertUpdate(DocumentEvent event) {
-
-		super.fireInsertUpdate(event);
-
-		highlightText(event.getOffset(), event.getLength());
-	}
-
-	@Override
-	public void remove(int offset, int length) {
-
-		try {
-			super.remove(offset, length);
-		} catch (BadLocationException e) {
-			// oops!
-		}
-
-		highlightText(offset, 0);
-		
-		if (onChangeCallback != null) {
-			onChangeCallback.call();
-		}
-	}
-
-	@Override
-	protected void fireRemoveUpdate(DocumentEvent event) {
-
-		super.fireRemoveUpdate(event);
-
-		highlightText(event.getOffset(), event.getLength());
-	}
-	
-	// this is the main function that... well... hightlights our text :)
+	// this is the main function that... well... highlights our text :)
 	@Override
 	void highlightText(int start, int length) {
 

@@ -85,7 +85,11 @@ public abstract class Code extends DefaultStyledDocument {
 		setLightScheme();
 		
 		// actually style the editor with... us
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origContent = decoratedEditor.getText();
 		decoratedEditor.setDocument(this);
+		decoratedEditor.setText(origContent);
+		decoratedEditor.setCaretPosition(origCaretPos);
 		
 		instances.add(this);
 	}
@@ -219,12 +223,86 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	/**
+	 * A key has been pressed (like, e.g. any letter key - not just the 'A' key literally ^^)
+	 */
+	@Override
+	public void insertString(int offset, String insertedString, AttributeSet attrs) {
+
+		try {
+			super.insertString(offset, insertedString, attrs);
+		} catch (BadLocationException e) {
+			// oops!
+		}
+
+		highlightText(offset, insertedString.length());
+
+		callOnChange();
+	}
+
+	/**
+	 * The delete key or something like that has been pressed
+	 */
+	@Override
+	public void remove(int offset, int length) {
+
+		try {
+			super.remove(offset, length);
+		} catch (BadLocationException e) {
+			// oops!
+		}
+
+		highlightText(offset, 0);
+		
+		callOnChange();
+	}
+	
+	/**
+	 * Paste has been pressed (as in copy-paste)
+	 */
+	@Override
+	protected void fireInsertUpdate(DocumentEvent event) {
+
+		super.fireInsertUpdate(event);
+
+		highlightText(event.getOffset(), event.getLength());
+		
+		callOnChange();
+	}
+
+	/**
+	 * Cut has been pressed (as in cut-paste)
+	 */
+	@Override
+	protected void fireRemoveUpdate(DocumentEvent event) {
+
+		super.fireRemoveUpdate(event);
+
+		highlightText(event.getOffset(), event.getLength());
+		
+		callOnChange();
+	}
+	
+	void callOnChange() {
+		if (onChangeCallback != null) {
+			onChangeCallback.call();
+		}
+	}
+
 	void highlightAllText() {
 		highlightText(0, this.getLength());
 	}
 
-	// this is the main function that... well... hightlights our text :)
+	// this is the main function that... well... highlights our text :)
 	// you might want to override it ;)
 	abstract void highlightText(int start, int length);
+
+	/**
+	 * Call this to detach the code highlighter from its text field,
+	 * stop sending update callbacks and enable it to be garbage collected
+	 */
+	public void discard() {
+		onChangeCallback = null;
+	}
 
 }
