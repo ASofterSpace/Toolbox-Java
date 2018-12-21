@@ -63,6 +63,10 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// styles for the different kinds of text in the document
 	MutableAttributeSet attrRegular;
+	
+	private static Thread highlightThread;
+
+	private volatile boolean pleaseHighlight = false;
 
 	
 	public Code(JTextPane editor) {
@@ -91,7 +95,34 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.setText(origContent);
 		decoratedEditor.setCaretPosition(origCaretPos);
 		
-		instances.add(this);
+		synchronized (instances) {
+			instances.add(this);
+		}
+
+		startHighlightThread();
+	}
+	
+	private synchronized void startHighlightThread() {
+
+		if (highlightThread == null) {
+			Thread highlightThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						synchronized (instances) {
+							for (Code instance : instances) {
+								if (instance.pleaseHighlight) {
+									instance.pleaseHighlight = false;
+									instance.highlightText(0, instance.getLength());
+								}
+							}
+						}
+						// sleep(100);
+					}
+				}
+			});
+			highlightThread.start();
+		}
 	}
 	
 	public void setOnChange(Callback callback) {
@@ -235,9 +266,12 @@ public abstract class Code extends DefaultStyledDocument {
 			// oops!
 		}
 
-		highlightText(offset, insertedString.length());
+		/*
+		// highlightText(offset, insertedString.length());
+		highlightAllText();
 
 		callOnChange();
+		*/
 	}
 
 	/**
@@ -252,9 +286,12 @@ public abstract class Code extends DefaultStyledDocument {
 			// oops!
 		}
 
-		highlightText(offset, 0);
+		/*
+		// highlightText(offset, 0);
+		highlightAllText();
 		
 		callOnChange();
+		*/
 	}
 	
 	/**
@@ -265,7 +302,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 		super.fireInsertUpdate(event);
 
-		highlightText(event.getOffset(), event.getLength());
+		// highlightText(event.getOffset(), event.getLength());
+		highlightAllText();
 		
 		callOnChange();
 	}
@@ -278,7 +316,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 		super.fireRemoveUpdate(event);
 
-		highlightText(event.getOffset(), event.getLength());
+		// highlightText(event.getOffset(), event.getLength());
+		highlightAllText();
 		
 		callOnChange();
 	}
@@ -288,9 +327,10 @@ public abstract class Code extends DefaultStyledDocument {
 			onChangeCallback.call();
 		}
 	}
-
+	
 	void highlightAllText() {
-		highlightText(0, this.getLength());
+	
+		pleaseHighlight = true;
 	}
 
 	// this is the main function that... well... highlights our text :)
@@ -303,6 +343,10 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	public void discard() {
 		onChangeCallback = null;
+		
+		synchronized (instances) {
+			instances.remove(this);
+		}
 	}
 
 }
