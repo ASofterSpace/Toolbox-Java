@@ -43,7 +43,7 @@ public class JavaCode extends Code {
 
 	// all primitive types of the Groovy language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "class", "double", "enum", "int", "final", "package", "private", "protected", "public", "static", "void"}
+		new String[] {"boolean", "char", "class", "double", "enum", "int", "final", "package", "private", "protected", "public", "static", "void", "volatile"}
 	));
 
 	// all string delimiters of the Groovy language
@@ -88,7 +88,7 @@ public class JavaCode extends Code {
 	
 		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrAnnotation, new Color(0, 128, 0));
+		StyleConstants.setForeground(attrAnnotation, new Color(0, 128, 64));
 
 		attrComment = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrComment, new Color(0, 128, 0));
@@ -119,7 +119,7 @@ public class JavaCode extends Code {
 	
 		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 128));
+		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 196));
 		StyleConstants.setBackground(attrAnnotation, new Color(0, 0, 0));
 
 		attrComment = new SimpleAttributeSet();
@@ -372,4 +372,4 @@ public class JavaCode extends Code {
 	private boolean isAnnotation(String token) {
 		return token.startsWith("@");
 	}
-}
+}			

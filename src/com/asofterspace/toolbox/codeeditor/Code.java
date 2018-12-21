@@ -117,7 +117,7 @@ public abstract class Code extends DefaultStyledDocument {
 								}
 							}
 						}
-						// sleep(100);
+						Thread.yield();
 					}
 				}
 			});
@@ -260,6 +260,64 @@ public abstract class Code extends DefaultStyledDocument {
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
+		// on enter, step forward as far as there was whitespace in the current line
+		if (insertedString.contains("\n")) {
+
+			try {
+				String content = this.getText(0, offset);
+			
+				int startOfThisLine = content.lastIndexOf("\n") + 1;
+
+				StringBuilder curLineWhitespace = new StringBuilder();
+
+				for (int i = startOfThisLine; i < content.length(); i++) {
+					char curChar = content.charAt(i);
+					if (Character.isWhitespace(curChar)) {
+						curLineWhitespace.append(curChar);
+					} else {
+						break;
+					}
+				}
+
+				// in case of {, add indent, and in case of }, remove it
+				// TODO ::put this into the individual programming languages
+				if (content.endsWith("{") ||
+				    content.endsWith("[") ||
+				    content.endsWith("(") ||
+				    content.endsWith("begin") ||
+				    content.endsWith("then")) {
+					if ((curLineWhitespace.length() < 1) || (curLineWhitespace.toString().endsWith("\t"))) {
+						curLineWhitespace.append("\t");
+					} else {
+						curLineWhitespace.append("    ");
+					}
+				}
+				/*
+				if (content.endsWith("}") ||
+				    content.endsWith("]") ||
+				    content.endsWith(")") ||
+				    content.endsWith("end;")) {
+					if (curLineWhitespace.toString().endsWith("\t")) {
+						curLineWhitespace.setLength(Math.max(0, curLineWhitespace.length() - 1));
+					} else {
+						curLineWhitespace.setLength(Math.max(0, curLineWhitespace.length() - 4));
+					}
+				}
+				*/
+
+				insertedString += curLineWhitespace.toString();
+				
+				// TODO :: in case of e.g. } following the {, add another curLineWhitespace (but without the
+				// last append) after the caret pos, such that {} with an [ENTER] pressed in between leads to
+				//     {
+				//         |
+				//     }
+
+			} catch (BadLocationException e) {
+				// oops!
+			}
+		}
+
 		try {
 			super.insertString(offset, insertedString, attrs);
 		} catch (BadLocationException e) {
@@ -349,4 +407,4 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
-}
+}											
