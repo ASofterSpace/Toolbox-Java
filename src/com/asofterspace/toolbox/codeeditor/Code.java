@@ -48,10 +48,10 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// the editor that is to be decorated by us
 	final JTextPane decoratedEditor;
-	
+
 	// the list of all decorated editors
 	static List<Code> instances = new ArrayList<>();
-	
+
 	// the background color of all editors
 	Color schemeBackgroundColor;
 
@@ -63,16 +63,16 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// styles for the different kinds of text in the document
 	MutableAttributeSet attrRegular;
-	
+
 	private static Thread highlightThread;
 
 	private volatile boolean pleaseHighlight = false;
 
-	
+
 	public Code(JTextPane editor) {
 
 		super();
-		
+
 		// declare which end of line marker is to be used
 		putProperty(DefaultEditorKit.EndOfLineStringProperty, EOL);
 
@@ -81,27 +81,27 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// keep track of the root element
 		root = this.getDefaultRootElement();
-		
+
 		// initialize the font size, lastFont etc.
 		setFontSize(fontSize);
 
 		// initialize all the attribute sets
 		setLightScheme();
-		
+
 		// actually style the editor with... us
 		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origContent = decoratedEditor.getText();
 		decoratedEditor.setDocument(this);
 		decoratedEditor.setText(origContent);
 		decoratedEditor.setCaretPosition(origCaretPos);
-		
+
 		synchronized (instances) {
 			instances.add(this);
 		}
 
 		startHighlightThread();
 	}
-	
+
 	private synchronized void startHighlightThread() {
 
 		if (highlightThread == null) {
@@ -124,24 +124,24 @@ public abstract class Code extends DefaultStyledDocument {
 			highlightThread.start();
 		}
 	}
-	
+
 	public void setOnChange(Callback callback) {
 
 		onChangeCallback = callback;
 	}
-	
+
 	public void setFontSize(int newSize) {
-	
+
 		fontSize = newSize;
-		
+
 		initializeEditorFont();
-		
+
 		if (editorFontFamily == null) {
 			lastFont = new Font("", Font.PLAIN, fontSize);
 		} else {
 			lastFont = new Font(editorFontFamily, Font.PLAIN, fontSize);
 		}
-		
+
 		// calculate the correct tab stops
 		Canvas c = new Canvas();
 		FontMetrics fm = c.getFontMetrics(lastFont);
@@ -155,26 +155,26 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		lastTabSet = new TabSet(tabStops);
-		
+
 		decoratedEditor.setFont(lastFont);
 
 		Style style = decoratedEditor.getLogicalStyle();
 		StyleConstants.setTabSet(style, lastTabSet);
 		decoratedEditor.setLogicalStyle(style);
-		
+
 		highlightAllText();
 	}
 
 	public static void setFontSizeForAllEditors(int newSize) {
-	
+
 		for (Code instance : instances) {
-		
+
 			instance.setFontSize(newSize);
 		}
 	}
-	
+
 	public void setLightScheme() {
-	
+
 		// change the attribute sets
 		attrRegular = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
@@ -182,20 +182,20 @@ public abstract class Code extends DefaultStyledDocument {
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(255, 255, 255);
 		decoratedEditor.setBackground(schemeBackgroundColor);
-		
+
 		highlightAllText();
 	}
-	
+
 	public static void setLightSchemeForAllEditors() {
-	
+
 		for (Code instance : instances) {
-		
+
 			instance.setLightScheme();
 		}
 	}
-	
+
 	public void setDarkScheme() {
-	
+
 		// change the attribute sets
 		attrRegular = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
@@ -204,23 +204,23 @@ public abstract class Code extends DefaultStyledDocument {
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(0, 0, 0);
 		decoratedEditor.setBackground(schemeBackgroundColor);
-		
+
 		highlightAllText();
 	}
-	
+
 	public static void setDarkSchemeForAllEditors() {
-	
+
 		for (Code instance : instances) {
-		
+
 			instance.setDarkScheme();
 		}
 	}
-	
+
 	private static void initializeEditorFont() {
-	
+
 		// if no editor font family has been found yet...
 		if (editorFontFamily == null) {
-		
+
 			// ... go hunt for one!
 			String[] familiarFontFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
@@ -230,21 +230,21 @@ public abstract class Code extends DefaultStyledDocument {
 					editorFontFamily = fontFamily;
 				}
 			}
-			
+
 			// if there is a dedicated console font (Consolas, Lucida Console, ...), use that
 			for (String fontFamily : familiarFontFamilies) {
 				if (fontFamily.toLowerCase().contains("consol")) {
 					editorFontFamily = fontFamily;
 				}
 			}
-			
+
 			// if there is a dedicated terminal font (Terminus Font, ...), use that
 			for (String fontFamily : familiarFontFamilies) {
 				if (fontFamily.toLowerCase().startsWith("terminus")) {
 					editorFontFamily = fontFamily;
 				}
 			}
-			
+
 			// if there is Courier New, then yayyy - use that, we like it!
 			for (String fontFamily : familiarFontFamilies) {
 				if (fontFamily.toLowerCase().replace(" ", "").equals("couriernew")) {
@@ -270,15 +270,18 @@ public abstract class Code extends DefaultStyledDocument {
 	 *   because of string changes that have already been performed by an extending class
 	 */
 	void insertString(int offset, String insertedString, AttributeSet attrs, int overrideCaretPos) {
-    
+
 		int origCaretPos = decoratedEditor.getCaretPosition();
 
-		// on enter, step forward as far as there was whitespace in the current line
+		// on enter, step forward as far as there was whitespace in the current line...
 		if (insertedString.contains("\n")) {
+
+			// ... unless [Ctrl] is being held, as we want to use [Ctrl]+[Enter] = copy the current line
+			// TODO - this (and add it as option? but then again, this would need to be configurable, meh...)
 
 			try {
 				String content = this.getText(0, offset);
-			
+
 				int startOfThisLine = content.lastIndexOf("\n") + 1;
 
 				StringBuilder curLineWhitespace = new StringBuilder();
@@ -293,7 +296,7 @@ public abstract class Code extends DefaultStyledDocument {
 				}
 
 				String origWhitespace = curLineWhitespace.toString();
-				        
+
 				// in case of {, add indent, and in case of }, remove it
 				// TODO ::put this into the individual programming languages
 				if (content.endsWith("{") ||
@@ -322,12 +325,12 @@ public abstract class Code extends DefaultStyledDocument {
 
 				insertedString += curLineWhitespace.toString();
 				overrideCaretPos += curLineWhitespace.length();
-				
+
 				if (content.endsWith("{") ||
 				    content.endsWith("[") ||
 				    content.endsWith("(") ||
 				    content.endsWith("begin") ||
-				    content.endsWith("then")) {				
+				    content.endsWith("then")) {
 					String followedBy = this.getText(offset, 10);
 					if (followedBy.startsWith("}") ||
 					    followedBy.startsWith("]") ||
@@ -336,7 +339,7 @@ public abstract class Code extends DefaultStyledDocument {
 						insertedString += "\n" + origWhitespace;
 					}
 				}
-				
+
 				// TODO :: in case of e.g. } following the {, add another curLineWhitespace (but without the
 				// last append) after the caret pos, such that {} with an [ENTER] pressed in between leads to
 				//     {
@@ -360,7 +363,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 		callOnChange();
 		*/
-		
+
 		// the caret does not need to be set, if we are inserting exactly as long a string as we
 		// want to move it, that THAT move is already done internally automagically
 		if (overrideCaretPos != insertedString.length()) {
@@ -383,11 +386,11 @@ public abstract class Code extends DefaultStyledDocument {
 		/*
 		// highlightText(offset, 0);
 		highlightAllText();
-		
+
 		callOnChange();
 		*/
 	}
-	
+
 	/**
 	 * Paste has been pressed (as in copy-paste)
 	 */
@@ -398,7 +401,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// highlightText(event.getOffset(), event.getLength());
 		highlightAllText();
-		
+
 		callOnChange();
 	}
 
@@ -412,18 +415,18 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// highlightText(event.getOffset(), event.getLength());
 		highlightAllText();
-		
+
 		callOnChange();
 	}
-	
+
 	void callOnChange() {
 		if (onChangeCallback != null) {
 			onChangeCallback.call();
 		}
 	}
-	
+
 	void highlightAllText() {
-	
+
 		pleaseHighlight = true;
 	}
 
@@ -437,10 +440,10 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	public void discard() {
 		onChangeCallback = null;
-		
+
 		synchronized (instances) {
 			instances.remove(this);
 		}
 	}
 
-}																			
+}

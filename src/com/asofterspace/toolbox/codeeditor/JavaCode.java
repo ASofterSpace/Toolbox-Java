@@ -55,7 +55,7 @@ public class JavaCode extends Code {
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
 		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
 	));
-	
+
 	// start of single line comments in the Java language
 	private static final String START_SINGLELINE_COMMENT = "//";
 
@@ -67,7 +67,7 @@ public class JavaCode extends Code {
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
-	
+
 	// styles for the different kinds of text in the document
 	private MutableAttributeSet attrAnnotation; // @blubb
 	private MutableAttributeSet attrComment; // /* bla blubb */
@@ -82,10 +82,10 @@ public class JavaCode extends Code {
 
 		super(editor);
 	}
-	
+
 	@Override
 	public void setLightScheme() {
-	
+
 		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAnnotation, new Color(0, 128, 64));
@@ -103,7 +103,7 @@ public class JavaCode extends Code {
 
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(128, 0, 0));
-		
+
 		attrReservedChar = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrReservedChar, new Color(48, 0, 112));
 		StyleConstants.setBold(attrReservedChar, true);
@@ -113,10 +113,10 @@ public class JavaCode extends Code {
 
 		super.setLightScheme();
 	}
-	
+
 	@Override
 	public void setDarkScheme() {
-	
+
 		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 196));
@@ -139,7 +139,7 @@ public class JavaCode extends Code {
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
 		StyleConstants.setBackground(attrString, new Color(0, 0, 0));
-		
+
 		attrReservedChar = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrReservedChar, new Color(192, 112, 225));
 		StyleConstants.setBold(attrReservedChar, true);
@@ -149,7 +149,7 @@ public class JavaCode extends Code {
 
 		super.setDarkScheme();
 	}
-	
+
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
@@ -180,9 +180,9 @@ public class JavaCode extends Code {
 
 		try {
 			int end = this.getLength();
-			
+
 			String content = this.getText(0, end);
-			
+
 			// set the entire document back to regular
 			this.setCharacterAttributes(0, end, attrRegular, true);
 
@@ -196,7 +196,7 @@ public class JavaCode extends Code {
 				// while we have a delimiter...
 				char curChar = content.charAt(start);
 				while (isDelimiter(curChar)) {
-				
+
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
 						start = highlightComment(content, start, end);
@@ -215,7 +215,7 @@ public class JavaCode extends Code {
 					} else {
 						return;
 					}
-					
+
 					curChar = content.charAt(start);
 				}
 
@@ -231,7 +231,7 @@ public class JavaCode extends Code {
 					start = highlightOther(content, start, end);
 				}
 			}
-			
+
 		} catch (BadLocationException e) {
 			// oops!
 		}
@@ -244,32 +244,32 @@ public class JavaCode extends Code {
 		}
 
 		String potentialCommentStart = content.substring(start, start + 2);
-		
+
 		return START_SINGLELINE_COMMENT.equals(potentialCommentStart) || START_MULTILINE_COMMENT.equals(potentialCommentStart);
 	}
 
 	private int highlightComment(String content, int start, int end) {
 
 		String commentStart = content.substring(start, start + 2);
-		
+
 		if (START_SINGLELINE_COMMENT.equals(commentStart)) {
-		
+
 			int commentEnd = content.indexOf(EOL, start + 2);
-		
+
 			// this is the last line
 			if (commentEnd == -1) {
 				commentEnd = end;
 			}
-		
+
 			// apply single line comment highlighting
 			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 
 			return commentEnd;
 		}
-		
+
 		// apply multiline comment highlighting
 		int commentEnd = content.indexOf(END_MULTILINE_COMMENT, start + 2);
-		
+
 		// the multiline comment has not been closed - let's comment out the rest of the document!
 		if (commentEnd == -1) {
 			commentEnd = end;
@@ -277,10 +277,10 @@ public class JavaCode extends Code {
 			// +1 because of the length of END_MULTILINE_COMMENT itself
 			commentEnd += 1;
 		}
-		
+
 		// apply multiline comment highlighting
 		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
-		
+
 		return commentEnd;
 	}
 
@@ -291,23 +291,23 @@ public class JavaCode extends Code {
 
 		// find the end of line - as we do not want to go further
 		int endOfLine = content.indexOf(EOL, start + 2);
-		
+
 		if (endOfLine == -1) {
 			endOfLine = end;
 		}
-		
+
 		// find the matching end of string
 		int endOfString = start;
-		
+
 		while (true) {
 			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
-			
+
 			// if the end of string is actually escaped... well, then it is not an end of string yet, continue searching!
 			if ((endOfString == -1) || (content.charAt(endOfString - 1) != '\\')) {
 				break;
 			}
 		}
-		
+
 		if (endOfString == -1) {
 			// the string is open-ended... go for end of line
 			endOfString = endOfLine;
@@ -343,7 +343,7 @@ public class JavaCode extends Code {
 		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 		}
-			
+
 		return couldBeKeywordEnd;
 	}
 
@@ -366,4 +366,4 @@ public class JavaCode extends Code {
 	private boolean isAnnotation(String token) {
 		return token.startsWith("@");
 	}
-}							
+}
