@@ -237,7 +237,7 @@ public class JSON {
 
 			simpleContents = false;
 
-			return jsonString.substring(4);
+			return jsonString.substring(5);
 		}
 
 		if (jsonString.startsWith("null")) {
@@ -471,6 +471,10 @@ public class JSON {
 
 		JSON result = get(key);
 
+		if (result.arrContents == null) {
+			return new ArrayList<>();
+		}
+		
 		return result.arrContents;
 	}
 
