@@ -260,6 +260,19 @@ public abstract class Code extends DefaultStyledDocument {
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
+    		insertString(offset, insertedString, attrs, insertedString.length());
+    	}
+
+	/**
+	 * This is called internally for insertString
+	 * In addition to the regular parameters, we also have:
+	 * overrideCaretPos - the additional amount to which we should move the caret pos to the right
+	 *   because of string changes that have already been performed by an extending class
+	 */
+	void insertString(int offset, String insertedString, AttributeSet attrs, int overrideCaretPos) {
+    
+		int origCaretPos = decoratedEditor.getCaretPosition();
+
 		// on enter, step forward as far as there was whitespace in the current line
 		if (insertedString.contains("\n")) {
 
@@ -279,6 +292,8 @@ public abstract class Code extends DefaultStyledDocument {
 					}
 				}
 
+				String origWhitespace = curLineWhitespace.toString();
+				        
 				// in case of {, add indent, and in case of }, remove it
 				// TODO ::put this into the individual programming languages
 				if (content.endsWith("{") ||
@@ -286,10 +301,10 @@ public abstract class Code extends DefaultStyledDocument {
 				    content.endsWith("(") ||
 				    content.endsWith("begin") ||
 				    content.endsWith("then")) {
-					if ((curLineWhitespace.length() < 1) || (curLineWhitespace.toString().endsWith("\t"))) {
-						curLineWhitespace.append("\t");
-					} else {
+					if (origWhitespace.endsWith(" ")) {
 						curLineWhitespace.append("    ");
+					} else {
+						curLineWhitespace.append("\t");
 					}
 				}
 				/*
@@ -297,15 +312,30 @@ public abstract class Code extends DefaultStyledDocument {
 				    content.endsWith("]") ||
 				    content.endsWith(")") ||
 				    content.endsWith("end;")) {
-					if (curLineWhitespace.toString().endsWith("\t")) {
-						curLineWhitespace.setLength(Math.max(0, curLineWhitespace.length() - 1));
-					} else {
+					if (curLineWhitespace.toString().endsWith(" ")) {
 						curLineWhitespace.setLength(Math.max(0, curLineWhitespace.length() - 4));
+					} else {
+						curLineWhitespace.setLength(Math.max(0, curLineWhitespace.length() - 1));
 					}
 				}
 				*/
 
 				insertedString += curLineWhitespace.toString();
+				overrideCaretPos += curLineWhitespace.length();
+				
+				if (content.endsWith("{") ||
+				    content.endsWith("[") ||
+				    content.endsWith("(") ||
+				    content.endsWith("begin") ||
+				    content.endsWith("then")) {				
+					String followedBy = this.getText(offset, 10);
+					if (followedBy.startsWith("}") ||
+					    followedBy.startsWith("]") ||
+					    followedBy.startsWith(")") ||
+					    followedBy.startsWith("end;")) {
+						insertedString += "\n" + origWhitespace;
+					}
+				}
 				
 				// TODO :: in case of e.g. } following the {, add another curLineWhitespace (but without the
 				// last append) after the caret pos, such that {} with an [ENTER] pressed in between leads to
@@ -330,6 +360,12 @@ public abstract class Code extends DefaultStyledDocument {
 
 		callOnChange();
 		*/
+		
+		// the caret does not need to be set, if we are inserting exactly as long a string as we
+		// want to move it, that THAT move is already done internally automagically
+		if (overrideCaretPos != insertedString.length()) {
+			decoratedEditor.setCaretPosition(origCaretPos + overrideCaretPos);
+		}
 	}
 
 	/**
@@ -407,4 +443,4 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
-}											
+}																			

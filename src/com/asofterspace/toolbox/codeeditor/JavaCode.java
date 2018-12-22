@@ -153,31 +153,25 @@ public class JavaCode extends Code {
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
-		int origCaretPos = decoratedEditor.getCaretPosition();
-
-		boolean overrideCaretPos = false;
+		int overrideCaretPos = insertedString.length();
 
 		// automagically close brackets that are being opened
 		switch (insertedString) {
 			case "{":
 				insertedString = "{}";
-				overrideCaretPos = true;
+				overrideCaretPos = 1;
 				break;
 			case "(":
 				insertedString = "()";
-				overrideCaretPos = true;
+				overrideCaretPos = 1;
 				break;
 			case "[":
 				insertedString = "[]";
-				overrideCaretPos = true;
+				overrideCaretPos = 1;
 				break;
 		}
 
-		super.insertString(offset, insertedString, attrs);
-
-		if (overrideCaretPos) {
-			decoratedEditor.setCaretPosition(origCaretPos + 1);
-		}
+		super.insertString(offset, insertedString, attrs, overrideCaretPos);
 	}
 
 	// this is the main function that... well... highlights our text :)
@@ -372,4 +366,4 @@ public class JavaCode extends Code {
 	private boolean isAnnotation(String token) {
 		return token.startsWith("@");
 	}
-}			
+}							
