@@ -101,13 +101,13 @@ public class LineNumbering extends Code {
 		StyleConstants.setFontFamily(attrRight, editorFontFamily);
 
 		attrDot = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrDot, new Color(128, 0, 96));
+		StyleConstants.setForeground(attrDot, new Color(0, 0, 0));
 
 		attrMark = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrMark, new Color(128, 96, 0));
+		StyleConstants.setForeground(attrMark, new Color(96, 96, 128));
 
 		attrBetween = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrBetween, new Color(0, 0, 0));
+		StyleConstants.setForeground(attrBetween, new Color(48, 48, 96));
 
 		super.setLightScheme();
 	}
