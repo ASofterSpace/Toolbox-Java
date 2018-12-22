@@ -36,17 +36,17 @@ public class JavaCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the Groovy language
+	// all keywords of the Java language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
 		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "while"}
 	));
 
-	// all primitive types of the Groovy language and other stuff that looks that way
+	// all primitive types of the Java language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "class", "double", "enum", "int", "final", "package", "private", "protected", "public", "static", "void", "volatile"}
+		new String[] {"boolean", "char", "class", "double", "enum", "int", "abstract", "final", "package", "private", "protected", "public", "static", "void", "volatile"}
 	));
 
-	// all string delimiters of the Groovy language
+	// all string delimiters of the Java language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
@@ -72,10 +72,13 @@ public class JavaCode extends Code {
 	private MutableAttributeSet attrAnnotation; // @blubb
 	private MutableAttributeSet attrComment; // /* bla blubb */
 	private MutableAttributeSet attrKeyword; // this, null, ...
-	private MutableAttributeSet attrPrimitiveType; // int, bool, ...
+	private MutableAttributeSet attrPrimitiveType; // int, boolean, ...
+	private MutableAttributeSet attrAdvancedType; // Integer, Boolean, ...
 	private MutableAttributeSet attrString; // "meow!"
 	private MutableAttributeSet attrReservedChar; // ,.()[]...
 	private MutableAttributeSet attrFunction; // blubb()
+
+	private List<CodeLocation> functions = new ArrayList<>();
 
 
 	public JavaCode(JTextPane editor) {
@@ -100,6 +103,9 @@ public class JavaCode extends Code {
 
 		attrPrimitiveType = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrPrimitiveType, new Color(96, 0, 96));
+
+		attrAdvancedType = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrAdvancedType, new Color(96, 48, 48));
 
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(128, 0, 0));
@@ -135,6 +141,9 @@ public class JavaCode extends Code {
 		attrPrimitiveType = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrPrimitiveType, new Color(255, 96, 255));
 		StyleConstants.setBackground(attrPrimitiveType, new Color(0, 0, 0));
+
+		attrAdvancedType = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrAdvancedType, new Color(255, 196, 196));
 
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
@@ -177,6 +186,8 @@ public class JavaCode extends Code {
 	// this is the main function that... well... highlights our text :)
 	@Override
 	void highlightText(int start, int length) {
+
+		functions = new ArrayList<>();
 
 		try {
 			int end = this.getLength();
@@ -321,6 +332,8 @@ public class JavaCode extends Code {
 		return endOfString + 1;
 	}
 
+	private String lastCouldBeKeyword = "";
+
 	private int highlightOther(String content, int start, int end) {
 
 		int couldBeKeywordEnd = start + 1;
@@ -338,11 +351,21 @@ public class JavaCode extends Code {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+		} else if (isAdvancedType(couldBeKeyword)) {
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
 		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+			if (!"new".equals(lastCouldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+				if ((start > 0) && (content.charAt(start-1) == ' ')) {
+					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+					functions.add(new CodeLocation(functionName, start));
+				}
+			}
 		}
+
+		lastCouldBeKeyword = couldBeKeyword;
 
 		return couldBeKeywordEnd;
 	}
@@ -361,6 +384,13 @@ public class JavaCode extends Code {
 
 	private boolean isPrimitiveType(String token) {
 		return PRIMITIVE_TYPES.contains(token);
+	}
+
+	private boolean isAdvancedType(String token) {
+		if (token.length() < 1) {
+			return false;
+		}
+		return Character.isUpperCase(token.charAt(0));
 	}
 
 	private boolean isAnnotation(String token) {
