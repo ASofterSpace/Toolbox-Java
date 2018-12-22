@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.Utils;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -19,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.JTextPane;
 import javax.swing.text.AttributeSet;
@@ -70,6 +73,15 @@ public abstract class Code extends DefaultStyledDocument {
 	private static Thread highlightThread;
 	private volatile boolean pleaseHighlight = false;
 
+	// selection
+	private int selStart = 0;
+	private int selEnd = 0;
+	private int selLength = 0;
+
+	// prevent the next n insertions / removals
+	private int preventInsert = 0;
+	private int preventRemove = 0;
+
 	// configuration
 	private boolean copyOnCtrlEnter = true;
 
@@ -106,24 +118,15 @@ public abstract class Code extends DefaultStyledDocument {
 
 		startHighlightThread();
 
-		// on [Ctrl] + [Enter], duplicate current row
 		decoratedEditor.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent event) {
+				// on [Ctrl] + [Enter], duplicate current row
 				if (copyOnCtrlEnter) {
 					if ((event.getKeyCode() == KeyEvent.VK_ENTER) && (event.isControlDown() || event.isShiftDown())) {
 						int caretPos = decoratedEditor.getCaretPosition();
 						String content = decoratedEditor.getText();
-						int lineStart = 0;
-						if (caretPos > 0) {
-							lineStart = content.lastIndexOf("\n", caretPos-1);
-						}
-						if (lineStart < 0) {
-							lineStart = 0;
-						}
-						int lineEnd = content.indexOf("\n", caretPos);
-						if (lineEnd < 0) {
-							lineEnd = content.length();
-						}
+						int lineStart = getLineStartFromPosition(caretPos, content);
+						int lineEnd = getLineEndFromPosition(caretPos, content);
 
 						try {
 							String insertStr = content.substring(lineStart, lineEnd);
@@ -137,9 +140,103 @@ public abstract class Code extends DefaultStyledDocument {
 						}
 					}
 				}
+
+					if (event.getKeyChar() == KeyEvent.VK_TAB) {
+						if (selLength > 0) {
+							String content = decoratedEditor.getText();
+							int lineStart = getLineStartFromPosition(selStart, content);
+							int lineEnd = getLineEndFromPosition(selEnd, content);
+
+							String contentStart = content.substring(0, lineStart);
+							String contentMiddle = content.substring(lineStart, lineEnd);
+							String contentEnd = content.substring(lineEnd, content.length());
+
+							int replaceAmount = Utils.countCharInString('\n', contentMiddle);
+
+							// calculate this now, before we set the text, as afterwards
+							// selEnd changes again! ;)
+							int extraCarPos = 0;
+							final int origSelStart = selStart;
+
+							contentMiddle = contentMiddle.replace("\n", "\n\t");
+
+							// the very first line (only) does not start with \n!
+							if (lineStart == 0) {
+								extraCarPos++;
+								contentMiddle = "\t" + contentMiddle;
+							}
+
+							final int newCaretPos = extraCarPos + selEnd + replaceAmount;
+
+							content = contentStart + contentMiddle + contentEnd;
+
+							// set the text (this should go through...)
+							decoratedEditor.setText(content);
+
+							// ... and prevent the next text change (coming from the \t key)
+							preventInsert = 1;
+							// preventRemove = 1; - we do not need to call this, as we set the
+							// caret pos, which stops the selection
+
+							decoratedEditor.setCaretPosition(newCaretPos);
+
+							// later (!) also restore the selection - but not now, as it would
+							// all be replaced... ^^
+							Thread selThread = new Thread(new Runnable() {
+								@Override
+								public void run() {
+									try {
+									    Thread.sleep(50);
+									} catch(InterruptedException e) {
+										// Ooops...
+									}
+									decoratedEditor.setSelectionStart(origSelStart + 1);
+									decoratedEditor.setSelectionEnd(newCaretPos);
+								}
+							});
+							selThread.start();
+						}
+					}
 			}
 		});
 
+		// keep track of selection
+		decoratedEditor.addCaretListener(new CaretListener() {
+			@Override
+			public void caretUpdate(CaretEvent e) {
+				if (e.getDot() < e.getMark()) {
+					selStart = e.getDot();
+					selEnd = e.getMark();
+				} else {
+					selStart = e.getMark();
+					selEnd = e.getDot();
+				}
+				selLength = selEnd - selStart;
+			}
+		});
+	}
+
+	private int getLineStartFromPosition(int pos, String content) {
+
+						int lineStart = 0;
+						if (pos > 0) {
+							lineStart = content.lastIndexOf("\n", pos - 1);
+						}
+						if (lineStart < 0) {
+							lineStart = 0;
+						}
+
+						return lineStart;
+	}
+
+	private int getLineEndFromPosition(int pos, String content) {
+
+						int lineEnd = content.indexOf("\n", pos);
+						if (lineEnd < 0) {
+							lineEnd = content.length();
+						}
+
+						return lineEnd;
 	}
 
 	private synchronized void startHighlightThread() {
@@ -317,6 +414,11 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	void insertString(int offset, String insertedString, AttributeSet attrs, int overrideCaretPos) {
 
+		if (preventInsert > 0) {
+			preventInsert--;
+			return;
+		}
+
 		int origCaretPos = decoratedEditor.getCaretPosition();
 
 		// on enter, step forward as far as there was whitespace in the current line...
@@ -426,6 +528,11 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	@Override
 	public void remove(int offset, int length) {
+
+		if (preventRemove > 0) {
+			preventRemove--;
+			return;
+		}
 
 		try {
 			super.remove(offset, length);

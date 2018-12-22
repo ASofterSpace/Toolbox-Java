@@ -22,31 +22,31 @@ public class Utils {
 	public static void setProgramTitle(String programTitle) {
 		PROGRAM_TITLE = programTitle;
 	}
-	
+
 	public static void setVersionNumber(String versionNumber) {
 		VERSION_NUMBER = versionNumber;
 	}
-	
+
 	public static void setVersionDate(String versionDate) {
 		VERSION_DATE = versionDate;
 	}
-	
+
 	public static String getProgramTitle() {
 		return PROGRAM_TITLE;
 	}
-	
+
 	public static String getVersionNumber() {
 		return VERSION_NUMBER;
 	}
-	
+
 	public static String getVersionDate() {
 		return VERSION_DATE;
 	}
-	
+
 	public static String getFullProgramIdentifier() {
 		return "A Softer Space " + getProgramTitle() + " version " + getVersionNumber();
 	}
-	
+
 	public static String getFullProgramIdentifierWithDate() {
 		return getFullProgramIdentifier() + " (" + getVersionDate() + ")";
 	}
@@ -63,12 +63,29 @@ public class Utils {
 
 		return sb.toString();
 	}
-	
+
+	public static int countCharInString(char find, String inHere) {
+
+		if (inHere == null) {
+			return 0;
+		}
+
+		int result = 0;
+
+		for (int i = 0; i < inHere.length(); i++) {
+			if (find == inHere.charAt(i)) {
+				result++;
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Takes a number, e.g. 2 or 6 or 11 or 42, and returns it as ordinal string, e.g. 2nd, 6th, 11th or 42nd
 	 */
 	public static String th(int i) {
-		
+
 		// 11, 12 and 13 are special - they end in 1, 2 and 3, but get th anyway
 		switch (i % 100) {
 			case 11:
@@ -76,7 +93,7 @@ public class Utils {
 			case 13:
 				return i + "th";
 		}
-		
+
 		// all others are simpler: if they end with 1 - st, if with 2 - nd, if with 3 - rd, else - th
 		switch (i % 10) {
 			case 1:
@@ -86,19 +103,19 @@ public class Utils {
 			case 3:
 				return i + "rd";
 		}
-		
+
 		return i + "th";
 	}
-	
+
 	/**
 	 * Writes a log line to standard out together with debug information (the current time and JVM heap size)
 	 */
 	public static void debuglog(String logline) {
-	
+
 		long curHeap = Runtime.getRuntime().totalMemory();
-		
+
 		String heapStr = curHeap + " B";
-		
+
 		if (curHeap > 5000l) {
 			heapStr = (curHeap / 1000l) + " KB";
 		}
@@ -108,22 +125,22 @@ public class Utils {
 		if (curHeap > 5000000000l) {
 			heapStr = (curHeap / 1000000000l) + " GB";
 		}
-	
+
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
 		System.out.println(format.format(new Date()) + " [heap " + heapStr + "]: " + logline);
 	}
-	
+
 	/**
 	 * TODO :: This should be in the XmlFile class, or in an XmlEncoder, but not here, right? Who even uses this?
 	 */
 	public static String xmlEscape(String text) {
-	
+
 		StringBuilder result = new StringBuilder();
-		
+
 		for (int i = 0; i < text.length(); i++) {
-		
+
 			char c = text.charAt(i);
-			
+
 			switch (c) {
 				case '<':
 					result.append("&lt;");
