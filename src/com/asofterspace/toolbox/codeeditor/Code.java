@@ -51,8 +51,10 @@ public abstract class Code extends DefaultStyledDocument {
 	// the root element of the document, through which we can get the individual lines
 	Element root;
 
-	// the editor that is to be decorated by us
+	// the editor that is to be decorated by us - and the listeners we associate with it
 	final JTextPane decoratedEditor;
+	private KeyAdapter keyListener;
+	private CaretListener caretListener;
 
 	// the list of all decorated editors
 	static List<Code> instances = new ArrayList<>();
@@ -84,6 +86,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// configuration
 	private boolean copyOnCtrlEnter = true;
+	private boolean tabEntireBlocks = true;
 
 
 	public Code(JTextPane editor) {
@@ -118,9 +121,9 @@ public abstract class Code extends DefaultStyledDocument {
 
 		startHighlightThread();
 
-		decoratedEditor.addKeyListener(new KeyAdapter() {
+		keyListener = new KeyAdapter() {
 			public void keyPressed(KeyEvent event) {
-				// on [Ctrl] + [Enter], duplicate current row
+				// on [Ctrl / Shift] + [Enter], duplicate current row
 				if (copyOnCtrlEnter) {
 					if ((event.getKeyCode() == KeyEvent.VK_ENTER) && (event.isControlDown() || event.isShiftDown())) {
 						int caretPos = decoratedEditor.getCaretPosition();
@@ -141,67 +144,112 @@ public abstract class Code extends DefaultStyledDocument {
 					}
 				}
 
-					if (event.getKeyChar() == KeyEvent.VK_TAB) {
-						if (selLength > 0) {
-							String content = decoratedEditor.getText();
-							int lineStart = getLineStartFromPosition(selStart, content);
-							int lineEnd = getLineEndFromPosition(selEnd, content);
+				// on [Tab] during selection, indent whole block
+				// on [Ctrl / Shift] + [Tab] during selection, unindent whole block
+				if (tabEntireBlocks) {
+					if ((event.getKeyChar() == KeyEvent.VK_TAB) && (selLength > 0)) {
+						String content = decoratedEditor.getText();
+						int lineStart = getLineStartFromPosition(selStart, content);
+						int lineEnd = getLineEndFromPosition(selEnd, content);
 
-							String contentStart = content.substring(0, lineStart);
-							String contentMiddle = content.substring(lineStart, lineEnd);
-							String contentEnd = content.substring(lineEnd, content.length());
+						String contentStart = content.substring(0, lineStart);
+						String contentMiddle = content.substring(lineStart, lineEnd);
+						String contentEnd = content.substring(lineEnd, content.length());
 
-							int replaceAmount = Utils.countCharInString('\n', contentMiddle);
+						// calculate this now, before we set the text, as afterwards
+						// selStart, selEnd etc. change again! ;)
+						int replaceAmount = 0;
+						int selStartOffset = 0;
 
-							// calculate this now, before we set the text, as afterwards
-							// selEnd changes again! ;)
-							int extraCarPos = 0;
-							final int origSelStart = selStart;
+						if (event.isControlDown() || event.isShiftDown()) {
+							// un-indent
+							replaceAmount = - Utils.countStringInString("\n\t", contentMiddle);
+
+							// the very first line (only) does not start with \n!
+							if (lineStart == 0) {
+								if (contentMiddle.startsWith("\t")) {
+									replaceAmount--;
+									selStartOffset--;
+									contentMiddle = contentMiddle.substring(1);
+								}
+
+							}
+
+							if (contentMiddle.startsWith("\n\t")) {
+								selStartOffset--;
+							}
+
+							contentMiddle = contentMiddle.replace("\n\t", "\n");
+						} else {
+							// indent
+							replaceAmount = Utils.countCharInString('\n', contentMiddle);
 
 							contentMiddle = contentMiddle.replace("\n", "\n\t");
 
 							// the very first line (only) does not start with \n!
 							if (lineStart == 0) {
-								extraCarPos++;
+								replaceAmount++;
 								contentMiddle = "\t" + contentMiddle;
 							}
 
-							final int newCaretPos = extraCarPos + selEnd + replaceAmount;
-
-							content = contentStart + contentMiddle + contentEnd;
-
-							// set the text (this should go through...)
-							decoratedEditor.setText(content);
-
-							// ... and prevent the next text change (coming from the \t key)
-							preventInsert = 1;
-							// preventRemove = 1; - we do not need to call this, as we set the
-							// caret pos, which stops the selection
-
-							decoratedEditor.setCaretPosition(newCaretPos);
-
-							// later (!) also restore the selection - but not now, as it would
-							// all be replaced... ^^
-							Thread selThread = new Thread(new Runnable() {
-								@Override
-								public void run() {
-									try {
-									    Thread.sleep(50);
-									} catch(InterruptedException e) {
-										// Ooops...
-									}
-									decoratedEditor.setSelectionStart(origSelStart + 1);
-									decoratedEditor.setSelectionEnd(newCaretPos);
-								}
-							});
-							selThread.start();
+							selStartOffset++;
 						}
+
+						final int newSelEnd = selEnd + replaceAmount;
+						final int newSelStart = selStart + selStartOffset;
+
+						content = contentStart + contentMiddle + contentEnd;
+
+						// set the text (this should go through...)
+						decoratedEditor.setText(content);
+
+						// ... and prevent the next text change (coming from the \t key)
+						if (event.isControlDown() || event.isShiftDown()) {
+							preventInsert += 1;
+							preventRemove += 1;
+						} else {
+							preventInsert += 1;
+							preventRemove += 1;
+						}
+
+						decoratedEditor.setCaretPosition(newSelEnd);
+
+						// later (!) also restore the selection - but not now, as it would
+						// all be replaced... ^^
+						Thread selThread = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+								    Thread.sleep(50);
+								} catch(InterruptedException e) {
+									// Ooops...
+								}
+
+								decoratedEditor.setSelectionStart(newSelStart);
+								decoratedEditor.setSelectionEnd(newSelEnd);
+
+								selStart = newSelStart;
+								selEnd = newSelEnd;
+								selLength = selEnd - selStart;
+
+								preventInsert = 0;
+								preventRemove = 0;
+							}
+						});
+						selThread.start();
+
+						selStart = newSelStart;
+						selEnd = newSelEnd;
+						selLength = selEnd - selStart;
 					}
+				}
 			}
-		});
+		};
+
+		decoratedEditor.addKeyListener(keyListener);
 
 		// keep track of selection
-		decoratedEditor.addCaretListener(new CaretListener() {
+		caretListener = new CaretListener() {
 			@Override
 			public void caretUpdate(CaretEvent e) {
 				if (e.getDot() < e.getMark()) {
@@ -213,30 +261,35 @@ public abstract class Code extends DefaultStyledDocument {
 				}
 				selLength = selEnd - selStart;
 			}
-		});
+		};
+
+		decoratedEditor.addCaretListener(caretListener);
 	}
 
 	private int getLineStartFromPosition(int pos, String content) {
 
-						int lineStart = 0;
-						if (pos > 0) {
-							lineStart = content.lastIndexOf("\n", pos - 1);
-						}
-						if (lineStart < 0) {
-							lineStart = 0;
-						}
+		int lineStart = 0;
 
-						return lineStart;
+		if (pos > 0) {
+			lineStart = content.lastIndexOf("\n", pos - 1);
+		}
+
+		if (lineStart < 0) {
+			lineStart = 0;
+		}
+
+		return lineStart;
 	}
 
 	private int getLineEndFromPosition(int pos, String content) {
 
-						int lineEnd = content.indexOf("\n", pos);
-						if (lineEnd < 0) {
-							lineEnd = content.length();
-						}
+		int lineEnd = content.indexOf("\n", pos);
 
-						return lineEnd;
+		if (lineEnd < 0) {
+			lineEnd = content.length();
+		}
+
+		return lineEnd;
 	}
 
 	private synchronized void startHighlightThread() {
@@ -264,6 +317,10 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public void setCopyOnCtrlEnter(boolean value) {
 		copyOnCtrlEnter = value;
+	}
+
+	public void setTabEntireBlocks(boolean value) {
+		tabEntireBlocks = value;
 	}
 
 	public void setOnChange(Callback callback) {
@@ -597,6 +654,15 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	public void discard() {
 		onChangeCallback = null;
+
+		if (decoratedEditor != null) {
+			if (keyListener != null) {
+				decoratedEditor.removeKeyListener(keyListener);
+			}
+			if (caretListener != null) {
+				decoratedEditor.removeCaretListener(caretListener);
+			}
+		}
 
 		synchronized (instances) {
 			instances.remove(this);

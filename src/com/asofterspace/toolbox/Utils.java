@@ -81,6 +81,30 @@ public class Utils {
 		return result;
 	}
 
+	public static int countStringInString(String find, String inHere) {
+
+		if (inHere == null) {
+			return 0;
+		}
+
+		int result = 0;
+
+		for (int i = 0; i < 1 + inHere.length() - find.length(); i++) {
+			boolean found = true;
+			for (int j = 0; j < find.length(); j++) {
+				if (find.charAt(j) != inHere.charAt(i+j)) {
+					found = false;
+					break;
+				}
+			}
+			if (found) {
+				result++;
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Takes a number, e.g. 2 or 6 or 11 or 42, and returns it as ordinal string, e.g. 2nd, 6th, 11th or 42nd
 	 */
