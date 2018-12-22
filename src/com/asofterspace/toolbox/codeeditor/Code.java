@@ -274,7 +274,7 @@ public abstract class Code extends DefaultStyledDocument {
 		int origCaretPos = decoratedEditor.getCaretPosition();
 
 		// on enter, step forward as far as there was whitespace in the current line...
-		if (insertedString.contains("\n")) {
+		if ("\n".equals(insertedString)) {
 
 			// ... unless [Ctrl] is being held, as we want to use [Ctrl]+[Enter] = copy the current line
 			// TODO - this (and add it as option? but then again, this would need to be configurable, meh...)
@@ -331,12 +331,16 @@ public abstract class Code extends DefaultStyledDocument {
 				    content.endsWith("(") ||
 				    content.endsWith("begin") ||
 				    content.endsWith("then")) {
-					String followedBy = this.getText(offset, 10);
-					if (followedBy.startsWith("}") ||
-					    followedBy.startsWith("]") ||
-					    followedBy.startsWith(")") ||
-					    followedBy.startsWith("end;")) {
-						insertedString += "\n" + origWhitespace;
+					int len = "end;".length();
+					len = Math.min(len, this.getLength() - offset);
+					if (len > 0) {
+						String followedBy = this.getText(offset, len);
+						if (followedBy.startsWith("}") ||
+							followedBy.startsWith("]") ||
+							followedBy.startsWith(")") ||
+							followedBy.startsWith("end;")) {
+							insertedString += "\n" + origWhitespace;
+						}
 					}
 				}
 
