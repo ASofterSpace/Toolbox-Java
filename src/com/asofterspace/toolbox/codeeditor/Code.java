@@ -8,6 +8,8 @@ import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
@@ -52,7 +54,7 @@ public abstract class Code extends DefaultStyledDocument {
 	// the list of all decorated editors
 	static List<Code> instances = new ArrayList<>();
 
-	// the background color of all editors
+	// the background color of the editor
 	Color schemeBackgroundColor;
 
 	// the font sizes, fonts and tab sets of all editors
@@ -64,9 +66,12 @@ public abstract class Code extends DefaultStyledDocument {
 	// styles for the different kinds of text in the document
 	MutableAttributeSet attrRegular;
 
+	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
-
 	private volatile boolean pleaseHighlight = false;
+
+	// configuration
+	private boolean copyOnCtrlEnter = true;
 
 
 	public Code(JTextPane editor) {
@@ -100,6 +105,41 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		startHighlightThread();
+
+		// on [Ctrl] + [Enter], duplicate current row
+		decoratedEditor.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent event) {
+				if (copyOnCtrlEnter) {
+					if ((event.getKeyCode() == KeyEvent.VK_ENTER) && (event.isControlDown() || event.isShiftDown())) {
+						int caretPos = decoratedEditor.getCaretPosition();
+						String content = decoratedEditor.getText();
+						int lineStart = 0;
+						if (caretPos > 0) {
+							lineStart = content.lastIndexOf("\n", caretPos-1);
+						}
+						if (lineStart < 0) {
+							lineStart = 0;
+						}
+						int lineEnd = content.indexOf("\n", caretPos);
+						if (lineEnd < 0) {
+							lineEnd = content.length();
+						}
+
+						try {
+							String insertStr = content.substring(lineStart, lineEnd);
+							if (!insertStr.startsWith("\n")) {
+								insertStr = "\n" + insertStr;
+							}
+							Code.super.insertString(lineEnd, insertStr, (AttributeSet) attrRegular);
+							decoratedEditor.setCaretPosition(caretPos + insertStr.length());
+						} catch (BadLocationException e) {
+							// oops!
+						}
+					}
+				}
+			}
+		});
+
 	}
 
 	private synchronized void startHighlightThread() {
@@ -123,6 +163,10 @@ public abstract class Code extends DefaultStyledDocument {
 			});
 			highlightThread.start();
 		}
+	}
+
+	public void setCopyOnCtrlEnter(boolean value) {
+		copyOnCtrlEnter = value;
 	}
 
 	public void setOnChange(Callback callback) {
@@ -182,6 +226,7 @@ public abstract class Code extends DefaultStyledDocument {
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(255, 255, 255);
 		decoratedEditor.setBackground(schemeBackgroundColor);
+		decoratedEditor.setCaretColor(new Color(0, 0, 0));
 
 		highlightAllText();
 	}
@@ -204,6 +249,7 @@ public abstract class Code extends DefaultStyledDocument {
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(0, 0, 0);
 		decoratedEditor.setBackground(schemeBackgroundColor);
+		decoratedEditor.setCaretColor(new Color(255, 255, 255));
 
 		highlightAllText();
 	}
