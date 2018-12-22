@@ -66,13 +66,18 @@ public class Utils {
 
 	public static int countCharInString(char find, String inHere) {
 
+		return countCharInString(find, inHere, inHere.length());
+	}
+
+	public static int countCharInString(char find, String inHere, int untilPos) {
+
 		if (inHere == null) {
 			return 0;
 		}
 
 		int result = 0;
 
-		for (int i = 0; i < inHere.length(); i++) {
+		for (int i = 0; i < untilPos; i++) {
 			if (find == inHere.charAt(i)) {
 				result++;
 			}

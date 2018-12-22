@@ -41,21 +41,4 @@ public class PlainText extends Code {
 
 		super(editor);
 	}
-
-	// this is the main function that... well... highlights our text :)
-	@Override
-	void highlightText(int start, int length) {
-
-		try {
-			int end = this.getLength();
-			
-			String content = this.getText(0, end);
-			
-			// set the entire document back to regular
-			this.setCharacterAttributes(0, end, attrRegular, true);
-
-		} catch (BadLocationException e) {
-			// oops!
-		}
-	}
 }

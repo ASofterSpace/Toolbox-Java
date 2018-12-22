@@ -179,6 +179,14 @@ public abstract class Code extends DefaultStyledDocument {
 								selStartOffset--;
 							}
 
+							// TODO :: replacing "\n " (four times) is just done as an
+							// afterthought, but is not done properly - e.g. the caret
+							// pos will behave wonkily...
+							contentMiddle = contentMiddle.replace("\n ", "\n");
+							contentMiddle = contentMiddle.replace("\n ", "\n");
+							contentMiddle = contentMiddle.replace("\n ", "\n");
+							contentMiddle = contentMiddle.replace("\n ", "\n");
+
 							contentMiddle = contentMiddle.replace("\n\t", "\n");
 						} else {
 							// indent
@@ -646,7 +654,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// this is the main function that... well... highlights our text :)
 	// you might want to override it ;)
-	abstract void highlightText(int start, int length);
+	void highlightText(int start, int length) {
+
+		int end = this.getLength();
+
+		// set the entire document back to regular
+		this.setCharacterAttributes(0, end, attrRegular, true);
+	}
 
 	/**
 	 * Call this to detach the code highlighter from its text field,
