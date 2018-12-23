@@ -15,11 +15,13 @@ import java.util.zip.Inflater;
 public class PdfObject {
 
 	private int number;
-	
+
 	private int generation;
-	
+
 	// plain-text content for whatever is not contained in the rest...
-	// e.g. for objects that only contain [1 2 3] - yes, just an array, outside of any dictionary!
+	// e.g. for objects that only contain [1 2 3] - yes, just an array, outside of any dictionary! -
+	//   or for objects that only contain (1 2 3),
+	//   or for objects that only contain 123 - all three of these we encountered "in the wild" :)
 	// null if the object only contains dictionary and/or stream content
 	private String content = null;
 
@@ -31,7 +33,7 @@ public class PdfObject {
 	private String streamContent = null;
 
 	private StringBuilder contentReader = new StringBuilder();
-	
+
 
 	/**
 	 * Create a pdf object based on the line defining it in a pdf file
@@ -41,19 +43,19 @@ public class PdfObject {
 	 * be set later or kept empty)
 	 */
 	public PdfObject(String pdfLine) throws NumberFormatException, NullPointerException, ArrayIndexOutOfBoundsException {
-		
+
 		String[] lineArr = pdfLine.split(" ");
-		
+
 		number = Integer.valueOf(lineArr[0]);
-		
+
 		generation = Integer.valueOf(lineArr[1]);
 	}
-	
+
 	public PdfObject(int number, int generation) {
 		this.number = number;
 		this.generation = generation;
 	}
-	
+
 	public void readContents(String contents) {
 
 		// stream reading already done? nothing more to do...
@@ -74,7 +76,7 @@ public class PdfObject {
 		// aaand finalize everything already - nothing interesting happens after a stream anyway ;)
 		doneReadingContents();
 	}
-	
+
 	public void doneReadingContents() {
 
 		// stream reading already done? nothing more to do...
@@ -94,7 +96,7 @@ public class PdfObject {
 			this.content = contents;
 		}
 	}
-	
+
 	public int getNumber() {
 		return number;
 	}
@@ -103,7 +105,7 @@ public class PdfObject {
 		ensureDictContent();
 		return this.dictContent.getAsString(key);
 	}
-	
+
 	/**
 	 * Gets the stream exactly as it is internally
 	 */
@@ -111,13 +113,17 @@ public class PdfObject {
 
 		return streamContent;
 	}
-	
+
 	/**
 	 * Gets the stream, possibly unzipping it if it is zipped
 	 * in a way that we are aware of - but if not, then just
 	 * getting it as is
 	 */
 	public String getPlainStreamContent() {
+
+		if (streamContent == null) {
+			return null;
+		}
 
 		if (this.dictContent == null) {
 			this.dictContent = new PdfDictionary();
@@ -155,14 +161,24 @@ public class PdfObject {
 					return streamContent;
 				}
 			}
-			
+
 			inflater.end();
 			return new String(output.toByteArray(), PdfFile.PDF_CHARSET);
 		}
 
 		return streamContent;
 	}
-	
+
+	/**
+	 * Uncompresses the contents (mostly the stream content) of this object.
+	 * If the object is not compressed, this changes nothing.
+	 * If the object is compressed in a way we do not understand, this also changes nothing. ^^
+	 */
+	public void uncompress() {
+		// TODO :: if this worksed, remove /Filter entry from the dictionary?
+		this.streamContent = getPlainStreamContent();
+	}
+
 	public Integer getStreamLength() {
 
 		if (streamContent == null) {
@@ -171,7 +187,7 @@ public class PdfObject {
 
 		return streamContent.length();
 	}
-	
+
 	/**
 	 * Reads the length property of this object in case we have a stream
 	 * This method is used to read the stream and therefore needs to produce
@@ -180,7 +196,7 @@ public class PdfObject {
 	 * stream contents themselves.)
 	 */
 	public Integer preGetStreamLength() {
-		
+
 		// do NOT rely on contentReader already being done with its thing!
 		String contents = contentReader.toString();
 
@@ -209,11 +225,11 @@ public class PdfObject {
 			return null;
 		}
 	}
-	
+
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
+
 	private void ensureDictContent() {
 		if (this.dictContent == null) {
 			this.dictContent = new PdfDictionary();
@@ -224,23 +240,23 @@ public class PdfObject {
 		ensureDictContent();
 		this.dictContent.set(key, value);
 	}
-	
+
 	public void setDictValue(String key, PdfDictionary value) {
 		ensureDictContent();
 		this.dictContent.set(key, value);
 	}
-	
+
 	public void removeDictValue(String key) {
 		ensureDictContent();
 		this.dictContent.remove(key);
 	}
-	
+
 	public void setStreamContent(String streamContent) {
 		this.streamContent = streamContent;
-		
+
 		setDictValue("/Length", ""+streamContent.length());
 	}
-	
+
 	/**
 	 * Append the content of this PDF object to a PDF file that is in the process of being created
 	 */
@@ -268,7 +284,7 @@ public class PdfObject {
 			result.append(streamContent);
 			result.append("\r\nendstream\r\n");
 		}
-		
+
 		result.append("endobj\r\n");
 	}
 }
