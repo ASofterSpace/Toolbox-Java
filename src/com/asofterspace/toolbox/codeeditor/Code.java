@@ -52,9 +52,14 @@ public abstract class Code extends DefaultStyledDocument {
 	Element root;
 
 	// the editor that is to be decorated by us - and the listeners we associate with it
+	// (should most usually be a CodeEditor - but in a pitch any JTextPane will do)
 	final JTextPane decoratedEditor;
 	private KeyAdapter keyListener;
 	private CaretListener caretListener;
+
+	// the (optional) line memo to the left of the code editor, containing the line numbers
+	// (should most usually be a CodeEditorLineMemo - but in a pitch any JTextPane will do)
+	private JTextPane codeEditorLineMemo;
 
 	// the list of all decorated editors
 	static List<Code> instances = new ArrayList<>();
@@ -334,6 +339,16 @@ public abstract class Code extends DefaultStyledDocument {
 	public void setOnChange(Callback callback) {
 
 		onChangeCallback = callback;
+	}
+
+	public void setCodeEditorLineMemo(JTextPane lineMemo) {
+
+		codeEditorLineMemo = lineMemo;
+
+		// refresh the line numbering in the left memo (if we did not just un-assign one)
+		if (codeEditorLineMemo != null) {
+			refreshLineNumbering();
+		}
 	}
 
 	public void setFontSize(int newSize) {
@@ -642,8 +657,15 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	void callOnChange() {
+
+		// call the on change callback (if there is one)
 		if (onChangeCallback != null) {
 			onChangeCallback.call();
+		}
+
+		// refresh the line numbering in the left memo (if there is one)
+		if (codeEditorLineMemo != null) {
+			refreshLineNumbering();
 		}
 	}
 
@@ -662,12 +684,41 @@ public abstract class Code extends DefaultStyledDocument {
 		this.setCharacterAttributes(0, end, attrRegular, true);
 	}
 
+	private int lastLineAmount = 0;
+
+	/**
+	 * Refresh the line numbering in the connected line memo - only call this function
+	 * when you already know that the codeEditorLineMemo is not null! As it could very
+	 * well be!
+	 */
+	private void refreshLineNumbering() {
+
+		int lineAmount = Utils.countCharInString('\n', decoratedEditor.getText());
+
+		if (lineAmount != lastLineAmount) {
+			lastLineAmount = lineAmount;
+
+			StringBuilder lines = new StringBuilder();
+			for (int i = 1; i <= lineAmount + 1; i++) {
+				lines.append(i + "\n");
+			}
+			codeEditorLineMemo.setText(lines.toString());
+		}
+	}
+
 	/**
 	 * Call this to detach the code highlighter from its text field,
 	 * stop sending update callbacks and enable it to be garbage collected
+	 * (this is meant to be called if you wish to change the highlighter
+	 * for a code editor - in that case, discard the old one before you
+	 * attach the new one, as otherwise both will handle updates and get
+	 * in each other's way!)
 	 */
 	public void discard() {
+
 		onChangeCallback = null;
+
+		codeEditorLineMemo = null;
 
 		if (decoratedEditor != null) {
 			if (keyListener != null) {

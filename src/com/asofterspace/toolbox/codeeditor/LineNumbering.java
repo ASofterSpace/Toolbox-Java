@@ -154,6 +154,10 @@ public class LineNumbering extends Code {
 		// ... and character ones for getting the color back to normal
 		this.setCharacterAttributes(0, end, attrRight, true);
 
+		if (connectedEditor == null) {
+			return;
+		}
+
 		String content = connectedEditor.getText();
 
 		Pair<Integer, Integer> dotSels = null;

@@ -183,6 +183,10 @@ public class JavaCode extends Code {
 				overrideCaretPos = 1;
 				break;
 			case "'":
+				// replace ' with '' in code - but not in comment mode!
+				if (attrComment.equals(attrs)) {
+					break;
+				}
 				insertedString = "''";
 				overrideCaretPos = 1;
 				break;
