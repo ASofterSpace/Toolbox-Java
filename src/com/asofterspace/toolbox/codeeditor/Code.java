@@ -320,7 +320,12 @@ public abstract class Code extends DefaultStyledDocument {
 								}
 							}
 						}
-						Thread.yield();
+						//Thread.yield();
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							return;
+						}
 					}
 				}
 			});
