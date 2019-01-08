@@ -18,9 +18,9 @@ public abstract class MainWindow implements Runnable {
 
 	@Override
 	public void run() {
-	
+
 		create();
-		
+
 		show();
 	}
 
@@ -31,8 +31,8 @@ public abstract class MainWindow implements Runnable {
 
 		// Create the window
 		mainFrame = new JFrame();
-		
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void show() {

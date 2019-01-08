@@ -9,16 +9,16 @@ import com.asofterspace.toolbox.io.JSON;
 
 
 public class ConfigFile {
-	
+
 	private String filename;
-	
+
 	private JSON content;
-	
-	private static final String FOLDER = "./config/";
-	
+
+	private static final String FOLDER = "/config/";
+
 	private static final String FILE_EXTENSION = ".cnf";
 
-	
+
 	/**
 	 * Please do not construct a config file without a name ;)
 	 */
@@ -27,26 +27,54 @@ public class ConfigFile {
 	}
 
 	/**
-	 * Creates a config file with the given name
-	 * @param name The name of the config file (without its extension or directory-part)
+	 * Creates a config file with the given name, either absolute (if the path is absolute)
+	 * or relative to the current working directory (if the path is relative)
+	 * @param name The name of the config file
 	 */
 	public ConfigFile(String name) {
 
-		// if a full pathname is given, then just use that
-		// (however, an extension will still be appended in the end anyway!)
-		filename = name;
+		setConfigFilename(name, false);
+	}
 
-		if (!filename.contains(".")) {
-			filename = filename + FILE_EXTENSION;
+	/**
+	 * Creates a config file with the given name, either absolute (if the path is absolute)
+	 * or relative; if the baseOnClasspath argument is true, then relative to the classpath,
+	 * otherwise relative to the current working directory
+	 * @param name The name of the config file
+	 * @param baseOnClasspath true if we want to base a relative file on the classpath, false otherwise
+	 */
+	public ConfigFile(String name, Boolean baseOnClasspath) {
+
+		setConfigFilename(name, baseOnClasspath);
+	}
+
+	private void setConfigFilename(String name, Boolean baseOnClasspath) {
+
+		if (baseOnClasspath == null) {
+			baseOnClasspath = false;
 		}
 
-		if (!filename.contains("/")) {
-			// if just a word or somesuch is given (without any /-signs),
-			// then we probably want a local-ish file
-			filename = FOLDER + filename;
-		}
+		// start with the given name
+ 		filename = name;
 
-		loadFromFile();
+		// apply an extension, if necessary
+ 		if (!filename.contains(".")) {
+			filename += FILE_EXTENSION;
+ 		}
+
+		// if we are not using an absolute path...
+		if (!filename.startsWith("/")) {
+			// ... then either use a relative file ...
+			if (baseOnClasspath) {
+				// ... based on the classpath ...
+				filename = System.getProperty("java.class.path") + "/.." + FOLDER + filename;
+			} else {
+				// ... or based on the current working directory
+				filename = "." + FOLDER + filename;
+			}
+ 		}
+
+ 		loadFromFile();
 	}
 
 	/**
@@ -66,18 +94,18 @@ public class ConfigFile {
 			content = new JSON(correspondingFile.getContent(false));
 		}
 	}
-	
+
 	/**
 	 * Stores the configuration on the file system (this is called
 	 * internally and does not need to be called from the outside
 	 * world)
 	 */
 	private void saveToFile() {
-		
+
 		String uncompressedJson = content.toString(false);
-		
+
 		File correspondingFile = new File(filename);
-		
+
 		correspondingFile.saveContent(uncompressedJson);
 	}
 
@@ -86,7 +114,7 @@ public class ConfigFile {
 	 * @return all the contents
 	 */
 	public JSON getAllContents() {
-		
+
 		return content;
 	}
 
@@ -96,7 +124,7 @@ public class ConfigFile {
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
 	public String getValue(String key) {
-		
+
 		return content.getString(key);
 	}
 
@@ -119,11 +147,11 @@ public class ConfigFile {
 	public int getInteger(String key, int defaultValue) {
 
 		Integer result = content.getInteger(key);
-		
+
 		if (result == null) {
 			return defaultValue;
 		}
-		
+
 		return result;
 	}
 
@@ -146,11 +174,11 @@ public class ConfigFile {
 	public boolean getBoolean(String key, boolean defaultValue) {
 
 		Boolean result = content.getBoolean(key);
-		
+
 		if (result == null) {
 			return defaultValue;
 		}
-		
+
 		return result;
 	}
 
@@ -159,7 +187,7 @@ public class ConfigFile {
 	 * @param newContent
 	 */
 	public void setAllContents(JSON newContent) {
-		
+
 		this.content = newContent;
 
 		saveToFile();
@@ -173,7 +201,7 @@ public class ConfigFile {
 	public void set(String key, String value) {
 
 		content.setString(key, value);
-		
+
 		saveToFile();
 	}
 
@@ -185,7 +213,7 @@ public class ConfigFile {
 	public void set(String key, Integer value) {
 
 		content.set(key, new JSON(value));
-		
+
 		saveToFile();
 	}
 
@@ -197,7 +225,7 @@ public class ConfigFile {
 	public void set(String key, Boolean value) {
 
 		content.set(key, new JSON(value));
-		
+
 		saveToFile();
 	}
 
@@ -209,8 +237,8 @@ public class ConfigFile {
 	public void set(String key, JSON value) {
 
 		content.set(key, value);
-		
+
 		saveToFile();
 	}
-	
+
 }

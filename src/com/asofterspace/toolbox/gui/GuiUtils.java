@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.awt.Point;
 import java.awt.Window;
 
 import javax.swing.JComponent;
@@ -21,19 +22,21 @@ public class GuiUtils {
 	 * Maximize the window
 	 */
 	public static void maximizeWindow(JFrame window) {
-	
+
 		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		
+
 		Rectangle bounds = env.getMaximumWindowBounds();
 		window.setMaximizedBounds(bounds);
-		
+
 		window.setSize((int) bounds.getWidth(), (int) bounds.getHeight());
-		
+
 		window.setPreferredSize(new Dimension((int) bounds.getWidth(), (int) bounds.getHeight()));
-		
+
+		window.setLocation(new Point(0, 0));
+
 		// This should actually maximize the window, but for some reason does not work (reliably),
 		// so instead we do it manually in the lines above...
-		// window.setExtendedState(mainFrame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		// window.setExtendedState(window.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 	}
 
 	/**
@@ -43,14 +46,14 @@ public class GuiUtils {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				// Center the window
-				window.setLocationRelativeTo(null);
-
 				// Stage everything to be shown
 				window.pack();
 
 				// Actually display the whole jazz
 				window.setVisible(true);
+
+				// Center the window
+				window.setLocationRelativeTo(null);
 			}
 		});
 	}

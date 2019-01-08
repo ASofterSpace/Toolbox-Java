@@ -117,6 +117,21 @@ public class File {
 		return basePath.toAbsolutePath().toString();
 	}
 
+ 	/**
+	 * Get the canonical filename associated with this file object,
+	 * or if it is unavailable, at lest the absolute filename
+	 */
+	public String getCanonicalFilename() {
+
+		try {
+			return getJavaFile().getCanonicalPath();
+
+		} catch (IOException | SecurityException e) {
+
+			return getAbsoluteFilename();
+		}
+	}
+
 	/**
 	 * Get a Java File object representing this file
 	 */

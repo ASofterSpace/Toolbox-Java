@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 31;
+	public final static int TOOLBOX_VERSION_NUMBER = 32;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -134,6 +134,45 @@ public class Utils {
 		}
 
 		return i + "th";
+	}
+
+	public static String leftPadW(int origStr, int length) {
+		return leftPad(""+origStr, ' ', length);
+	}
+
+	public static String leftPadW(String origStr, int length) {
+		return leftPad(origStr, ' ', length);
+	}
+
+	public static String leftPad0(int origStr, int length) {
+		return leftPad(""+origStr, '0', length);
+	}
+
+	public static String leftPad0(String origStr, int length) {
+		return leftPad(origStr, '0', length);
+	}
+
+	public static String leftPad(int origStr, char padWith, int length) {
+		return leftPad(""+origStr, padWith, length);
+	}
+
+	/**
+	 * Takes a string, e.g. blubb, and leftpads it with a character, e.g. _,
+	 * until it reaches a certain length, e.g. 7 - which would give __blubb.
+	 * If length is smaller than the length of origStr, origStr will be
+	 * return without change - it will NOT be truncated!
+	 */
+	public static String leftPad(String origStr, char padWith, int length) {
+
+		StringBuilder result = new StringBuilder();
+
+		result.append(origStr);
+
+		while (result.length() < length) {
+			result.append(padWith);
+		}
+
+		return result.toString();
 	}
 
 	/**
