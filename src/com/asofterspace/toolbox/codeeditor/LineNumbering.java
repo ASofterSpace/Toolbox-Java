@@ -146,6 +146,10 @@ public class LineNumbering extends Code {
 
 	public void highlightOnSelection(Integer dot, Integer mark) {
 
+		if (connectedEditor == null) {
+			return;
+		}
+
 		int end = this.getLength();
 
 		// set the entire document to rightbound - and use paragraph
@@ -153,10 +157,6 @@ public class LineNumbering extends Code {
 		this.setParagraphAttributes(0, end, attrRight, true);
 		// ... and character ones for getting the color back to normal
 		this.setCharacterAttributes(0, end, attrRight, true);
-
-		if (connectedEditor == null) {
-			return;
-		}
 
 		String content = connectedEditor.getText();
 

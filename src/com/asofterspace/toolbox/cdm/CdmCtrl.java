@@ -229,7 +229,7 @@ public class CdmCtrl {
 	private CdmFile loadCdmFileInternally(File cdmFile) throws AttemptingEmfException, CdmLoadingException {
 
 		CdmFile result = null;
-		
+
 		try {
 			result = new CdmFile(cdmFile, this);
 
@@ -238,7 +238,7 @@ public class CdmCtrl {
 		}
 
 		String there_was_a_problem = "There was a problem while loading the CDM file " + cdmFile.getLocalFilename() + ".";
-		
+
 		if (result == null) {
 			throw new CdmLoadingException(there_was_a_problem);
 		}
@@ -758,15 +758,6 @@ public class CdmCtrl {
 			outProblemsFound.add(foundVersions.toString());
 		}
 
-		// TODO :: check that in version 1.14.0, all arguments have names and arg values have names and values!
-		// (and eng args have eng values rather than raw values...)
-
-		// TODO :: check that all activity mappers are fully filled (e.g. no script or activity missing)
-
-		// TODO :: check that all CIs have at least one child
-
-		// TODO :: check that all references actually lead to somewhere
-
 		// check that there is exactly one root node of the merged MCM tree (so no more or less than one MCE that is not
 		// listed in other MCEs as subElement)
 		if (getMonitoringControlElements().size() < 1) {
@@ -780,7 +771,10 @@ public class CdmCtrl {
 			outProblemsFound.add("The MCM tree seems to have " + getAllMcmTreeRoots().size() + " root nodes, which means that there are " + getAllMcmTreeRoots().size() + " times as many root nodes as are allowed! ;)");
 		}
 
-		// TODO :: check that every MCE has an MCE definition
+		// check everything that can be easier checked by looking at each CDM file individually
+		for (CdmFile file : cdmFiles) {
+			verdict += file.checkValidity(outProblemsFound);
+		}
 
 		return verdict;
 	}
@@ -1191,19 +1185,19 @@ public class CdmCtrl {
 
 		return result;
 	}
-	
+
 	// this one is right, the other one is left
 	public List<String> findDifferencesFrom(CdmCtrl otherCdm) {
-	
+
 		List<String> result = new ArrayList<>();
-		
+
 		List<CdmFile> onlyLeft = new ArrayList<>(otherCdm.getCdmFiles());
 		List<CdmFile> onlyRight = new ArrayList<>(getCdmFiles());
 		List<Pair<CdmFile, CdmFile>> both = new ArrayList<>();
-		
+
 		for (CdmFile file : getCdmFiles()) {
 			String relativePath = file.getPathRelativeToCdmRoot();
-			
+
 			for (CdmFile otherFile : otherCdm.getCdmFiles()) {
 				if (relativePath.equals(otherFile.getPathRelativeToCdmRoot())) {
 					both.add(new Pair<>(otherFile, file));
@@ -1213,7 +1207,7 @@ public class CdmCtrl {
 				}
 			}
 		}
-		
+
 		if (onlyLeft.size() > 0) {
 			if (onlyLeft.size() == 1) {
 				result.add("This file is only contained in the left CDM:");
@@ -1224,7 +1218,7 @@ public class CdmCtrl {
 				result.add("  " + onlyLeftFile.getPathRelativeToCdmRoot());
 			}
 		}
-		
+
 		if (onlyRight.size() > 0) {
 			if (onlyRight.size() == 1) {
 				result.add("This file is only contained in the right CDM:");
@@ -1235,11 +1229,11 @@ public class CdmCtrl {
 				result.add("  " + onlyRightFile.getPathRelativeToCdmRoot());
 			}
 		}
-		
+
 		for (Pair<CdmFile, CdmFile> filePair : both) {
 			result.addAll(filePair.getRight().findDifferencesFrom(filePair.getLeft()));
 		}
-		
+
 		return result;
 	}
 

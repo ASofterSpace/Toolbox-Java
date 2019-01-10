@@ -140,10 +140,10 @@ public class CdmFile extends CdmFileBase {
 		newMappedScript.setAttribute("href", scriptFile + "#" + scriptId);
 
 		CdmScript2Activity newNode = new CdmScript2Activity(this, newMapping, cdmCtrl);
-		
+
 		// update cdm ctrl model with the new node
 		cdmCtrl.addToModel(newNode);
-		
+
 		return newNode;
 	}
 
@@ -199,5 +199,248 @@ public class CdmFile extends CdmFileBase {
 		}
 
 		return root.getChildNodes().size();
+	}
+
+
+	/**
+	 * Check if the CDM file in isolation is valid (for checking
+	 * the full CDM, look into CdmCtrl.checkValidity()!)
+	 * returns 0 if it is valid, and the amount of problems
+	 * encountered if it is not;
+	 * in the case of it not being valid, the List<String>
+	 * that has been passed in will be filled with more detailed
+	 * explanations about why it is not valid
+	 */
+	public int checkValidity(List<String> outProblemsFound) {
+
+		// innocent unless proven otherwise
+		int verdict = 0;
+
+		// TODO :: check that in version 1.14.0, all arguments have names and arg values have names and values!
+		// (and eng args have eng values rather than raw values...)
+
+		// TODO :: check that all activity mappers are fully filled (e.g. no script or activity missing)
+
+		// TODO :: check that all CIs have at least one child
+
+		// check that all references actually lead to somewhere
+		XmlElement startElement = getRoot();
+		verdict += checkValidity_ReferenceLeadSomewhere(outProblemsFound, startElement);
+
+		// TODO :: check that every MCE has an MCE definition
+
+		// check that all values are adequate for their types
+		// (e.g. limit checks with boolean values that are assigned to integer parameters will not work and,
+		// if unreported, lead to wonky problems later on!)
+		verdict += checkValidity_ValuesAndTypesAlign(outProblemsFound);
+
+		return verdict;
+	}
+
+	private int checkValidity_ReferenceLeadSomewhere(List<String> outProblemsFound, XmlElement currentElement) {
+
+		// innocent unless proven otherwise
+		int verdict = 0;
+
+		String nodeName = currentElement.getNodeName();
+
+		if (nodeName != null) {
+
+			// TODO :: check even more kinds of references!
+
+			switch (nodeName) {
+				case "monitoringControlElement":
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "definition");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "controlledSystemRootDefinition");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "defaultServiceAccessPoint");
+					verdict += checkValidity_ReferenceLeadSomewhere_Multi(outProblemsFound, currentElement, "subElements");
+				break;
+
+				case "monitoringControlElementAspects":
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "baseElement");
+				break;
+
+				case "arguments":
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "engineeringArgumentDefinition");
+				break;
+
+				case "checksForParameterMonitoring":
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "highLimitEvent");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "lowLimitEvent");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "limitCheckDefinition");
+				break;
+
+				case "abstractDataType":
+					verdict += checkValidity_ReferenceLeadSomewhere_Multi(outProblemsFound, currentElement, "realDisplayFormat");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "lengthEncoding");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "byteStreamDisplayFormat");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "timeDisplayFormat");
+					verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "stringDisplayFormat");
+				break;
+			}
+		}
+
+		// everything (and their dog) can contain an attribute called href that is then a single link
+		verdict += checkValidity_ReferenceLeadSomewhere_Single(outProblemsFound, currentElement, "href");
+
+		List<XmlElement> children = currentElement.getChildNodes();
+
+		for (XmlElement child : children) {
+			verdict += checkValidity_ReferenceLeadSomewhere(outProblemsFound, child);
+		}
+
+		return verdict;
+	}
+
+	private int checkValidity_ReferenceLeadSomewhere_Single(List<String> outProblemsFound, XmlElement currentElement, String key) {
+
+		// innocent unless proven otherwise
+		int verdict = 0;
+
+		String ref = currentElement.getAttribute(key);
+		if (ref != null) {
+			if (cdmCtrl.getByUuid(ref) == null) {
+				verdict++;
+				outProblemsFound.add(this.getLocalFilename() + "#" + currentElement.getAttribute("xmi:id") +
+					" has the attribute " + key + " which references the element " +
+					ref + " - but it cannot be found!");
+			}
+		}
+
+		return verdict;
+	}
+
+	private int checkValidity_ReferenceLeadSomewhere_Multi(List<String> outProblemsFound, XmlElement currentElement, String key) {
+
+		// innocent unless proven otherwise
+		int verdict = 0;
+
+		String refs = currentElement.getAttribute(key);
+		if (refs != null) {
+			String[] refa = refs.split(" ");
+			for (String ref : refa) {
+				if (cdmCtrl.getByUuid(ref) == null) {
+					verdict++;
+					outProblemsFound.add(this.getLocalFilename() + "#" + currentElement.getAttribute("xmi:id") +
+						" has the attribute " + key + " which references the element " +
+						ref + " - but it cannot be found!");
+				}
+			}
+		}
+
+		return verdict;
+	}
+
+	private int checkValidity_ValuesAndTypesAlign(List<String> outProblemsFound) {
+
+		// innocent unless proven otherwise
+		int verdict = 0;
+
+		List<XmlElement> engParas = domGetElems("monitoringControlElementAspects", "xsi:type", "monitoringcontrolmodel:EngineeringParameter");
+
+		for (XmlElement engPara : engParas) {
+			XmlElement engDataType = engPara.getChild("engineeringDataType");
+			String engXsiDataType = engDataType.getAttribute("xsi:type");
+			String href = engDataType.getAttribute("href");
+			if (href != null) {
+				XmlElement engDataTypeEl = cdmCtrl.getByUuid(href);
+				String engXsiDataTypeEl = engDataTypeEl.getAttribute("xsi:type");
+				if (!engXsiDataType.equals(engXsiDataTypeEl)) {
+					verdict++;
+					outProblemsFound.add(this.getLocalFilename() + "#" +
+						engPara.getAttribute("xmi:id") +
+						" has the type " + engXsiDataType +
+						" but when we follow its reference we get element " +
+						href + " with type " + engXsiDataTypeEl +
+						" - these two really should be matching!");
+				}
+			}
+
+			XmlElement engDispFormat = engPara.getChild("engineeringDisplayFormat");
+			String engXsiDispFormat = engDispFormat.getAttribute("xsi:type");
+			href = engDispFormat.getAttribute("href");
+			if (href != null) {
+				XmlElement engDispFormatEl = cdmCtrl.getByUuid(href);
+				String engXsiDispFormatEl = engDispFormatEl.getAttribute("xsi:type");
+				if (!engXsiDispFormat.equals(engXsiDispFormatEl)) {
+					verdict++;
+					outProblemsFound.add(this.getLocalFilename() + "#" +
+						engPara.getAttribute("xmi:id") +
+						" has the display format " + engXsiDispFormat +
+						" but when we follow its reference we get element " +
+						href + " with type " + engXsiDispFormatEl +
+						" - these two really should be matching!");
+				}
+			}
+
+			// usually, we want these to match exactly...
+			if (!engXsiDispFormat.equals(engXsiDataType + "DisplayFormat")) {
+				// ... but there are a few exceptions that are also okay...
+				boolean okay = false;
+				if (engXsiDispFormat.equals("monitoringcontrolcommon:StringDisplayFormat") &&
+					engXsiDataType.equals("monitoringcontrolcommon:VariableString")) {
+						okay = true;
+				}
+				if (engXsiDispFormat.equals("monitoringcontrolcommon:ByteStreamDisplayFormat") &&
+					engXsiDataType.equals("monitoringcontrolcommon:VariableByteStream")) {
+						okay = true;
+				}
+				if (engXsiDispFormat.equals("monitoringcontrolcommon:BitStreamDisplayFormat") &&
+					engXsiDataType.equals("monitoringcontrolcommon:VariableBitStream")) {
+						okay = true;
+				}
+				if (engXsiDispFormat.equals("monitoringcontrolcommon:TimeDisplayFormat") &&
+					engXsiDataType.equals("monitoringcontrolcommon:AbsoluteCUCTime")) {
+						okay = true;
+				}
+				if (engXsiDispFormat.equals("monitoringcontrolcommon:TimeDisplayFormat") &&
+					engXsiDataType.equals("monitoringcontrolcommon:RelativeCUCTime")) {
+						okay = true;
+				}
+				if (engXsiDataType.equals("monitoringcontrolcommon:EnumerationDataType")) {
+					// TODO :: check enumerations more strictly!
+					okay = true;
+				}
+				// ... however, if none of the exception occurred, then obviously this is NOT okay!
+				if (!okay) {
+					verdict++;
+					outProblemsFound.add(this.getLocalFilename() + "#" +
+						engPara.getAttribute("xmi:id") +
+						" has the type " + engXsiDataType +
+						" but it has the display format " + engXsiDispFormat +
+						" - we would expect the display format " + engXsiDataType +
+						"DisplayFormat!");
+				}
+			}
+
+			XmlElement checksForPMon = engPara.getChild("checksForParameterMonitoring");
+			if (checksForPMon != null) {
+				String limitCheckDefHref = checksForPMon.getAttribute("limitCheckDefinition");
+				XmlElement limitCheckDefEl = cdmCtrl.getByUuid(limitCheckDefHref);
+				if (limitCheckDefEl != null) {
+					for (XmlElement limit : limitCheckDefEl.getChildNodes()) {
+						String value = limit.getAttribute("value");
+						if (value != null) {
+							if (engXsiDataType.startsWith("monitoringcontrolcommon:Unsigned")) {
+								if (value.startsWith("-")) {
+									verdict++;
+									outProblemsFound.add(this.getLocalFilename() + "#" +
+										engPara.getAttribute("xmi:id") +
+										" has the type " + engXsiDataType +
+										" but also has a limit check with id " +
+										limitCheckDefHref +
+										" which has " + limit.getNodeName() +
+										" with value " + value +
+										" - and negative values do not like being" +
+										" limits for unsigned parameters!");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return verdict;
 	}
 }
