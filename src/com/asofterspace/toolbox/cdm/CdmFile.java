@@ -320,6 +320,9 @@ public class CdmFile extends CdmFileBase {
 		if (refs != null) {
 			String[] refa = refs.split(" ");
 			for (String ref : refa) {
+				if ("".equals(ref)) {
+					continue;
+				}
 				if (cdmCtrl.getByUuid(ref) == null) {
 					verdict++;
 					outProblemsFound.add(this.getLocalFilename() + "#" + currentElement.getAttribute("xmi:id") +
@@ -392,6 +395,14 @@ public class CdmFile extends CdmFileBase {
 				}
 				if (engXsiDispFormat.equals("monitoringcontrolcommon:TimeDisplayFormat") &&
 					engXsiDataType.equals("monitoringcontrolcommon:AbsoluteCUCTime")) {
+						okay = true;
+				}
+				if (engXsiDispFormat.equals("monitoringcontrolcommon:TimeDisplayFormat") &&
+					engXsiDataType.equals("monitoringcontrolcommon:AbsoluteCDSTime")) {
+						okay = true;
+				}
+				if (engXsiDispFormat.equals("monitoringcontrolcommon:TimeDisplayFormat") &&
+					engXsiDataType.equals("monitoringcontrolcommon:EpochTime")) {
 						okay = true;
 				}
 				if (engXsiDispFormat.equals("monitoringcontrolcommon:TimeDisplayFormat") &&
