@@ -227,7 +227,8 @@ public class CdmFile extends CdmFileBase {
 		XmlElement startElement = getRoot();
 		verdict += checkValidity_ReferenceLeadSomewhere(outProblemsFound, startElement);
 
-		// TODO :: check that every MCE has an MCE definition
+		// check that every MCE has an MCE definition
+		verdict += checkValidity_MCEsHaveDefinitions(outProblemsFound);
 
 		// check that all values are adequate for their types
 		// (e.g. limit checks with boolean values that are assigned to integer parameters will not work and,
@@ -443,4 +444,46 @@ public class CdmFile extends CdmFileBase {
 
 		return verdict;
 	}
+
+	private int checkValidity_MCEsHaveDefinitions(List<String> outProblemsFound) {
+
+		// innocent unless proven otherwise
+		int verdict = 0;
+
+		List<XmlElement> mces = domGetElems("monitoringControlElement");
+
+		for (XmlElement mce : mces) {
+
+			String type = mce.getAttribute("xsi:type");
+
+			String mceDefHref;
+
+			if ("monitoringcontrolmodel:ControlledSystemRoot".equals(type)) {
+				mceDefHref = mce.getAttribute("controlledSystemRootDefinition");
+			} else {
+				mceDefHref = mce.getAttribute("definition");
+			}
+
+			XmlElement mceDef = cdmCtrl.getByUuid(mceDefHref);
+
+			if (mceDef == null) {
+				verdict++;
+				outProblemsFound.add(this.getLocalFilename() + "#" +
+					mce.getAttribute("xmi:id") +
+					" is a monitoringControlElement but has no definition attached!");
+			} else {
+				if (!"monitoringControlElementDefinition".equals(mceDef.getNodeName())) {
+					verdict++;
+					outProblemsFound.add(this.getLocalFilename() + "#" +
+						mce.getAttribute("xmi:id") +
+						" is a monitoringControlElement with definition " +
+						mceDefHref + " - but the tag name of the definition is " +
+						mceDef.getNodeName() + " instead of the expected monitoringControlElementDefinition!");
+				}
+			}
+		}
+
+		return verdict;
+	}
+
 }
