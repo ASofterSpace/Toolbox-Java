@@ -10,6 +10,7 @@ import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
+import com.asofterspace.toolbox.io.SimpleFile;
 import com.asofterspace.toolbox.utils.NoOpProgressIndicator;
 import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.ProgressIndicator;
@@ -900,7 +901,7 @@ public class CdmCtrl {
 			"<" + CI_SCRIPT_TO_ACTIVITY + " xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" " + getXMLNS() + " xmi:id=\"" + UuidEncoderDecoder.generateEcoreUUID() + "\" externalVersionLabel=\"Created by the " + Utils.getFullProgramIdentifier() + "\" name=\"" + newCiName + "\" onlineRevisionIdentifier=\"0\">\n" +
 			"</" + CI_SCRIPT_TO_ACTIVITY + ">";
 
-		File tmpCi = new File("tmpfile.tmp");
+		SimpleFile tmpCi = new SimpleFile("tmpfile.tmp");
 		tmpCi.setContent(newCiContent);
 		tmpCi.save();
 
@@ -981,7 +982,7 @@ public class CdmCtrl {
 		String newCiName;
 		String mcmRootDefinitionUuid;
 		String resourceMcmContent;
-		File mcmCi;
+		SimpleFile mcmCi;
 
 		// btw., all of our templates are written for version 1.14.0... so we convert them later on in this function to whatever version is actually required ^^
 		String templateVersion = "1.14.0";
@@ -1004,7 +1005,7 @@ public class CdmCtrl {
 					"  </monitoringControlElementDefinition>\n" +
 					"</configurationcontrol:McmCI>";
 
-				mcmCi = new File(cdmDir, "Resource_" + newCiName + ".cdm");
+				mcmCi = new SimpleFile(cdmDir, "Resource_" + newCiName + ".cdm");
 				mcmCi.setContent(resourceMcmContent);
 				mcmCi.save();
 
@@ -1025,7 +1026,7 @@ public class CdmCtrl {
 					"  <abstractDataDisplayFormat xsi:type=\"monitoringcontrolcommon:SignedIntegerDisplayFormat\" xmi:id=\"" + displayFormatUuid + "\" name=\"INT32Format\" format=\"decimal\"/>\n" +
 					"</configurationcontrol:DataTypesCI>\n";
 
-				mcmCi = new File(cdmDir, "Resource_" + newCiName + ".cdm");
+				mcmCi = new SimpleFile(cdmDir, "Resource_" + newCiName + ".cdm");
 				mcmCi.setContent(resourceMcmContent);
 				mcmCi.save();
 
@@ -1061,7 +1062,7 @@ public class CdmCtrl {
 					"  </monitoringControlElementDefinition>\n" +
 					"</configurationcontrol:McmCI>";
 
-				mcmCi = new File(cdmDir, "Resource_" + newCiName + ".cdm");
+				mcmCi = new SimpleFile(cdmDir, "Resource_" + newCiName + ".cdm");
 				mcmCi.setContent(resourceMcmContent);
 				mcmCi.save();
 

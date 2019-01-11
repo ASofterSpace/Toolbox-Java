@@ -5,14 +5,11 @@
 package com.asofterspace.toolbox.configuration;
 
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JSON;
 
 
-public class ConfigFile {
-
-	private String filename;
-
-	private JSON content;
+public class ConfigFile extends JsonFile {
 
 	private static final String FOLDER = "/config/";
 
@@ -22,8 +19,7 @@ public class ConfigFile {
 	/**
 	 * Please do not construct a config file without a name ;)
 	 */
-	@SuppressWarnings("unused")
-	private ConfigFile() {
+	protected ConfigFile() {
 	}
 
 	/**
@@ -33,7 +29,9 @@ public class ConfigFile {
 	 */
 	public ConfigFile(String name) {
 
-		setConfigFilename(name, false);
+		super(getConfigFilename(name, false));
+
+		createParentDirectory();
 	}
 
 	/**
@@ -45,17 +43,19 @@ public class ConfigFile {
 	 */
 	public ConfigFile(String name, Boolean baseOnClasspath) {
 
-		setConfigFilename(name, baseOnClasspath);
+		super(getConfigFilename(name, baseOnClasspath));
+
+		createParentDirectory();
 	}
 
-	private void setConfigFilename(String name, Boolean baseOnClasspath) {
+	private static String getConfigFilename(String name, Boolean baseOnClasspath) {
 
 		if (baseOnClasspath == null) {
 			baseOnClasspath = false;
 		}
 
 		// start with the given name
- 		filename = name;
+ 		String filename = name;
 
 		// apply an extension, if necessary
  		if (!filename.contains(".")) {
@@ -74,171 +74,29 @@ public class ConfigFile {
 			}
  		}
 
- 		loadFromFile();
+ 		return filename;
 	}
 
-	/**
-	 * Loads the configuration from a file (this is called internally
-	 * and does not need to be called from the outside world)
-	 */
-	private void loadFromFile() {
-
-		File correspondingFile = new File(filename);
-
-		// if no file could be loaded, then we will have to default to an empty one
-		if (correspondingFile == null) {
-			content = new JSON();
-		} else {
-			// here, we do NOT want to complain if the content is missing - as it is entirely reasonable
-			// that a program is opened for the first time, and the config has not been written before
-			content = new JSON(correspondingFile.getContent(false));
-		}
-	}
-
-	/**
-	 * Stores the configuration on the file system (this is called
-	 * internally and does not need to be called from the outside
-	 * world)
-	 */
-	private void saveToFile() {
-
-		String uncompressedJson = content.toString(false);
-
-		File correspondingFile = new File(filename);
-
-		correspondingFile.saveContent(uncompressedJson);
-	}
-
-	/**
-	 * Gets all the contents as JSON container
-	 * @return all the contents
-	 */
-	public JSON getAllContents() {
-
-		return content;
-	}
-
-	/**
-	 * Gets the value stored with the given key
-	 * @param key
-	 * @return the value stored in the key, or null if it cannot be found
-	 */
-	public String getValue(String key) {
-
-		return content.getString(key);
-	}
-
-	/**
-	 * Gets the value stored with the given key
-	 * @param key
-	 * @return the value stored in the key, or 0 if it cannot be found
-	 */
-	public int getInteger(String key) {
-
-		return getInteger(key, 0);
-	}
-
-	/**
-	 * Gets the value stored with the given key
-	 * @param key
-	 * @param defaultValue
-	 * @return the value stored in the key, or defaultValue if it cannot be found
-	 */
-	public int getInteger(String key, int defaultValue) {
-
-		Integer result = content.getInteger(key);
-
-		if (result == null) {
-			return defaultValue;
-		}
-
-		return result;
-	}
-
-	/**
-	 * Gets the value stored with the given key
-	 * @param key
-	 * @return the value stored in the key, or false if it cannot be found
-	 */
-	public boolean getBoolean(String key) {
-
-		return getBoolean(key, false);
-	}
-
-	/**
-	 * Gets the value stored with the given key
-	 * @param key
-	 * @param defaultValue
-	 * @return the value stored in the key, or defaultValue if it cannot be found
-	 */
-	public boolean getBoolean(String key, boolean defaultValue) {
-
-		Boolean result = content.getBoolean(key);
-
-		if (result == null) {
-			return defaultValue;
-		}
-
-		return result;
-	}
-
-	/**
-	 * Sets all the contents based on a JSON container
-	 * @param newContent
-	 */
+	// setting works exactly like in JSON files - but we are making it a bit simpler:
+	// we are also saving, and also ensuring the parent folder exists
 	public void setAllContents(JSON newContent) {
-
-		this.content = newContent;
-
-		saveToFile();
+		super.setAllContents(newContent);
+		create();
 	}
-
-	/**
-	 * Stores the value in the configuration with the given key
-	 * @param key
-	 * @param value
-	 */
 	public void set(String key, String value) {
-
-		content.setString(key, value);
-
-		saveToFile();
+		super.set(key, value);
+		create();
 	}
-
-	/**
-	 * Stores the value in the configuration with the given key
-	 * @param key
-	 * @param value
-	 */
 	public void set(String key, Integer value) {
-
-		content.set(key, new JSON(value));
-
-		saveToFile();
+		super.set(key, value);
+		create();
 	}
-
-	/**
-	 * Stores the value in the configuration with the given key
-	 * @param key
-	 * @param value
-	 */
 	public void set(String key, Boolean value) {
-
-		content.set(key, new JSON(value));
-
-		saveToFile();
+		super.set(key, value);
+		create();
 	}
-
-	/**
-	 * Stores the value in the configuration with the given key
-	 * @param key
-	 * @param value
-	 */
 	public void set(String key, JSON value) {
-
-		content.set(key, value);
-
-		saveToFile();
+		super.set(key, value);
+		create();
 	}
-
 }

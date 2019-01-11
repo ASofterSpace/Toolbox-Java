@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 32;
+	public final static int TOOLBOX_VERSION_NUMBER = 33;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -169,7 +169,7 @@ public class Utils {
 		result.append(origStr);
 
 		while (result.length() < length) {
-			result.append(padWith);
+			result.insert(0, padWith);
 		}
 
 		return result.toString();

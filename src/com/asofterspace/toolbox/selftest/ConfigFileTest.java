@@ -34,7 +34,7 @@ public class ConfigFileTest implements Test {
 		confFile1.set(testkey, testvalue);
 
 		ConfigFile confFile2 = new ConfigFile(testfile);
-		
+
 		if (testvalue.equals(confFile2.getValue(testkey))) {
 			TestUtils.succeed();
 			return;

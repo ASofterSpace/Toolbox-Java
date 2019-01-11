@@ -29,12 +29,12 @@ public class BinaryFile extends File {
 	// the Unicode letters that we are aware of into their same-byte counterparts or whatever... ^^)
 	public static final Charset BINARY_CHARSET = StandardCharsets.ISO_8859_1;
 
-	
+
 	/**
 	 * You can construct a BinaryFile instance by directly from a path name.
 	 */
 	public BinaryFile(String fullyQualifiedFileName) {
-	
+
 		super(fullyQualifiedFileName);
 	}
 
@@ -42,24 +42,24 @@ public class BinaryFile extends File {
 	 * You can construct a BinaryFile instance by basing it on an existing file object.
 	 */
 	public BinaryFile(File regularFile) {
-	
+
 		super(regularFile);
 	}
-	
+
 	public byte[] loadContent() {
-	
+
 		try {
 			return Files.readAllBytes(Paths.get(this.filename));
-					
+
 		} catch (IOException | ArrayIndexOutOfBoundsException e) {
 			System.err.println("[ERROR] Trying to load the file " + filename + ", but there was an exception - inconceivable!\n" + e);
 		}
-		
+
 		return new byte[0];
 	}
 
 	public String loadContentStr() {
-	
+
 		return new String(loadContent(), BINARY_CHARSET);
 	}
 
@@ -68,8 +68,29 @@ public class BinaryFile extends File {
 	}
 
 	public void saveContentStr(String content) {
-	
-		super.saveContentDirectly(content, BINARY_CHARSET);
+
+		saveContentStr(content, BINARY_CHARSET);
 	}
-	
+
+	/**
+	 * Allows saving content directly, without it being interpreted as list of lines and acted upon
+	 * Attention: Due to the nature of this function, it does NOT change the content buffered in this
+	 * file instance; when reading content, it will be read from the buffer or disk, but not from the
+	 * string you just supplied!
+	 * Often used charsets are:
+	 * StandardCharsets.ISO_8859_1 (Latin-1, covers the entire byte range of ASCII)
+	 * StandardCharsets.UTF_8 (compatible with ASCII 0..127, but adds up to 4 byte wide character to get all of Unicode)
+	 */
+	public void saveContentStr(String content, Charset charset) {
+
+		// fill file with data
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(initSave()), charset)) {
+
+			writer.write(content);
+
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + filename + " - inconceivable!");
+		}
+	}
+
 }
