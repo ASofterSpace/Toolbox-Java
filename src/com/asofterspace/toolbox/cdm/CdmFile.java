@@ -428,23 +428,46 @@ public class CdmFile extends CdmFileBase {
 			XmlElement checksForPMon = engPara.getChild("checksForParameterMonitoring");
 			if (checksForPMon != null) {
 				String limitCheckDefHref = checksForPMon.getAttribute("limitCheckDefinition");
-				XmlElement limitCheckDefEl = cdmCtrl.getByUuid(limitCheckDefHref);
-				if (limitCheckDefEl != null) {
-					for (XmlElement limit : limitCheckDefEl.getChildNodes()) {
-						String value = limit.getAttribute("value");
-						if (value != null) {
-							if (engXsiDataType.startsWith("monitoringcontrolcommon:Unsigned")) {
-								if (value.startsWith("-")) {
-									verdict++;
-									outProblemsFound.add(this.getLocalFilename() + "#" +
-										engPara.getAttribute("xmi:id") +
-										" has the type " + engXsiDataType +
-										" but also has a limit check with id " +
-										limitCheckDefHref +
-										" which has " + limit.getNodeName() +
-										" with value " + value +
-										" - and negative values do not like being" +
-										" limits for unsigned parameters!");
+				if (engXsiDataType.equals("monitoringcontrolcommon:EnumerationDataType")) {
+					verdict++;
+					outProblemsFound.add(this.getLocalFilename() + "#" +
+						engPara.getAttribute("xmi:id") +
+						" has the type " + engXsiDataType +
+						" but also has a limit check with id " +
+						limitCheckDefHref +
+						" - and EGS-CC does not like limit checks" +
+						" for enumerations!");
+				} else {
+					XmlElement limitCheckDefEl = cdmCtrl.getByUuid(limitCheckDefHref);
+					if (limitCheckDefEl != null) {
+						for (XmlElement limit : limitCheckDefEl.getChildNodes()) {
+							String value = limit.getAttribute("value");
+							if (value != null) {
+								if (engXsiDataType.startsWith("monitoringcontrolcommon:Unsigned")) {
+									if (value.startsWith("-")) {
+										verdict++;
+										outProblemsFound.add(this.getLocalFilename() + "#" +
+											engPara.getAttribute("xmi:id") +
+											" has the type " + engXsiDataType +
+											" but also has a limit check with id " +
+											limitCheckDefHref +
+											" which has " + limit.getNodeName() +
+											" with value " + value +
+											" - and negative values do not like being" +
+											" limits for unsigned parameters!");
+									}
+									if (value.equals("true") || value.equals("false")) {
+										verdict++;
+										outProblemsFound.add(this.getLocalFilename() + "#" +
+											engPara.getAttribute("xmi:id") +
+											" has the type " + engXsiDataType +
+											" but also has a limit check with id " +
+											limitCheckDefHref +
+											" which has " + limit.getNodeName() +
+											" with value " + value +
+											" - and booleans do not like being" +
+											" limits for unsigned parameters!");
+									}
 								}
 							}
 						}

@@ -280,8 +280,10 @@ public class CdmCtrl {
 
 	/**
 	 * Reload the entire internal model of the CDM
+	 * Call this at a later stage if you loaded the CDM in a fast way
+	 * and later on realize that you actually need to fully load it
 	 */
-	private void reloadModel() {
+	public void reloadModel() {
 
 		initFullModel();
 

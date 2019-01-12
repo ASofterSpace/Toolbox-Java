@@ -19,33 +19,33 @@ import org.xml.sax.Attributes;
 public class XmlElement {
 
 	private String name = null;
-	
-	private String innerText;
-	
-	private TinyMap attributes;
-	
-	private XmlElement xmlParent;
-	
-	private List<XmlElement> xmlChildren;
 
-	
+	private String innerText;
+
+	private TinyMap attributes;
+
+	private XmlElement xmlParent;
+
+	protected List<XmlElement> xmlChildren;
+
+
 	public XmlElement(String name, Attributes attributes) {
 
 		TinyMap attrMap = new TinyMap(attributes.getLength());
-		
+
 		for (int i = 0; i < attributes.getLength(); i++) {
-		
+
 			// internalize all keys
 			String key = attributes.getQName(i).intern();
-			
+
 			// only internalize a FEW values, based on their keys
 			String val = attributes.getValue(i);
-			
+
 			// we can use == comparison as the key has already been internalized
 			if (key == "xsi:type") {
 				val = val.intern();
 			}
-			
+
 			attrMap.putFast(key, val);
 		}
 
@@ -58,24 +58,24 @@ public class XmlElement {
 	}
 
 	private void construct(String name, TinyMap attributes) {
-	
+
 		// internalize the node names
 		if (name != null) {
 			this.name = name.intern();
 		}
-		
+
 		this.innerText = null;
-		
+
 		this.attributes = attributes;
 
 		this.xmlParent = null;
-		
+
 		this.xmlChildren = new ArrayList<>();
 	}
-	
+
 	protected XmlElement() {
 	}
-	
+
 	public void copyTo(XmlElement other) {
 		other.name = name;
 		other.innerText = innerText;
@@ -83,51 +83,55 @@ public class XmlElement {
 		other.xmlParent = xmlParent;
 		other.xmlChildren = xmlChildren;
 	}
-	
+
 	public String getNodeName() {
 		return name;
 	}
-	
+
 	public void setNodeName(String name) {
 		this.name = name;
 	}
-	
+
 	public List<XmlElement> getChildNodes() {
 		return xmlChildren;
 	}
-	
+
 	public void removeChild(XmlElement xmlEl) {
 		xmlChildren.remove(xmlEl);
 	}
-	
+
 	public void addChild(XmlElement newChild) {
 		this.xmlChildren.add(newChild);
 		newChild.xmlParent = this;
 	}
-	
+
 	public XmlElement createChild(String tagName) {
-	
+
 		XmlElement newChild = new XmlElement();
-		
+
 		newChild.name = tagName;
-		
+
 		newChild.innerText = null;
-		
+
 		newChild.attributes = new TinyMap();
-		
+
 		newChild.xmlParent = this;
-		
+
 		newChild.xmlChildren = new ArrayList<>();
-		
+
 		xmlChildren.add(newChild);
-		
+
 		return newChild;
 	}
-	
+
 	public XmlElement getXmlParent() {
 		return xmlParent;
 	}
-	
+
+	public void setXmlParent(XmlElement newParent) {
+		xmlParent = newParent;
+	}
+
 	/**
 	 * Get one child with the given tag name, if any such child exists
 	 */
@@ -139,7 +143,7 @@ public class XmlElement {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Recursively get elements by any of several tag names
 	 */
@@ -148,7 +152,7 @@ public class XmlElement {
 		getElementsByTagNames(tagNames, result);
 		return result;
 	}
-	
+
 	private void getElementsByTagNames(String[] tagNames, List<XmlElement> outResult) {
 		for (String tagName : tagNames) {
 			if (name.equals(tagName)) {
@@ -156,7 +160,7 @@ public class XmlElement {
 				break;
 			}
 		}
-		
+
 		for (XmlElement child : xmlChildren) {
 			child.getElementsByTagNames(tagNames, outResult);
 		}
@@ -170,12 +174,12 @@ public class XmlElement {
 		getElementsByTagName(tagName, result);
 		return result;
 	}
-	
+
 	private void getElementsByTagName(String tagName, List<XmlElement> outResult) {
 		if (name.equals(tagName)) {
 			outResult.add(this);
 		}
-		
+
 		for (XmlElement child : xmlChildren) {
 			child.getElementsByTagName(tagName, outResult);
 		}
@@ -189,41 +193,41 @@ public class XmlElement {
 	 * with further intermediate elements in between)
 	 */
 	public List<XmlElement> getElementsByTagNameHierarchy(String... tagNameHierarchy) {
-		
+
 		if (tagNameHierarchy == null) {
 			return null;
 		}
-		
+
 		if (tagNameHierarchy.length < 1) {
 			return null;
 		}
-		
+
 		List<XmlElement> result = new ArrayList<>();
-		
+
 		getElementsByTagNameHierarchy(tagNameHierarchy, result, 0);
-		
+
 		return result;
 	}
-	
+
 	private void getElementsByTagNameHierarchy(String[] tagNameHierarchy, List<XmlElement> outResult, int hierarchyLevel) {
-		
+
 		// check that this element has the correct name in the hierarchy
 		if (!name.equals(tagNameHierarchy[hierarchyLevel])) {
 			return;
 		}
-		
+
 		// check if we need to go any deeper
 		if (hierarchyLevel < tagNameHierarchy.length - 1) {
-		
+
 			// increase the hierarchy level when looking through children
 			hierarchyLevel++;
-		
+
 			for (XmlElement child : xmlChildren) {
 				child.getElementsByTagNameHierarchy(tagNameHierarchy, outResult, hierarchyLevel);
 			}
-			
+
 		} else {
-			
+
 			// we do not need to go deeper - we are found!
 			outResult.add(this);
 		}
@@ -235,25 +239,25 @@ public class XmlElement {
 		}
 		return attributes.get(key);
 	}
-	
+
 	public TinyMap getAttributes() {
 		return attributes;
 	}
-	
+
 	public void setAttribute(String key, String value) {
 		attributes.put(key, value);
 	}
-	
+
 	public void removeAttribute(String key) {
 		attributes.remove(key);
 	}
-	
+
 	public String getInnerText() {
 		return innerText;
 	}
-	
+
 	public void appendInnerText(String furtherInnerText) {
-		
+
 		if (this.innerText == null) {
 			this.innerText = furtherInnerText;
 		} else {
@@ -296,7 +300,7 @@ public class XmlElement {
 
 		return null;
 	}
-	
+
 	public void writeToFile(OutputStreamWriter writer) throws IOException {
 		writer.write("<" + name + attributes.toXmlAttributesStr());
 		if (xmlChildren.size() < 1) {
