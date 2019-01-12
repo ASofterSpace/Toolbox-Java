@@ -11,6 +11,7 @@ import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.SimpleFile;
+import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.utils.NoOpProgressIndicator;
 import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.ProgressIndicator;
@@ -309,6 +310,16 @@ public class CdmCtrl {
 
 	/**
 	 * Adds one node to our internal model - called from cdmFile, after we call it in addContentsToCdmCtrl
+	 */
+	void addToModel(CdmFileBase parentFile, XmlElement xmEl) {
+
+		CdmNode cdmNode = getByXmlElement(parentFile, xmEl);
+
+		addToModel(cdmNode);
+	}
+
+	/**
+	 * Adds one node to our internal model
 	 */
 	void addToModel(CdmNode cdmNode) {
 
@@ -1124,6 +1135,32 @@ public class CdmCtrl {
 	}
 
 	/**
+	 * This is the way - THE ONLY WAY - to get CdmNodes, ANYWHERE.
+	 * You don't construct them or whatever - you use this CdmCtrl
+	 * as factory to get them.
+	 * The reason why: It keeps track of whether the xml element
+	 * was already converted to a CdmNode or not, and if it was,
+	 * you get that existing CdmNode and not a new one!
+	 * TODO :: also take care that other elements, such as CdmProcedure
+	 * etc., never get created except once (e.g. in here) and elsewise
+	 * just get gotten...
+	 */
+	public CdmNode getByXmlElement(CdmFileBase parentFile, XmlElement xmEl) {
+
+		XmlElement currentExt = xmEl.getExtendingObject();
+
+		if (currentExt instanceof CdmNode) {
+			return (CdmNode) currentExt;
+		}
+
+		CdmNode newNode = new CdmNode(parentFile, xmEl, this);
+
+		xmEl.setExtendingObject(newNode);
+
+		return newNode;
+	}
+
+	/**
 	 * This is the quick-access version of findByUuid - where findByUuid really searches everywhere,
 	 * this here just looks up the correct node in the internal map; assuming all IDs are indeed unique,
 	 * as they should be, this here also works and is much faster - so use this function for internal access!
@@ -1162,6 +1199,72 @@ public class CdmCtrl {
 
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.findByName(name, result);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Works for MCEs, but also parameters, activities, etc.
+	 * This should only every return one result in the list, but in very very silly,
+	 * very malformed CDMs might also return several ones, which have the same path
+	 * but are different elements... lol
+	 * The path here is a full path - no regexes or nonsense like that!
+	 */
+	public List<CdmNode> findByPath(String path) {
+
+		List<CdmNode> result = new ArrayList<>();
+
+		if (path == null) {
+			return result;
+		}
+
+		if (path.equals("")) {
+			return result;
+		}
+
+		String[] paths = path.split("\\.");
+
+		Set<CdmMonitoringControlElement> roots = getAllMcmTreeRoots();
+
+		// iterate over all roots that we are aware of ...
+		for (CdmMonitoringControlElement root : roots) {
+
+			CdmMonitoringControlElement curEl = root;
+
+			// ... and, first of all, drop the lead if the root is already wrong ...
+			if (!paths[0].equals(curEl.getName())) {
+				continue;
+			}
+
+			// ... and if the path was just this (just the one root element), return this element ...
+			if (paths.length == 1) {
+				result.add(root);
+				continue;
+			}
+
+			// ... and then check all the MCEs from the second path element to the second-last ...
+			for (int pathNum = 1; pathNum < paths.length - 1; pathNum++) {
+				curEl = curEl.getSubElementByName(paths[pathNum]);
+				if (curEl == null) {
+					break;
+				}
+			}
+			if (curEl == null) {
+				continue;
+			}
+
+			// ... and finally check the last path element, which could also be an MCE,
+			// or just an aspect!
+			String lastPath = paths[paths.length - 1];
+			CdmMonitoringControlElement finalMCE = curEl.getSubElementByName(lastPath);
+			if (finalMCE != null) {
+				result.add(finalMCE);
+			}
+			CdmNode finalAspect = curEl.getAspectByName(lastPath);
+			if (finalAspect != null) {
+				result.add(finalAspect);
+			}
 		}
 
 		return result;

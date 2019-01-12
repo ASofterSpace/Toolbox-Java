@@ -20,8 +20,6 @@ public class CdmNode extends XmlElement {
 
 	protected CdmCtrl cdmCtrl;
 
-	private CdmMonitoringControlElement mce;
-
 
 	public CdmNode(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
@@ -33,13 +31,10 @@ public class CdmNode extends XmlElement {
 
 		thisNode.copyTo(this);
 
-		// ensure that the listed xmlparent is at least a cdm node, not just an xmlelement
-		for (XmlElement xmlEl : xmlChildren) {
-			xmlEl.setXmlParent(this);
-		}
+		thisNode.setExtendingObject(this);
 	}
 
-	public CdmNode(CdmNode other) {
+	protected CdmNode(CdmNode other) {
 
 		super();
 
@@ -74,16 +69,36 @@ public class CdmNode extends XmlElement {
 		return getAttribute("xmi:id");
 	}
 
-	public CdmMonitoringControlElement getMCE() {
-		return mce;
+	/**
+	 * For MCEs and MCE aspects, this gives their path.
+	 * For others, this is null.
+	 */
+	public String getPath() {
+
+		String xmlTag = getNodeName();
+
+		if ("monitoringControlElement".equals(xmlTag)) {
+			XmlElement curMCE = getExtendingObject();
+			if (curMCE instanceof CdmMonitoringControlElement) {
+				return ((CdmMonitoringControlElement) curMCE).getPath();
+			}
+		}
+
+		if ("monitoringControlElementAspects".equals(xmlTag)) {
+			XmlElement parEl = getXmlParent();
+			if (parEl != null) {
+				XmlElement curMCE = parEl.getExtendingObject();
+				if (curMCE instanceof CdmMonitoringControlElement) {
+					return ((CdmMonitoringControlElement) curMCE).getPath() + "." + getName();
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public void setName(String newName) {
 		setAttribute("name", newName);
-	}
-
-	public void setMCE(CdmMonitoringControlElement mce) {
-		this.mce = mce;
 	}
 
 	public void delete() {
@@ -138,27 +153,16 @@ public class CdmNode extends XmlElement {
 			System.out.println("XML Tag: " + xmlTag);
 		}
 
-		if ("monitoringControlElement".equals(xmlTag)) {
-			CdmMonitoringControlElement curMCE = getMCE();
-			if (curMCE == null) {
-				System.out.println("MCM Path: no path found :(");
+		if ("monitoringControlElement".equals(xmlTag) ||
+			"monitoringControlElementAspects".equals(xmlTag)) {
+			String path = getPath();
+			if (path == null) {
+				System.out.println("MCM Path: none found, but there should be one :(");
 			} else {
-				System.out.println("MCM Path: " + curMCE.getPath());
+				System.out.println("MCM Path: " + path);
 			}
-		}
-
-		if ("monitoringControlElementAspects".equals(xmlTag)) {
-			XmlElement parEl = getXmlParent();
-			if (parEl != null) {
-				if (parEl instanceof CdmNode) {
-					CdmMonitoringControlElement curMCE = ((CdmNode) parEl).getMCE();
-					if (curMCE == null) {
-						System.out.println("MCM Path: no path found :(");
-					} else {
-						System.out.println("MCM Path: " + curMCE.getPath() + "." + name);
-					}
-				}
-			}
+		} else {
+			System.out.println("MCM Path: none (as this is not contained in the MCM tree)");
 		}
 
 		System.out.println("Contained in: " + getParentFile().getPathRelativeToCdmRoot());

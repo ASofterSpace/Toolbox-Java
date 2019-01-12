@@ -33,7 +33,7 @@ public class CdmTest implements Test {
 		createAndValidateCdmTest();
 
 		findEntityInCdmTest();
-		
+
 		convertCdmPacketCIsTest();
 
 		parseBinaryCDM("Mcm 1"); // contains McmCI, one MCE, one MCE Def
@@ -46,7 +46,7 @@ public class CdmTest implements Test {
 	public void createAndValidateCdmTest() {
 
 		TestUtils.start("Create and Validate CDM");
-		
+
 		CdmCtrl cdmCtrl = new CdmCtrl();
 
 		// ensure the directory is clear
@@ -104,6 +104,10 @@ public class CdmTest implements Test {
 				TestUtils.fail("We wanted to find a node called mcmRoot, but we found one called " + foundNode.getName() + " instead!");
 				return;
 			}
+			if (!"mcmRoot".equals(foundNode.getPath())) {
+				TestUtils.fail("We wanted to find a node called mcmRoot which was supposed to be the root element, but the one we found had the path " + foundNode.getPath() + " instead!");
+				return;
+			}
 			if (!"Resource_Mcm.cdm".equals(foundNode.getParentFile().getPathRelativeToCdmRoot())) {
 				TestUtils.fail("The node that we found should be contained in the file Resource_Mcm.cdm, but it is contained in " + foundNode.getParentFile().getPathRelativeToCdmRoot() + " instead!");
 				return;
@@ -144,11 +148,28 @@ public class CdmTest implements Test {
 			return;
 		}
 
+		List<CdmNode> foundByPath = cdmCtrl.findByPath("mcmRoot.DefaultRoute");
+
+		if (foundByPath.size() < 1) {
+			TestUtils.fail("We wanted to find one node by its path mcmRoot.DefaultRoute, but we did not find any!");
+			return;
+		}
+		if (foundByPath.size() > 1) {
+			TestUtils.fail("We wanted to find one node by its path mcmRoot.DefaultRoute, but we found several!");
+			return;
+		}
+
+		String foundPath = foundByPath.get(0).getPath();
+		if (!"mcmRoot.DefaultRoute".equals(foundPath)) {
+			TestUtils.fail("We found one node by its path mcmRoot.DefaultRoute, but when querying the node for its path we actually got back " + foundPath + "!");
+			return;
+		}
+
 		TestUtils.succeed();
 	}
-	
+
 	public void convertCdmPacketCIsTest() {
-		
+
 		TestUtils.start("Convert CDM Packet CIs");
 
 		CdmCtrl cdmCtrl = new CdmCtrl();
@@ -163,13 +184,13 @@ public class CdmTest implements Test {
 			TestUtils.fail("We tried to load a CDM, but got this exception: " + e.getMessage());
 			return;
 		}
-		
+
 		cdmCtrl.convertTo("1.14.0b", null);
-		
+
 		Set<CdmFile> files = cdmCtrl.getCdmFiles();
-		
+
 		CdmFile file = files.iterator().next();
-		
+
 		List<XmlElement> packets = file.domGetElems("packet");
 		for (XmlElement packet : packets) {
 			CdmNode cdmPacket = new CdmNode(file, packet, cdmCtrl);
@@ -203,13 +224,13 @@ public class CdmTest implements Test {
 			TestUtils.fail("We tried to load a CDM, but got this exception: " + e.getMessage());
 			return;
 		}
-		
+
 		cdmCtrl.convertTo("1.13.0bd1", null);
-		
+
 		files = cdmCtrl.getCdmFiles();
-		
+
 		file = files.iterator().next();
-		
+
 		List<XmlElement> pktParameters = file.domGetElems("pktParameter");
 		for (XmlElement pktParameter : pktParameters) {
 			CdmNode cdmPktParameter = new CdmNode(file, pktParameter, cdmCtrl);
@@ -226,7 +247,7 @@ public class CdmTest implements Test {
 				}
 			}
 		}
-		
+
 		TestUtils.succeed();
 	}
 
@@ -258,9 +279,9 @@ public class CdmTest implements Test {
 			TestUtils.fail("We tried to load an XML CDM, but got this exception: " + e.getMessage());
 			return;
 		}
-		
+
 		List<String> differences = cdmCtrl.findDifferencesFrom(xmlCdmCtrl);
-		
+
 		if (differences.size() > 0) {
 			TestUtils.fail("There were differences between the parsed binary and XML versions of the same CDM!");
 			return;

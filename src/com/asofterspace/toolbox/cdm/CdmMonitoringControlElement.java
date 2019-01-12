@@ -78,12 +78,12 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 
 		this.subElements = new ArrayList<>();
 
-		baseNode.setMCE(this);
+		baseNode.setExtendingObject(this);
 	}
 
 	public CdmMonitoringControlElement(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
-		this(new CdmNode(parentFile, thisNode, cdmCtrl));
+		this(cdmCtrl.getByXmlElement(parentFile, thisNode));
 	}
 
 	public List<String> getSubElementIds() {
@@ -94,6 +94,55 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		return subElements;
 	}
 
+	public CdmMonitoringControlElement getSubElementByName(String name) {
+
+		if (name == null) {
+			return null;
+		}
+
+		for (CdmMonitoringControlElement subEl : subElements) {
+			if (name.equals(subEl.getName())) {
+				return subEl;
+			}
+		}
+
+		return null;
+	}
+
+	public List<CdmNode> getAspects() {
+
+		List<XmlElement> aspects = getChildren("monitoringControlElementAspects");
+
+		List<CdmNode> result = new ArrayList<>();
+
+		for (XmlElement aspect : aspects) {
+			XmlElement aspectEx = aspect.getExtendingObject();
+			if (aspectEx instanceof CdmNode) {
+				result.add((CdmNode) aspectEx);
+			}
+		}
+
+		return result;
+	}
+
+	public CdmNode getAspectByName(String name) {
+
+		if (name == null) {
+			return null;
+		}
+
+		List<CdmNode> aspects = getAspects();
+
+		for (CdmNode aspect : aspects) {
+			if (name.equals(aspect.getName())) {
+				return aspect;
+			}
+		}
+
+		return null;
+	}
+
+	@Override
 	public String getPath() {
 
 		CdmMonitoringControlElement containedIn = getContainingElement();

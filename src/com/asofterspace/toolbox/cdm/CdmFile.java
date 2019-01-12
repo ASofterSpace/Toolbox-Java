@@ -57,7 +57,10 @@ public class CdmFile extends CdmFileBase {
 		// now actually add the current node to the internal model in the controller - first to specialized lists, and then to the full id map...
 		String nodeName = curNode.getNodeName();
 
-		CdmNode cdmNode = new CdmNode(this, curNode, cdmCtrl);
+		// TODO :: improve this by somehow directly creating the necessary element,
+		// instead of creating a CdmNode that then is immediately replaced by e.g.
+		// a CdmScript
+		CdmNode cdmNode = cdmCtrl.getByXmlElement(this, curNode);
 
 		switch (ciType) {
 
@@ -168,7 +171,7 @@ public class CdmFile extends CdmFileBase {
 		String resultStr = currentNode.getAttribute(key);
 
 		if (value.equals(resultStr)) {
-				result.add(new CdmNode(this, currentNode, cdmCtrl));
+			result.add(cdmCtrl.getByXmlElement(this, currentNode));
 		}
 
 		List<XmlElement> children = currentNode.getChildNodes();
@@ -182,7 +185,7 @@ public class CdmFile extends CdmFileBase {
 		List<XmlElement> elements = getRoot().getElementsByTagName(xmlTag);
 
 		for (XmlElement element : elements) {
-			result.add(new CdmNode(this, element, cdmCtrl));
+			result.add(cdmCtrl.getByXmlElement(this, element));
 		}
 	}
 

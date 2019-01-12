@@ -14,28 +14,30 @@ import java.util.Set;
 public class CdmProcedure extends CdmNode {
 
 	private String content;
-	
+
 
 	public CdmProcedure(CdmNode baseNode) {
 
 		super(baseNode);
-		
+
 		this.content = getAttribute("procedureContent");
+
+		baseNode.setExtendingObject(this);
 	}
-	
+
 	public CdmProcedure(CdmFileBase parentFile, XmlElement thisNode, CdmCtrl cdmCtrl) {
 
-		this(new CdmNode(parentFile, thisNode, cdmCtrl));
+		this(cdmCtrl.getByXmlElement(parentFile, thisNode));
 	}
 
 	public String getSourceCode() {
 		return content;
 	}
-	
+
 	public void setSourceCode(String procedureContent) {
 
 		setAttribute("procedureContent", procedureContent);
-	
+
 		content = procedureContent;
 	}
 
@@ -50,7 +52,7 @@ public class CdmProcedure extends CdmNode {
 		Set<CdmProcedure2Activity> procedure2Activities = cdmCtrl.getProcedureToActivityMappings();
 
 		String id = getId();
-		
+
 		for (CdmProcedure2Activity procedure2Activity : procedure2Activities) {
 			// check if a procedure to activity mapper maps the procedure id of this particular procedure!
 			// TODO :: also check if the filename maps (however, this is complicated, as the file
@@ -60,10 +62,10 @@ public class CdmProcedure extends CdmNode {
 				results.add(procedure2Activity);
 			}
 		}
-		
+
 		return results;
 	}
-	
+
 	public void delete() {
 
 		// delete entries from the procedure to activity mapper - as there could be several
@@ -75,17 +77,17 @@ public class CdmProcedure extends CdmNode {
 
 			// ... we delete the associated activities, if the user wants us to ...
 			// TODO
-			
+
 			// ... and we delete the mappings themselves!
 			procedure2Activity.delete();
 		}
-		
+
 		// delete the procedure itself from the parent file and the model in the controller
 		super.delete();
 
 		// check if there are still elements left now, and if not, delete the entire parent file
 		List<XmlElement> elements = getParentFile().getRoot().getChildNodes();
-		
+
 		// delete the entire parent file
 		// (or actually set a deleted flag, to delete it when save() is called ^^)
 		if (elements.size() < 1) {

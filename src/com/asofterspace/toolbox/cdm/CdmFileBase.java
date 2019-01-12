@@ -101,12 +101,12 @@ public abstract class CdmFileBase extends EmfFile {
 		if (root == null) {
 			return;
 		}
-		
+
 		String configurationcontrol = root.getAttribute("xmlns:configurationcontrol");
 		if (configurationcontrol != null) {
 			root.setAttribute("xmlns:configurationcontrol", toPrefix + "/" + CdmCtrl.CDM_NAMESPACE_MIDDLE + toVersion);
 		}
-		
+
 		String mcmimplementationitems = root.getAttribute("xmlns:mcmimplementationitems");
 		if (mcmimplementationitems != null) {
 			root.setAttribute("xmlns:mcmimplementationitems", toPrefix + "/MonitoringControl/MCMImplementationItems/" + toVersion);
@@ -595,7 +595,7 @@ public abstract class CdmFileBase extends EmfFile {
 							for (XmlElement event : events) {
 								String baseHref = null;
 								String typeHref = null;
-							
+
 								for (XmlElement child : event.getChildNodes()) {
 									if ("baseElement".equals(child.getNodeName())) {
 										baseHref = child.getAttribute("href");
@@ -667,7 +667,7 @@ public abstract class CdmFileBase extends EmfFile {
 							for (XmlElement vdcdef : vdcdefs) {
 								XmlElement refVal = vdcdef.createChild("referenceValue");
 								refVal.setAttribute("xmi:id", UuidEncoderDecoder.generateEcoreUUID());
-								cdmCtrl.addToModel(new CdmNode(this, refVal, cdmCtrl));
+								cdmCtrl.addToModel(this, refVal);
 							}
 						}
 
@@ -832,7 +832,7 @@ public abstract class CdmFileBase extends EmfFile {
 								domRemoveAttributeFromElems("configurationcontrol:PusService2PacketMapperCI", "xmlns:parameter");
 							}
 						}
-						
+
 						if ("configurationcontrol:UserDefinedDisplay2MceMapperCI".equals(getCiType())) {
 							domRenameChildrenOfElems("udd2mceMapper", "displayContext", "monitoringControlElement");
 						}
@@ -959,7 +959,7 @@ public abstract class CdmFileBase extends EmfFile {
 									newLiteral.setAttribute("x", "1");
 									newLiteral.setAttribute("y", "one");
 									newLiteral.setAttribute("xmi:id", UuidEncoderDecoder.generateEcoreUUID());
-									cdmCtrl.addToModel(new CdmNode(this, newLiteral, cdmCtrl));
+									cdmCtrl.addToModel(this, newLiteral);
 								}
 							}
 
@@ -1307,20 +1307,20 @@ public abstract class CdmFileBase extends EmfFile {
 				break;
 		}
 	}
-	
+
 	// this one is right, the other one is left
 	public List<String> findDifferencesFrom(CdmFileBase otherFile) {
-	
+
 		List<String> result = new ArrayList<>();
-		
+
 		XmlElement thisRoot = getRoot();
 		XmlElement otherRoot = otherFile.getRoot();
-		
+
 		// do not complain if both files do not contain root elements
 		if ((thisRoot == null) && (otherRoot == null)) {
 			return result;
 		}
-		
+
 		// do complain if only one does not contain a root element
 		if (thisRoot == null) {
 			result.add(getPathRelativeToCdmRoot() + " in the right CDM does not contain a root element.");
@@ -1328,19 +1328,19 @@ public abstract class CdmFileBase extends EmfFile {
 		if (otherRoot == null) {
 			result.add(otherFile.getPathRelativeToCdmRoot() + " in the left CDM does not contain a root element.");
 		}
-		
+
 		findDifferencesRecursivelyFrom("", otherFile.getRoot(), "", getRoot(), result);
-		
+
 		return result;
 	}
-	
+
 	private void findDifferencesRecursivelyFrom(String otherPath, XmlElement otherEl, String curPath, XmlElement curEl, List<String> outResult) {
-	
+
 		// check this node's name
 		if (!curEl.getNodeName().equals(otherEl.getNodeName())) {
 			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getNodeName() + ", which has the name " + otherPath + otherEl.getNodeName() + " in the left CDM.");
 		}
-		
+
 		// check this node's attributes
 		TinyMap curAttrs = curEl.getAttributes();
 		TinyMap otherAttrs = otherEl.getAttributes();
@@ -1361,26 +1361,26 @@ public abstract class CdmFileBase extends EmfFile {
 			}
 			// no need for the else here - if there was a different value, then it was already reported a few lines above ^^
 		}
-		
+
 		// check this node's children
 		List<XmlElement> rightChildEls = curEl.getChildNodes();
 		List<XmlElement> leftChildEls = otherEl.getChildNodes();
-		
+
 		int childrenLen = rightChildEls.size();
-		
+
 		if (rightChildEls.size() > leftChildEls.size()) {
 			childrenLen = leftChildEls.size();
 			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getNodeName() + ", which has more children than the corresponding element in the left CDM.");
 		}
-		
+
 		if (leftChildEls.size() > rightChildEls.size()) {
 			outResult.add(getPathRelativeToCdmRoot() + " in the left CDM contains the element " + otherPath + otherEl.getNodeName() + ", which has more children than the corresponding element in the right CDM.");
 		}
-		
+
 		curPath += curEl.getNodeName() + ".";
 		otherPath += otherEl.getNodeName() + ".";
-	
-		for (int i = 0; i < childrenLen; i++) {	
+
+		for (int i = 0; i < childrenLen; i++) {
 			findDifferencesRecursivelyFrom(otherPath, leftChildEls.get(i), curPath, rightChildEls.get(i), outResult);
 		}
 	}

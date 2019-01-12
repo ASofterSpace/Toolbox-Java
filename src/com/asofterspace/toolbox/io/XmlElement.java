@@ -28,6 +28,9 @@ public class XmlElement {
 
 	protected List<XmlElement> xmlChildren;
 
+	// an object that represents this XmlElement, but is (ideally the uppermost) extending class of it
+	private XmlElement extendingObject;
+
 
 	public XmlElement(String name, Attributes attributes) {
 
@@ -74,6 +77,17 @@ public class XmlElement {
 	}
 
 	protected XmlElement() {
+	}
+
+	public void setExtendingObject(XmlElement extObj) {
+		this.extendingObject = extObj;
+	}
+
+	public XmlElement getExtendingObject() {
+		if (extendingObject == null) {
+			return this;
+		}
+		return extendingObject.getExtendingObject();
 	}
 
 	public void copyTo(XmlElement other) {
@@ -133,7 +147,7 @@ public class XmlElement {
 	}
 
 	/**
-	 * Get one child with the given tag name, if any such child exists
+	 * Get one direct child with the given tag name, if any such child exists
 	 */
 	public XmlElement getChild(String tagName) {
 		for (XmlElement child : xmlChildren) {
@@ -142,6 +156,23 @@ public class XmlElement {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Get all direct children with the given tag name, but without recursion
+	 * (if you want recursion, check getElementsByTagNames())
+	 */
+	public List<XmlElement> getChildren(String tagName) {
+
+		List<XmlElement> result = new ArrayList<>();
+
+		for (XmlElement child : xmlChildren) {
+			if (tagName.equals(child.name)) {
+				result.add(child);
+			}
+		}
+
+		return result;
 	}
 
 	/**
