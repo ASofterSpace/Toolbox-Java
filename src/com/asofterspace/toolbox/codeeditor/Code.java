@@ -75,6 +75,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// styles for the different kinds of text in the document
 	MutableAttributeSet attrRegular;
+	MutableAttributeSet attrSearch;
+	MutableAttributeSet attrSearchSelected;
 
 	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
@@ -92,6 +94,9 @@ public abstract class Code extends DefaultStyledDocument {
 	// configuration
 	private boolean copyOnCtrlEnter = true;
 	private boolean tabEntireBlocks = true;
+
+	// search string - the string that is currently being searched for
+	private String searchStr = null;
 
 
 	public Code(JTextPane editor) {
@@ -316,7 +321,9 @@ public abstract class Code extends DefaultStyledDocument {
 							for (Code instance : instances) {
 								if (instance.pleaseHighlight) {
 									instance.pleaseHighlight = false;
-									instance.highlightText(0, instance.getLength());
+									int len = instance.getLength();
+									instance.highlightText(0, len);
+									instance.highlightSearch(0, len);
 								}
 							}
 						}
@@ -405,6 +412,14 @@ public abstract class Code extends DefaultStyledDocument {
 		attrRegular = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
 
+		attrSearch = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrSearch, new Color(0, 0, 0));
+		StyleConstants.setBackground(attrSearch, new Color(0, 255, 255));
+
+		attrSearchSelected = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrSearchSelected, new Color(0, 0, 0));
+		StyleConstants.setBackground(attrSearchSelected, new Color(255, 0, 255));
+
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(255, 255, 255);
 		decoratedEditor.setBackground(schemeBackgroundColor);
@@ -428,6 +443,14 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
 		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
 
+		attrSearch = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrSearch, new Color(255, 255, 255));
+		StyleConstants.setBackground(attrSearch, new Color(0, 128, 128));
+
+		attrSearchSelected = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrSearchSelected, new Color(255, 255, 255));
+		StyleConstants.setBackground(attrSearchSelected, new Color(128, 0, 128));
+
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(0, 0, 0);
 		decoratedEditor.setBackground(schemeBackgroundColor);
@@ -442,6 +465,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 			instance.setDarkScheme();
 		}
+	}
+
+	public void setSearchStr(String searchFor) {
+
+		this.searchStr = searchFor;
+
+		pleaseHighlight = true;
 	}
 
 	private static void initializeEditorFont() {
@@ -687,6 +717,43 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// set the entire document back to regular
 		this.setCharacterAttributes(0, end, attrRegular, true);
+	}
+
+	// highlight for search - which is called by the highlighting thread always
+	// AFTER all the other highlightings have been performed!
+	void highlightSearch(int start, int length) {
+
+		if (searchStr == null) {
+			return;
+		}
+
+		if ("".equals(searchStr)) {
+			return;
+		}
+
+		try {
+			String content = this.getText(0, length);
+
+			int caretPos = decoratedEditor.getCaretPosition();
+
+			int searchLen = searchStr.length();
+
+			int nextPos = content.indexOf(searchStr);
+
+			while (nextPos >= 0) {
+
+				if ((caretPos >= nextPos) && (caretPos <= nextPos + searchLen)) {
+					this.setCharacterAttributes(nextPos, searchLen, attrSearchSelected, true);
+				} else {
+					this.setCharacterAttributes(nextPos, searchLen, attrSearch, true);
+				}
+
+				nextPos = content.indexOf(searchStr, nextPos + 1);
+			}
+
+		} catch (BadLocationException e) {
+			// oops!
+		}
 	}
 
 	private int lastLineAmount = 0;
