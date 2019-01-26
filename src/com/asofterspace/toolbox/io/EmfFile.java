@@ -383,16 +383,16 @@ public class EmfFile extends XmlFile {
 	public void saveTo(String newLocation) {
 
 		filename = newLocation;
-		
+
 		java.io.File javaFile = getJavaFile();
 
 		// create parent directories
 		javaFile.getParentFile().mkdirs();
 
 		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(javaFile), StandardCharsets.UTF_8)) {
-			
+
 			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-			
+
 			XmlElement root = getRoot();
 
 			if (root != null) {
