@@ -210,7 +210,7 @@ public class JSON {
 
 			String simpleContentsStr = jsonString.substring(0, jsonString.indexOf("\""));
 			jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
-			
+
 			// also allow escaping " (basically, by checking here is simpleContentsStr
 			// ends with \ - in which case we add the " instead and carry on searching forward)
 			while (simpleContentsStr.endsWith("\\")) {
@@ -218,7 +218,7 @@ public class JSON {
 				simpleContentsStr += jsonString.substring(0, jsonString.indexOf("\""));
 				jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
 			}
-			
+
 			simpleContents = simpleContentsStr;
 
 			return jsonString;
@@ -251,9 +251,9 @@ public class JSON {
 		kind = JSONkind.NUMBER;
 
 		String numStr = "";
-		
+
 		int charPos = 0;
-		
+
 		while (charPos < jsonString.length()) {
 
 			Character curChar = jsonString.charAt(charPos);
@@ -322,7 +322,7 @@ public class JSON {
 		switch (kind) {
 
 			case STRING:
-				return "\"" + simpleContents.toString() + "\"";
+				return "\"" + escapeJSONstr(simpleContents.toString()) + "\"";
 
 			case BOOLEAN:
 			case NUMBER:
@@ -376,7 +376,7 @@ public class JSON {
 					if (objFirstEntry) {
 						objFirstEntry = false;
 					} else {
-						objResult.append(",");
+						objResult.append(", ");
 						if (!compressed) {
 							objResult.append("\n" + linePrefix + "\t");
 						}
@@ -402,18 +402,18 @@ public class JSON {
 				return "null";
 		}
 	}
-	
+
 	/**
 	 * Returns the value of this JSON object as string, without any surrounding " or somesuch;
 	 * meant to be used when you know that your JSON object is of the simple type String, and
 	 * you want to get that String
 	 */
 	public String asString() {
-	
+
 		if (simpleContents == null) {
 			return null;
 		}
-		
+
 		return simpleContents.toString();
 	}
 
@@ -474,7 +474,7 @@ public class JSON {
 		if (result.arrContents == null) {
 			return new ArrayList<>();
 		}
-		
+
 		return result.arrContents;
 	}
 
@@ -680,7 +680,7 @@ public class JSON {
 	 */
 	private String escapeJSONstr(String str) {
 
-		// TODO
+		str = str.replace("\"", "\\\"");
 
 		return str;
 	}
