@@ -15,21 +15,21 @@ import java.util.Iterator;
  *
  * @author Moya (a softer space), 2018
  */
-public class EnumeratedCollection implements Enumeration<Object> {
+public class EnumeratedCollection<T> implements Enumeration<T> {
 
-	private Iterator<? extends Object> baseIterator;
+	private Iterator<? extends T> baseIterator;
 
 
-	public EnumeratedCollection(Collection<? extends Object> baseCollection) {
+	public EnumeratedCollection(Collection<? extends T> baseCollection) {
 		this.baseIterator = baseCollection.iterator();
 	}
-	
+
 	public boolean hasMoreElements() {
 		return baseIterator.hasNext();
 	}
-	
-	public Object nextElement() {
+
+	public T nextElement() {
 		return baseIterator.next();
 	}
-	
+
 }
