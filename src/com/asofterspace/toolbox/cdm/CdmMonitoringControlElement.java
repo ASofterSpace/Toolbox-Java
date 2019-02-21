@@ -229,8 +229,9 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 	// the following are methods provided such that we are conforming with the TreeNode interface
 	// ------------------------------------------------------------------------------------------
 
-	public Enumeration<Object> children() {
-		return new EnumeratedCollection(subElements);
+	@Override
+	public Enumeration<TreeNode> children() {
+		return new EnumeratedCollection<TreeNode>(subElements);
 	}
 
 	public boolean getAllowsChildren() {

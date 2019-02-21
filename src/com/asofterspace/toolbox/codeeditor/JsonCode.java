@@ -32,33 +32,38 @@ import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
 
-public class HtmlCode extends Code {
+public class JsonCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	// all primitive types of the Html language and other stuff that looks that way
-	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"id", "class"}
+	// all keywords of the Java language
+	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
+		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "var", "while"}
 	));
 
-	// all string delimiters of the Html language
+	// all primitive types of the Java language and other stuff that looks that way
+	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
+		new String[] {"boolean", "char", "class", "double", "enum", "int", "long", "abstract", "final", "package", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
+	));
+
+	// all string delimiters of the Java language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the Html language
+	// operand characters in the Java language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
-		new Character[] {'<', '>', '=', '/'}
+		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
 	));
 
 	// start of single line comments in the Java language
 	private static final String START_SINGLELINE_COMMENT = "//";
 
-	// start of multiline comments in the HTML language
-	private static final String START_MULTILINE_COMMENT = "<!--";
+	// start of multiline comments in the Java language
+	private static final String START_MULTILINE_COMMENT = "/*";
 
-	// end of multiline comments in the HTML language
-	private static final String END_MULTILINE_COMMENT = "-->";
+	// end of multiline comments in the Java language
+	private static final String END_MULTILINE_COMMENT = "*/";
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
@@ -73,10 +78,8 @@ public class HtmlCode extends Code {
 	private MutableAttributeSet attrReservedChar; // ,.()[]...
 	private MutableAttributeSet attrFunction; // blubb()
 
-	private List<CodeLocation> functions = new ArrayList<>();
 
-
-	public HtmlCode(JTextPane editor) {
+	public JsonCode(JTextPane editor) {
 
 		super(editor);
 	}
@@ -193,8 +196,6 @@ public class HtmlCode extends Code {
 	// this is the main function that... well... highlights our text :)
 	@Override
 	void highlightText(int start, int length) {
-
-		functions = new ArrayList<>();
 
 		try {
 			int end = this.getLength();
@@ -354,46 +355,14 @@ public class HtmlCode extends Code {
 
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
-		boolean isKeyword = false;
-
-		if (start > 0) {
-			if ("<".equals(content.substring(start - 1, start))) {
-				isKeyword = true;
-			}
-		}
-
-		if (start > 1) {
-			if ("</".equals(content.substring(start - 2, start))) {
-				isKeyword = true;
-			}
-		}
-
-		boolean isKey = false;
-
-		if (couldBeKeywordEnd < end) {
-			if ("=".equals(content.substring(couldBeKeywordEnd, couldBeKeywordEnd + 1))) {
-				isKey = true;
-			}
-		}
-
-		if (isKeyword) {
+		if (isKeyword(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
-		} else if (isKey) {
-			if (isPrimitiveType(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
-			} else {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
-			}
+		} else if (isPrimitiveType(couldBeKeyword)) {
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+		} else if (isAdvancedType(couldBeKeyword)) {
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
-		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
-			if (!"new".equals(lastCouldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
-				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-					functions.add(new CodeLocation(functionName, start));
-				}
-			}
 		}
 
 		lastCouldBeKeyword = couldBeKeyword;
@@ -409,8 +378,19 @@ public class HtmlCode extends Code {
 		return STRING_DELIMITERS.contains(character);
 	}
 
+	private boolean isKeyword(String token) {
+		return KEYWORDS.contains(token);
+	}
+
 	private boolean isPrimitiveType(String token) {
 		return PRIMITIVE_TYPES.contains(token);
+	}
+
+	private boolean isAdvancedType(String token) {
+		if (token.length() < 1) {
+			return false;
+		}
+		return Character.isUpperCase(token.charAt(0));
 	}
 
 	private boolean isAnnotation(String token) {
