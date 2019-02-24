@@ -19,4 +19,14 @@ public class CodeLocation {
 		this.caretPos = caretPos;
 	}
 
+	public String getCode() {
+
+		return sourceCode;
+	}
+
+	public int getCaretPos() {
+
+		return caretPos;
+	}
+
 }

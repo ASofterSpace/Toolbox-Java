@@ -51,9 +51,6 @@ public class HtmlCode extends Code {
 		new Character[] {'<', '>', '=', '/'}
 	));
 
-	// start of single line comments in the Java language
-	private static final String START_SINGLELINE_COMMENT = "//";
-
 	// start of multiline comments in the HTML language
 	private static final String START_MULTILINE_COMMENT = "<!--";
 
@@ -257,43 +254,26 @@ public class HtmlCode extends Code {
 
 	private boolean isCommentStart(String content, int start, int end) {
 
-		if (start + 1 > end) {
+		if (start + 3 > end) {
 			return false;
 		}
 
-		String potentialCommentStart = content.substring(start, start + 2);
+		String potentialCommentStart = content.substring(start, start + 4);
 
-		return START_SINGLELINE_COMMENT.equals(potentialCommentStart) || START_MULTILINE_COMMENT.equals(potentialCommentStart);
+		return START_MULTILINE_COMMENT.equals(potentialCommentStart);
 	}
 
 	private int highlightComment(String content, int start, int end) {
 
-		String commentStart = content.substring(start, start + 2);
-
-		if (START_SINGLELINE_COMMENT.equals(commentStart)) {
-
-			int commentEnd = content.indexOf(EOL, start + 2);
-
-			// this is the last line
-			if (commentEnd == -1) {
-				commentEnd = end;
-			}
-
-			// apply single line comment highlighting
-			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
-
-			return commentEnd;
-		}
-
 		// apply multiline comment highlighting
-		int commentEnd = content.indexOf(END_MULTILINE_COMMENT, start + 2);
+		int commentEnd = content.indexOf(END_MULTILINE_COMMENT, start + 4);
 
 		// the multiline comment has not been closed - let's comment out the rest of the document!
 		if (commentEnd == -1) {
 			commentEnd = end;
 		} else {
-			// +1 because of the length of END_MULTILINE_COMMENT itself
-			commentEnd += 1;
+			// +2 because of the length of END_MULTILINE_COMMENT itself
+			commentEnd += 2;
 		}
 
 		// apply multiline comment highlighting

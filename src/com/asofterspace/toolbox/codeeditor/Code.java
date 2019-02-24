@@ -284,6 +284,11 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.addCaretListener(caretListener);
 	}
 
+	// does this code editor support reporting function names in the code?
+	public boolean suppliesFunctions() {
+		return false;
+	}
+
 	private int getLineStartFromPosition(int pos, String content) {
 
 		int lineStart = 0;

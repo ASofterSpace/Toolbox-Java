@@ -38,7 +38,7 @@ public class CSharpCode extends Code {
 
 	// all keywords of the C# language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "goto", "if", "implements", "using", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "var", "while"}
+		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "foreach", "goto", "if", "implements", "using", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "var", "while"}
 	));
 
 	// all primitive types of the C# language and other stuff that looks that way
@@ -351,6 +351,9 @@ public class CSharpCode extends Code {
 		int couldBeKeywordEnd = start + 1;
 
 		while (couldBeKeywordEnd <= end) {
+			if (content.charAt(couldBeKeywordEnd) == '=') {
+				lastCouldBeKeyword = "";
+			}
 			if (isDelimiter(content.charAt(couldBeKeywordEnd))) {
 				break;
 			}
@@ -371,8 +374,10 @@ public class CSharpCode extends Code {
 			if (!"new".equals(lastCouldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-					functions.add(new CodeLocation(functionName, start));
+					if (!"".equals(lastCouldBeKeyword)) {
+						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+						functions.add(new CodeLocation(functionName, start));
+					}
 				}
 			}
 		}

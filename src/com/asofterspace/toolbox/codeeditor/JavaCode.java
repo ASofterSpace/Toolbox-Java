@@ -8,6 +8,8 @@ import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
@@ -80,10 +82,87 @@ public class JavaCode extends Code {
 
 	private List<CodeLocation> functions = new ArrayList<>();
 
+	private JTextPane functionPane;
+
+	private int curLineStartingWhitespace = 0;
+
+	private boolean startingWhitespace = false;
+
+	private String lastCouldBeKeyword = "";
+
 
 	public JavaCode(JTextPane editor) {
 
 		super(editor);
+	}
+
+	public JavaCode(JTextPane editor, JTextPane functionPane) {
+
+		super(editor);
+
+		this.functionPane = functionPane;
+
+		functionPane.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// scrollToFunction(e);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// scrollToFunction(e);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				scrollToFunction(e);
+			}
+
+			private void scrollToFunction(MouseEvent e) {
+				int pressedLine = -1;
+				int caretPos = functionPane.getCaretPosition();
+				for (CodeLocation codeLoc : functions) {
+					pressedLine++;
+					caretPos -= codeLoc.getCode().length() + 1;
+					if (caretPos < 0) {
+						break;
+					}
+				}
+				int targetCaretPos = functions.get(pressedLine).getCaretPos();
+				// jump to the end...
+				decoratedEditor.setCaretPosition(decoratedEditor.getText().length());
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							// ... and a couple milliseconds later...
+							Thread.sleep(25);
+						} catch (InterruptedException e) {
+							// ... or earlier, if you insist...
+						}
+						// ... jump to the actual location (such that the
+						// location is definitely at the TOP of the screen)
+						decoratedEditor.setCaretPosition(targetCaretPos);
+					}
+				}).start();
+			}
+		});
+	}
+
+	// does this code editor support reporting function names in the code?
+	// (we are saying true, but if we are really supposed to supply something, the constructor
+	// also needs to be called with the function pane!)
+	@Override
+	public boolean suppliesFunctions() {
+		return true;
 	}
 
 	@Override
@@ -218,7 +297,24 @@ public class JavaCode extends Code {
 
 				// while we have a delimiter...
 				char curChar = content.charAt(start);
+
+				startingWhitespace = false;
+
 				while (isDelimiter(curChar)) {
+
+					// prevent stuff like blubb = foo() from ending up in the function overview list
+					if (curChar == '=') {
+						lastCouldBeKeyword = "";
+					}
+
+					if (curChar == '\n') {
+						curLineStartingWhitespace = 0;
+						startingWhitespace = true;
+					} else {
+						if (startingWhitespace) {
+							curLineStartingWhitespace++;
+						}
+					}
 
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
@@ -236,6 +332,7 @@ public class JavaCode extends Code {
 						start++;
 
 					} else {
+						updateFunctionList();
 						return;
 					}
 
@@ -257,6 +354,23 @@ public class JavaCode extends Code {
 
 		} catch (BadLocationException e) {
 			// oops!
+		}
+
+		updateFunctionList();
+	}
+
+	private void updateFunctionList() {
+
+		if (functionPane != null) {
+
+			StringBuilder functionText = new StringBuilder();
+
+			for (CodeLocation func : functions) {
+				functionText.append(func.getCode());
+				functionText.append("\n");
+			}
+
+			functionPane.setText(functionText.toString());
 		}
 	}
 
@@ -344,8 +458,6 @@ public class JavaCode extends Code {
 		return endOfString + 1;
 	}
 
-	private String lastCouldBeKeyword = "";
-
 	private int highlightOther(String content, int start, int end) {
 
 		int couldBeKeywordEnd = start + 1;
@@ -371,8 +483,11 @@ public class JavaCode extends Code {
 			if (!"new".equals(lastCouldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-					functions.add(new CodeLocation(functionName, start));
+					// ignore lines with more than 1 tab indent and line without the return type
+					if ((curLineStartingWhitespace < 2) && !"".equals(lastCouldBeKeyword)) {
+						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+						functions.add(new CodeLocation(functionName, start));
+					}
 				}
 			}
 		}
