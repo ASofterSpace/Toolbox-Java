@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.gui;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
@@ -33,6 +34,11 @@ public abstract class MainWindow implements Runnable {
 		mainFrame = new JFrame();
 
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		// Set an icon
+		String classPath = System.getProperty("java.class.path");
+		ImageIcon ico = new ImageIcon(classPath + "/../res/ico.png");
+		mainFrame.setIconImage(ico.getImage());
 	}
 
 	public void show() {
