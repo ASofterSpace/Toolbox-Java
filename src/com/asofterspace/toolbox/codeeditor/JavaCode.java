@@ -144,7 +144,7 @@ public class JavaCode extends Code {
 					public void run() {
 						try {
 							// ... and a couple milliseconds later...
-							Thread.sleep(25);
+							Thread.sleep(50);
 						} catch (InterruptedException e) {
 							// ... or earlier, if you insist...
 						}
