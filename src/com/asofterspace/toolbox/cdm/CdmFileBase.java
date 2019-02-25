@@ -1345,6 +1345,10 @@ public abstract class CdmFileBase extends EmfFile {
 		TinyMap curAttrs = curEl.getAttributes();
 		TinyMap otherAttrs = otherEl.getAttributes();
 		for (int i = 0; i < curAttrs.size(); i++) {
+			// ignore the ID TODO :: make this behavior configurable!
+			if ("xmi:id".equals(curAttrs.getKey(i))) {
+				continue;
+			}
 			String otherNode = otherAttrs.get(curAttrs.getKey(i));
 			if (otherNode == null) {
 				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + ", which in the right CDM contains the attribute \"" + curAttrs.getKey(i) + "\" that is missing from the left CDM.");
@@ -1355,6 +1359,10 @@ public abstract class CdmFileBase extends EmfFile {
 			}
 		}
 		for (int i = 0; i < otherAttrs.size(); i++) {
+			// ignore the ID TODO :: make this behavior configurable!
+			if ("xmi:id".equals(otherAttrs.getKey(i))) {
+				continue;
+			}
 			String curNode = curAttrs.get(otherAttrs.getKey(i));
 			if (curNode == null) {
 				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + otherPath + otherEl.getNodeName() + ", which in the left CDM contains the attribute \"" + otherAttrs.getKey(i) + "\" that is missing from the right CDM.");
