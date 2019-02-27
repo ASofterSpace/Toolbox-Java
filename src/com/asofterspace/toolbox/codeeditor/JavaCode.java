@@ -15,6 +15,8 @@ import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -166,6 +168,78 @@ public class JavaCode extends Code {
 	}
 
 	@Override
+	public void reorganizeImports() {
+
+		String origText = decoratedEditor.getText();
+
+		String newText = reorganizeImportsStr(origText);
+
+		decoratedEditor.setText(newText);
+	}
+
+	public String reorganizeImportsStr(String origText) {
+
+		StringBuilder output = new StringBuilder();
+		List<String> imports = new ArrayList<>();
+		StringBuilder secondOutput = new StringBuilder();
+
+		String[] lines = origText.split("\n");
+
+		int curLine = 0;
+
+		for (; curLine < lines.length; curLine++) {
+			String line = lines[curLine];
+			if (line.startsWith("import")) {
+				break;
+			} else {
+				output.append(line);
+				output.append("\n");
+			}
+		}
+
+		for (; curLine < lines.length; curLine++) {
+			String line = lines[curLine];
+			if (line.equals("")) {
+				continue;
+			}
+			if (line.startsWith("import")) {
+				imports.add(line);
+			} else {
+				break;
+			}
+		}
+
+		for (; curLine < lines.length; curLine++) {
+			secondOutput.append("\n");
+			String line = lines[curLine];
+			secondOutput.append(line);
+		}
+
+		Collections.sort(imports, new Comparator<String>() {
+			public int compare(String a, String b) {
+				return a.toLowerCase().compareTo(b.toLowerCase());
+			}
+		});
+
+		String lastImport = "";
+		int i = 0;
+		for (String importLine : imports) {
+			String thisImport = importLine.substring(0, importLine.indexOf(".") + 1);
+			if (!lastImport.equals(thisImport)) {
+				if (i > 0) {
+					output.append("\n");
+				}
+			}
+			output.append(importLine);
+			output.append("\n");
+			lastImport = thisImport;
+			i++;
+		}
+
+		return output.toString() + secondOutput.toString();
+	}
+
+	@Override
 	public void setLightScheme() {
 
 		// change the attribute sets
@@ -312,7 +386,11 @@ public class JavaCode extends Code {
 						startingWhitespace = true;
 					} else {
 						if (startingWhitespace) {
-							curLineStartingWhitespace++;
+							if (curChar == '\t') {
+								curLineStartingWhitespace += 4;
+							} else {
+								curLineStartingWhitespace++;
+							}
 						}
 					}
 
@@ -483,8 +561,8 @@ public class JavaCode extends Code {
 			if (!"new".equals(lastCouldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					// ignore lines with more than 1 tab indent and line without the return type
-					if ((curLineStartingWhitespace < 2) && !"".equals(lastCouldBeKeyword)) {
+					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
+					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
 						functions.add(new CodeLocation(functionName, start));
 					}

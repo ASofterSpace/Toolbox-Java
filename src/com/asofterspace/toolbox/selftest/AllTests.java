@@ -14,14 +14,16 @@ public class AllTests {
 
 		TestUtils.run(new ConfigFileTest());
 
+		TestUtils.run(new CoderJavaTest());
+
 		TestUtils.run(new JSONTest());
-		
+
 		TestUtils.run(new XlsxTest());
-		
+
 		TestUtils.run(new ConverterTest());
-		
+
 		TestUtils.run(new UuidTest());
-		
+
 		TestUtils.run(new CdmTest());
 
 		TestUtils.endSuite();

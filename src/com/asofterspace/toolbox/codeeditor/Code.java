@@ -109,6 +109,11 @@ public abstract class Code extends DefaultStyledDocument {
 		// keep track of the editor we are decorating (useful e.g. to get and set caret pos during insert operations)
 		decoratedEditor = editor;
 
+		// no editor was given... great ^^ (we are probably testing!)
+		if (editor == null) {
+			return;
+		}
+
 		// keep track of the root element
 		root = this.getDefaultRootElement();
 
@@ -287,6 +292,10 @@ public abstract class Code extends DefaultStyledDocument {
 	// does this code editor support reporting function names in the code?
 	public boolean suppliesFunctions() {
 		return false;
+	}
+
+	public void reorganizeImports() {
+		// just do nothing :)
 	}
 
 	private int getLineStartFromPosition(int pos, String content) {
