@@ -36,27 +36,27 @@ public class ShellCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the C# language
+	// all keywords of the sh language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "foreach", "goto", "if", "implements", "using", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "var", "while"}
+		new String[] {"break", "case", "esac", "do", "done", "else", "for", "while", "function", "if", "fi", "then", "in"}
 	));
 
-	// all primitive types of the C# language and other stuff that looks that way
+	// all primitive types of the sh language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"bool", "char", "class", "double", "float", "enum", "int", "long", "abstract", "final", "package", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
+		new String[] {"echo", "exit", "sleep"}
 	));
 
-	// all string delimiters of the C# language
+	// all string delimiters of the sh language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the C# language
+	// operand characters in the sh language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
-		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*', '#'}
+		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*', '#', '$'}
 	));
 
-	// start of single line comments in the Java language
+	// start of single line comments in the sh language
 	private static final String START_SINGLELINE_COMMENT = "#";
 
 	// are we currently in a multiline comment?
@@ -133,8 +133,16 @@ public class ShellCode extends Code {
 
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
+
 						start = highlightComment(content, start, end);
+
+					// ... and check for a quoted string
+					} else if (isStringDelimiter(content.charAt(start))) {
+
+						// then let's get that string!
+						start = highlightString(content, start, end);
 					} else {
+
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
 							this.setCharacterAttributes(start, 1, attrReservedChar, false);
@@ -153,17 +161,8 @@ public class ShellCode extends Code {
 					curChar = content.charAt(start);
 				}
 
-				// now check what we have: a quoted string?
-				if (isStringDelimiter(curChar)) {
-
-					// then let's get that string!
-					start = highlightString(content, start, end);
-
-				} else {
-
-					// or any other token instead?
-					start = highlightOther(content, start, end);
-				}
+				// or any other token instead?
+				start = highlightOther(content, start, end);
 			}
 
 		} catch (BadLocationException e) {
@@ -173,10 +172,18 @@ public class ShellCode extends Code {
 
 	private boolean isCommentStart(String content, int start, int end) {
 
+		// but $# is NOT a comment!
+		if (start > 0) {
+			if ("$".equals(content.substring(start - 1, start))) {
+				return false;
+			}
+		}
+
 		if (start > end) {
 			return false;
 		}
 
+		// everything after # is a comment
 		return START_SINGLELINE_COMMENT.equals(content.substring(start, start + 1));
 	}
 
@@ -229,7 +236,7 @@ public class ShellCode extends Code {
 
 		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
 
-		return endOfString + 1;
+		return endOfString;
 	}
 
 	private int highlightOther(String content, int start, int end) {
@@ -259,7 +266,7 @@ public class ShellCode extends Code {
 	}
 
 	private boolean isDelimiter(char character) {
-		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character);
+		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character) || STRING_DELIMITERS.contains(character);
 	}
 
 	private boolean isStringDelimiter(char character) {

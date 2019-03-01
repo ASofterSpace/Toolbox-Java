@@ -13,8 +13,8 @@ import java.awt.event.MouseListener;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -34,7 +34,6 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
-
 
 public abstract class FunctionSupplyingCode extends Code {
 
@@ -61,6 +60,10 @@ public abstract class FunctionSupplyingCode extends Code {
 	@Override
 	public boolean suppliesFunctions() {
 		return true;
+	}
+
+	public List<CodeLocation> getFunctions() {
+		return functions;
 	}
 
 	protected void updateFunctionList() {

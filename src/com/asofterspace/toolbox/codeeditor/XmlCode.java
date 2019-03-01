@@ -36,26 +36,33 @@ public class XmlCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	// all string delimiters of the Html language
+	// all string delimiters of the XML language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the Html language
+	// operand characters in the XML language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
 		new Character[] {'<', '>', '=', '/'}
 	));
 
-	// start of multiline comments in the HTML language
+	// start of multiline comments in the XML language
 	private static final String START_MULTILINE_COMMENT = "<!--";
 
-	// end of multiline comments in the HTML language
+	// end of multiline comments in the XML language
 	private static final String END_MULTILINE_COMMENT = "-->";
+
+	// start of CDATA fields in the XML language
+	private static final String START_CDATA = "<![CDATA[";
+
+	// end of CDATA fields in the XML language
+	private static final String END_CDATA = "]]>";
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
-	private List<CodeLocation> functions = new ArrayList<>();
+	// are we currently in a CDATA section?
+	private boolean curCDATA;
 
 
 	public XmlCode(JTextPane editor) {
@@ -103,8 +110,6 @@ public class XmlCode extends Code {
 	@Override
 	void highlightText(int start, int length) {
 
-		functions = new ArrayList<>();
-
 		try {
 			int end = this.getLength();
 
@@ -127,6 +132,16 @@ public class XmlCode extends Code {
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
 						start = highlightComment(content, start, end);
+
+					} else if (isCdataStart(content, start, end)) {
+						start = highlightCdata(content, start, end);
+
+					// ... and check for a quoted string
+					} else if (isStringDelimiter(content.charAt(start))) {
+
+						// then let's get that string!
+						start = highlightString(content, start, end);
+
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
@@ -146,17 +161,8 @@ public class XmlCode extends Code {
 					curChar = content.charAt(start);
 				}
 
-				// now check what we have: a quoted string?
-				if (isStringDelimiter(curChar)) {
-
-					// then let's get that string!
-					start = highlightString(content, start, end);
-
-				} else {
-
-					// or any other token instead?
-					start = highlightOther(content, start, end);
-				}
+				// or any other token instead?
+				start = highlightOther(content, start, end);
 			}
 
 		} catch (BadLocationException e) {
@@ -190,6 +196,36 @@ public class XmlCode extends Code {
 
 		// apply multiline comment highlighting
 		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+
+		return commentEnd;
+	}
+
+	private boolean isCdataStart(String content, int start, int end) {
+
+		if (start + 8 > end) {
+			return false;
+		}
+
+		String potentialCommentStart = content.substring(start, start + 9);
+
+		return START_CDATA.equals(potentialCommentStart);
+	}
+
+	private int highlightCdata(String content, int start, int end) {
+
+		// apply multiline comment highlighting
+		int commentEnd = content.indexOf(END_CDATA, start + 9);
+
+		// the multiline comment has not been closed - let's comment out the rest of the document!
+		if (commentEnd == -1) {
+			commentEnd = end;
+		} else {
+			// +2 because of the length of END_CDATA itself
+			commentEnd += 2;
+		}
+
+		// apply multiline comment highlighting
+		this.setCharacterAttributes(start, commentEnd - start + 1, attrData, false);
 
 		return commentEnd;
 	}
@@ -228,7 +264,7 @@ public class XmlCode extends Code {
 
 		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
 
-		return endOfString + 1;
+		return endOfString;
 	}
 
 	private String lastCouldBeKeyword = "";
@@ -271,17 +307,9 @@ public class XmlCode extends Code {
 		if (isKeyword) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
 		} else if (isKey) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
-		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
-			if (!"new".equals(lastCouldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
-				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-					functions.add(new CodeLocation(functionName, start));
-				}
-			}
 		}
 
 		lastCouldBeKeyword = couldBeKeyword;
@@ -290,7 +318,7 @@ public class XmlCode extends Code {
 	}
 
 	private boolean isDelimiter(char character) {
-		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character);
+		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character) || STRING_DELIMITERS.contains(character);
 	}
 
 	private boolean isStringDelimiter(char character) {

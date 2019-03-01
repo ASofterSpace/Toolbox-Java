@@ -85,6 +85,7 @@ public abstract class Code extends DefaultStyledDocument {
 	MutableAttributeSet attrString; // "meow!"
 	MutableAttributeSet attrReservedChar; // ,.()[]...
 	MutableAttributeSet attrFunction; // blubb()
+	MutableAttributeSet attrData; // <![CDATA[...]]>
 
 	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
@@ -466,11 +467,12 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setItalic(attrComment, true);
 
 		attrKeyword = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrKeyword, new Color(0, 0, 128));
+		StyleConstants.setForeground(attrKeyword, new Color(96, 0, 96));
 		StyleConstants.setBold(attrKeyword, true);
 
 		attrPrimitiveType = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrPrimitiveType, new Color(96, 0, 96));
+		StyleConstants.setForeground(attrPrimitiveType, new Color(0, 0, 128));
+		StyleConstants.setBold(attrPrimitiveType, true);
 
 		attrAdvancedType = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAdvancedType, new Color(96, 48, 48));
@@ -484,6 +486,9 @@ public abstract class Code extends DefaultStyledDocument {
 
 		attrFunction = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrFunction, new Color(48, 0, 48));
+
+		attrData = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrData, new Color(48, 48, 48));
 
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(255, 255, 255);
@@ -527,13 +532,14 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setItalic(attrComment, true);
 
 		attrKeyword = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrKeyword, new Color(128, 128, 255));
+		StyleConstants.setForeground(attrKeyword, new Color(156, 96, 255));
 		StyleConstants.setBackground(attrKeyword, new Color(0, 0, 0));
 		StyleConstants.setBold(attrKeyword, true);
 
 		attrPrimitiveType = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrPrimitiveType, new Color(255, 96, 255));
+		StyleConstants.setForeground(attrPrimitiveType, new Color(128, 128, 255));
 		StyleConstants.setBackground(attrPrimitiveType, new Color(0, 0, 0));
+		StyleConstants.setBold(attrPrimitiveType, true);
 
 		attrAdvancedType = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAdvancedType, new Color(255, 196, 196));
@@ -548,6 +554,9 @@ public abstract class Code extends DefaultStyledDocument {
 
 		attrFunction = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrFunction, new Color(255, 178, 255));
+
+		attrData = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrData, new Color(178, 178, 178));
 
 		// re-decorate the editor
 		schemeBackgroundColor = new Color(0, 0, 0);

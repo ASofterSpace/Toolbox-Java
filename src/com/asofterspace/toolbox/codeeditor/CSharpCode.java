@@ -38,12 +38,12 @@ public class CSharpCode extends Code {
 
 	// all keywords of the C# language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "foreach", "goto", "if", "implements", "using", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "var", "while"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "final", "finally", "for", "foreach", "goto", "if", "implements", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "using", "while", "volatile"}
 	));
 
 	// all primitive types of the C# language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"bool", "char", "class", "double", "float", "enum", "int", "long", "abstract", "final", "package", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
+		new String[] {"bool", "char", "class", "double", "float", "enum", "int", "long", "false", "null", "super", "this", "true", "var", "void"}
 	));
 
 	// all string delimiters of the C# language
@@ -56,7 +56,7 @@ public class CSharpCode extends Code {
 		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
 	));
 
-	// start of single line comments in the Java language
+	// start of single line comments in the C# language
 	private static final String START_SINGLELINE_COMMENT = "//";
 
 	// start of multiline comments in the Java language
@@ -140,6 +140,13 @@ public class CSharpCode extends Code {
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
 						start = highlightComment(content, start, end);
+
+					// ... and check for a quoted string
+					} else if (isStringDelimiter(content.charAt(start))) {
+
+						// then let's get that string!
+						start = highlightString(content, start, end);
+
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
@@ -159,17 +166,8 @@ public class CSharpCode extends Code {
 					curChar = content.charAt(start);
 				}
 
-				// now check what we have: a quoted string?
-				if (isStringDelimiter(curChar)) {
-
-					// then let's get that string!
-					start = highlightString(content, start, end);
-
-				} else {
-
-					// or any other token instead?
-					start = highlightOther(content, start, end);
-				}
+				// or any other token instead?
+				start = highlightOther(content, start, end);
 			}
 
 		} catch (BadLocationException e) {
@@ -258,7 +256,7 @@ public class CSharpCode extends Code {
 
 		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
 
-		return endOfString + 1;
+		return endOfString;
 	}
 
 	private String lastCouldBeKeyword = "";
@@ -305,7 +303,7 @@ public class CSharpCode extends Code {
 	}
 
 	private boolean isDelimiter(char character) {
-		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character);
+		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character) || STRING_DELIMITERS.contains(character);
 	}
 
 	private boolean isStringDelimiter(char character) {

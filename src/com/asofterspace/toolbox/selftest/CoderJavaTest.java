@@ -30,9 +30,12 @@ public class CoderJavaTest implements Test {
 				"import stargarr.fofarr.codd\n" +
 				"import foo.blubb.two;\n" +
 				"import foo.bar.one;\n" +
+				"import foo.bar.one;\n" +
 				"\n" +
 				"import alcatar.blebb\n" +
+				"import foo.bar.one;\n" +
 				"import stargarr.fofarr.blobb\n" +
+				"import foo.bar.one;\n" +
 				"\n" +
 				"blebbel\n" +
 				"blööö\n" +
@@ -49,6 +52,7 @@ public class CoderJavaTest implements Test {
 				"\n" +
 				"import stargarr.fofarr.blobb\n" +
 				"import stargarr.fofarr.codd\n" +
+				"\n" +
 				"\n" +
 				"blebbel\n" +
 				"blööö\n" +

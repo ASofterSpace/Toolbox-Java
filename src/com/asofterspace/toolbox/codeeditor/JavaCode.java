@@ -42,12 +42,12 @@ public class JavaCode extends FunctionSupplyingCode {
 
 	// all keywords of the Java language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "package", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "while"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "while", "volatile"}
 	));
 
 	// all primitive types of the Java language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "class", "double", "enum", "int", "long", "abstract", "final", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
+		new String[] {"boolean", "char", "class", "double", "enum", "int", "long", "false", "null", "super", "this", "true", "void"}
 	));
 
 	// all string delimiters of the Java language
@@ -132,25 +132,46 @@ public class JavaCode extends FunctionSupplyingCode {
 			secondOutput.append(line);
 		}
 
+
+		// sort imports alphabetically
 		Collections.sort(imports, new Comparator<String>() {
 			public int compare(String a, String b) {
 				return a.toLowerCase().compareTo(b.toLowerCase());
 			}
 		});
 
+
 		String lastImport = "";
+		String lastImportStart = "";
+
 		int i = 0;
+
 		for (String importLine : imports) {
-			String thisImport = importLine.substring(0, importLine.indexOf(".") + 1);
-			if (!lastImport.equals(thisImport)) {
+
+			// remove duplicates
+			if (lastImport.equals(importLine)) {
+				continue;
+			}
+
+			// add an empty line between imports in different namespaces
+			String thisImportStart = importLine.substring(0, importLine.indexOf(".") + 1);
+			if (!lastImportStart.equals(thisImportStart)) {
 				if (i > 0) {
 					output.append("\n");
 				}
 			}
+
+			// actually add the import
 			output.append(importLine);
 			output.append("\n");
-			lastImport = thisImport;
+			lastImport = importLine;
+			lastImportStart = thisImportStart;
 			i++;
+		}
+
+		// actually have two empty lines between the import end and the class start
+		if (i > 0) {
+			output.append("\n");
 		}
 
 		return output.toString() + secondOutput.toString();
@@ -241,6 +262,13 @@ public class JavaCode extends FunctionSupplyingCode {
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
 						start = highlightComment(content, start, end);
+
+					// ... and check for a quoted string
+					} else if (isStringDelimiter(content.charAt(start))) {
+
+						// then let's get that string!
+						start = highlightString(content, start, end);
+
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
@@ -261,17 +289,8 @@ public class JavaCode extends FunctionSupplyingCode {
 					curChar = content.charAt(start);
 				}
 
-				// now check what we have: a quoted string?
-				if (isStringDelimiter(curChar)) {
-
-					// then let's get that string!
-					start = highlightString(content, start, end);
-
-				} else {
-
-					// or any other token instead?
-					start = highlightOther(content, start, end);
-				}
+				// or any other token instead?
+				start = highlightOther(content, start, end);
 			}
 
 		} catch (BadLocationException e) {
@@ -362,7 +381,7 @@ public class JavaCode extends FunctionSupplyingCode {
 
 		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
 
-		return endOfString + 1;
+		return endOfString;
 	}
 
 	private int highlightOther(String content, int start, int end) {
@@ -405,7 +424,7 @@ public class JavaCode extends FunctionSupplyingCode {
 	}
 
 	private boolean isDelimiter(char character) {
-		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character);
+		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character) || STRING_DELIMITERS.contains(character);
 	}
 
 	private boolean isStringDelimiter(char character) {
