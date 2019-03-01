@@ -36,18 +36,18 @@ import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
 
-public class JavaCode extends Code {
+public class JavaCode extends FunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
 	// all keywords of the Java language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "while"}
+		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "package", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "while"}
 	));
 
 	// all primitive types of the Java language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "class", "double", "enum", "int", "long", "abstract", "final", "package", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
+		new String[] {"boolean", "char", "class", "double", "enum", "int", "long", "abstract", "final", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
 	));
 
 	// all string delimiters of the Java language
@@ -72,20 +72,6 @@ public class JavaCode extends Code {
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
-	// styles for the different kinds of text in the document
-	private MutableAttributeSet attrAnnotation; // @blubb
-	private MutableAttributeSet attrComment; // /* bla blubb */
-	private MutableAttributeSet attrKeyword; // this, null, ...
-	private MutableAttributeSet attrPrimitiveType; // int, boolean, ...
-	private MutableAttributeSet attrAdvancedType; // Integer, Boolean, ...
-	private MutableAttributeSet attrString; // "meow!"
-	private MutableAttributeSet attrReservedChar; // ,.()[]...
-	private MutableAttributeSet attrFunction; // blubb()
-
-	private List<CodeLocation> functions = new ArrayList<>();
-
-	private JTextPane functionPane;
-
 	private int curLineStartingWhitespace = 0;
 
 	private boolean startingWhitespace = false;
@@ -96,75 +82,6 @@ public class JavaCode extends Code {
 	public JavaCode(JTextPane editor) {
 
 		super(editor);
-	}
-
-	public JavaCode(JTextPane editor, JTextPane functionPane) {
-
-		super(editor);
-
-		this.functionPane = functionPane;
-
-		functionPane.addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// scrollToFunction(e);
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// scrollToFunction(e);
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				scrollToFunction(e);
-			}
-
-			private void scrollToFunction(MouseEvent e) {
-				int pressedLine = -1;
-				int caretPos = functionPane.getCaretPosition();
-				for (CodeLocation codeLoc : functions) {
-					pressedLine++;
-					caretPos -= codeLoc.getCode().length() + 1;
-					if (caretPos < 0) {
-						break;
-					}
-				}
-				int targetCaretPos = functions.get(pressedLine).getCaretPos();
-				// jump to the end...
-				decoratedEditor.setCaretPosition(decoratedEditor.getText().length());
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-							// ... and a couple milliseconds later...
-							Thread.sleep(50);
-						} catch (InterruptedException e) {
-							// ... or earlier, if you insist...
-						}
-						// ... jump to the actual location (such that the
-						// location is definitely at the TOP of the screen)
-						decoratedEditor.setCaretPosition(targetCaretPos);
-					}
-				}).start();
-			}
-		});
-	}
-
-	// does this code editor support reporting function names in the code?
-	// (we are saying true, but if we are really supposed to supply something, the constructor
-	// also needs to be called with the function pane!)
-	@Override
-	public boolean suppliesFunctions() {
-		return true;
 	}
 
 	@Override
@@ -237,79 +154,6 @@ public class JavaCode extends Code {
 		}
 
 		return output.toString() + secondOutput.toString();
-	}
-
-	@Override
-	public void setLightScheme() {
-
-		// change the attribute sets
-		attrAnnotation = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrAnnotation, new Color(0, 128, 64));
-
-		attrComment = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrComment, new Color(0, 128, 0));
-		StyleConstants.setItalic(attrComment, true);
-
-		attrKeyword = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrKeyword, new Color(0, 0, 128));
-		StyleConstants.setBold(attrKeyword, true);
-
-		attrPrimitiveType = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrPrimitiveType, new Color(96, 0, 96));
-
-		attrAdvancedType = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrAdvancedType, new Color(96, 48, 48));
-
-		attrString = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrString, new Color(128, 0, 0));
-
-		attrReservedChar = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrReservedChar, new Color(48, 0, 112));
-		StyleConstants.setBold(attrReservedChar, true);
-
-		attrFunction = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrFunction, new Color(48, 0, 48));
-
-		super.setLightScheme();
-	}
-
-	@Override
-	public void setDarkScheme() {
-
-		// change the attribute sets
-		attrAnnotation = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 196));
-		StyleConstants.setBackground(attrAnnotation, new Color(0, 0, 0));
-
-		attrComment = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrComment, new Color(128, 255, 128));
-		StyleConstants.setBackground(attrComment, new Color(0, 0, 0));
-		StyleConstants.setItalic(attrComment, true);
-
-		attrKeyword = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrKeyword, new Color(128, 128, 255));
-		StyleConstants.setBackground(attrKeyword, new Color(0, 0, 0));
-		StyleConstants.setBold(attrKeyword, true);
-
-		attrPrimitiveType = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrPrimitiveType, new Color(255, 96, 255));
-		StyleConstants.setBackground(attrPrimitiveType, new Color(0, 0, 0));
-
-		attrAdvancedType = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrAdvancedType, new Color(255, 196, 196));
-
-		attrString = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
-		StyleConstants.setBackground(attrString, new Color(0, 0, 0));
-
-		attrReservedChar = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrReservedChar, new Color(192, 112, 225));
-		StyleConstants.setBold(attrReservedChar, true);
-
-		attrFunction = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrFunction, new Color(255, 178, 255));
-
-		super.setDarkScheme();
 	}
 
 	@Override
@@ -435,21 +279,6 @@ public class JavaCode extends Code {
 		}
 
 		updateFunctionList();
-	}
-
-	private void updateFunctionList() {
-
-		if (functionPane != null) {
-
-			StringBuilder functionText = new StringBuilder();
-
-			for (CodeLocation func : functions) {
-				functionText.append(func.getCode());
-				functionText.append("\n");
-			}
-
-			functionPane.setText(functionText.toString());
-		}
 	}
 
 	private boolean isCommentStart(String content, int start, int end) {
