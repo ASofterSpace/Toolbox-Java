@@ -58,7 +58,7 @@ public class CoderJavaTest implements Test {
 				"blööö\n" +
 				"alodalo";
 
-		String resultStr = javaCoder.reorganizeImportsStr(origStr);
+		String resultStr = javaCoder.reorganizeImports(origStr);
 
 		if (resultStr.equals(targetStr)) {
 			TestUtils.succeed();

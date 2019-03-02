@@ -4,9 +4,9 @@
  */
 package com.asofterspace.toolbox;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.text.SimpleDateFormat;
 
 
 public class Utils {

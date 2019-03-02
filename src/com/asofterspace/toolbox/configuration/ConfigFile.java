@@ -5,8 +5,8 @@
 package com.asofterspace.toolbox.configuration;
 
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonFile;
 
 
 public class ConfigFile extends JsonFile {
@@ -55,12 +55,12 @@ public class ConfigFile extends JsonFile {
 		}
 
 		// start with the given name
- 		String filename = name;
+		String filename = name;
 
 		// apply an extension, if necessary
- 		if (!filename.contains(".")) {
+		if (!filename.contains(".")) {
 			filename += FILE_EXTENSION;
- 		}
+		}
 
 		// if we are not using an absolute or explicitly relative path (so starting with ./ or ../)...
 		if (!(filename.startsWith("/") || filename.startsWith("./") || filename.startsWith("../"))) {
@@ -72,9 +72,9 @@ public class ConfigFile extends JsonFile {
 				// ... or based on the current working directory
 				filename = "." + FOLDER + filename;
 			}
- 		}
+		}
 
- 		return filename;
+		return filename;
 	}
 
 	// setting works exactly like in JSON files - but we are making it a bit simpler:

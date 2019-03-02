@@ -4,18 +4,18 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
-import com.asofterspace.toolbox.Utils;
 import com.asofterspace.toolbox.utils.Callback;
+import com.asofterspace.toolbox.Utils;
 
 import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -252,7 +252,7 @@ public abstract class Code extends DefaultStyledDocument {
 							@Override
 							public void run() {
 								try {
-								    Thread.sleep(50);
+									Thread.sleep(50);
 								} catch(InterruptedException e) {
 									// Ooops...
 								}
@@ -320,7 +320,24 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	public void reorganizeImports() {
+
+		String origText = decoratedEditor.getText();
+
+		String newText = reorganizeImports(origText);
+
+		decoratedEditor.setText(newText);
+	}
+
+	/**
+	 * This is the stuff that is actually done when imports are reorganized;
+	 * we need to have this string-in, string-out available both for testing
+	 * and for using this from the outside, with the plain reorganizeImports()
+	 * being more a convenience method around it, but this here is the main one!
+	 */
+	public String reorganizeImports(String origText) {
+
 		// just do nothing :)
+		return origText;
 	}
 
 	private int getLineStartFromPosition(int pos, String content) {
@@ -524,21 +541,17 @@ public abstract class Code extends DefaultStyledDocument {
 		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 196));
-		StyleConstants.setBackground(attrAnnotation, new Color(0, 0, 0));
 
 		attrComment = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrComment, new Color(128, 255, 128));
-		StyleConstants.setBackground(attrComment, new Color(0, 0, 0));
 		StyleConstants.setItalic(attrComment, true);
 
 		attrKeyword = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrKeyword, new Color(156, 96, 255));
-		StyleConstants.setBackground(attrKeyword, new Color(0, 0, 0));
+		StyleConstants.setForeground(attrKeyword, new Color(176, 64, 255));
 		StyleConstants.setBold(attrKeyword, true);
 
 		attrPrimitiveType = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrPrimitiveType, new Color(128, 128, 255));
-		StyleConstants.setBackground(attrPrimitiveType, new Color(0, 0, 0));
 		StyleConstants.setBold(attrPrimitiveType, true);
 
 		attrAdvancedType = new SimpleAttributeSet();
@@ -546,7 +559,6 @@ public abstract class Code extends DefaultStyledDocument {
 
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
-		StyleConstants.setBackground(attrString, new Color(0, 0, 0));
 
 		attrReservedChar = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrReservedChar, new Color(192, 112, 225));
@@ -625,8 +637,8 @@ public abstract class Code extends DefaultStyledDocument {
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
-    		insertString(offset, insertedString, attrs, insertedString.length());
-    	}
+			insertString(offset, insertedString, attrs, insertedString.length());
+		}
 
 	/**
 	 * This is called internally for insertString
@@ -670,21 +682,21 @@ public abstract class Code extends DefaultStyledDocument {
 				// in case of {, add indent, and in case of }, remove it
 				// TODO ::put this into the individual programming languages
 				if (content.endsWith("{") ||
-				    content.endsWith("[") ||
-				    content.endsWith("(") ||
-				    content.endsWith("begin") ||
-				    content.endsWith("then")) {
+					content.endsWith("[") ||
+					content.endsWith("(") ||
+					content.endsWith("begin") ||
+					content.endsWith("then")) {
 					if (origWhitespace.endsWith(" ")) {
-						curLineWhitespace.append("    ");
+						curLineWhitespace.append("	");
 					} else {
 						curLineWhitespace.append("\t");
 					}
 				}
 				/*
 				if (content.endsWith("}") ||
-				    content.endsWith("]") ||
-				    content.endsWith(")") ||
-				    content.endsWith("end;")) {
+					content.endsWith("]") ||
+					content.endsWith(")") ||
+					content.endsWith("end;")) {
 					if (curLineWhitespace.toString().endsWith(" ")) {
 						curLineWhitespace.setLength(Math.max(0, curLineWhitespace.length() - 4));
 					} else {
@@ -697,10 +709,10 @@ public abstract class Code extends DefaultStyledDocument {
 				overrideCaretPos += curLineWhitespace.length();
 
 				if (content.endsWith("{") ||
-				    content.endsWith("[") ||
-				    content.endsWith("(") ||
-				    content.endsWith("begin") ||
-				    content.endsWith("then")) {
+					content.endsWith("[") ||
+					content.endsWith("(") ||
+					content.endsWith("begin") ||
+					content.endsWith("then")) {
 					int len = "end;".length();
 					len = Math.min(len, this.getLength() - offset);
 					if (len > 0) {
@@ -716,9 +728,9 @@ public abstract class Code extends DefaultStyledDocument {
 
 				// TODO :: in case of e.g. } following the {, add another curLineWhitespace (but without the
 				// last append) after the caret pos, such that {} with an [ENTER] pressed in between leads to
-				//     {
-				//         |
-				//     }
+				//	 {
+				//		 |
+				//	 }
 
 			} catch (BadLocationException e) {
 				// oops!

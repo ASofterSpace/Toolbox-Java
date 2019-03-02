@@ -35,6 +35,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
+
 public abstract class FunctionSupplyingCode extends Code {
 
 	private static final long serialVersionUID = 1L;

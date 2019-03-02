@@ -13,8 +13,8 @@ import java.awt.event.MouseListener;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -85,16 +85,7 @@ public class JavaCode extends FunctionSupplyingCode {
 	}
 
 	@Override
-	public void reorganizeImports() {
-
-		String origText = decoratedEditor.getText();
-
-		String newText = reorganizeImportsStr(origText);
-
-		decoratedEditor.setText(newText);
-	}
-
-	public String reorganizeImportsStr(String origText) {
+	public String reorganizeImports(String origText) {
 
 		StringBuilder output = new StringBuilder();
 		List<String> imports = new ArrayList<>();
