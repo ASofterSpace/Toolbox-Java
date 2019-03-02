@@ -47,7 +47,7 @@ public class JavaCode extends FunctionSupplyingCode {
 
 	// all primitive types of the Java language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "class", "double", "enum", "int", "long", "false", "null", "super", "this", "true", "void"}
+		new String[] {"boolean", "byte", "char", "class", "double", "enum", "int", "long", "false", "null", "super", "this", "true", "void"}
 	));
 
 	// all string delimiters of the Java language

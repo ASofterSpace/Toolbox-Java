@@ -25,6 +25,8 @@ public class SimpleFile extends File {
 
 	protected List<String> filecontents;
 
+	protected boolean usingUtf8Bom = false;
+
 
 	/**
 	 * Please do not construct a file without a name ;)
@@ -257,6 +259,13 @@ public class SimpleFile extends File {
 
 		// fill file with data
 		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(initSave()), StandardCharsets.UTF_8)) {
+
+			if (usingUtf8Bom) {
+				// 0xEF 0xBB 0xBF
+				char[] utf8Bom = {(char) 239, (char) 187, (char) 191};
+
+				writer.write(utf8Bom);
+			}
 
 			for (String line : filecontents) {
 				writer.write(line + "\n");
