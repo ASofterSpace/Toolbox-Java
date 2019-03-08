@@ -107,6 +107,12 @@ public abstract class Code extends DefaultStyledDocument {
 	// search string - the string that is currently being searched for
 	private String searchStr = null;
 
+	// all of the text versions we are aware of
+	private List<String> textVersions = new ArrayList<>();
+
+	// the text version we are currently at (not necessarily the latest, through undo)
+	private int currentTextVersion = 0;
+
 
 	public Code(JTextPane editor) {
 
@@ -135,6 +141,9 @@ public abstract class Code extends DefaultStyledDocument {
 		// actually style the editor with... us
 		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origContent = decoratedEditor.getText();
+
+		textVersions.add(origContent);
+
 		decoratedEditor.setDocument(this);
 		decoratedEditor.setText(origContent);
 		decoratedEditor.setCaretPosition(origCaretPos);
@@ -821,6 +830,32 @@ public abstract class Code extends DefaultStyledDocument {
 		if (codeEditorLineMemo != null) {
 			refreshLineNumbering();
 		}
+
+		// add text version to the undo cache
+		String nextVersion = decoratedEditor.getText();
+		String currentVersion = textVersions.get(currentTextVersion);
+
+		// only do this if the new version is not empty!
+		if (nextVersion.equals("")) {
+			return;
+		}
+
+		// only do this if the new version is not the current version!
+		// (to minimize the amount of data stored, but also to not re-store
+		// the changed when undo and redo are pressed etc.)
+		if (nextVersion.equals(currentVersion)) {
+			return;
+		}
+
+		// if we did some undoing, and are now doing something else, then remove
+		// the alternative timeline
+		if (currentTextVersion < textVersions.size() - 1) {
+			textVersions = textVersions.subList(0, currentTextVersion);
+		}
+
+		textVersions.add(nextVersion);
+
+		currentTextVersion = textVersions.size() - 1;
 	}
 
 	void highlightAllText() {
@@ -923,6 +958,28 @@ public abstract class Code extends DefaultStyledDocument {
 		synchronized (instances) {
 			instances.remove(this);
 		}
+	}
+
+	public void undo() {
+
+		currentTextVersion--;
+
+		if (currentTextVersion < 0) {
+			currentTextVersion = 0;
+		}
+
+		decoratedEditor.setText(textVersions.get(currentTextVersion));
+	}
+
+	public void redo() {
+
+		currentTextVersion++;
+
+		if (currentTextVersion > textVersions.size() - 1) {
+			currentTextVersion = textVersions.size() - 1;
+		}
+
+		decoratedEditor.setText(textVersions.get(currentTextVersion));
 	}
 
 }
