@@ -74,6 +74,20 @@ public class SimpleFile extends File {
 		super(directory, filename);
 	}
 
+	public boolean isUsingUTF8BOM() {
+		return usingUtf8Bom;
+	}
+
+	/**
+	 * Determines whether the UTF8 BOM should be written or not,
+	 * but does NOT immediately write the file - so after changing
+	 * this, if you also want to change the file on the disk, call
+	 * save() afterwards!
+	 */
+	public void useUTF8BOM(boolean useItOrNot) {
+		usingUtf8Bom = useItOrNot;
+	}
+
 	/**
 	 * Creates this file on the disk, which entails:
 	 * - creating the parent directory
@@ -102,7 +116,21 @@ public class SimpleFile extends File {
 		try {
 			byte[] binaryContent = Files.readAllBytes(this.getJavaPath());
 
+			usingUtf8Bom = false;
+
+			if (binaryContent.length > 2) {
+				if ((binaryContent[0] == (byte) 239) &&
+					(binaryContent[1] == (byte) 187) &&
+					(binaryContent[2] == (byte) 191)) {
+					usingUtf8Bom = true;
+				}
+			}
+
 			String newContent = new String(binaryContent, StandardCharsets.UTF_8);
+
+			if (usingUtf8Bom) {
+				newContent = newContent.substring(1);
+			}
 
 			setContent(newContent);
 
@@ -257,15 +285,29 @@ public class SimpleFile extends File {
 	 */
 	public void save() {
 
-		// fill file with data
-		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(initSave()), StandardCharsets.UTF_8)) {
+		java.io.File targetFile = initSave();
 
-			if (usingUtf8Bom) {
+		if (usingUtf8Bom) {
+			// initialize the file with the BOM
+			try (FileOutputStream stream = new FileOutputStream(targetFile, false)) {
+
 				// 0xEF 0xBB 0xBF
-				char[] utf8Bom = {(char) 239, (char) 187, (char) 191};
+				byte[] utf8Bom = {(byte) 239, (byte) 187, (byte) 191};
 
-				writer.write(utf8Bom);
+				stream.write(utf8Bom);
+
+			} catch (IOException e) {
+				System.err.println("[ERROR] An IOException occurred when trying to write the UTF8 BOM to the file " + filename + " - inconceivable!");
 			}
+		}
+
+		// if we are using a UTF8 BOM, append now (to the BOM we just wrote)
+		// if we are not using a UTF8 BOM, do not append (but just overwrite), as we have not yet written
+		// to the file (as we have not written any BOM or anything else)
+		boolean append = usingUtf8Bom;
+
+		// fill file with the actual data
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, append), StandardCharsets.UTF_8)) {
 
 			for (String line : filecontents) {
 				writer.write(line + "\n");
