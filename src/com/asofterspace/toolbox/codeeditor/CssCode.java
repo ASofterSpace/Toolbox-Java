@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -65,8 +66,6 @@ public class CssCode extends Code {
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
-	private List<CodeLocation> functions = new ArrayList<>();
-
 
 	public CssCode(JTextPane editor) {
 
@@ -111,9 +110,7 @@ public class CssCode extends Code {
 
 	// this is the main function that... well... highlights our text :)
 	@Override
-	void highlightText(int start, int length) {
-
-		functions = new ArrayList<>();
+	protected void highlightText(int start, int length) {
 
 		try {
 			int end = this.getLength();

@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -112,7 +113,7 @@ public class JsonCode extends Code {
 
 	// this is the main function that... well... highlights our text :)
 	@Override
-	void highlightText(int start, int length) {
+	protected void highlightText(int start, int length) {
 
 		try {
 			int end = this.getLength();
@@ -188,7 +189,7 @@ public class JsonCode extends Code {
 
 		if (START_SINGLELINE_COMMENT.equals(commentStart)) {
 
-			int commentEnd = content.indexOf(EOL, start + 2);
+			int commentEnd = content.indexOf(EOL, start + 2) - 1;
 
 			// this is the last line
 			if (commentEnd == -1) {

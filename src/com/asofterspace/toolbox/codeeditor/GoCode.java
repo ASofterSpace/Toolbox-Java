@@ -1,19 +1,24 @@
 /**
- * Unlicensed code created by A Softer Space, 2019
+ * Unlicensed code created by A Softer Space, 2018
  * www.asofterspace.com/licenses/unlicense.txt
  */
 package com.asofterspace.toolbox.codeeditor;
 
-import com.asofterspace.toolbox.codeeditor.base.Code;
+import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,40 +38,136 @@ import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
 
-public class ShellCode extends Code {
+public class GoCode extends FunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the sh language
+	// all keywords of the Go language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"break", "case", "esac", "do", "done", "else", "for", "while", "function", "if", "fi", "then", "in"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "while", "volatile"}
 	));
 
-	// all primitive types of the sh language and other stuff that looks that way
+	// all primitive types of the Go language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"echo", "exit", "sleep"}
+		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "int", "long", "null", "super", "this", "true", "void"}
 	));
 
-	// all string delimiters of the sh language
+	// all string delimiters of the Go language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the sh language
+	// operand characters in the Go language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
-		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*', '#', '$'}
+		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
 	));
 
-	// start of single line comments in the sh language
-	private static final String START_SINGLELINE_COMMENT = "#";
+	// start of single line comments in the Go language
+	private static final String START_SINGLELINE_COMMENT = "//";
+
+	// start of multiline comments in the Go language
+	private static final String START_MULTILINE_COMMENT = "/*";
+
+	// end of multiline comments in the Go language
+	private static final String END_MULTILINE_COMMENT = "*/";
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
+	private int curLineStartingWhitespace = 0;
 
-	public ShellCode(JTextPane editor) {
+	private boolean startingWhitespace = false;
+
+	private String lastCouldBeKeyword = "";
+
+
+	public GoCode(JTextPane editor) {
 
 		super(editor);
+	}
+
+	@Override
+	public String reorganizeImports(String origText) {
+
+		StringBuilder output = new StringBuilder();
+		List<String> imports = new ArrayList<>();
+		StringBuilder secondOutput = new StringBuilder();
+
+		String[] lines = origText.split("\n");
+
+		int curLine = 0;
+
+		for (; curLine < lines.length; curLine++) {
+			String line = lines[curLine];
+			if (line.startsWith("import")) {
+				break;
+			} else {
+				output.append(line);
+				output.append("\n");
+			}
+		}
+
+		for (; curLine < lines.length; curLine++) {
+			String line = lines[curLine];
+			if (line.equals("")) {
+				continue;
+			}
+			if (line.startsWith("import")) {
+				imports.add(line);
+			} else {
+				break;
+			}
+		}
+
+		for (; curLine < lines.length; curLine++) {
+			secondOutput.append("\n");
+			String line = lines[curLine];
+			secondOutput.append(line);
+		}
+
+
+		// sort imports alphabetically
+		Collections.sort(imports, new Comparator<String>() {
+			public int compare(String a, String b) {
+				return a.toLowerCase().compareTo(b.toLowerCase());
+			}
+		});
+
+
+		String lastImport = "";
+		String lastImportStart = "";
+
+		int i = 0;
+
+		for (String importLine : imports) {
+
+			// remove duplicates
+			if (lastImport.equals(importLine)) {
+				continue;
+			}
+
+			// add an empty line between imports in different namespaces
+			String thisImportStart = importLine.substring(0, importLine.indexOf(".") + 1);
+			if (!lastImportStart.equals(thisImportStart)) {
+				if (i > 0) {
+					output.append("\n");
+				}
+			}
+
+			// actually add the import
+			output.append(importLine);
+			output.append("\n");
+			lastImport = importLine;
+			lastImportStart = thisImportStart;
+			i++;
+		}
+
+		// actually have two empty lines between the import end and the class start
+		if (i > 0) {
+			output.append("\n");
+		}
+
+		return output.toString() + secondOutput.toString();
 	}
 
 	@Override
@@ -109,6 +210,8 @@ public class ShellCode extends Code {
 	@Override
 	protected void highlightText(int start, int length) {
 
+		functions = new ArrayList<>();
+
 		try {
 			int end = this.getLength();
 
@@ -126,11 +229,31 @@ public class ShellCode extends Code {
 
 				// while we have a delimiter...
 				char curChar = content.charAt(start);
+
+				startingWhitespace = false;
+
 				while (isDelimiter(curChar)) {
+
+					// prevent stuff like blubb = foo() from ending up in the function overview list
+					if (curChar == '=') {
+						lastCouldBeKeyword = "";
+					}
+
+					if (curChar == '\n') {
+						curLineStartingWhitespace = 0;
+						startingWhitespace = true;
+					} else {
+						if (startingWhitespace) {
+							if (curChar == '\t') {
+								curLineStartingWhitespace += 4;
+							} else {
+								curLineStartingWhitespace++;
+							}
+						}
+					}
 
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
-
 						start = highlightComment(content, start, end);
 
 					// ... and check for a quoted string
@@ -138,8 +261,8 @@ public class ShellCode extends Code {
 
 						// then let's get that string!
 						start = highlightString(content, start, end);
-					} else {
 
+					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
 							this.setCharacterAttributes(start, 1, attrReservedChar, false);
@@ -152,6 +275,7 @@ public class ShellCode extends Code {
 						start++;
 
 					} else {
+						updateFunctionList();
 						return;
 					}
 
@@ -165,35 +289,52 @@ public class ShellCode extends Code {
 		} catch (BadLocationException e) {
 			// oops!
 		}
+
+		updateFunctionList();
 	}
 
 	private boolean isCommentStart(String content, int start, int end) {
 
-		// but $# is NOT a comment!
-		if (start > 0) {
-			if ("$".equals(content.substring(start - 1, start))) {
-				return false;
-			}
-		}
-
-		if (start > end) {
+		if (start + 1 > end) {
 			return false;
 		}
 
-		// everything after # is a comment
-		return START_SINGLELINE_COMMENT.equals(content.substring(start, start + 1));
+		String potentialCommentStart = content.substring(start, start + 2);
+
+		return START_SINGLELINE_COMMENT.equals(potentialCommentStart) || START_MULTILINE_COMMENT.equals(potentialCommentStart);
 	}
 
 	private int highlightComment(String content, int start, int end) {
 
-		int commentEnd = content.indexOf(EOL, start + 1) - 1;
+		String commentStart = content.substring(start, start + 2);
 
-		// this is the last line
-		if (commentEnd == -1) {
-			commentEnd = end;
+		if (START_SINGLELINE_COMMENT.equals(commentStart)) {
+
+			int commentEnd = content.indexOf(EOL, start + 2) - 1;
+
+			// this is the last line
+			if (commentEnd == -1) {
+				commentEnd = end;
+			}
+
+			// apply single line comment highlighting
+			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+
+			return commentEnd;
 		}
 
-		// apply single line comment highlighting
+		// apply multiline comment highlighting
+		int commentEnd = content.indexOf(END_MULTILINE_COMMENT, start + 2);
+
+		// the multiline comment has not been closed - let's comment out the rest of the document!
+		if (commentEnd == -1) {
+			commentEnd = end;
+		} else {
+			// +1 because of the length of END_MULTILINE_COMMENT itself
+			commentEnd += 1;
+		}
+
+		// apply multiline comment highlighting
 		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 
 		return commentEnd;
@@ -257,7 +398,20 @@ public class ShellCode extends Code {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
+			if (!"new".equals(lastCouldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+				if ((start > 0) && (content.charAt(start-1) == ' ')) {
+					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
+					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
+						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+						functions.add(new CodeLocation(functionName, start));
+					}
+				}
+			}
 		}
+
+		lastCouldBeKeyword = couldBeKeyword;
 
 		return couldBeKeywordEnd;
 	}

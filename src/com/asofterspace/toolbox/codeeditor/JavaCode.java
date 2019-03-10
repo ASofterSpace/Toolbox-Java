@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -206,7 +208,7 @@ public class JavaCode extends FunctionSupplyingCode {
 
 	// this is the main function that... well... highlights our text :)
 	@Override
-	void highlightText(int start, int length) {
+	protected void highlightText(int start, int length) {
 
 		functions = new ArrayList<>();
 
@@ -291,6 +293,67 @@ public class JavaCode extends FunctionSupplyingCode {
 		updateFunctionList();
 	}
 
+	private void sortFunctions(List<CodeLocation> functions) {
+
+		Collections.sort(functions, new Comparator<CodeLocation>() {
+			public int compare(CodeLocation a, CodeLocation b) {
+				String funcNameA = getFuncName(a.getCode());
+				String funcNameB = getFuncName(b.getCode());
+				return funcNameA.toLowerCase().compareTo(funcNameB.toLowerCase());
+			}
+		});
+	}
+
+	private void appendFunctions(List<CodeLocation> target, List<CodeLocation> origin, String type) {
+
+		if (origin.size() > 0) {
+			target.add(new CodeLocation(type + ":", 0));
+			for (CodeLocation func : origin) {
+				target.add(func);
+			}
+			target.add(new CodeLocation("", 0));
+		}
+	}
+
+	@Override
+	protected void updateFunctionList() {
+
+		List<CodeLocation> publicFunctions = new ArrayList<>();
+		List<CodeLocation> protectedFunctions = new ArrayList<>();
+		List<CodeLocation> anyFunctions = new ArrayList<>();
+		List<CodeLocation> privateFunctions = new ArrayList<>();
+
+		for (CodeLocation func : functions) {
+			String line = func.getCode().trim();
+			if (line.endsWith("{")) {
+				line = line.substring(0, line.length() - 1).trim();
+			}
+			if (line.startsWith("public ")) {
+				publicFunctions.add(new CodeLocation(line.substring(7), func.getCaretPos()));
+			} else if (line.startsWith("protected ")) {
+				protectedFunctions.add(new CodeLocation(line.substring(10), func.getCaretPos()));
+			} else if (line.startsWith("private ")) {
+				privateFunctions.add(new CodeLocation(line.substring(8), func.getCaretPos()));
+			} else {
+				anyFunctions.add(new CodeLocation(line, func.getCaretPos()));
+			}
+		}
+
+		sortFunctions(publicFunctions);
+		sortFunctions(protectedFunctions);
+		sortFunctions(anyFunctions);
+		sortFunctions(privateFunctions);
+
+		functions = new ArrayList<>();
+
+		appendFunctions(functions, publicFunctions, "public");
+		appendFunctions(functions, protectedFunctions, "protected");
+		appendFunctions(functions, anyFunctions, "package private");
+		appendFunctions(functions, privateFunctions, "private");
+
+		super.updateFunctionList();
+	}
+
 	private boolean isCommentStart(String content, int start, int end) {
 
 		if (start + 1 > end) {
@@ -308,7 +371,7 @@ public class JavaCode extends FunctionSupplyingCode {
 
 		if (START_SINGLELINE_COMMENT.equals(commentStart)) {
 
-			int commentEnd = content.indexOf(EOL, start + 2);
+			int commentEnd = content.indexOf(EOL, start + 2) - 1;
 
 			// this is the last line
 			if (commentEnd == -1) {
@@ -402,7 +465,9 @@ public class JavaCode extends FunctionSupplyingCode {
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
 					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
-						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+						// now get the entire line that we found!
+						// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+						String functionName = getLineFromPosition(start, content);
 						functions.add(new CodeLocation(functionName, start));
 					}
 				}

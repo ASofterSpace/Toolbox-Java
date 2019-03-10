@@ -2,8 +2,9 @@
  * Unlicensed code created by A Softer Space, 2019
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.codeeditor;
+package com.asofterspace.toolbox.codeeditor.base;
 
+import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -65,6 +66,34 @@ public abstract class FunctionSupplyingCode extends Code {
 
 	public List<CodeLocation> getFunctions() {
 		return functions;
+	}
+
+	/**
+	 * Takes something like
+	 * public void foo(String blubb)
+	 * and returns something like
+	 * foo
+	 * - and ALWAYS returns a string; even an empty one
+	 * when null is fed into it - such that it is very
+	 * safe to use!
+	 */
+	protected String getFuncName(String functionSignature) {
+
+		if (functionSignature == null) {
+			return "";
+		}
+
+		int bracketStart = functionSignature.indexOf("(");
+		if (bracketStart < 0) {
+			bracketStart = functionSignature.length();
+		}
+
+		int funcNameStart = functionSignature.substring(0, bracketStart).lastIndexOf(" ");
+		if (funcNameStart < 0) {
+			funcNameStart = -1;
+		}
+
+		return functionSignature.substring(funcNameStart + 1, bracketStart);
 	}
 
 	protected void updateFunctionList() {

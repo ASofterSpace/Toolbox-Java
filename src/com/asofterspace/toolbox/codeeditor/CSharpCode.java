@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -32,7 +34,7 @@ import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
 
-public class CSharpCode extends Code {
+public class CSharpCode extends FunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -67,8 +69,6 @@ public class CSharpCode extends Code {
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
-
-	private List<CodeLocation> functions = new ArrayList<>();
 
 
 	public CSharpCode(JTextPane editor) {
@@ -114,7 +114,7 @@ public class CSharpCode extends Code {
 
 	// this is the main function that... well... highlights our text :)
 	@Override
-	void highlightText(int start, int length) {
+	protected void highlightText(int start, int length) {
 
 		functions = new ArrayList<>();
 
@@ -192,7 +192,7 @@ public class CSharpCode extends Code {
 
 		if (START_SINGLELINE_COMMENT.equals(commentStart)) {
 
-			int commentEnd = content.indexOf(EOL, start + 2);
+			int commentEnd = content.indexOf(EOL, start + 2) - 1;
 
 			// this is the last line
 			if (commentEnd == -1) {

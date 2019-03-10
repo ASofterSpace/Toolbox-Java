@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -11,8 +12,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class MarkdownCode extends Code {
 
 	// are we currently in a multiline bold area?
 	private boolean curMultilineBold;
-	
+
 	// styles for the different kinds of text in the document
 	private MutableAttributeSet attrBold;
 
@@ -50,29 +51,29 @@ public class MarkdownCode extends Code {
 
 		super(editor);
 	}
-	
+
 	@Override
 	public void setLightScheme() {
-	
-		// change the attribute 
+
+		// change the attribute
 		attrBold = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrBold, new Color(0, 0, 0));
 		StyleConstants.setBold(attrBold, true);
-		
+
 		super.setLightScheme();
 	}
-	
+
 	@Override
 	public void setDarkScheme() {
-	
+
 		// change the attribute sets
 		attrBold = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrBold, new Color(255, 255, 255));
 		StyleConstants.setBold(attrBold, true);
-		
+
 		super.setDarkScheme();
 	}
-	
+
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
@@ -107,13 +108,13 @@ public class MarkdownCode extends Code {
 
 	// this is the main function that... well... highlights our text :)
 	@Override
-	void highlightText(int start, int length) {
+	protected void highlightText(int start, int length) {
 
 		try {
 			int end = this.getLength();
-			
+
 			String content = this.getText(0, end);
-			
+
 			// set the entire document back to regular
 			this.setCharacterAttributes(0, end, attrRegular, true);
 
@@ -122,7 +123,7 @@ public class MarkdownCode extends Code {
 			start = 0;
 			int cur = start;
 			end -= 1;
-			
+
 			Integer boldStart = null;
 
 			while (cur <= end) {
@@ -135,10 +136,10 @@ public class MarkdownCode extends Code {
 						boldStart = null;
 					}
 				}
-				
+
 				cur++;
 			}
-			
+
 		} catch (BadLocationException e) {
 			// oops!
 		}

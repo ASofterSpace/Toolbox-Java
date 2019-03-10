@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -62,8 +63,6 @@ public class PythonCode extends Code {
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
-	private List<CodeLocation> functions = new ArrayList<>();
-
 
 	public PythonCode(JTextPane editor) {
 
@@ -108,9 +107,7 @@ public class PythonCode extends Code {
 
 	// this is the main function that... well... highlights our text :)
 	@Override
-	void highlightText(int start, int length) {
-
-		functions = new ArrayList<>();
+	protected void highlightText(int start, int length) {
 
 		try {
 			int end = this.getLength();
@@ -180,7 +177,7 @@ public class PythonCode extends Code {
 
 	private int highlightComment(String content, int start, int end) {
 
-		int commentEnd = content.indexOf(EOL, start + 1);
+		int commentEnd = content.indexOf(EOL, start + 1) - 1;
 
 		// this is the last line
 		if (commentEnd == -1) {

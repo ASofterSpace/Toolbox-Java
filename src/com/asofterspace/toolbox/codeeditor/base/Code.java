@@ -2,8 +2,9 @@
  * Unlicensed code created by A Softer Space, 2018
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.codeeditor;
+package com.asofterspace.toolbox.codeeditor.base;
 
+import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.Utils;
 
@@ -46,14 +47,14 @@ public abstract class Code extends DefaultStyledDocument {
 	Callback onChangeCallback;
 
 	// the end-of-line marker
-	static final String EOL = "\n";
+	protected static final String EOL = "\n";
 
 	// the root element of the document, through which we can get the individual lines
 	Element root;
 
 	// the editor that is to be decorated by us - and the listeners we associate with it
 	// (should most usually be a CodeEditor - but in a pitch any JTextPane will do)
-	final JTextPane decoratedEditor;
+	protected final JTextPane decoratedEditor;
 	private KeyAdapter keyListener;
 	private CaretListener caretListener;
 
@@ -68,24 +69,24 @@ public abstract class Code extends DefaultStyledDocument {
 	Color schemeBackgroundColor;
 
 	// the font sizes, fonts and tab sets of all editors
-	int fontSize = 15;
-	static String editorFontFamily;
-	Font lastFont;
-	TabSet lastTabSet;
+	protected int fontSize = 15;
+	protected static String editorFontFamily;
+	protected Font lastFont;
+	protected TabSet lastTabSet;
 
 	// styles for the different kinds of text in the document
-	MutableAttributeSet attrRegular;
-	MutableAttributeSet attrSearch;
-	MutableAttributeSet attrSearchSelected;
-	MutableAttributeSet attrAnnotation; // @blubb
-	MutableAttributeSet attrComment; // /* bla blubb */
-	MutableAttributeSet attrKeyword; // this, null, ...
-	MutableAttributeSet attrPrimitiveType; // int, boolean, ...
-	MutableAttributeSet attrAdvancedType; // Integer, Boolean, ...
-	MutableAttributeSet attrString; // "meow!"
-	MutableAttributeSet attrReservedChar; // ,.()[]...
-	MutableAttributeSet attrFunction; // blubb()
-	MutableAttributeSet attrData; // <![CDATA[...]]>
+	protected MutableAttributeSet attrRegular;
+	protected MutableAttributeSet attrSearch;
+	protected MutableAttributeSet attrSearchSelected;
+	protected MutableAttributeSet attrAnnotation; // @blubb
+	protected MutableAttributeSet attrComment; // /* bla blubb */
+	protected MutableAttributeSet attrKeyword; // this, null, ...
+	protected MutableAttributeSet attrPrimitiveType; // int, boolean, ...
+	protected MutableAttributeSet attrAdvancedType; // Integer, Boolean, ...
+	protected MutableAttributeSet attrString; // "meow!"
+	protected MutableAttributeSet attrReservedChar; // ,.()[]...
+	protected MutableAttributeSet attrFunction; // blubb()
+	protected MutableAttributeSet attrData; // <![CDATA[...]]>
 
 	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
@@ -349,6 +350,14 @@ public abstract class Code extends DefaultStyledDocument {
 		return origText;
 	}
 
+	protected String getLineFromPosition(int pos, String content) {
+
+		int start = getLineStartFromPosition(pos, content);
+		int end = getLineEndFromPosition(pos, content);
+
+		return content.substring(start, end);
+	}
+
 	private int getLineStartFromPosition(int pos, String content) {
 
 		int lineStart = 0;
@@ -456,9 +465,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 		decoratedEditor.setFont(lastFont);
 
-		Style style = decoratedEditor.getLogicalStyle();
-		StyleConstants.setTabSet(style, lastTabSet);
-		decoratedEditor.setLogicalStyle(style);
+		try {
+			Style style = decoratedEditor.getLogicalStyle();
+			StyleConstants.setTabSet(style, lastTabSet);
+			decoratedEditor.setLogicalStyle(style);
+		} catch (NullPointerException npe) {
+			System.err.println("Tab set could not be set on decoratedEditor!");
+		}
 
 		highlightAllText();
 	}
@@ -547,7 +560,6 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setForeground(attrSearchSelected, new Color(255, 255, 255));
 		StyleConstants.setBackground(attrSearchSelected, new Color(128, 0, 128));
 
-		// change the attribute sets
 		attrAnnotation = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 196));
 
@@ -556,7 +568,7 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setItalic(attrComment, true);
 
 		attrKeyword = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrKeyword, new Color(176, 64, 255));
+		StyleConstants.setForeground(attrKeyword, new Color(172, 64, 255));
 		StyleConstants.setBold(attrKeyword, true);
 
 		attrPrimitiveType = new SimpleAttributeSet();
@@ -564,7 +576,7 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setBold(attrPrimitiveType, true);
 
 		attrAdvancedType = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrAdvancedType, new Color(255, 196, 196));
+		StyleConstants.setForeground(attrAdvancedType, new Color(255, 188, 188));
 
 		attrString = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrString, new Color(255, 128, 128));
@@ -655,7 +667,7 @@ public abstract class Code extends DefaultStyledDocument {
 	 * overrideCaretPos - the additional amount to which we should move the caret pos to the right
 	 *   because of string changes that have already been performed by an extending class
 	 */
-	void insertString(int offset, String insertedString, AttributeSet attrs, int overrideCaretPos) {
+	protected void insertString(int offset, String insertedString, AttributeSet attrs, int overrideCaretPos) {
 
 		if (preventInsert > 0) {
 			preventInsert--;
@@ -819,7 +831,7 @@ public abstract class Code extends DefaultStyledDocument {
 		callOnChange();
 	}
 
-	void callOnChange() {
+	protected void callOnChange() {
 
 		// call the on change callback (if there is one)
 		if (onChangeCallback != null) {
@@ -858,14 +870,14 @@ public abstract class Code extends DefaultStyledDocument {
 		currentTextVersion = textVersions.size() - 1;
 	}
 
-	void highlightAllText() {
+	protected void highlightAllText() {
 
 		pleaseHighlight = true;
 	}
 
 	// this is the main function that... well... highlights our text :)
 	// you might want to override it ;)
-	void highlightText(int start, int length) {
+	protected void highlightText(int start, int length) {
 
 		int end = this.getLength();
 
@@ -875,7 +887,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// highlight for search - which is called by the highlighting thread always
 	// AFTER all the other highlightings have been performed!
-	void highlightSearch(int start, int length) {
+	protected void highlightSearch(int start, int length) {
 
 		if (searchStr == null) {
 			return;
@@ -962,6 +974,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public void undo() {
 
+		int origCaretPos = decoratedEditor.getCaretPosition();
+
 		currentTextVersion--;
 
 		if (currentTextVersion < 0) {
@@ -969,9 +983,13 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		decoratedEditor.setText(textVersions.get(currentTextVersion));
+
+		decoratedEditor.setCaretPosition(origCaretPos);
 	}
 
 	public void redo() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
 
 		currentTextVersion++;
 
@@ -980,6 +998,8 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		decoratedEditor.setText(textVersions.get(currentTextVersion));
+
+		decoratedEditor.setCaretPosition(origCaretPos);
 	}
 
 }

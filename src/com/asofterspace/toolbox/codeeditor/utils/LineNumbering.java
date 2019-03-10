@@ -2,11 +2,12 @@
  * Unlicensed code created by A Softer Space, 2018
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.codeeditor;
+package com.asofterspace.toolbox.codeeditor.utils;
 
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.utils.Pair;
+import com.asofterspace.toolbox.Utils;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -14,8 +15,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -139,7 +140,7 @@ public class LineNumbering extends Code {
 
 	// this is the main function that... well... highlights our text :)
 	@Override
-	void highlightText(int start, int length) {
+	protected void highlightText(int start, int length) {
 
 		highlightOnSelection(lastDot, lastMark);
 	}
