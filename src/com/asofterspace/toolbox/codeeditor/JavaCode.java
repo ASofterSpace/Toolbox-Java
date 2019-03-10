@@ -332,12 +332,12 @@ public class JavaCode extends FunctionSupplyingCode {
 			if (line.endsWith("{")) {
 				line = line.substring(0, line.length() - 1).trim();
 			}
-			if (line.startsWith("public ")) {
-				publicFunctions.add(new CodeLocation(line.substring(7), func.getCaretPos()));
-			} else if (line.startsWith("protected ")) {
-				protectedFunctions.add(new CodeLocation(line.substring(10), func.getCaretPos()));
-			} else if (line.startsWith("private ")) {
-				privateFunctions.add(new CodeLocation(line.substring(8), func.getCaretPos()));
+			if (line.contains("public ")) {
+				publicFunctions.add(new CodeLocation(line.replace("public ", ""), func.getCaretPos()));
+			} else if (line.contains("protected ")) {
+				protectedFunctions.add(new CodeLocation(line.replace("protected ", ""), func.getCaretPos()));
+			} else if (line.contains("private ")) {
+				privateFunctions.add(new CodeLocation(line.replace("private ", ""), func.getCaretPos()));
 			} else {
 				anyFunctions.add(new CodeLocation(line, func.getCaretPos()));
 			}
