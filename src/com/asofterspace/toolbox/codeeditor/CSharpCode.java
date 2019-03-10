@@ -95,6 +95,10 @@ public class CSharpCode extends FunctionSupplyingCode {
 				insertedString = "[]";
 				overrideCaretPos = 1;
 				break;
+			case "<":
+				insertedString = "<>";
+				overrideCaretPos = 1;
+				break;
 			case "\"":
 				insertedString = "\"\"";
 				overrideCaretPos = 1;

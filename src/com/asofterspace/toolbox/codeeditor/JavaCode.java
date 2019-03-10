@@ -189,6 +189,10 @@ public class JavaCode extends FunctionSupplyingCode {
 				insertedString = "[]";
 				overrideCaretPos = 1;
 				break;
+			case "<":
+				insertedString = "<>";
+				overrideCaretPos = 1;
+				break;
 			case "\"":
 				insertedString = "\"\"";
 				overrideCaretPos = 1;
@@ -348,7 +352,7 @@ public class JavaCode extends FunctionSupplyingCode {
 
 		appendFunctions(functions, publicFunctions, "public");
 		appendFunctions(functions, protectedFunctions, "protected");
-		appendFunctions(functions, anyFunctions, "package private");
+		appendFunctions(functions, anyFunctions, "package-private");
 		appendFunctions(functions, privateFunctions, "private");
 
 		super.updateFunctionList();

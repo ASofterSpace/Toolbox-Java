@@ -76,6 +76,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// styles for the different kinds of text in the document
 	protected MutableAttributeSet attrRegular;
+	protected MutableAttributeSet attrBold;
 	protected MutableAttributeSet attrSearch;
 	protected MutableAttributeSet attrSearchSelected;
 	protected MutableAttributeSet attrAnnotation; // @blubb
@@ -490,6 +491,9 @@ public abstract class Code extends DefaultStyledDocument {
 		attrRegular = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
 
+		attrBold = new SimpleAttributeSet();
+		StyleConstants.setBold(attrBold, true);
+
 		attrSearch = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSearch, new Color(0, 0, 0));
 		StyleConstants.setBackground(attrSearch, new Color(0, 255, 255));
@@ -551,6 +555,9 @@ public abstract class Code extends DefaultStyledDocument {
 		attrRegular = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
 		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
+
+		attrBold = new SimpleAttributeSet();
+		StyleConstants.setBold(attrBold, true);
 
 		attrSearch = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSearch, new Color(255, 255, 255));

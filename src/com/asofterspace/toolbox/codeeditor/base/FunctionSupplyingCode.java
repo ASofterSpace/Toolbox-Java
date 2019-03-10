@@ -45,6 +45,8 @@ public abstract class FunctionSupplyingCode extends Code {
 
 	protected JTextPane functionPane;
 
+	private DefaultStyledDocument functionPaneStyle;
+
 
 	public FunctionSupplyingCode(JTextPane editor) {
 
@@ -54,6 +56,10 @@ public abstract class FunctionSupplyingCode extends Code {
 	public void setFunctionTextField(JTextPane functionPane) {
 
 		this.functionPane = functionPane;
+
+		functionPaneStyle = new DefaultStyledDocument();
+
+		functionPane.setDocument(functionPaneStyle);
 	}
 
 	// does this code editor support reporting function names in the code?
@@ -79,8 +85,15 @@ public abstract class FunctionSupplyingCode extends Code {
 	 */
 	protected String getFuncName(String functionSignature) {
 
+		CodePatch patch = getFuncPatch(functionSignature);
+
+		return functionSignature.substring(patch.getStart(), patch.getEnd());
+	}
+
+	protected CodePatch getFuncPatch(String functionSignature) {
+
 		if (functionSignature == null) {
-			return "";
+			return new CodePatch(0, 0);
 		}
 
 		int bracketStart = functionSignature.indexOf("(");
@@ -93,21 +106,68 @@ public abstract class FunctionSupplyingCode extends Code {
 			funcNameStart = -1;
 		}
 
-		return functionSignature.substring(funcNameStart + 1, bracketStart);
+		return new CodePatch(funcNameStart, bracketStart);
 	}
 
 	protected void updateFunctionList() {
 
 		if (functionPane != null) {
 
+			List<CodePatch> boldPatches = new ArrayList<>();
+
 			StringBuilder functionText = new StringBuilder();
 
+			int lengthBefore = 0;
+
 			for (CodeLocation func : functions) {
-				functionText.append(func.getCode());
+
+				String function = func.getCode();
+
+				CodePatch patch = getFuncPatch(function);
+				patch.addOffset(lengthBefore);
+				boldPatches.add(patch);
+
+				functionText.append(function);
 				functionText.append("\n");
+
+				lengthBefore += function.length() + 1;
 			}
 
 			functionPane.setText(functionText.toString());
+
+			for (CodePatch boldPatch : boldPatches) {
+				functionPaneStyle.setCharacterAttributes(boldPatch.getStart(), boldPatch.getLength(), attrBold, false);
+			}
+		}
+	}
+
+
+	private class CodePatch {
+
+		private int start;
+		private int end;
+
+
+		CodePatch(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+
+		void addOffset(int offset) {
+			this.start += offset;
+			this.end += offset;
+		}
+
+		int getStart() {
+			return this.start;
+		}
+
+		int getEnd() {
+			return this.end;
+		}
+
+		int getLength() {
+			return this.end - this.start;
 		}
 	}
 
