@@ -180,7 +180,7 @@ public class PythonCode extends Code {
 		int commentEnd = content.indexOf(EOL, start + 1) - 1;
 
 		// this is the last line
-		if (commentEnd == -1) {
+		if (commentEnd == -2) {
 			commentEnd = end;
 		}
 

@@ -378,7 +378,7 @@ public class JavaCode extends FunctionSupplyingCode {
 			int commentEnd = content.indexOf(EOL, start + 2) - 1;
 
 			// this is the last line
-			if (commentEnd == -1) {
+			if (commentEnd == -2) {
 				commentEnd = end;
 			}
 
