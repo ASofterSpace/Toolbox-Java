@@ -65,11 +65,12 @@ public abstract class Code extends DefaultStyledDocument {
 	// the list of all decorated editors
 	static List<Code> instances = new ArrayList<>();
 
-	// the background color of the editor
+	// the fore- and background colors of the editor
+	Color schemeForegroundColor;
 	Color schemeBackgroundColor;
 
 	// the font sizes, fonts and tab sets of all editors
-	protected int fontSize = 15;
+	protected int fontSize = 14;
 	protected static String editorFontFamily;
 	protected Font lastFont;
 	protected TabSet lastTabSet;
@@ -487,9 +488,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public void setLightScheme() {
 
+		schemeForegroundColor = new Color(0, 0, 0);
+		schemeBackgroundColor = new Color(255, 255, 255);
+
 		// change the attribute sets
 		attrRegular = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrRegular, new Color(0, 0, 0));
+		StyleConstants.setForeground(attrRegular, schemeForegroundColor);
+		StyleConstants.setBackground(attrRegular, schemeBackgroundColor);
 
 		attrBold = new SimpleAttributeSet();
 		StyleConstants.setBold(attrBold, true);
@@ -534,9 +539,8 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setForeground(attrData, new Color(48, 48, 48));
 
 		// re-decorate the editor
-		schemeBackgroundColor = new Color(255, 255, 255);
 		decoratedEditor.setBackground(schemeBackgroundColor);
-		decoratedEditor.setCaretColor(new Color(0, 0, 0));
+		decoratedEditor.setCaretColor(schemeForegroundColor);
 
 		highlightAllText();
 	}
@@ -551,10 +555,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public void setDarkScheme() {
 
+		schemeForegroundColor = new Color(255, 255, 255);
+		schemeBackgroundColor = new Color(0, 0, 0);
+
 		// change the attribute sets
 		attrRegular = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrRegular, new Color(255, 255, 255));
-		StyleConstants.setBackground(attrRegular, new Color(0, 0, 0));
+		StyleConstants.setForeground(attrRegular, schemeForegroundColor);
+		StyleConstants.setBackground(attrRegular, schemeBackgroundColor);
 
 		attrBold = new SimpleAttributeSet();
 		StyleConstants.setBold(attrBold, true);
@@ -599,11 +606,20 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setForeground(attrData, new Color(178, 178, 178));
 
 		// re-decorate the editor
-		schemeBackgroundColor = new Color(0, 0, 0);
 		decoratedEditor.setBackground(schemeBackgroundColor);
-		decoratedEditor.setCaretColor(new Color(255, 255, 255));
+		decoratedEditor.setCaretColor(schemeForegroundColor);
 
 		highlightAllText();
+	}
+
+	public Color getForegroundColor() {
+
+		return schemeForegroundColor;
+	}
+
+	public Color getBackgroundColor() {
+
+		return schemeBackgroundColor;
 	}
 
 	public static void setDarkSchemeForAllEditors() {

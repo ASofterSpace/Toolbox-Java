@@ -60,6 +60,8 @@ public abstract class FunctionSupplyingCode extends Code {
 		functionPaneStyle = new DefaultStyledDocument();
 
 		functionPane.setDocument(functionPaneStyle);
+		
+		applyColorToFunctionPane();
 	}
 
 	// does this code editor support reporting function names in the code?
@@ -133,12 +135,44 @@ public abstract class FunctionSupplyingCode extends Code {
 				lengthBefore += function.length() + 1;
 			}
 
-			functionPane.setText(functionText.toString());
+			String functionTextStr = functionText.toString();
 
+			functionPane.setText(functionTextStr);
+
+			// reset all...
+			functionPaneStyle.setCharacterAttributes(0, functionTextStr.length(), attrRegular, true);
+
+			// ... and then set this one
 			for (CodePatch boldPatch : boldPatches) {
 				functionPaneStyle.setCharacterAttributes(boldPatch.getStart(), boldPatch.getLength(), attrBold, false);
 			}
 		}
+	}
+
+	@Override
+	public void setLightScheme() {
+
+		super.setLightScheme();
+
+		applyColorToFunctionPane();
+	}
+	
+	@Override
+	public void setDarkScheme() {
+
+		super.setDarkScheme();
+
+		applyColorToFunctionPane();
+	}
+
+	private void applyColorToFunctionPane() {
+	
+		if (functionPane == null) {
+			return;
+		}
+		
+		functionPane.setBackground(schemeBackgroundColor);
+		functionPane.setCaretColor(schemeForegroundColor);
 	}
 
 
