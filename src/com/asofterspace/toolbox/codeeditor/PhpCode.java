@@ -100,7 +100,7 @@ public class PhpCode extends HtmlCode {
 	@Override
 	protected int highlightOther(String content, int start, int end) {
 
-		if (start > 0) {
+		if ((start > 0) && (start + PHP_START.length() < end)) {
 			if (PHP_START.equals(content.substring(start - 1, start - 1 + PHP_START.length()))) {
 
 				this.setCharacterAttributes(start - 1, PHP_START.length(), attrKeyword, false);
@@ -251,12 +251,8 @@ public class PhpCode extends HtmlCode {
 		// get the string delimiter that was actually used to start this string (so " or ') to be able to find the matching one
 		String stringDelimiter = content.substring(start, start + 1);
 
-		// find the end of line - as we do not want to go further
-		int endOfLine = content.indexOf(EOL, start + 2);
-
-		if (endOfLine == -1) {
-			endOfLine = end;
-		}
+		// find the end of text - as we do not want to go further
+		int endOfText = end;
 
 		// find the matching end of string
 		int endOfString = start;
@@ -271,11 +267,11 @@ public class PhpCode extends HtmlCode {
 		}
 
 		if (endOfString == -1) {
-			// the string is open-ended... go for end of line
-			endOfString = endOfLine;
+			// the string is open-ended... go for end of text
+			endOfString = endOfText;
 		} else {
 			// the string is not open-ended... so will the end marker or the line break be first?
-			endOfString = Math.min(endOfString, endOfLine);
+			endOfString = Math.min(endOfString, endOfText);
 		}
 
 		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
