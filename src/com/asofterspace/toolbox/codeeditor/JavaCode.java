@@ -59,7 +59,7 @@ public class JavaCode extends FunctionSupplyingCode {
 
 	// operand characters in the Java language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
-		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
+		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '?', '&', '|', '^', '~', '*'}
 	));
 
 	// start of single line comments in the Java language
@@ -269,7 +269,11 @@ public class JavaCode extends FunctionSupplyingCode {
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							// we are checking this because otherwise we are getting exceptions... but... why?
+							// at this point, this should always be the case o.o
+							if (start <= end) {
+								this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							}
 						}
 					}
 

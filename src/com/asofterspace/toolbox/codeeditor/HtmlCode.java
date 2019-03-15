@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
-import com.asofterspace.toolbox.codeeditor.base.Code;
+import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -33,7 +33,7 @@ import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
 
-public class HtmlCode extends Code {
+public class HtmlCode extends FunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -112,9 +112,18 @@ public class HtmlCode extends Code {
 		super.insertString(offset, insertedString, attrs, overrideCaretPos);
 	}
 
+	// TODO :: remove, once (pure) HTML can return useful function identifiers, e.g. based on the elements
+	// inside, or based on inline JS, or somesuch
+	@Override
+	public boolean suppliesFunctions() {
+		return false;
+	}
+
 	// this is the main function that... well... highlights our text :)
 	@Override
 	protected void highlightText(int start, int length) {
+
+		functions = new ArrayList<>();
 
 		try {
 			int end = this.getLength();
@@ -161,6 +170,7 @@ public class HtmlCode extends Code {
 						start++;
 
 					} else {
+						updateFunctionList();
 						return;
 					}
 
@@ -174,6 +184,8 @@ public class HtmlCode extends Code {
 		} catch (BadLocationException e) {
 			// oops!
 		}
+
+		updateFunctionList();
 	}
 
 	private boolean isCommentStart(String content, int start, int end) {
@@ -275,7 +287,7 @@ public class HtmlCode extends Code {
 
 	private String lastCouldBeKeyword = "";
 
-	private int highlightOther(String content, int start, int end) {
+	protected int highlightOther(String content, int start, int end) {
 
 		int couldBeKeywordEnd = start + 1;
 

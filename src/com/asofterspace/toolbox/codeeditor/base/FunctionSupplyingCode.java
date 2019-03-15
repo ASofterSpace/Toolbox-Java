@@ -60,7 +60,7 @@ public abstract class FunctionSupplyingCode extends Code {
 		functionPaneStyle = new DefaultStyledDocument();
 
 		functionPane.setDocument(functionPaneStyle);
-		
+
 		applyColorToFunctionPane();
 	}
 
@@ -105,7 +105,7 @@ public abstract class FunctionSupplyingCode extends Code {
 
 		int funcNameStart = functionSignature.substring(0, bracketStart).lastIndexOf(" ");
 		if (funcNameStart < 0) {
-			funcNameStart = -1;
+			funcNameStart = 0;
 		}
 
 		return new CodePatch(funcNameStart, bracketStart);
@@ -156,7 +156,7 @@ public abstract class FunctionSupplyingCode extends Code {
 
 		applyColorToFunctionPane();
 	}
-	
+
 	@Override
 	public void setDarkScheme() {
 
@@ -166,11 +166,11 @@ public abstract class FunctionSupplyingCode extends Code {
 	}
 
 	private void applyColorToFunctionPane() {
-	
+
 		if (functionPane == null) {
 			return;
 		}
-		
+
 		functionPane.setBackground(schemeBackgroundColor);
 		functionPane.setCaretColor(schemeForegroundColor);
 	}
