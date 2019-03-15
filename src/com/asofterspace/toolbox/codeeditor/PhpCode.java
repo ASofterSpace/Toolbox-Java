@@ -48,12 +48,12 @@ public class PhpCode extends HtmlCode {
 
 	// all keywords of the PHP language
 	private static final Set<String> PHP_KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "while", "volatile"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "require_once", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "use", "while", "volatile"}
 	));
 
 	// all primitive types of the PHP language and other stuff that looks that way
 	private static final Set<String> PHP_PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "int", "long", "null", "super", "this", "true", "void"}
+		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "function", "int", "long", "null", "super", "this", "true", "void"}
 	));
 
 	// all string delimiters of the PHP language
@@ -308,8 +308,8 @@ public class PhpCode extends HtmlCode {
 			if (!"new".equals(lastCouldBeKeywordPhp)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
-					if ((curLineStartingWhitespacePhp < 5) && !"".equals(lastCouldBeKeywordPhp)) {
+					// ignore lines with more than 1 tab indent / 4 regular indents and line without "function" name
+					if ((curLineStartingWhitespacePhp < 5) && "function".equals(lastCouldBeKeywordPhp)) {
 						// now get the entire line that we found!
 						// String functionName = lastCouldBeKeywordPhp + " " + couldBeKeyword + "()";
 						String functionName = getLineFromPosition(start, content);
@@ -344,7 +344,7 @@ public class PhpCode extends HtmlCode {
 		if (token.length() < 1) {
 			return false;
 		}
-		return Character.isUpperCase(token.charAt(0));
+		return (token.charAt(0) == '$') || token.charAt(0) == '&';
 	}
 
 	private boolean isPhpAnnotation(String token) {

@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
-import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -33,7 +33,7 @@ import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
 
-public class HtmlCode extends FunctionSupplyingCode {
+public class HtmlCode extends PublicPrivateFunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
