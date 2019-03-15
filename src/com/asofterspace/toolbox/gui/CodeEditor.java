@@ -5,6 +5,9 @@
 package com.asofterspace.toolbox.gui;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Graphics;
+import java.awt.RenderingHints;
 
 import javax.swing.JTextPane;
 
@@ -42,5 +45,17 @@ public class CodeEditor extends JTextPane {
 		result.height = result.height + 25;
 
 		return result;
+	}
+
+	protected void paintComponent(Graphics g) {
+
+		if (g instanceof Graphics2D) {
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setRenderingHint(
+				RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		}
+
+		super.paintComponent(g);
 	}
 }
