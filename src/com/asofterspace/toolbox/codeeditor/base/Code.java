@@ -17,6 +17,7 @@ import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -331,13 +332,140 @@ public abstract class Code extends DefaultStyledDocument {
 		// does nothing - as this does not support reporting function names :)
 	}
 
+	public void sortDocumentAlphabetically() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origText = decoratedEditor.getText();
+
+		String newText = sortLinesAlphabetically(origText);
+
+		decoratedEditor.setText(newText);
+		decoratedEditor.setCaretPosition(origCaretPos);
+	}
+
+	private String sortLinesAlphabetically(String origText) {
+
+		List<String> lines = Arrays.asList(origText.split("\n"));
+
+		Collections.sort(lines);
+
+		StringBuilder newText = new StringBuilder();
+
+		String newline = "";
+
+		for (String line : lines) {
+			newText.append(newline);
+			newText.append(line);
+			newline = "\n";
+		}
+
+		return newText.toString();
+	}
+
+	public void sortSelectedLinesAlphabetically() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origText = decoratedEditor.getText();
+
+		int dot = decoratedEditor.getCaret().getDot();
+		int mark = decoratedEditor.getCaret().getMark();
+
+		if (mark < dot) {
+			int exchange = dot;
+			dot = mark;
+			mark = exchange;
+		}
+
+		while (dot >= 0) {
+			if (origText.charAt(dot) == '\n') {
+				dot++;
+				break;
+			}
+			dot--;
+		}
+
+		while (mark < origText.length()) {
+			if (origText.charAt(mark) == '\n') {
+				break;
+			}
+			mark++;
+		}
+
+		String before = origText.substring(0, dot);
+		String middle = origText.substring(dot, mark);
+		String after = origText.substring(mark);
+
+		middle = sortLinesAlphabetically(middle);
+
+		decoratedEditor.setText(before + middle + after);
+		decoratedEditor.setCaretPosition(origCaretPos);
+	}
+
+	public void sortSelectedStringsAlphabetically() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origText = decoratedEditor.getText();
+
+		int dot = decoratedEditor.getCaret().getDot();
+		int mark = decoratedEditor.getCaret().getMark();
+
+		if (mark < dot) {
+			int exchange = dot;
+			dot = mark;
+			mark = exchange;
+		}
+
+		String before = origText.substring(0, dot);
+		String middle = origText.substring(dot, mark);
+		String after = origText.substring(mark);
+
+		middle = sortStringsAlphabetically(middle);
+
+		decoratedEditor.setText(before + middle + after);
+		decoratedEditor.setCaretPosition(origCaretPos);
+	}
+
+	private String sortStringsAlphabetically(String origText) {
+
+		origText = origText.replace("\", \"", "\"\n\"");
+		origText = origText.replace("\",\"", "\"\n\"");
+		origText = origText.replace("\",\n", "\"\n");
+
+		List<String> lines = Arrays.asList(origText.split("\n"));
+		List<String> sortlines = new ArrayList<>();
+
+		for (String line : lines) {
+			String sortline = line.trim();
+
+			if (!sortline.equals("")) {
+				sortlines.add(sortline);
+			}
+		}
+
+		Collections.sort(sortlines);
+
+		StringBuilder newText = new StringBuilder();
+
+		String newline = "";
+
+		for (String line : sortlines) {
+			newText.append(newline);
+			newText.append(line);
+			newline = ", ";
+		}
+
+		return newText.toString();
+	}
+
 	public void reorganizeImports() {
 
+		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origText = decoratedEditor.getText();
 
 		String newText = reorganizeImports(origText);
 
 		decoratedEditor.setText(newText);
+		decoratedEditor.setCaretPosition(origCaretPos);
 	}
 
 	/**

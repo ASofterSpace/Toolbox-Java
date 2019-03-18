@@ -48,12 +48,12 @@ public class PhpCode extends HtmlCode {
 
 	// all keywords of the PHP language
 	private static final Set<String> PHP_KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "require_once", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "use", "while", "volatile"}
+		new String[] {"abstract", "and", "as", "assert", "break", "case", "catch", "const", "continue", "count", "def", "default", "do", "else", "elseif", "extends", "final", "finally", "for", "foreach", "goto", "if", "implements", "import", "in", "instanceof", "interface", "isset", "new", "or", "package", "private", "protected", "public", "require_once", "return", "static", "substr", "switch", "synchronized", "throw", "throws", "trait", "try", "use", "volatile", "while"}
 	));
 
 	// all primitive types of the PHP language and other stuff that looks that way
 	private static final Set<String> PHP_PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "function", "int", "long", "null", "super", "this", "true", "void"}
+		new String[] {"$this", "boolean", "byte", "char", "class", "double", "enum", "false", "float", "function", "int", "long", "null", "true", "void"}
 	));
 
 	// all string delimiters of the PHP language
