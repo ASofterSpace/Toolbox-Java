@@ -366,8 +366,15 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		while (true) {
 			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
 
+			if (endOfString == -1) {
+				break;
+			}
 			// if the end of string is actually escaped... well, then it is not an end of string yet, continue searching!
-			if ((endOfString == -1) || (content.charAt(endOfString - 1) != '\\')) {
+			if (content.charAt(endOfString - 1) != '\\') {
+				break;
+			}
+			// but if the escaping is escaped - so \\ - then actually the end of string is not escaped, just the escape string xD
+			if ((endOfString > 1) && (content.charAt(endOfString - 1) == '\\') && (content.charAt(endOfString - 2) == '\\')) {
 				break;
 			}
 		}

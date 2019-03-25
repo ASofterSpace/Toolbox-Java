@@ -53,6 +53,11 @@ public abstract class FunctionSupplyingCode extends Code {
 		super(editor);
 	}
 
+	public FunctionSupplyingCode(JTextPane editor, Code parentEditor) {
+
+		super(editor, parentEditor);
+	}
+
 	public void setFunctionTextField(JTextPane functionPane) {
 
 		this.functionPane = functionPane;

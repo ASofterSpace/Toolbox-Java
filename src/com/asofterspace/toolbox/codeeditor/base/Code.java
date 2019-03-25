@@ -117,19 +117,52 @@ public abstract class Code extends DefaultStyledDocument {
 	// the text version we are currently at (not necessarily the latest, through undo)
 	private int currentTextVersion = 0;
 
+	// the parent editor, of which this here is a sub-editor
+	private Code parentEditor = null;
+
 
 	public Code(JTextPane editor) {
 
 		super();
 
+		// keep track of the editor we are decorating (useful e.g. to get and set caret pos during insert operations)
+		this.decoratedEditor = editor;
+
+		this.parentEditor = this;
+
+		fullyStartupCodeHighlighter();
+	}
+
+	// just create this coder without creating any threads etc.
+	// intended to be used for sub-highlighters, such as Javascript as part of HTML
+	public Code(JTextPane editor, Code parentEditor) {
+
+		super();
+
+		// keep track of the editor we are decorating (useful e.g. to get and set caret pos during insert operations)
+		this.decoratedEditor = editor;
+
+		this.parentEditor = parentEditor;
+
+		// initialize the font size, lastFont etc.
+		setFontSize(parentEditor.getFontSize());
+
+		// initialize all the attribute sets
+		setParentScheme();
+	}
+
+	public Code getMe() {
+
+		return parentEditor;
+	}
+
+	private void fullyStartupCodeHighlighter() {
+
 		// declare which end of line marker is to be used
 		putProperty(DefaultEditorKit.EndOfLineStringProperty, EOL);
 
-		// keep track of the editor we are decorating (useful e.g. to get and set caret pos during insert operations)
-		decoratedEditor = editor;
-
-		// no editor was given... great ^^ (we are probably testing!)
-		if (editor == null) {
+		// just testing, apparently!
+		if (decoratedEditor == null) {
 			return;
 		}
 
@@ -567,6 +600,11 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	public int getFontSize() {
+
+		return fontSize;
+	}
+
 	public void setFontSize(int newSize) {
 
 		fontSize = newSize;
@@ -740,6 +778,35 @@ public abstract class Code extends DefaultStyledDocument {
 		highlightAllText();
 	}
 
+	public static void setDarkSchemeForAllEditors() {
+
+		for (Code instance : instances) {
+
+			instance.setDarkScheme();
+		}
+	}
+
+	public void setParentScheme() {
+
+		schemeForegroundColor = parentEditor.getForegroundColor();
+		schemeBackgroundColor = parentEditor.getBackgroundColor();
+
+		// change the attribute sets
+		attrRegular = parentEditor.attrRegular;
+		attrBold = parentEditor.attrBold;
+		attrSearch = parentEditor.attrSearch;
+		attrSearchSelected = parentEditor.attrSearchSelected;
+		attrAnnotation = parentEditor.attrAnnotation;
+		attrComment = parentEditor.attrComment;
+		attrKeyword = parentEditor.attrKeyword;
+		attrPrimitiveType = parentEditor.attrPrimitiveType;
+		attrAdvancedType = parentEditor.attrAdvancedType;
+		attrString = parentEditor.attrString;
+		attrReservedChar = parentEditor.attrReservedChar;
+		attrFunction = parentEditor.attrFunction;
+		attrData = parentEditor.attrData;
+	}
+
 	public Color getForegroundColor() {
 
 		return schemeForegroundColor;
@@ -748,14 +815,6 @@ public abstract class Code extends DefaultStyledDocument {
 	public Color getBackgroundColor() {
 
 		return schemeBackgroundColor;
-	}
-
-	public static void setDarkSchemeForAllEditors() {
-
-		for (Code instance : instances) {
-
-			instance.setDarkScheme();
-		}
 	}
 
 	public void setSearchStr(String searchFor) {

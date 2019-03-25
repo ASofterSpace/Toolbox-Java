@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
@@ -67,6 +68,9 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 	// end of multiline comments in the Java language
 	private static final String END_MULTILINE_COMMENT = "*/";
 
+	// end of <script> blocks (but without the end tag, as we want to be a bit fuzzy on that!)
+	private static final String END_SCRIPT_BLOCK = "</script";
+
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
@@ -74,6 +78,11 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 	public JavaScriptCode(JTextPane editor) {
 
 		super(editor);
+	}
+
+	public JavaScriptCode(JTextPane editor, Code parentEditor) {
+
+		super(editor, parentEditor);
 	}
 
 	@Override
@@ -131,48 +140,73 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 			start = 0;
 			end -= 1;
 
-			while (start <= end) {
-
-				// while we have a delimiter...
-				char curChar = content.charAt(start);
-				while (isDelimiter(curChar)) {
-
-					// ... check for a comment (which starts with a delimiter)
-					if (isCommentStart(content, start, end)) {
-						start = highlightComment(content, start, end);
-
-					// ... and check for a quoted string
-					} else if (isStringDelimiter(content.charAt(start))) {
-
-						// then let's get that string!
-						start = highlightString(content, start, end);
-
-					} else {
-						// please highlight the delimiter in the process ;)
-						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
-						}
-					}
-
-					if (start < end) {
-
-						// jump forward and try again!
-						start++;
-
-					} else {
-						return;
-					}
-
-					curChar = content.charAt(start);
-				}
-
-				// or any other token instead?
-				start = highlightOther(content, start, end);
-			}
+			highlightScript(content, start, end, functions, false);
 
 		} catch (BadLocationException e) {
 			// oops!
 		}
+
+		updateFunctionList();
+	}
+
+	// listenForScriptEnd .. true if we return upon finding </script>, false if not
+	public int highlightScript(String content, int start, int end, List<CodeLocation> functions, boolean listenForScriptEnd) {
+
+		while (start <= end) {
+
+			// while we have a delimiter...
+			char curChar = content.charAt(start);
+			while (isDelimiter(curChar)) {
+
+				if (listenForScriptEnd && isScriptEnd(content, start, end)) {
+					return start;
+				}
+
+				// ... check for a comment (which starts with a delimiter)
+				if (isCommentStart(content, start, end)) {
+					start = highlightComment(content, start, end);
+
+				// ... and check for a quoted string
+				} else if (isStringDelimiter(content.charAt(start))) {
+
+					// then let's get that string!
+					start = highlightString(content, start, end);
+
+				} else {
+					// please highlight the delimiter in the process ;)
+					if (!Character.isWhitespace(curChar)) {
+						getMe().setCharacterAttributes(start, 1, attrReservedChar, false);
+					}
+				}
+
+				if (start < end) {
+
+					// jump forward and try again!
+					start++;
+
+				} else {
+					return start;
+				}
+
+				curChar = content.charAt(start);
+			}
+
+			// or any other token instead?
+			start = highlightOther(content, start, end, functions);
+		}
+
+		return start;
+	}
+
+	private boolean isScriptEnd(String content, int start, int end) {
+
+		if (start + END_SCRIPT_BLOCK.length() - 1 > end) {
+			return false;
+		}
+
+		String potentialEndScriptBlock = content.substring(start, start + END_SCRIPT_BLOCK.length()).toLowerCase();
+
+		return END_SCRIPT_BLOCK.equals(potentialEndScriptBlock);
 	}
 
 	private boolean isCommentStart(String content, int start, int end) {
@@ -200,7 +234,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 			}
 
 			// apply single line comment highlighting
-			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+			getMe().setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 
 			return commentEnd;
 		}
@@ -217,7 +251,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		getMe().setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 
 		return commentEnd;
 	}
@@ -254,14 +288,14 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 			endOfString = Math.min(endOfString, endOfLine);
 		}
 
-		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
+		getMe().setCharacterAttributes(start, endOfString - start + 1, attrString, false);
 
 		return endOfString;
 	}
 
 	private String lastCouldBeKeyword = "";
 
-	private int highlightOther(String content, int start, int end) {
+	private int highlightOther(String content, int start, int end, List<CodeLocation> functions) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -275,16 +309,16 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
 		} else if (isAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
 		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
 			if (!"new".equals(lastCouldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+				getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
 					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
 					functions.add(new CodeLocation(functionName, start));

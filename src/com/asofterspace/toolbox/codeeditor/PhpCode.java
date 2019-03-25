@@ -87,11 +87,6 @@ public class PhpCode extends HtmlCode {
 		super(editor);
 	}
 
-	@Override
-	public boolean suppliesFunctions() {
-		return true;
-	}
-
 	/**
 	 * In the highlight other function of the HTML Code (in which tokens are highlighted, such as
 	 * <div), add awareness for the PHP Start (<?php), which then initiates PHP-specific highlighting

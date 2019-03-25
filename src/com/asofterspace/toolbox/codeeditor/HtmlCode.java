@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
 
 import java.awt.Canvas;
@@ -70,10 +71,46 @@ public class HtmlCode extends PublicPrivateFunctionSupplyingCode {
 	// are we currently in a CDATA section?
 	private boolean curCDATA;
 
+	// will we next continue with higlighting javascript inside the HTML?
+	private boolean continueWithJavascript = false;
+
+	// a java script coder used in case we encounter <script> elements with contents
+	private JavaScriptCode javaScriptCoder;
+
 
 	public HtmlCode(JTextPane editor) {
 
 		super(editor);
+
+		javaScriptCoder = new JavaScriptCode(editor, this);
+	}
+
+
+	public void setFontSize(int newSize) {
+
+		super.setFontSize(newSize);
+
+		if (javaScriptCoder != null) {
+			javaScriptCoder.setFontSize(newSize);
+		}
+	}
+
+	public void setLightScheme() {
+
+		super.setLightScheme();
+
+		if (javaScriptCoder != null) {
+			javaScriptCoder.setParentScheme();
+		}
+	}
+
+	public void setDarkScheme() {
+
+		super.setDarkScheme();
+
+		if (javaScriptCoder != null) {
+			javaScriptCoder.setParentScheme();
+		}
 	}
 
 	@Override
@@ -112,18 +149,13 @@ public class HtmlCode extends PublicPrivateFunctionSupplyingCode {
 		super.insertString(offset, insertedString, attrs, overrideCaretPos);
 	}
 
-	// TODO :: remove, once (pure) HTML can return useful function identifiers, e.g. based on the elements
-	// inside, or based on inline JS, or somesuch
-	@Override
-	public boolean suppliesFunctions() {
-		return false;
-	}
-
 	// this is the main function that... well... highlights our text :)
 	@Override
 	protected void highlightText(int start, int length) {
 
 		functions = new ArrayList<>();
+
+		continueWithJavascript = false;
 
 		try {
 			int end = this.getLength();
@@ -143,6 +175,14 @@ public class HtmlCode extends PublicPrivateFunctionSupplyingCode {
 				// while we have a delimiter...
 				char curChar = content.charAt(start);
 				while (isDelimiter(curChar)) {
+
+					if (continueWithJavascript && (curChar == '>')) {
+						// if we have <script link="foobar.js"/>, do NOT do JS-highlighting!
+						if (content.charAt(start - 1) != '/') {
+							start = javaScriptCoder.highlightScript(content, start, end, functions, true);
+						}
+						continueWithJavascript = false;
+					}
 
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
@@ -324,6 +364,16 @@ public class HtmlCode extends PublicPrivateFunctionSupplyingCode {
 
 		if (isKeyword) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			// <script> is a script opening tag!
+			if ("script".equals(couldBeKeyword)) {
+				continueWithJavascript = true;
+				// but </script> is not!
+				if (start > 1) {
+					if ("</".equals(content.substring(start - 2, start))) {
+						continueWithJavascript = false;
+					}
+				}
+			}
 		} else if (isKey) {
 			if (isKeyword(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
