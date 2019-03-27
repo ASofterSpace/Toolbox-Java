@@ -60,61 +60,65 @@ public class HexDecoder {
 	}
 
 	private static String cleanUpInputStr(String hexStr) {
-	
+
 		hexStr = hexStr.replaceAll("0x", "");
 		hexStr = hexStr.replaceAll(" ", "");
 		hexStr = hexStr.replaceAll("\t", "");
+		hexStr = hexStr.replaceAll("\r", "");
+		hexStr = hexStr.replaceAll("\n", "");
 		hexStr = hexStr.replaceAll("-", "");
 		hexStr = hexStr.replaceAll("_", "");
 		hexStr = hexStr.replaceAll(",", "");
 		hexStr = hexStr.replaceAll(";", "");
-	
+		hexStr = hexStr.replaceAll("<", "");
+		hexStr = hexStr.replaceAll(">", "");
+
 		return hexStr;
 	}
-	
+
 	public static byte[] decodeBytesFromHex(String hexStr) {
 
 		hexStr = cleanUpInputStr(hexStr);
-		
+
 		int len = hexStr.length();
-		
+
 		if (len % 2 == 1) {
 			hexStr = "0" + hexStr;
 			len++;
 		}
-		
+
 		len = len / 2;
-	
+
 		byte[] result = new byte[len];
-		
+
 		for (int i = 0; i < len; i++) {
 			result[i] = (byte) ((16 * hexCharToByte(hexStr.charAt(i*2))) + hexCharToByte(hexStr.charAt((i*2)+1)));
 		}
-	
+
 		return result;
 	}
 
 	public static String decodeStringFromHex(String hexStr) {
-	
+
 		return new String(decodeBytesFromHex(hexStr));
 	}
 
 	public static BigInteger decodeNumberFromHex(String hexStr) {
 
 		hexStr = cleanUpInputStr(hexStr);
-		
+
 		int len = hexStr.length();
-		
+
 		BigInteger result = BigInteger.ZERO;
 		BigInteger factor = BigInteger.ONE;
 		BigInteger SIXTEEN = new BigInteger("16");
-		
+
 		for (int i = len - 1; i >= 0; i--) {
 			byte[] bytes = new byte[] {hexCharToByte(hexStr.charAt(i))};
 			result.add(factor.multiply(new BigInteger(bytes)));
 			factor = factor.multiply(SIXTEEN);
 		}
-	
+
 		return result;
 	}
 

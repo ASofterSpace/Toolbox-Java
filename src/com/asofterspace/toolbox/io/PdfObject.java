@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.coders.HexDecoder;
+
 import java.io.ByteArrayOutputStream;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -158,12 +160,20 @@ public class PdfObject {
 				} catch (DataFormatException e) {
 					System.err.println("[ERROR] Unzipping a PDF object stream failed - oh well!");
 					inflater.end();
-					return streamContent;
+					// return streamContent;
+					throw new RuntimeException(e);
 				}
 			}
 
 			inflater.end();
 			return new String(output.toByteArray(), PdfFile.PDF_CHARSET);
+		}
+
+		if ("/ASCIIHexDecode".equals(this.dictContent.getAsString("/Filter"))) {
+
+			byte[] decodedData = HexDecoder.decodeBytesFromHex(streamContent);
+
+			return new String(decodedData, PdfFile.PDF_CHARSET);
 		}
 
 		return streamContent;
