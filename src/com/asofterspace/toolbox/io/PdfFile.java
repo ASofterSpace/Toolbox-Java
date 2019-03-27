@@ -111,6 +111,27 @@ public class PdfFile extends BinaryFile {
 					System.arraycopy(binaryContent, lineStart, buffer, 0, lineLen);
 					String line = new String(buffer, PDF_CHARSET);
 
+					int offset = 0;
+
+					// ignore the second line end marker in case of \r\n (which seems to actually be the PDF default!)
+					if (cur < len) {
+						byte nextByte = binaryContent[cur];
+
+						if ((nextByte == '\n') || (nextByte == '\r')) {
+
+							// ignore the second line end marker of the current line,
+							// e.g. in front of the stream keyword
+							cur++;
+
+							// ignore the second line end marker after the stream keyword
+							// (here it is NOT CHECKED that there are also two line end markers
+							// after the stream keyword, but seriously, if the PDF file is not
+							// even consistent in using either \n or \r\n, then we are pretty
+							// much doomed anyway... DOOMED! ^^)
+							offset++;
+						}
+					}
+
 					if (gotLine(line)) {
 						return;
 					}
@@ -120,28 +141,19 @@ public class PdfFile extends BinaryFile {
 						break;
 					}
 
-					// ignore the second line end marker in case of \r\n (which seems to actually be the PDF default!)
-					if (cur+1 < len) {
-						byte nextByte = binaryContent[cur+1];
-
-						if ((nextByte == '\n') || (nextByte == '\r')) {
-							cur++;
-						}
-					}
-
 					// if we are starting a stream, read its length and then read its contents directly as
 					// streams are NOT line-based and any \r or \n in there is just a regular stream byte
 					if ((currentSection == PdfSection.IN_OBJECT) && line.endsWith("stream") && (!line.endsWith("endstream"))) {
 						lineLen = currentObject.preGetStreamLength();
 
 						buffer = new byte[lineLen];
-						System.arraycopy(binaryContent, cur+1, buffer, 0, lineLen);
+						System.arraycopy(binaryContent, cur, buffer, 0, lineLen);
 
 						line = new String(buffer, PDF_CHARSET);
 
 						currentObject.readStreamContents(line);
 
-						cur += lineLen + 1;
+						cur += lineLen + offset;
 					}
 
 					lineStart = cur;
