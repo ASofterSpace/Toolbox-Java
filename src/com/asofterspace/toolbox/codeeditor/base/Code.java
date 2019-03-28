@@ -550,7 +550,7 @@ public abstract class Code extends DefaultStyledDocument {
 	private synchronized void startHighlightThread() {
 
 		if (highlightThread == null) {
-			Thread highlightThread = new Thread(new Runnable() {
+			highlightThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					while (true) {
@@ -568,9 +568,10 @@ public abstract class Code extends DefaultStyledDocument {
 						try {
 							Thread.sleep(500);
 						} catch (InterruptedException e) {
-							return;
+							break;
 						}
 					}
+					highlightThread = null;
 				}
 			});
 			highlightThread.start();
@@ -868,8 +869,8 @@ public abstract class Code extends DefaultStyledDocument {
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
-			insertString(offset, insertedString, attrs, insertedString.length());
-		}
+		insertString(offset, insertedString, attrs, insertedString.length());
+	}
 
 	/**
 	 * This is called internally for insertString
@@ -1083,6 +1084,17 @@ public abstract class Code extends DefaultStyledDocument {
 	protected void highlightAllText() {
 
 		pleaseHighlight = true;
+	}
+
+	/**
+	 * Calls the highlighter now.
+	 * Intended for usage in automated tests (as they can synchronously wait
+	 * for the result), NOT for usage outside of them!
+	 */
+	public void highlightAllTextNow() {
+
+		int len = getLength();
+		highlightText(0, len);
 	}
 
 	// this is the main function that... well... highlights our text :)

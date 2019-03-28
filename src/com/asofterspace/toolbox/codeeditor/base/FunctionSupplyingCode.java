@@ -144,12 +144,14 @@ public abstract class FunctionSupplyingCode extends Code {
 
 			functionPane.setText(functionTextStr);
 
-			// reset all...
-			functionPaneStyle.setCharacterAttributes(0, functionTextStr.length(), attrRegular, true);
+			if (functionPaneStyle != null) {
+				// reset all...
+				functionPaneStyle.setCharacterAttributes(0, functionTextStr.length(), attrRegular, true);
 
-			// ... and then set this one
-			for (CodePatch boldPatch : boldPatches) {
-				functionPaneStyle.setCharacterAttributes(boldPatch.getStart(), boldPatch.getLength(), attrBold, false);
+				// ... and then set this one
+				for (CodePatch boldPatch : boldPatches) {
+					functionPaneStyle.setCharacterAttributes(boldPatch.getStart(), boldPatch.getLength(), attrBold, false);
+				}
 			}
 		}
 	}

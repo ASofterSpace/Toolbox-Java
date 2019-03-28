@@ -64,6 +64,8 @@ public class CoderJavaTest implements Test {
 
 		String resultStr = javaCoder.reorganizeImports(origStr);
 
+		javaCoder.discard();
+
 		if (resultStr.equals(targetStr)) {
 			TestUtils.succeed();
 			return;
@@ -137,6 +139,8 @@ public class CoderJavaTest implements Test {
 
 		editor.setText(origStr);
 
+		// instead of waiting for maybe too short a time...
+		/*
 		try {
 			// await the text update
 			Thread.sleep(1000);
@@ -144,8 +148,14 @@ public class CoderJavaTest implements Test {
 			TestUtils.fail("We got interrupted!");
 			return;
 		}
+		*/
+
+		// ... just call the highlighter synchronously!
+		javaCoder.highlightAllTextNow();
 
 		String resultStr = functionPane.getText().trim();
+
+		javaCoder.discard();
 
 		if (resultStr.equals(targetStr)) {
 			TestUtils.succeed();

@@ -17,6 +17,11 @@ public class ColorRGB {
 	private byte b;
 
 
+	// by default, just a white pixel
+	public ColorRGB() {
+		this(255, 255, 255);
+	}
+
 	public ColorRGB(byte r, byte g, byte b) {
 		this.r = r;
 		this.g = g;
@@ -36,6 +41,18 @@ public class ColorRGB {
 		int intB = b & 0xFF;
 		int result = intR + intG + intB;
 		return result < (255 * 3) / 2;
+	}
+
+	public byte getRByte() {
+		return r;
+	}
+
+	public byte getGByte() {
+		return g;
+	}
+
+	public byte getBByte() {
+		return b;
 	}
 
 	public String toString() {

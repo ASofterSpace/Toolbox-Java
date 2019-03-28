@@ -64,7 +64,15 @@ public class BinaryFile extends File {
 	}
 
 	public void saveContent(byte[] content) {
-		// TODO
+
+		// fill file with data
+		try (FileOutputStream stream = new FileOutputStream(initSave())) {
+
+			stream.write(content);
+
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + filename + " - inconceivable!");
+		}
 	}
 
 	public void saveContentStr(String content) {

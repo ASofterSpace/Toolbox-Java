@@ -28,5 +28,10 @@ public class AllTests {
 		TestUtils.run(new CdmTest());
 
 		TestUtils.endSuite();
+
+		// code editor components keep one single highlighting thread running,
+		// and the JVM will not stop until all threads are stopped, so we just
+		// tell the JVM to stop :)
+		System.exit(0);
 	}
 }

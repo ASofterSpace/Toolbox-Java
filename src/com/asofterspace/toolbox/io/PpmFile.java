@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.io;
 
 import com.asofterspace.toolbox.utils.ColorRGB;
+import com.asofterspace.toolbox.utils.Image;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,18 +20,10 @@ import java.util.List;
 /**
  * A PPM image file object describes a certain type of file, often with .ppm extension,
  * and starting with P6 as magic bytes (or P3 for ASCII instead of raw format)
+ *
+ * @author Moya (a softer space), 2019
  */
-public class PpmFile extends ImageFile {
-
-	// the data in uncompressed form, with first index vertical, second index horizontal
-	private ColorRGB[][] uncompressedData;
-
-	private int width;
-
-	private int height;
-
-	private int maxColorValue;
-
+public class PpmFile extends RasterImageFile {
 
 	/**
 	 * You can construct a PpmFile instance by directly from a path name.
@@ -48,9 +41,13 @@ public class PpmFile extends ImageFile {
 		super(regularFile);
 	}
 
-	protected void loadPpmContents() {
+	protected void loadImageContents() {
 
 		try {
+
+			int width = 0;
+			int height = 0;
+			int maxColorValue = 255;
 
 			byte[] binaryContent = Files.readAllBytes(Paths.get(this.filename));
 			int len = binaryContent.length;
@@ -137,7 +134,7 @@ public class PpmFile extends ImageFile {
 			}
 
 			// content starts exactly one newline after the maxColorValue
-			uncompressedData = new ColorRGB[height][width];
+			ColorRGB[][] uncompressedData = new ColorRGB[height][width];
 
 			// the scale is already exactly the RGB scale (0 .. 255)
 			if (maxColorValue == 255){
@@ -169,6 +166,8 @@ public class PpmFile extends ImageFile {
 				}
 			}
 
+			img = new Image(uncompressedData);
+
 		} catch (ArrayIndexOutOfBoundsException e) {
 			// we expect array index out of bounds exceptions and just catch them,
 			// instead of having to check on every step if cur < length ourselves...
@@ -182,33 +181,42 @@ public class PpmFile extends ImageFile {
 	}
 
 	@Override
-	public int getWidth() {
+	public void save() {
 
-		if (uncompressedData == null) {
-			loadPpmContents();
+		if (img == null) {
+			loadImageContents();
 		}
 
-		return width;
-	}
+		StringBuilder out = new StringBuilder();
 
-	@Override
-	public int getHeight() {
+		out.append("P6");
+		out.append("\n");
+		out.append(getWidth());
+		out.append("\n");
+		out.append(getHeight());
+		out.append("\n");
+		// we want to actually save using the maxColorValue,
+		// as we internally have the data uncompressed anyway
+		out.append("255");
+		out.append("\n");
 
-		if (uncompressedData == null) {
-			loadPpmContents();
+		// fill file with data
+		try (FileOutputStream stream = new FileOutputStream(initSave())) {
+
+			stream.write(out.toString().getBytes());
+
+			for (int y = 0; y < getHeight(); y++) {
+				for (int x = 0; x < getWidth(); x++) {
+					ColorRGB px = img.getPixel(x, y);
+					stream.write(px.getRByte());
+					stream.write(px.getGByte());
+					stream.write(px.getBByte());
+				}
+			}
+
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + filename + " - inconceivable!");
 		}
-
-		return height;
-	}
-
-	@Override
-	public ColorRGB getPixel(int x, int y) {
-
-		if (uncompressedData == null) {
-			loadPpmContents();
-		}
-
-		return uncompressedData[y][x];
 	}
 
 	/**

@@ -380,4 +380,13 @@ public class PdfFile extends BinaryFile {
 
 		super.saveContentStr(pdf.toString(), PDF_CHARSET);
 	}
+
+	/**
+	 * Gives back a string representation of the pdf file object
+	 */
+	@Override
+	public String toString() {
+		return "com.asofterspace.toolbox.io.PdfFile: " + filename;
+	}
+
 }
