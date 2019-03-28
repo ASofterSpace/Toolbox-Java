@@ -8,12 +8,15 @@ import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 
+
 public class JSONTest implements Test {
 
 	@Override
 	public void runAll() {
 
 		fromStringTest();
+
+		malformedFromStringTest();
 
 		toStringTest();
 
@@ -44,6 +47,20 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We stored foo:bar in a JSON object, then read the key foo - and did not get bar!");
+	}
+
+	public void malformedFromStringTest() {
+
+		TestUtils.start("Malformed JSON from String");
+
+		JSON testObject = new JSON("{files:[]}");
+
+		if (testObject.toString().equals("{\"files\": []}")) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We stored a malformed JSON string in a JSON object and would expect it to cope with that - but it did not!\nOutput: " + testObject.toString());
 	}
 
 	public void toStringTest() {

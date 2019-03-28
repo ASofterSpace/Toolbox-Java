@@ -151,26 +151,43 @@ public class JSON {
 
 			kind = JSONkind.OBJECT;
 
-			jsonString = jsonString.substring(1).trim();
+			jsonString = jsonString.substring(1);
 
-			while (jsonString.startsWith("\"")) {
-				jsonString = jsonString.substring(1).trim();
-				int endIndex = jsonString.indexOf("\"");
+			while (true) {
+				jsonString = jsonString.trim();
+
+				if (jsonString.startsWith("}")) {
+					jsonString = jsonString.substring(1).trim();
+					break;
+				}
+
+				// this should be the case - keys should be inside quote marks
+				if (jsonString.startsWith("\"")) {
+					jsonString = jsonString.substring(1).trim();
+					int endIndex = jsonString.indexOf("\"");
+					String key = jsonString.substring(0, endIndex);
+					jsonString = jsonString.substring(endIndex);
+					jsonString = jsonString.substring(jsonString.indexOf(":") + 1);
+					JSON value = new JSON();
+					jsonString = value.init(jsonString).trim();
+					objContents.put(key, value);
+					if (jsonString.startsWith(",")) {
+						jsonString = jsonString.substring(1);
+					}
+					continue;
+				}
+
+				// this should NOT be the case - the key is not in a quote mark!
+				// but we will grudgingly accept it anyway, as we are nice people...
+				int endIndex = jsonString.indexOf(":");
 				String key = jsonString.substring(0, endIndex);
-				jsonString = jsonString.substring(endIndex);
-				jsonString = jsonString.substring(jsonString.indexOf(":") + 1);
+				jsonString = jsonString.substring(endIndex + 1);
 				JSON value = new JSON();
 				jsonString = value.init(jsonString).trim();
 				objContents.put(key, value);
 				if (jsonString.startsWith(",")) {
-					jsonString = jsonString.substring(1).trim();
+					jsonString = jsonString.substring(1);
 				}
-			}
-
-			jsonString = jsonString.trim();
-
-			if (jsonString.startsWith("}")) {
-				jsonString = jsonString.substring(1).trim();
 			}
 
 			return jsonString;
@@ -305,8 +322,8 @@ public class JSON {
 	/**
 	 * Stores this JSON object in a string
 	 * @param compressed  whether to store this object compressed (true, default) or
-	 *                    uncompressed (false) - in which case it will be easier to
-	 *                    read by humans, but take up more space
+	 *					uncompressed (false) - in which case it will be easier to
+	 *					read by humans, but take up more space
 	 */
 	public String toString(Boolean compressed) {
 
@@ -382,13 +399,13 @@ public class JSON {
 						}
 					}
 
-				    String key = entry.getKey();
-				    JSON content = entry.getValue();
+					String key = entry.getKey();
+					JSON content = entry.getValue();
 
-				    objResult.append("\"");
-				    objResult.append(key);
-				    objResult.append("\": ");
-				    objResult.append(content.toString(compressed, linePrefix + "\t"));
+					objResult.append("\"");
+					objResult.append(key);
+					objResult.append("\": ");
+					objResult.append(content.toString(compressed, linePrefix + "\t"));
 				}
 
 				if (!compressed) {
@@ -471,7 +488,7 @@ public class JSON {
 
 		JSON result = get(key);
 
-		if (result.arrContents == null) {
+		if ((result == null) || (result.arrContents == null)) {
 			return new ArrayList<>();
 		}
 
