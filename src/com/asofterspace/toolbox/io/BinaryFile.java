@@ -46,6 +46,17 @@ public class BinaryFile extends File {
 		super(regularFile);
 	}
 
+	/**
+	 * Create a new BinaryFile instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public BinaryFile(Directory directory, String filename) {
+
+		super(directory, filename);
+	}
+
 	public byte[] loadContent() {
 
 		try {
