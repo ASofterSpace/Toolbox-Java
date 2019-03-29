@@ -26,6 +26,14 @@ public class Image {
 		this.height = height;
 
 		this.data = new ColorRGB[height][width];
+
+		ColorRGB defaultCol = new ColorRGB();
+
+		for (int y = 0; y < getHeight(); y++) {
+			for (int x = 0; x < getWidth(); x++) {
+				this.data[y][x] = defaultCol;
+			}
+		}
 	}
 
 	public Image(ColorRGB[][] data) {

@@ -146,9 +146,6 @@ public class PpmFile extends RasterImageFile {
 
 						uncompressedData[y][x] = new ColorRGB(r, g, b);
 					}
-					if (binaryContent[cur] == '\n') {
-						cur++;
-					}
 				}
 			} else {
 				// ah well, we have to scale the data...
@@ -159,9 +156,6 @@ public class PpmFile extends RasterImageFile {
 						byte b = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
 
 						uncompressedData[y][x] = new ColorRGB(r, g, b);
-					}
-					if (binaryContent[cur] == '\n') {
-						cur++;
 					}
 				}
 			}

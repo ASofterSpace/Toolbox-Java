@@ -21,9 +21,24 @@ public class QrCode {
 	// rotate the input?
 	private int rotate;
 
+	// some people seem to define an additional format mask,
+	// meaning that the edcLevel and maskPattern that are read
+	// out change, and that the constants change, but others
+	// do neither - we opt for neither, which also works fine :)
+	private int edcLevel;
+
 	private int maskPattern;
 
 	private boolean[][] data;
+
+	// a map of the fields which are inaccessible for D and E
+	private boolean[][] inaccessibleFields;
+
+	// the current x and y coordinates at which we are trying to read data
+	private int currentX = 0;
+	private int currentY = 0;
+	private boolean goingUp = true;
+	private boolean readingRight = true;
 
 
 	public QrCode(int version) {
@@ -57,6 +72,45 @@ public class QrCode {
 		height = width;
 
 		data = new boolean[width][height];
+		inaccessibleFields = new boolean[width][height];
+
+		// TODO :: add info about inaccessible fields for other versions too!
+		switch (version) {
+			case 3:
+				// top left block
+				for (int x = 0; x < 9; x++) {
+					for (int y = 0; y < 9; y++) {
+						inaccessibleFields[x][y] = true;
+					}
+				}
+				// top right block
+				for (int x = width - 8; x < width; x++) {
+					for (int y = 0; y < 9; y++) {
+						inaccessibleFields[x][y] = true;
+					}
+				}
+				// bottom left block
+				for (int x = 0; x < 9; x++) {
+					for (int y = height - 8; y < height; y++) {
+						inaccessibleFields[x][y] = true;
+					}
+				}
+				// small alignment block
+				for (int x = width - 9; x < width - 4; x++) {
+					for (int y = height - 9; y < height - 4; y++) {
+						inaccessibleFields[x][y] = true;
+					}
+				}
+				// horizontal alignment bar
+				for (int x = 0; x < width; x++) {
+					inaccessibleFields[x][6] = true;
+				}
+				// vertical alignment bar
+				for (int y = 0; y < height; y++) {
+					inaccessibleFields[6][y] = true;
+				}
+				break;
+		}
 	}
 
 	public void setDatapoint(int x, int y, boolean value) {
@@ -100,40 +154,94 @@ public class QrCode {
 		// do the inversion
 		switch (maskPattern) {
 			case 0:
-				if ((x*y)%2 + (x*y)%3 == 0) {
+				if (((y*x) % 2) + ((y*x) % 3) == 0) {
 					return !result;
 				}
 				return result;
 			case 1:
-				if (((x/2) + (y/3)) % 2 == 0) {
+				if (((y/2) + (x/3)) % 2 == 0) {
 					return !result;
 				}
 				return result;
 			case 2:
-				if (((x*y)%3+x+y)%2==0) {
+				if (((y*x) % 3 + y + x) % 2 == 0) {
 					return !result;
 				}
 				return result;
-			// TODO NOW :: add the others, see: https://en.wikipedia.org/wiki/QR_code#/media/File:QR_Format_Information.svg
+			case 3:
+				if (((y*x) % 3 + (y*x)) % 2 == 0) {
+					return !result;
+				}
+				return result;
+			case 4:
+				if (y % 2 == 0) {
+					return !result;
+				}
+				return result;
+			case 5:
+				if ((y + x) % 2 == 0) {
+					return !result;
+				}
+				return result;
+			case 6:
+				if ((y + x) % 3 == 0) {
+					return !result;
+				}
+				return result;
+			case 7:
+				if (x % 3 == 0) {
+					return !result;
+				}
+				return result;
 		}
 
 		return result;
 	}
 
+	private byte bitsToNibble(boolean b1, boolean b2, boolean b3, boolean b4) {
+
+		return (byte) ((b1?8:0) + (b2?4:0) + (b3?2:0) + (b4?1:0));
+	}
+
 	private byte bitsToByte(boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
 
-		System.out.println("" + (b1?1:0) + (b2?1:0) + (b3?1:0) + (b4?1:0) + (b5?1:0) + (b6?1:0) + (b7?1:0) + (b8?1:0));
+		return (byte) ((b1?128:0) + (b2?64:0) + (b3?32:0) + (b4?16:0) + (b5?8:0) + (b6?4:0) + (b7?2:0) + (b8?1:0));
+	}
 
-		return (byte) ((b1?1:0) + (b2?2:0) + (b3?4:0) + (b4?8:0) + (b5?16:0) + (b6?32:0) + (b7?64:0) + (b8?128:0));
+	private int bitsToInt(boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
+
+		return (b1?128:0) + (b2?64:0) + (b3?32:0) + (b4?16:0) + (b5?8:0) + (b6?4:0) + (b7?2:0) + (b8?1:0);
+	}
+
+	private int bitsToInt(boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8, boolean b9, boolean b10, boolean b11, boolean b12, boolean b13, boolean b14, boolean b15, boolean b16) {
+
+		return (b1?32768:0) + (b2?16384:0) + (b3?8192:0) + (b4?4096:0) + (b5?2048:0) + (b6?1024:0) + (b7?512:0) + (b8?256:0) + (b9?128:0) + (b10?64:0) + (b11?32:0) + (b12?16:0) + (b13?8:0) + (b14?4:0) + (b15?2:0) + (b16?1:0);
+	}
+
+	private void writeBitsIntoStream(boolean[] datastream, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
+
+		datastream[offset+0] = b8;
+		datastream[offset+1] = b7;
+		datastream[offset+2] = b6;
+		datastream[offset+3] = b5;
+		datastream[offset+4] = b4;
+		datastream[offset+5] = b3;
+		datastream[offset+6] = b2;
+		datastream[offset+7] = b1;
 	}
 
 	private void constructInversionField() {
 
-		boolean bit1 = rotatedBit(2, 8);
-		boolean bit2 = rotatedBit(3, 8);
+		boolean bit1 = rotatedBit(0, 8);
+		boolean bit2 = rotatedBit(1, 8);
+
+		edcLevel = (int) bitsToNibble(false, false, bit1, bit2) & 0xFF;
+
+		bit1 = rotatedBit(2, 8);
+		bit2 = rotatedBit(3, 8);
 		boolean bit3 = rotatedBit(4, 8);
 
-		maskPattern = (int) bitsToByte(bit3, bit2, bit1, false, false, false, false, false) & 0xFF;
+		maskPattern = (int) bitsToNibble(false, bit1, bit2, bit3) & 0xFF;
 	}
 
 	private boolean hasPositionBlockAt(int x, int y) {
@@ -148,6 +256,53 @@ public class QrCode {
 		return false;
 	}
 
+	private void reverseIfNecessary() {
+		if (readingRight) {
+			readingRight = false;
+			currentX--;
+		} else {
+			readingRight = true;
+			currentX++;
+			if (goingUp) {
+				currentY--;
+				if (currentY < 0) {
+					goingUp = false;
+					currentY = 0;
+					currentX -= 2;
+				}
+			} else {
+				currentY++;
+				if (currentY >= height) {
+					goingUp = true;
+					currentY = height - 1;
+					currentX -= 2;
+				}
+			}
+		}
+	}
+
+	// returns true if something could be written,
+	// false otherwise (as no more data is left)
+	private void writeBytesIntoStream(boolean[] datastream) {
+
+		// first of all, we want to get eight fields that are hanging together...
+		int offset = 0;
+		while (true) {
+			while (inaccessibleFields[currentX][currentY]) {
+				reverseIfNecessary();
+				if (currentX < 0) {
+					return;
+				}
+			}
+			datastream[offset] = bit(currentX, currentY);
+			offset++;
+			reverseIfNecessary();
+			if (currentX < 0) {
+				return;
+			}
+		}
+	}
+
 	public String getContent() {
 
 		// first of all, figure out the orientation by getting the large blocks on the sides...
@@ -158,8 +313,6 @@ public class QrCode {
 		boolean hasRightTopBlock = hasPositionBlockAt(width - 7, 0);
 		boolean hasLeftBottomBlock = hasPositionBlockAt(0, height - 7);
 		boolean hasRightBottomBlock = hasPositionBlockAt(width - 7, height - 7);
-
-		System.out.println("hasLeftTopBlock: " + hasLeftTopBlock + ", hasRightTopBlock: " + hasRightTopBlock + ", hasLeftBottomBlock: " + hasLeftBottomBlock + ", hasRightBottomBlock: " + hasRightBottomBlock);
 
 		if (hasLeftTopBlock && hasRightTopBlock && hasLeftBottomBlock) {
 			// all is awesome!
@@ -175,33 +328,134 @@ public class QrCode {
 			rotate = 3;
 		}
 
-		System.out.println("Rotation detected: " + rotate);
-
 		constructInversionField();
 
 		// TODO :: also enable other versions!
 		if (version == 3) {
-			// message data for version 3 QR codes has 26 bytes
-			byte[] result = new byte[26];
 
-			result[0] = bitsToByte(bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
-			result[1] = bitsToByte(bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
+			// message data can never be larger than actual QR code size
+			// (for small QR codes this is a waste of space, but they are small;
+			// for large QR codes it is nearly optimal anyway, so whatever)
+			boolean[] ds = new boolean[width*height];
 
-			return new String(result);
+			// read out the message data bits
+			switch (edcLevel) {
+
+				// H: high quality
+				case 0:
+					writeBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
+					writeBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
+					writeBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
+					writeBitsIntoStream(ds, 24, bit(25, 16), bit(26, 16), bit(25, 15), bit(26, 15), bit(25, 14), bit(26, 14), bit(25, 13), bit(26, 13));
+					writeBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
+					writeBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
+					writeBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
+					// TODO :: add more bits (or, ideally, improve writeBytesIntoStream to work with this case too)
+					break;
+
+				// Q: good quality
+				case 1:
+					// TODO :: implement
+					break;
+
+				// M: medium quality
+				case 2:
+					// TODO :: implement
+					break;
+
+				// L: low quality
+				case 3:
+					currentX = width - 1;
+					currentY = height - 1;
+					goingUp = true;
+					readingRight = true;
+					writeBytesIntoStream(ds);
+					break;
+			}
+
+			StringBuilder result = new StringBuilder();
+
+			// now read the encoded data blocks...
+			int cur = 0;
+			while (cur < ds.length) {
+				// ... with each data block starting with a 4 bit mode indicator
+				byte modeIndicator = bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
+				cur += 4;
+
+				switch (modeIndicator) {
+
+					// end of message
+					case 0:
+						return result.toString();
+
+					// numeric
+					case 1:
+						// TODO
+						break;
+
+					// alphanumeric
+					case 2:
+						// TODO
+						break;
+
+					// ascii bytes
+					case 4:
+
+						// the length of the field length depends on the version, of course .-.
+						int blockLength;
+
+						if (version > 9) {
+							blockLength = bitsToInt(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3], ds[cur+4], ds[cur+5], ds[cur+6], ds[cur+7], ds[cur+8], ds[cur+9], ds[cur+10], ds[cur+11], ds[cur+12], ds[cur+13], ds[cur+14], ds[cur+15]);
+							cur += 16;
+						} else {
+							blockLength = bitsToInt(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3], ds[cur+4], ds[cur+5], ds[cur+6], ds[cur+7]);
+							cur += 8;
+						}
+
+						for (int n = 0; n < blockLength; n++) {
+							result.append((char) bitsToInt(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3], ds[cur+4], ds[cur+5], ds[cur+6], ds[cur+7]));
+							cur += 8;
+						}
+
+						break;
+
+					// kanji
+					case 8:
+						// TODO
+						break;
+				}
+			}
+
+			return result.toString();
 		}
 
 		return null;
 	}
 
 	public String toString() {
-		StringBuilder str = new StringBuilder();
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				str.append(data[x][y] ? "1" : "0");
-			}
-			str.append("\n");
+
+		String qualityStr = "unknown";
+
+		switch (edcLevel) {
+
+			case 0:
+				qualityStr = "H / high quality";
+				break;
+
+			case 1:
+				qualityStr = "Q / quality";
+				break;
+
+			case 2:
+				qualityStr = "M / medium";
+				break;
+
+			case 3:
+				qualityStr = "L / low";
+				break;
 		}
-		return "QR Code (version " + version + ") containing: " + getContent() + "\n" + str.toString();
+
+		return "QR Code (version " + version + ", " + qualityStr + " error correction level) containing: " + getContent();
 	}
 
 }
