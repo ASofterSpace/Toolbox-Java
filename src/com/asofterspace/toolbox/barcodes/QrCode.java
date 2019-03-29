@@ -256,7 +256,7 @@ public class QrCode {
 		return false;
 	}
 
-	private void reverseIfNecessary() {
+	private void stepOneFieldAhead() {
 		if (readingRight) {
 			readingRight = false;
 			currentX--;
@@ -278,6 +278,13 @@ public class QrCode {
 					currentX -= 2;
 				}
 			}
+
+			// if we crossed the x = 6 vertical line,
+			// left and right are shifted by one...
+			// because why not .-.
+			if (currentX == 6) {
+				currentX--;
+			}
 		}
 	}
 
@@ -289,14 +296,14 @@ public class QrCode {
 		int offset = 0;
 		while (true) {
 			while (inaccessibleFields[currentX][currentY]) {
-				reverseIfNecessary();
+				stepOneFieldAhead();
 				if (currentX < 0) {
 					return;
 				}
 			}
 			datastream[offset] = bit(currentX, currentY);
 			offset++;
-			reverseIfNecessary();
+			stepOneFieldAhead();
 			if (currentX < 0) {
 				return;
 			}
