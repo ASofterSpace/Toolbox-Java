@@ -335,7 +335,9 @@ public class PdfFile extends BinaryFile {
 		return objects;
 	}
 
-	public void exportPictures(Directory targetDir) {
+	public List<File> exportPictures(Directory targetDir) {
+
+		List<File> resultList = new ArrayList<>();
 
 		List<PdfObject> objects = getObjects();
 
@@ -352,15 +354,18 @@ public class PdfFile extends BinaryFile {
 							BinaryFile ppmFile = new BinaryFile(targetDir, "Image" + obj.getNumber() + ".ppm");
 							String header = "P6\n" + obj.getDictValue("/Width") + " " + obj.getDictValue("/Height") + "\n255\n";
 							ppmFile.saveContentStr(header + obj.getPlainStreamContent());
+							resultList.add(ppmFile);
 							break;
 						case "/DCTDecode": //JPEG
 						case "/JPX": // JPEG2000
 							BinaryFile jpgFile = new BinaryFile(targetDir, "Image" + obj.getNumber() + ".jpg");
 							jpgFile.saveContentStr(obj.getStreamContent());
+							resultList.add(jpgFile);
 							break;
 						case "/FlateDecode": // PNG? or just generic, could be anything?
 							BinaryFile pngFile = new BinaryFile(targetDir, "Image" + obj.getNumber() + ".png");
 							pngFile.saveContentStr(obj.getPlainStreamContent());
+							resultList.add(pngFile);
 							break;
 						default:
 							System.err.println("The image cannot be saved as the filter is not understood! :(");
@@ -369,6 +374,8 @@ public class PdfFile extends BinaryFile {
 				}
 			}
 		}
+
+		return resultList;
 	}
 
 	public void save() {

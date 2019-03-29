@@ -31,6 +31,7 @@ public abstract class ImageFile extends BinaryFile {
 		super(regularFile);
 	}
 
+
 	public abstract void assign(Image img);
 
 	public abstract Image getImage();
@@ -44,5 +45,17 @@ public abstract class ImageFile extends BinaryFile {
 	public abstract void setPixel(int x, int y, ColorRGB pix);
 
 	public abstract void save();
+
+
+	public static Image readImageFromFile(File imageFile) {
+
+		if (imageFile.getFilename().toLowerCase().endsWith(".ppm")) {
+			PpmFile ppmFile = new PpmFile(imageFile);
+			return ppmFile.getImage();
+		}
+
+		DefaultImageFile defaultImageFile = new DefaultImageFile(imageFile);
+		return defaultImageFile.getImage();
+	}
 
 }

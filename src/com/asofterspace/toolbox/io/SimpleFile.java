@@ -284,6 +284,14 @@ public class SimpleFile extends File {
 	 * to the file system
 	 */
 	public void save() {
+		saveWithLineEndings("\n");
+	}
+
+	public void saveWithSystemLineEndings() {
+		saveWithLineEndings(System.lineSeparator());
+	}
+
+	public void saveWithLineEndings(String lineEnding) {
 
 		java.io.File targetFile = initSave();
 
@@ -310,7 +318,8 @@ public class SimpleFile extends File {
 		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, append), StandardCharsets.UTF_8)) {
 
 			for (String line : filecontents) {
-				writer.write(line + "\n");
+				writer.write(line);
+				writer.write(lineEnding);
 			}
 
 		} catch (IOException e) {
