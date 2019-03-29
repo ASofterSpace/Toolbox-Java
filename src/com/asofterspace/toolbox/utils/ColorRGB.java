@@ -43,6 +43,23 @@ public class ColorRGB {
 		return result < (255 * 3) / 2;
 	}
 
+	// is this pixel the one we would expect?
+	public boolean is(int r, int g, int b) {
+		return (this.r == (byte) r) && (this.g == (byte) g) && (this.b == (byte) b);
+	}
+
+	public int getR() {
+		return r;
+	}
+
+	public int getG() {
+		return g;
+	}
+
+	public int getB() {
+		return b;
+	}
+
 	public byte getRByte() {
 		return r;
 	}
@@ -53,6 +70,43 @@ public class ColorRGB {
 
 	public byte getBByte() {
 		return b;
+	}
+
+	@Override
+	public int hashCode() {
+		return (int) r + (int) g + (int) b;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+
+		if (other == null) {
+			return false;
+		}
+
+		if (!(other instanceof ColorRGB)) {
+			return false;
+		}
+
+		ColorRGB otherColor = (ColorRGB) other;
+
+		if (r != otherColor.getRByte()) {
+			return false;
+		}
+
+		if (g != otherColor.getGByte()) {
+			return false;
+		}
+
+		if (b != otherColor.getBByte()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public boolean fastEquals(ColorRGB other) {
+		return (this.r == other.r) && (this.g == other.g) && (this.b == other.b);
 	}
 
 	public String toString() {

@@ -162,10 +162,7 @@ public class PpmFile extends RasterImageFile {
 
 			img = new Image(uncompressedData);
 
-		} catch (ArrayIndexOutOfBoundsException e) {
-			// we expect array index out of bounds exceptions and just catch them,
-			// instead of having to check on every step if cur < length ourselves...
-		} catch (IOException e) {
+		} catch (ArrayIndexOutOfBoundsException | IOException e) {
 			System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but there was an exception - inconceivable!\n" + e);
 		}
 	}

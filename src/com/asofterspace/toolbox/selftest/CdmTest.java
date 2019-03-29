@@ -25,10 +25,10 @@ import org.w3c.dom.Element;
 
 public class CdmTest implements Test {
 
-	private static final String CDM_TEST_PATH = "test/testcdm";
-
 	@Override
 	public void runAll() {
+
+		AllTests.clearTestDirectory();
 
 		createAndValidateCdmTest();
 
@@ -49,12 +49,8 @@ public class CdmTest implements Test {
 
 		CdmCtrl cdmCtrl = new CdmCtrl();
 
-		// ensure the directory is clear
-		Directory testDir = new Directory("test");
-		testDir.clear();
-
 		try {
-			Boolean creationResult = cdmCtrl.createNewCdm(CDM_TEST_PATH, "1.14.0", "http://www.esa.int/egscc/", "root_route_sap_ex_type");
+			Boolean creationResult = cdmCtrl.createNewCdm(AllTests.TEST_PATH, "1.14.0", "http://www.esa.int/egscc/", "root_route_sap_ex_type");
 
 			if (!(creationResult == true)) {
 				TestUtils.fail("We tried to create a new CDM, the creation result was not true!");
@@ -85,7 +81,7 @@ public class CdmTest implements Test {
 
 		// we know that the previous test just ran, so we can attempt to read stuff out from that test... :)
 
-		Directory cdmDir = new Directory(CDM_TEST_PATH);
+		Directory cdmDir = new Directory(AllTests.TEST_PATH);
 		ProgressIndicator noProgress = new NoOpProgressIndicator();
 
 		try {
@@ -175,7 +171,7 @@ public class CdmTest implements Test {
 		CdmCtrl cdmCtrl = new CdmCtrl();
 
 		// convert from 1.13.0bd1 to 1.14.0b
-		Directory cdmDir = new Directory("testdata/cdm/convertCdmPacketCIsTest1");
+		Directory cdmDir = new Directory(AllTests.CDM_TEST_DATA_PATH + "/convertCdmPacketCIsTest1");
 		ProgressIndicator noProgress = new NoOpProgressIndicator();
 
 		try {
@@ -215,7 +211,7 @@ public class CdmTest implements Test {
 		}
 
 		// convert from 1.14.0b to 1.13.0bd1
-		cdmDir = new Directory("testdata/cdm/convertCdmPacketCIsTest2");
+		cdmDir = new Directory(AllTests.CDM_TEST_DATA_PATH + "/convertCdmPacketCIsTest2");
 		noProgress = new NoOpProgressIndicator();
 
 		try {
@@ -259,7 +255,7 @@ public class CdmTest implements Test {
 
 		CdmCtrl cdmCtrl = new CdmCtrl();
 
-		Directory cdmDir = new Directory("testdata/cdm/parseBinaryCDMsTest/" + which);
+		Directory cdmDir = new Directory(AllTests.CDM_TEST_DATA_PATH + "/parseBinaryCDMsTest/" + which);
 		ProgressIndicator noProgress = new NoOpProgressIndicator();
 
 		try {
@@ -271,7 +267,7 @@ public class CdmTest implements Test {
 
 		CdmCtrl xmlCdmCtrl = new CdmCtrl();
 
-		cdmDir = new Directory("testdata/cdm/parseBinaryCDMsTest/" + which + "_xml");
+		cdmDir = new Directory(AllTests.CDM_TEST_DATA_PATH + "/parseBinaryCDMsTest/" + which + "_xml");
 
 		try {
 			xmlCdmCtrl.loadCdmDirectory(cdmDir, noProgress);

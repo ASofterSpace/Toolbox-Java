@@ -4,6 +4,9 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
+import com.asofterspace.toolbox.utils.ColorRGB;
+import com.asofterspace.toolbox.utils.Image;
+
 
 /**
  * A simple RGB triplet
@@ -41,33 +44,28 @@ public class QrCode {
 	private boolean readingRight = true;
 
 
+	// attempts to read from the image with one image pixel being one qr code pixel
+	public QrCode(Image readFromImage) {
+
+		this(widthToVersion(readFromImage.getWidth()));
+
+		setDatapoints(readFromImage);
+	}
+
+	// attempts to read from the image a certain qr code version, resizing the image
+	public QrCode(Image readFromImage, int version) {
+
+		this(version);
+
+		setDatapoints(readFromImage);
+	}
+
+	// creates a new empty qr code of a certain version
 	public QrCode(int version) {
 
 		this.version = version;
 
-		switch (version) {
-			case 1:
-				width = 21;
-				break;
-			case 2:
-				width = 25;
-				break;
-			case 3:
-				width = 29;
-				break;
-			case 4:
-				width = 33;
-				break;
-			case 10:
-				width = 57;
-				break;
-			case 25:
-				width = 117;
-				break;
-			case 40:
-				width = 177;
-				break;
-		}
+		width = versionToWidth(version);
 
 		height = width;
 
@@ -75,41 +73,100 @@ public class QrCode {
 		inaccessibleFields = new boolean[width][height];
 
 		// TODO :: add info about inaccessible fields for other versions too!
-		switch (version) {
-			case 3:
-				// top left block
-				for (int x = 0; x < 9; x++) {
-					for (int y = 0; y < 9; y++) {
-						inaccessibleFields[x][y] = true;
-					}
+		// (this here should work for all small QR codes that have only one small alignment block...
+		// once you have more alignment blocks - and especially once you have the version bits
+		// from version 7 onwards - this needs to be adjusted!)
+
+		// top left block
+		for (int x = 0; x < 9; x++) {
+			for (int y = 0; y < 9; y++) {
+				inaccessibleFields[x][y] = true;
+			}
+		}
+		// top right block
+		for (int x = width - 8; x < width; x++) {
+			for (int y = 0; y < 9; y++) {
+				inaccessibleFields[x][y] = true;
+			}
+		}
+		// bottom left block
+		for (int x = 0; x < 9; x++) {
+			for (int y = height - 8; y < height; y++) {
+				inaccessibleFields[x][y] = true;
+			}
+		}
+		// small alignment block
+		for (int x = width - 9; x < width - 4; x++) {
+			for (int y = height - 9; y < height - 4; y++) {
+				inaccessibleFields[x][y] = true;
+			}
+		}
+		// horizontal alignment bar
+		for (int x = 0; x < width; x++) {
+			inaccessibleFields[x][6] = true;
+		}
+		// vertical alignment bar
+		for (int y = 0; y < height; y++) {
+			inaccessibleFields[6][y] = true;
+		}
+	}
+
+	private static int widthToVersion(int width) {
+
+		// version 1 is 21x21, version 2 is 25x25, version 3 is 29x29, ...
+		return (width - 17) / 4;
+	}
+
+	private static int versionToWidth(int version) {
+
+		// version 1 is 21x21, version 2 is 25x25, version 3 is 29x29, ...
+		return 17 + (4 * version);
+	}
+
+	public Image getDatapointsAsImage() {
+
+		Image result = new Image(width, height);
+
+		ColorRGB black = new ColorRGB(0, 0, 0);
+		ColorRGB white = new ColorRGB(255, 255, 255);
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (data[x][y]) {
+					result.setPixel(x, y, black);
+				} else {
+					result.setPixel(x, y, white);
 				}
-				// top right block
-				for (int x = width - 8; x < width; x++) {
-					for (int y = 0; y < 9; y++) {
-						inaccessibleFields[x][y] = true;
-					}
+			}
+		}
+
+		return result;
+	}
+
+	public void setDatapoints(Image img) {
+
+		int imgWidth = img.getWidth();
+		int imgHeight = img.getHeight();
+
+		int halfPixW = imgWidth / (2 * width);
+		int halfPixH = imgHeight / (2 * height);
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+
+				int ix = ((x * imgWidth) / width) + halfPixW;
+				int iy = ((y * imgHeight) / height) + halfPixH;
+
+				if (ix > imgWidth - 1) {
+					ix = imgWidth - 1;
 				}
-				// bottom left block
-				for (int x = 0; x < 9; x++) {
-					for (int y = height - 8; y < height; y++) {
-						inaccessibleFields[x][y] = true;
-					}
+
+				if (iy > imgHeight - 1) {
+					iy = imgHeight - 1;
 				}
-				// small alignment block
-				for (int x = width - 9; x < width - 4; x++) {
-					for (int y = height - 9; y < height - 4; y++) {
-						inaccessibleFields[x][y] = true;
-					}
-				}
-				// horizontal alignment bar
-				for (int x = 0; x < width; x++) {
-					inaccessibleFields[x][6] = true;
-				}
-				// vertical alignment bar
-				for (int y = 0; y < height; y++) {
-					inaccessibleFields[6][y] = true;
-				}
-				break;
+
+				data[x][y] = img.getPixel(ix, iy).isDark();
+			}
 		}
 	}
 
@@ -208,14 +265,19 @@ public class QrCode {
 		return (byte) ((b1?128:0) + (b2?64:0) + (b3?32:0) + (b4?16:0) + (b5?8:0) + (b6?4:0) + (b7?2:0) + (b8?1:0));
 	}
 
-	private int bitsToInt(boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
+	private int bitsToInt(boolean[] datastream, int offset, int length) {
 
-		return (b1?128:0) + (b2?64:0) + (b3?32:0) + (b4?16:0) + (b5?8:0) + (b6?4:0) + (b7?2:0) + (b8?1:0);
-	}
+		int result = 0;
+		int twoThePower = 1;
 
-	private int bitsToInt(boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8, boolean b9, boolean b10, boolean b11, boolean b12, boolean b13, boolean b14, boolean b15, boolean b16) {
+		for (int i = length - 1; i >= 0; i--) {
+			if (datastream[offset + i]) {
+				result += twoThePower;
+			}
+			twoThePower *= 2;
+		}
 
-		return (b1?32768:0) + (b2?16384:0) + (b3?8192:0) + (b4?4096:0) + (b5?2048:0) + (b6?1024:0) + (b7?512:0) + (b8?256:0) + (b9?128:0) + (b10?64:0) + (b11?32:0) + (b12?16:0) + (b13?8:0) + (b14?4:0) + (b15?2:0) + (b16?1:0);
+		return result;
 	}
 
 	private void writeBitsIntoStream(boolean[] datastream, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
@@ -338,7 +400,7 @@ public class QrCode {
 		constructInversionField();
 
 		// TODO :: also enable other versions!
-		if (version == 3) {
+		if ((version == 2) || (version == 3)) {
 
 			// message data can never be larger than actual QR code size
 			// (for small QR codes this is a waste of space, but they are small;
@@ -350,6 +412,7 @@ public class QrCode {
 
 				// H: high quality
 				case 0:
+					// TODO :: use writeBytesIntoStream here too!
 					writeBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
 					writeBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
 					writeBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
@@ -357,7 +420,6 @@ public class QrCode {
 					writeBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
 					writeBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
 					writeBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
-					// TODO :: add more bits (or, ideally, improve writeBytesIntoStream to work with this case too)
 					break;
 
 				// Q: good quality
@@ -380,10 +442,28 @@ public class QrCode {
 					break;
 			}
 
+			boolean debug = false;
+
+			if (debug) {
+				StringBuilder debugInfo = new StringBuilder();
+				for (int i = 0; i < ds.length; i++) {
+					if (ds[i]) {
+						debugInfo.append("1");
+					} else {
+						debugInfo.append("0");
+					}
+				}
+				System.out.println(debugInfo);
+			}
+
 			StringBuilder result = new StringBuilder();
 
 			// now read the encoded data blocks...
 			int cur = 0;
+
+			// by default (if no ECI is given) use ASCII...
+			int eciNumber = 27;
+
 			while (cur < ds.length) {
 				// ... with each data block starting with a 4 bit mode indicator
 				byte modeIndicator = bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
@@ -412,16 +492,35 @@ public class QrCode {
 						int blockLength;
 
 						if (version > 9) {
-							blockLength = bitsToInt(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3], ds[cur+4], ds[cur+5], ds[cur+6], ds[cur+7], ds[cur+8], ds[cur+9], ds[cur+10], ds[cur+11], ds[cur+12], ds[cur+13], ds[cur+14], ds[cur+15]);
+							blockLength = bitsToInt(ds, cur, 16);
 							cur += 16;
 						} else {
-							blockLength = bitsToInt(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3], ds[cur+4], ds[cur+5], ds[cur+6], ds[cur+7]);
+							blockLength = bitsToInt(ds, cur, 8);
 							cur += 8;
 						}
 
 						for (int n = 0; n < blockLength; n++) {
-							result.append((char) bitsToInt(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3], ds[cur+4], ds[cur+5], ds[cur+6], ds[cur+7]));
+							// TODO :: if eciNumber is not 27, then do... uhm... something to get the correct conversion xD
+							result.append((char) bitsToInt(ds, cur, 8));
 							cur += 8;
+						}
+
+						break;
+
+					// ECI - extended channel interpretation
+					case 7:
+
+						if (ds[cur] == false) {
+							eciNumber = bitsToInt(ds, cur, 8);
+							cur += 8;
+						} else {
+							if (ds[cur+1] == false) {
+								eciNumber = bitsToInt(ds, cur, 16);
+								cur += 16;
+							} else {
+								eciNumber = bitsToInt(ds, cur, 24);
+								cur += 24;
+							}
 						}
 
 						break;
