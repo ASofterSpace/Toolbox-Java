@@ -9,7 +9,8 @@ import com.asofterspace.toolbox.utils.Image;
 
 
 /**
- * A simple RGB triplet
+ * A QR Code based either on some image data,
+ * or on some bits that are set as datapoints directly
  *
  * @author Moya (a softer space), 2019
  */
@@ -305,8 +306,7 @@ public class QrCode {
 
 		// TODO :: check better, also a bit error-aware etc.
 		// (right now we are just checking the diagonal of the block ^^)
-		// TODO :: use data[][] directly everywhere, as rotation is 0 anyway .-.
-		if (data[x][y] && !rotatedBit(x+1, y+1) && rotatedBit(x+2, y+2) && rotatedBit(x+3, y+3) && rotatedBit(x+4, y+4) && !rotatedBit(x+5, y+5) && rotatedBit(x+6, y+6)) {
+		if (data[x][y] && !data[x+1][y+1] && data[x+2][y+2] && data[x+3][y+3] && data[x+4][y+4] && !data[x+5][y+5] && data[x+6][y+6]) {
 			return true;
 		}
 
@@ -371,7 +371,7 @@ public class QrCode {
 
 		// first of all, figure out the orientation by getting the large blocks on the sides...
 		// ... setting the orientation to 0 as default for reading out the blocks...
-		rotate = 0;
+		rotate = -1;
 
 		boolean hasLeftTopBlock = hasPositionBlockAt(0, 0);
 		boolean hasRightTopBlock = hasPositionBlockAt(width - 7, 0);
@@ -392,10 +392,14 @@ public class QrCode {
 			rotate = 3;
 		}
 
+		if (rotate < 0) {
+			return null;
+		}
+
 		constructInversionField();
 
 		// TODO :: also enable other versions!
-		if ((version == 2) || (version == 3)) {
+		if ((version == 2) || (version == 3) || (version == 4)) {
 
 			// message data can never be larger than actual QR code size
 			// (for small QR codes this is a waste of space, but they are small;

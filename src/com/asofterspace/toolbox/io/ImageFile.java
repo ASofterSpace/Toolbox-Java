@@ -54,6 +54,16 @@ public abstract class ImageFile extends BinaryFile {
 			return ppmFile.getImage();
 		}
 
+		if (imageFile.getFilename().toLowerCase().endsWith(".pgm")) {
+			PgmFile pgmFile = new PgmFile(imageFile);
+			return pgmFile.getImage();
+		}
+
+		if (imageFile.getFilename().toLowerCase().endsWith(".pbm")) {
+			PbmFile pbmFile = new PbmFile(imageFile);
+			return pbmFile.getImage();
+		}
+
 		DefaultImageFile defaultImageFile = new DefaultImageFile(imageFile);
 		return defaultImageFile.getImage();
 	}
