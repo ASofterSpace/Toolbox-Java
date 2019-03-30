@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.io;
 
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
+import com.asofterspace.toolbox.Utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,29 +19,29 @@ import java.util.List;
 
 
 /**
- * A PPM image file object describes uncompressed RGB image file,
- * often with .ppm extension, and starting with P6 as magic bytes
- * (or P3 for ASCII instead of raw format)
+ * A PBM image file object describes an uncompressed monochrome image file,
+ * often with .pbm extension, and starting with P4 as magic bytes
+ * (or P1 for ASCII instead of raw format)
  *
  * TODO :: add ASCII variant
  * TODO :: allow comments inside the file
  *
  * @author Moya (a softer space), 2019
  */
-public class PpmFile extends RasterImageFile {
+public class PbmFile extends RasterImageFile {
 
 	/**
-	 * You can construct a PpmFile instance by directly from a path name.
+	 * You can construct a PbmFile instance by directly from a path name.
 	 */
-	public PpmFile(String fullyQualifiedFileName) {
+	public PbmFile(String fullyQualifiedFileName) {
 
 		super(fullyQualifiedFileName);
 	}
 
 	/**
-	 * You can construct a PpmFile instance by basing it on an existing file object.
+	 * You can construct a PbmFile instance by basing it on an existing file object.
 	 */
-	public PpmFile(File regularFile) {
+	public PbmFile(File regularFile) {
 
 		super(regularFile);
 	}
@@ -51,21 +52,20 @@ public class PpmFile extends RasterImageFile {
 
 			int width = 0;
 			int height = 0;
-			int maxColorValue = 255;
 
 			byte[] binaryContent = Files.readAllBytes(Paths.get(this.filename));
 			int len = binaryContent.length;
 
 			if (binaryContent[0] != 'P') {
-				System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but its header is not that of a PPM file!");
+				System.err.println("[ERROR] Trying to load the PBM file " + filename + ", but its header is not that of a PBM file!");
 			}
 
-			if (binaryContent[1] != '6') {
-				System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but its header is not that of a raw PPM file!");
+			if (binaryContent[1] != '4') {
+				System.err.println("[ERROR] Trying to load the PBM file " + filename + ", but its header is not that of a raw PBM file!");
 			}
 
 			if (!isWhitespace(binaryContent[2])) {
-				System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but its header is weird!");
+				System.err.println("[ERROR] Trying to load the PBM file " + filename + ", but its header is weird!");
 			}
 
 			int cur = 3;
@@ -111,63 +111,33 @@ public class PpmFile extends RasterImageFile {
 				}
 			}
 
-			while (cur < len) {
-
-				byte curByte = binaryContent[cur];
-				cur++;
-
-				if (!isWhitespace(curByte)) {
-					cur--;
-					break;
-				}
-			}
-
-			buf = new StringBuilder();
-
-			while (cur < len) {
-
-				byte curByte = binaryContent[cur];
-				cur++;
-
-				if (isWhitespace(curByte)) {
-					maxColorValue = Integer.parseInt(buf.toString());
-					break;
-				} else {
-					buf.append((char) curByte);
-				}
-			}
-
-			// content starts exactly one newline after the maxColorValue
+			// content starts exactly one newline after the height
 			ColorRGB[][] uncompressedData = new ColorRGB[height][width];
 
-			// the scale is already exactly the RGB scale (0 .. 255)
-			if (maxColorValue == 255){
-				for (int y = 0; y < height; y++) {
-					for (int x = 0; x < width; x++) {
-						byte r = binaryContent[cur++];
-						byte g = binaryContent[cur++];
-						byte b = binaryContent[cur++];
+			ColorRGB black = new ColorRGB(0, 0, 0);
+			ColorRGB white = new ColorRGB(255, 255, 255);
+			boolean[] buffer = new boolean[8];
+			int curInBuffer = 8;
 
-						uncompressedData[y][x] = new ColorRGB(r, g, b);
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (curInBuffer >= 8) {
+						buffer = Utils.byteToBits(binaryContent[cur++]);
+						curInBuffer = 0;
 					}
-				}
-			} else {
-				// ah well, we have to scale the data...
-				for (int y = 0; y < height; y++) {
-					for (int x = 0; x < width; x++) {
-						byte r = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
-						byte g = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
-						byte b = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
-
-						uncompressedData[y][x] = new ColorRGB(r, g, b);
+					if (buffer[curInBuffer]) {
+						uncompressedData[y][x] = black;
+					} else {
+						uncompressedData[y][x] = white;
 					}
+					curInBuffer++;
 				}
 			}
 
 			img = new Image(uncompressedData);
 
 		} catch (ArrayIndexOutOfBoundsException | IOException e) {
-			System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but there was an exception - inconceivable!\n" + e);
+			System.err.println("[ERROR] Trying to load the PBM file " + filename + ", but there was an exception - inconceivable!\n" + e);
 		}
 	}
 
@@ -184,15 +154,11 @@ public class PpmFile extends RasterImageFile {
 
 		StringBuilder out = new StringBuilder();
 
-		out.append("P6");
+		out.append("P4");
 		out.append("\n");
 		out.append(getWidth());
 		out.append("\n");
 		out.append(getHeight());
-		out.append("\n");
-		// we want to actually save using the maxColorValue,
-		// as we internally have the data uncompressed anyway
-		out.append("255");
 		out.append("\n");
 
 		// fill file with data
@@ -200,13 +166,25 @@ public class PpmFile extends RasterImageFile {
 
 			stream.write(out.toString().getBytes());
 
+			boolean[] buffer = new boolean[8];
+			int cur = 0;
+
 			for (int y = 0; y < getHeight(); y++) {
 				for (int x = 0; x < getWidth(); x++) {
-					ColorRGB px = img.getPixel(x, y);
-					stream.write(px.getRByte());
-					stream.write(px.getGByte());
-					stream.write(px.getBByte());
+					buffer[cur] = img.getPixel(x, y).isDark();
+					cur++;
+					if (cur >= 8) {
+						stream.write(Utils.bitsToByte(buffer));
+						cur = 0;
+					}
 				}
+			}
+
+			if (cur > 0) {
+				for (; cur < 8; cur++) {
+					buffer[cur] = false;
+				}
+				stream.write(Utils.bitsToByte(buffer));
 			}
 
 		} catch (IOException e) {
@@ -215,11 +193,11 @@ public class PpmFile extends RasterImageFile {
 	}
 
 	/**
-	 * Gives back a string representation of the ppm file object
+	 * Gives back a string representation of the pbm file object
 	 */
 	@Override
 	public String toString() {
-		return "com.asofterspace.toolbox.io.PpmFile: " + filename;
+		return "com.asofterspace.toolbox.io.PbmFile: " + filename;
 	}
 
 }

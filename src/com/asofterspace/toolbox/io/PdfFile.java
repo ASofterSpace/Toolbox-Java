@@ -25,6 +25,7 @@ public class PdfFile extends BinaryFile {
 	// the Unicode letters that we are aware of into their same-byte counterparts or whatever... ^^)
 	static final Charset PDF_CHARSET = BinaryFile.BINARY_CHARSET;
 
+	private boolean pdfLoadingStarted = false;
 	private boolean pdfLoaded = false;
 
 	private Integer version;
@@ -73,6 +74,8 @@ public class PdfFile extends BinaryFile {
 
 	private void initEmptyPdf() {
 
+		pdfLoadingStarted = true;
+
 		// initialize to false, such that if we abort in the middle, we count as "non-loaded" (even if we loaded successfully before)
 		pdfLoaded = false;
 
@@ -113,9 +116,11 @@ public class PdfFile extends BinaryFile {
 
 					int offset = 0;
 
+					byte nextByte = 0;
+
 					// ignore the second line end marker in case of \r\n (which seems to actually be the PDF default!)
 					if (cur < len) {
-						byte nextByte = binaryContent[cur];
+						nextByte = binaryContent[cur];
 
 						if ((nextByte == '\n') || (nextByte == '\r')) {
 
@@ -144,20 +149,55 @@ public class PdfFile extends BinaryFile {
 					// if we are starting a stream, read its length and then read its contents directly as
 					// streams are NOT line-based and any \r or \n in there is just a regular stream byte
 					if ((currentSection == PdfSection.IN_OBJECT) && line.endsWith("stream") && (!line.endsWith("endstream"))) {
-						lineLen = currentObject.preGetStreamLength();
+						Integer streamLen = currentObject.preGetStreamLength();
 
-						buffer = new byte[lineLen];
-						System.arraycopy(binaryContent, cur, buffer, 0, lineLen);
+						if (streamLen == null) {
+							// the length cannot be read out - either there is no length field,
+							// or it refers to an object that comes later (great .-.), which
+							// we could read out by following the xref table at the end...
+							// but that one is sometimes broken in the wild, so let's instead
+							// try to go until endstream\nendobj\n, hoping that this is not part
+							// of the regular stream content
+							streamLen = binaryContent.length - cur - 1;
+							String searchFor;
+							if (offset == 0) {
+								searchFor = "endstream" + (char) curByte + "endobj" + (char) curByte;
+							} else {
+								searchFor = "endstream" + (char) curByte + (char) nextByte + "endobj" + (char) curByte + (char) nextByte;
+							}
+
+							buffer = new byte[streamLen];
+							System.arraycopy(binaryContent, cur, buffer, 0, streamLen);
+							line = new String(buffer, PDF_CHARSET);
+
+							streamLen = line.indexOf(searchFor);
+
+							if (streamLen < 0) {
+								streamLen = 0;
+							}
+
+							if (offset == 0) {
+								if ((streamLen > 0) && (buffer[streamLen - 1] == curByte)) {
+									streamLen -= 1;
+								}
+							} else {
+								if ((streamLen > 1) && (buffer[streamLen - 2] == curByte) && (buffer[streamLen - 1] == nextByte)) {
+									streamLen -= 2;
+								}
+							}
+						}
+
+						buffer = new byte[streamLen];
+						System.arraycopy(binaryContent, cur, buffer, 0, streamLen);
 
 						line = new String(buffer, PDF_CHARSET);
 
 						currentObject.readStreamContents(line);
 
-						cur += lineLen + offset;
+						cur += streamLen + offset;
 					}
 
 					lineStart = cur;
-
 				}
 			}
 
@@ -212,7 +252,7 @@ public class PdfFile extends BinaryFile {
 
 				if (line.endsWith("obj")) {
 					try {
-						currentObject = new PdfObject(line);
+						currentObject = new PdfObject(this, line);
 						objects.add(currentObject);
 						currentSection = PdfSection.IN_OBJECT;
 						return false; // no error
@@ -274,6 +314,55 @@ public class PdfFile extends BinaryFile {
 		return true;
 	}
 
+	/**
+	 * We might have e.g. for a stream length either
+	 * /Length 9
+	 * or
+	 * /Length 9 0 R
+	 *
+	 * In the first case, the stream has length 9.
+	 * In the second case, the stream length is the content of PDF Object (9, 0).
+	 * Using the resolve function on "9" or "9 0 R" respectively gives you the
+	 * actual length - in both cases :)
+	 */
+	String resolve(String link) {
+
+		if (link == null) {
+			return null;
+		}
+
+		// first of all, check if this is a link...
+		if (link.contains(" ")) {
+
+			// if yes, follow the link...
+			String[] linkArr = link.split(" ");
+
+			if (linkArr.length > 1) {
+
+				try {
+					int linkNumber = Integer.valueOf(linkArr[0]);
+					int linkGeneration = Integer.valueOf(linkArr[1]);
+
+					PdfObject obj = getObject(linkNumber, linkGeneration);
+
+					// if we are called while the reading process is ongoing,
+					// the obj might not yet have been read... oops!
+					if (obj == null) {
+						return null;
+					}
+
+					return obj.getContent();
+
+				} catch (NumberFormatException e) {
+					return null;
+				}
+			}
+		}
+
+		// if no, then this is just flat data - simply return it
+		return link;
+	}
+
 	public void create(String text) {
 
 		initEmptyPdf();
@@ -282,18 +371,18 @@ public class PdfFile extends BinaryFile {
 
 		int objNum = 1;
 
-		PdfObject obj = new PdfObject(objNum++, 0);
+		PdfObject obj = new PdfObject(this, objNum++, 0);
 		obj.setDictValue("/Type", "/Catalog");
 		obj.setDictValue("/Pages", "2 0 R"); // TODO :: use reference instead of hardcoded link
 		objects.add(obj);
 
-		obj = new PdfObject(objNum++, 0);
+		obj = new PdfObject(this, objNum++, 0);
 		obj.setDictValue("/Type", "/Pages");
 		obj.setDictValue("/Count", "1");
 		obj.setDictValue("/Kids", "[3 0 R]"); // TODO :: use reference(s) instead of hardcoded link(s)
 		objects.add(obj);
 
-		obj = new PdfObject(objNum++, 0);
+		obj = new PdfObject(this, objNum++, 0);
 		obj.setDictValue("/Type", "/Range");
 		obj.setDictValue("/Parent", "2 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
 		obj.setDictValue("/MediaBox", "[0 0 612 792]");
@@ -305,13 +394,13 @@ public class PdfFile extends BinaryFile {
 		obj.setDictValue("/Resources", font);
 		objects.add(obj);
 
-		obj = new PdfObject(objNum++, 0);
+		obj = new PdfObject(this, objNum++, 0);
 		String streamContent = "BT\n/F1 24 Tf\n250 700 Td (" + text + ") Tj\nET";
 		obj.setDictValue("/Length", "" + streamContent.length());
 		obj.setStreamContent(streamContent);
 		objects.add(obj);
 
-		obj = new PdfObject(objNum++, 0);
+		obj = new PdfObject(this, objNum++, 0);
 		obj.setDictValue("/Type", "/Font");
 		obj.setDictValue("/Subtype", "/Type1");
 		obj.setDictValue("/BaseFont", "/Helvetica"); // TODO :: embed font inline
@@ -335,6 +424,25 @@ public class PdfFile extends BinaryFile {
 		return objects;
 	}
 
+	public PdfObject getObject(int number, int generation) {
+
+		// this may get called during the reading process, so we are just checking if we already
+		// started - not if we finished
+		if (!pdfLoadingStarted) {
+			loadPdfContents();
+		}
+
+		for (PdfObject obj : objects) {
+			if (number == obj.getNumber()) {
+				if (generation == obj.getGeneration()) {
+					return obj;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public List<File> exportPictures(Directory targetDir) {
 
 		List<File> resultList = new ArrayList<>();
@@ -350,7 +458,22 @@ public class PdfFile extends BinaryFile {
 					}
 					switch (filter) {
 						case "": // Portable Pix Map
-							// TODO :: do something about the ICCBased ColorSpace? (right now we are just ignoring it...)
+						case "/FlateDecode": // PNG? or just generic, could be anything?
+
+							// read the color space to see what kind of a picture we have on our hands...
+							String colorSpace = obj.getDictValue("/ColorSpace");
+
+							if ("/DeviceGray".equals(colorSpace)) {
+								BinaryFile pgmFile = new BinaryFile(targetDir, "Image" + obj.getNumber() + ".pgm");
+								String header = "P5\n" + obj.getDictValue("/Width") + " " + obj.getDictValue("/Height") + "\n255\n";
+								pgmFile.saveContentStr(header + obj.getPlainStreamContent());
+								resultList.add(pgmFile);
+								break;
+							}
+
+							// by default, assume DeviceRGB
+							// TODO :: do something about the ICCBased ColorSpace, if it is present?
+							// (right now we are just ignoring it... which however a lot of programs seem to do quite happily ^^)
 							BinaryFile ppmFile = new BinaryFile(targetDir, "Image" + obj.getNumber() + ".ppm");
 							String header = "P6\n" + obj.getDictValue("/Width") + " " + obj.getDictValue("/Height") + "\n255\n";
 							ppmFile.saveContentStr(header + obj.getPlainStreamContent());
@@ -361,11 +484,6 @@ public class PdfFile extends BinaryFile {
 							BinaryFile jpgFile = new BinaryFile(targetDir, "Image" + obj.getNumber() + ".jpg");
 							jpgFile.saveContentStr(obj.getStreamContent());
 							resultList.add(jpgFile);
-							break;
-						case "/FlateDecode": // PNG? or just generic, could be anything?
-							BinaryFile pngFile = new BinaryFile(targetDir, "Image" + obj.getNumber() + ".png");
-							pngFile.saveContentStr(obj.getPlainStreamContent());
-							resultList.add(pngFile);
 							break;
 						default:
 							System.err.println("The image cannot be saved as the filter is not understood! :(");

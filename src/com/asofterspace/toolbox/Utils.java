@@ -179,6 +179,30 @@ public class Utils {
 		return result.toString();
 	}
 
+	public static byte bitsToByte(boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
+
+		return (byte) ((b1?128:0) + (b2?64:0) + (b3?32:0) + (b4?16:0) + (b5?8:0) + (b6?4:0) + (b7?2:0) + (b8?1:0));
+	}
+
+	public static byte bitsToByte(boolean[] b) {
+
+		return (byte) ((b[0]?128:0) + (b[1]?64:0) + (b[2]?32:0) + (b[3]?16:0) + (b[4]?8:0) + (b[5]?4:0) + (b[6]?2:0) + (b[7]?1:0));
+	}
+
+	public static boolean[] byteToBits(byte b) {
+
+		boolean[] result = new boolean[8];
+		result[0] = ((b >>> 7) & 0x1) > 0;
+		result[1] = ((b >>> 6) & 0x1) > 0;
+		result[2] = ((b >>> 5) & 0x1) > 0;
+		result[3] = ((b >>> 4) & 0x1) > 0;
+		result[4] = ((b >>> 3) & 0x1) > 0;
+		result[5] = ((b >>> 2) & 0x1) > 0;
+		result[6] = ((b >>> 1) & 0x1) > 0;
+		result[7] = (b & 0x1) > 0;
+		return result;
+	}
+
 	/**
 	 * Writes a log line to standard out together with debug information (the current time and JVM heap size)
 	 */
@@ -202,52 +226,4 @@ public class Utils {
 		System.out.println(format.format(new Date()) + " [heap " + heapStr + "]: " + logline);
 	}
 
-	/**
-	 * TODO :: This should be in the XmlFile class, or in an XmlEncoder, but not here, right? Who even uses this?
-	 */
-	public static String xmlEscape(String text) {
-
-		StringBuilder result = new StringBuilder();
-
-		for (int i = 0; i < text.length(); i++) {
-
-			char c = text.charAt(i);
-
-			switch (c) {
-				case '<':
-					result.append("&lt;");
-					break;
-				case '>':
-					result.append("&gt;");
-					break;
-				case '\n':
-					result.append("&#10;");
-					break;
-				case '\r':
-					break;
-				case '\t':
-					result.append("&#9;");
-					break;
-				case '&':
-					result.append("&amp;");
-					break;
-				case '\'':
-					result.append("&apos;");
-					break;
-				case '\"':
-					result.append("&quot;");
-					break;
-			default:
-				if (c > 0x7e) {
-					result.append("&#");
-					result.append((int) c);
-					result.append(";");
-				} else {
-					result.append(c);
-				}
-			}
-		}
-
-		return result.toString();
-	}
 }

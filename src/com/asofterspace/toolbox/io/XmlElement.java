@@ -4,7 +4,6 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.utils.TinyMap;
 import com.asofterspace.toolbox.Utils;
 
 import java.io.IOException;
@@ -22,7 +21,7 @@ public class XmlElement {
 
 	private String innerText;
 
-	private TinyMap attributes;
+	private TinyXmlMap attributes;
 
 	private XmlElement xmlParent;
 
@@ -34,7 +33,7 @@ public class XmlElement {
 
 	public XmlElement(String name, Attributes attributes) {
 
-		TinyMap attrMap = new TinyMap(attributes.getLength());
+		TinyXmlMap attrMap = new TinyXmlMap(attributes.getLength());
 
 		for (int i = 0; i < attributes.getLength(); i++) {
 
@@ -55,12 +54,12 @@ public class XmlElement {
 		construct(name, attrMap);
 	}
 
-	public XmlElement(String name, TinyMap attributes) {
+	public XmlElement(String name, TinyXmlMap attributes) {
 
 		construct(name, attributes);
 	}
 
-	private void construct(String name, TinyMap attributes) {
+	private void construct(String name, TinyXmlMap attributes) {
 
 		// internalize the node names
 		if (name != null) {
@@ -127,7 +126,7 @@ public class XmlElement {
 
 		newChild.innerText = null;
 
-		newChild.attributes = new TinyMap();
+		newChild.attributes = new TinyXmlMap();
 
 		newChild.xmlParent = this;
 
@@ -271,7 +270,7 @@ public class XmlElement {
 		return attributes.get(key);
 	}
 
-	public TinyMap getAttributes() {
+	public TinyXmlMap getAttributes() {
 		return attributes;
 	}
 
@@ -338,7 +337,7 @@ public class XmlElement {
 			if ((innerText == null) || (innerText.length() < 1)) {
 				writer.write("/>\n");
 			} else {
-				writer.write(">" + Utils.xmlEscape(innerText) + "</" + name + ">\n");
+				writer.write(">" + xmlEscape(innerText) + "</" + name + ">\n");
 			}
 		} else {
 			writer.write(">\n");
@@ -358,4 +357,49 @@ public class XmlElement {
 		}
 	}
 
+	public static String xmlEscape(String text) {
+
+		StringBuilder result = new StringBuilder();
+
+		for (int i = 0; i < text.length(); i++) {
+
+			char c = text.charAt(i);
+
+			switch (c) {
+				case '<':
+					result.append("&lt;");
+					break;
+				case '>':
+					result.append("&gt;");
+					break;
+				case '\n':
+					result.append("&#10;");
+					break;
+				case '\r':
+					break;
+				case '\t':
+					result.append("&#9;");
+					break;
+				case '&':
+					result.append("&amp;");
+					break;
+				case '\'':
+					result.append("&apos;");
+					break;
+				case '\"':
+					result.append("&quot;");
+					break;
+			default:
+				if (c > 0x7e) {
+					result.append("&#");
+					result.append((int) c);
+					result.append(";");
+				} else {
+					result.append(c);
+				}
+			}
+		}
+
+		return result.toString();
+	}
 }

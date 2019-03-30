@@ -16,6 +16,8 @@ import java.util.zip.Inflater;
  */
 public class PdfObject {
 
+	private PdfFile parent;
+
 	private int number;
 
 	private int generation;
@@ -44,7 +46,9 @@ public class PdfObject {
 	 * just uses the line with the metadata and expects the contents to
 	 * be set later or kept empty)
 	 */
-	public PdfObject(String pdfLine) throws NumberFormatException, NullPointerException, ArrayIndexOutOfBoundsException {
+	public PdfObject(PdfFile parent, String pdfLine) throws NumberFormatException, NullPointerException, ArrayIndexOutOfBoundsException {
+
+		this.parent = parent;
 
 		String[] lineArr = pdfLine.split(" ");
 
@@ -53,7 +57,8 @@ public class PdfObject {
 		generation = Integer.valueOf(lineArr[1]);
 	}
 
-	public PdfObject(int number, int generation) {
+	public PdfObject(PdfFile parent, int number, int generation) {
+		this.parent = parent;
 		this.number = number;
 		this.generation = generation;
 	}
@@ -103,9 +108,21 @@ public class PdfObject {
 		return number;
 	}
 
+	public int getGeneration() {
+		return generation;
+	}
+
 	public String getDictValue(String key) {
 		ensureDictContent();
 		return this.dictContent.getAsString(key);
+	}
+
+	/**
+	 * Gets the regular, non-stream content exactly as it is internally
+	 */
+	public String getContent() {
+
+		return content;
 	}
 
 	/**
@@ -166,6 +183,7 @@ public class PdfObject {
 			}
 
 			inflater.end();
+
 			return new String(output.toByteArray(), PdfFile.PDF_CHARSET);
 		}
 
@@ -210,6 +228,26 @@ public class PdfObject {
 		// do NOT rely on contentReader already being done with its thing!
 		String contents = contentReader.toString();
 
+		if (contents.startsWith("<<")) {
+			PdfDictionary dictContent = new PdfDictionary();
+			dictContent.loadFromString(contents);
+
+			String strLen = dictContent.getAsString("/Length");
+
+			strLen = parent.resolve(strLen);
+
+			if (strLen == null) {
+				return null;
+			}
+
+			try {
+				return Integer.valueOf(strLen);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
+/*
 		int index = contents.indexOf("/Length ");
 
 		if (index < 0) {
@@ -234,6 +272,8 @@ public class PdfObject {
 		} catch (NumberFormatException e) {
 			return null;
 		}
+*/
+		return null;
 	}
 
 	public void setContent(String content) {

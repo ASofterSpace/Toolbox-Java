@@ -4,10 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.utils.TinyMap;
-
-import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -76,7 +74,7 @@ public class EmfFile extends XmlFile {
 		rootElement = null;
 		currentElement = null;
 
-		TinyMap curAttributes = new TinyMap();
+		TinyXmlMap curAttributes = new TinyXmlMap();
 
 		try {
 			binaryContent = Files.readAllBytes(Paths.get(this.filename));
@@ -285,7 +283,7 @@ public class EmfFile extends XmlFile {
 									wroteElementStart = true;
 									beforeEquals = true;
 
-									curAttributes = new TinyMap();
+									curAttributes = new TinyXmlMap();
 									XmlElement newEl = new XmlElement(namespaceAndTagToQName(element, tokenBuilder.toString()), curAttributes);
 									if (rootElement == null) {
 										rootElement = newEl;

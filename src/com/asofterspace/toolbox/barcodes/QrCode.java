@@ -260,11 +260,6 @@ public class QrCode {
 		return (byte) ((b1?8:0) + (b2?4:0) + (b3?2:0) + (b4?1:0));
 	}
 
-	private byte bitsToByte(boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
-
-		return (byte) ((b1?128:0) + (b2?64:0) + (b3?32:0) + (b4?16:0) + (b5?8:0) + (b6?4:0) + (b7?2:0) + (b8?1:0));
-	}
-
 	private int bitsToInt(boolean[] datastream, int offset, int length) {
 
 		int result = 0;
