@@ -39,7 +39,7 @@ public class PythonCode extends Code {
 
 	// all keywords of the C# language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "foreach", "goto", "if", "implements", "using", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "var", "while"}
+		new String[] {"and", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "foreach", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "not", "null", "or", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "using", "var", "while", "with"}
 	));
 
 	// all primitive types of the C# language and other stuff that looks that way

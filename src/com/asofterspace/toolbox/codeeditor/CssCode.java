@@ -37,30 +37,20 @@ public class CssCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the C# language
-	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "foreach", "goto", "if", "implements", "using", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "var", "while"}
-	));
-
-	// all primitive types of the C# language and other stuff that looks that way
-	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"bool", "char", "class", "double", "float", "enum", "int", "long", "abstract", "final", "package", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
-	));
-
-	// all string delimiters of the C# language
+	// all string delimiters of the CSS language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the C# language
+	// operand characters in the CSS language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
 		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*', '#'}
 	));
 
-	// start of multiline comments in the Java language
+	// start of multiline comments in the CSS language
 	private static final String START_MULTILINE_COMMENT = "/*";
 
-	// end of multiline comments in the Java language
+	// end of multiline comments in the CSS language
 	private static final String END_MULTILINE_COMMENT = "*/";
 
 	// are we currently in a multiline comment?
@@ -125,14 +115,22 @@ public class CssCode extends Code {
 			start = 0;
 			end -= 1;
 
+			char lastDelimiter = ' ';
+
 			while (start <= end) {
 
 				// while we have a delimiter...
 				char curChar = content.charAt(start);
 				while (isDelimiter(curChar)) {
 
+					lastDelimiter = curChar;
+
+					// ... check for the start of an object
+					if (curChar == '{') {
+						start = highlightObject(content, start, end);
+
 					// ... check for a comment (which starts with a delimiter)
-					if (isCommentStart(content, start, end)) {
+					} else if (isCommentStart(content, start, end)) {
 						start = highlightComment(content, start, end);
 
 					// ... and check for a quoted string
@@ -161,12 +159,69 @@ public class CssCode extends Code {
 				}
 
 				// or any other token instead?
-				start = highlightOther(content, start, end);
+				start = highlightOther(content, start, end, lastDelimiter);
 			}
 
 		} catch (BadLocationException e) {
 			// oops!
 		}
+	}
+
+	private int highlightObject(String content, int start, int end) {
+
+		while (start <= end) {
+
+			// while we have a delimiter...
+			char curChar = content.charAt(start);
+			while (true) {
+
+				if (isDelimiter(curChar)) {
+					// ... check for the end of the object
+					if (curChar == '}') {
+						return start + 1;
+
+					// ... check for a comment (which starts with a delimiter)
+					} else if (isCommentStart(content, start, end)) {
+						start = highlightComment(content, start, end);
+
+					// ... and check for a quoted string
+					} else if (isStringDelimiter(content.charAt(start))) {
+
+						// then let's get that string!
+						start = highlightString(content, start, end);
+
+					} else {
+						// please highlight the delimiter in the process ;)
+						if (!Character.isWhitespace(curChar)) {
+							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+						}
+					}
+				} else {
+					int keyEnd = content.indexOf(":", start);
+					int markLength = keyEnd - start;
+					if (markLength > 0) {
+						this.setCharacterAttributes(start, markLength, attrFunction, false);
+					}
+					if (keyEnd > 0) {
+						keyEnd = content.indexOf(";", keyEnd);
+						start = keyEnd - 1;
+					}
+				}
+
+				if (start < end) {
+
+					// jump forward and try again!
+					start++;
+
+				} else {
+					return start;
+				}
+
+				curChar = content.charAt(start);
+			}
+		}
+
+		return start;
 	}
 
 	private boolean isCommentStart(String content, int start, int end) {
@@ -236,7 +291,7 @@ public class CssCode extends Code {
 		return endOfString;
 	}
 
-	private int highlightOther(String content, int start, int end) {
+	private int highlightOther(String content, int start, int end, char lastDelimiter) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -249,11 +304,11 @@ public class CssCode extends Code {
 
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
-		if (isKeyword(couldBeKeyword)) {
+		if (lastDelimiter == '#') {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
-		} else if (isPrimitiveType(couldBeKeyword)) {
+		} else if (lastDelimiter == '.') {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
-		} else if (isAdvancedType(couldBeKeyword)) {
+		} else if (lastDelimiter == ':') {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
@@ -268,21 +323,6 @@ public class CssCode extends Code {
 
 	private boolean isStringDelimiter(char character) {
 		return STRING_DELIMITERS.contains(character);
-	}
-
-	private boolean isKeyword(String token) {
-		return KEYWORDS.contains(token);
-	}
-
-	private boolean isPrimitiveType(String token) {
-		return PRIMITIVE_TYPES.contains(token);
-	}
-
-	private boolean isAdvancedType(String token) {
-		if (token.length() < 1) {
-			return false;
-		}
-		return Character.isUpperCase(token.charAt(0));
 	}
 
 	private boolean isAnnotation(String token) {

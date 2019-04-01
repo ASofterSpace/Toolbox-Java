@@ -39,7 +39,7 @@ public class ShellCode extends Code {
 
 	// all keywords of the sh language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"break", "case", "esac", "do", "done", "else", "for", "while", "function", "if", "fi", "then", "in"}
+		new String[] {"break", "case", "do", "done", "else", "esac", "fi", "for", "function", "if", "in", "then", "while"}
 	));
 
 	// all primitive types of the sh language and other stuff that looks that way
