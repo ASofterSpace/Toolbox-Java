@@ -21,6 +21,8 @@ public class AllTests {
 
 		TestUtils.startSuite();
 
+		TestUtils.run(new UtilTest());
+
 		TestUtils.run(new ConfigFileTest());
 
 		TestUtils.run(new CoderJavaTest());

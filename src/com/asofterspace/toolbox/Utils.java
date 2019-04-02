@@ -19,6 +19,7 @@ public class Utils {
 	public static String VERSION_NUMBER;
 	public static String VERSION_DATE;
 
+
 	public static void setProgramTitle(String programTitle) {
 		PROGRAM_TITLE = programTitle;
 	}
@@ -203,6 +204,29 @@ public class Utils {
 		return result;
 	}
 
+	public static String intToHumanReadableByteAmountLocal(long byteAmount) {
+
+		if (byteAmount > 5 * 1024 * 1024 * 1024) {
+			return String.format("%.2f", byteAmount / (1024.0 * 1024.0 * 1024.0)) + " GB";
+		}
+
+		if (byteAmount > 5 * 1024 * 1024) {
+			return String.format("%.2f", byteAmount / (1024.0 * 1024.0)) + " MB";
+		}
+
+		if (byteAmount > 5 * 1024) {
+			return String.format("%.2f", byteAmount / 1024.0) + " KB";
+		}
+
+		return byteAmount + " B";
+	}
+
+	public static String intToHumanReadableByteAmount(long byteAmount) {
+
+		return intToHumanReadableByteAmountLocal(byteAmount).replace(",", ".");
+
+	}
+
 	/**
 	 * Writes a log line to standard out together with debug information (the current time and JVM heap size)
 	 */
@@ -210,17 +234,7 @@ public class Utils {
 
 		long curHeap = Runtime.getRuntime().totalMemory();
 
-		String heapStr = curHeap + " B";
-
-		if (curHeap > 5000l) {
-			heapStr = (curHeap / 1000l) + " KB";
-		}
-		if (curHeap > 5000000l) {
-			heapStr = (curHeap / 1000000l) + " MB";
-		}
-		if (curHeap > 5000000000l) {
-			heapStr = (curHeap / 1000000000l) + " GB";
-		}
+		String heapStr = intToHumanReadableByteAmount(curHeap);
 
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
 		System.out.println(format.format(new Date()) + " [heap " + heapStr + "]: " + logline);
