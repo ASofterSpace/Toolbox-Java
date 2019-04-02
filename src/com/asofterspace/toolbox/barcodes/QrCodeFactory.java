@@ -45,23 +45,25 @@ public class QrCodeFactory {
 		// now try to read out a certainly-shaped version 3 QR code...
 		// for now, let's just hardcode even the QR code location:
 		// go to a column that is right-wards of the logo at the left...
-		// row four...
-		// advance to the right until you get a dark one!
+		// row four (or three, or five)...
+		// advance to the right until you get a very dark one, which should
+		// be the top left pixel of the QR code itself!
+		// (well, and then height and version are hardcoded again, gnaaahh)
 		int offsetX3 = 300;
 		for (; offsetX3 < img.getWidth(); offsetX3++) {
-			if (img.getPixel(offsetX3, 3).isDark()) {
+			if (img.getPixel(offsetX3, 3).getGrayness() < 96) {
 				break;
 			}
 		}
 		int offsetX4 = 300;
 		for (; offsetX4 < img.getWidth(); offsetX4++) {
-			if (img.getPixel(offsetX4, 4).isDark()) {
+			if (img.getPixel(offsetX4, 4).getGrayness() < 96) {
 				break;
 			}
 		}
 		int offsetX5 = 300;
 		for (; offsetX5 < img.getWidth(); offsetX5++) {
-			if (img.getPixel(offsetX5, 5).isDark()) {
+			if (img.getPixel(offsetX5, 5).getGrayness() < 96) {
 				break;
 			}
 		}

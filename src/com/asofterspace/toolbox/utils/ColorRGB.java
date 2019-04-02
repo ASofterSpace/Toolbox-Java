@@ -72,6 +72,14 @@ public class ColorRGB {
 		return b;
 	}
 
+	public int getGrayness() {
+		int intR = r & 0xFF;
+		int intG = g & 0xFF;
+		int intB = b & 0xFF;
+		int result = intR + intG + intB;
+		return result / 3;
+	}
+
 	public byte getGrayByte() {
 		int intR = r & 0xFF;
 		int intG = g & 0xFF;
