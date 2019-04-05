@@ -18,7 +18,7 @@ import java.util.List;
 
 
 /**
- * A PPM image file object describes uncompressed RGB image file,
+ * A PPM image file object describes an uncompressed RGB image file,
  * often with .ppm extension, and starting with P6 as magic bytes
  * (or P3 for ASCII instead of raw format)
  *

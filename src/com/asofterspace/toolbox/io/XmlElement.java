@@ -300,7 +300,7 @@ public class XmlElement {
 	}
 
 	public void setInnerText(int innerText) {
-		this.innerText = ""+innerText;
+		this.innerText = Integer.toString(innerText);
 	}
 
 	/**

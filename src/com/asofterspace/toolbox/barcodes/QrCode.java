@@ -370,7 +370,7 @@ public class QrCode {
 	public String getContent() {
 
 		// first of all, figure out the orientation by getting the large blocks on the sides...
-		// ... setting the orientation to 0 as default for reading out the blocks...
+		// ... set rotation to -1 to be able to distinguish the case of no orientation matching
 		rotate = -1;
 
 		boolean hasLeftTopBlock = hasPositionBlockAt(0, 0);
