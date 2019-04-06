@@ -164,6 +164,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 				// ... check for a comment (which starts with a delimiter)
 				if (isCommentStart(content, start, end)) {
+
 					start = highlightComment(content, start, end);
 
 				// ... and check for a quoted string
@@ -229,7 +230,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 			int commentEnd = content.indexOf(EOL, start + 2) - 1;
 
 			// this is the last line
-			if (commentEnd == -1) {
+			if (commentEnd < 0) {
 				commentEnd = end;
 			}
 
@@ -243,7 +244,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		int commentEnd = content.indexOf(END_MULTILINE_COMMENT, start + 2);
 
 		// the multiline comment has not been closed - let's comment out the rest of the document!
-		if (commentEnd == -1) {
+		if (commentEnd < 0) {
 			commentEnd = end;
 		} else {
 			// +1 because of the length of END_MULTILINE_COMMENT itself
@@ -264,7 +265,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		// find the end of line - as we do not want to go further
 		int endOfLine = content.indexOf(EOL, start + 2);
 
-		if (endOfLine == -1) {
+		if (endOfLine < 0) {
 			endOfLine = end;
 		}
 
@@ -275,12 +276,12 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
 
 			// if the end of string is actually escaped... well, then it is not an end of string yet, continue searching!
-			if ((endOfString == -1) || (content.charAt(endOfString - 1) != '\\')) {
+			if ((endOfString < 0) || (content.charAt(endOfString - 1) != '\\')) {
 				break;
 			}
 		}
 
-		if (endOfString == -1) {
+		if (endOfString < 0) {
 			// the string is open-ended... go for end of line
 			endOfString = endOfLine;
 		} else {
