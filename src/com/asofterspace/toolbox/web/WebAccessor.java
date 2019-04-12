@@ -1,5 +1,5 @@
 /**
- * Unlicensed code created by A Softer Space, 2018
+ * Unlicensed code created by A Softer Space, 2017
  * www.asofterspace.com/licenses/unlicense.txt
  */
 package com.asofterspace.toolbox.web;
@@ -9,8 +9,8 @@ import com.asofterspace.toolbox.coders.UrlEncoder;
 import com.asofterspace.toolbox.io.JSON;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -28,7 +28,7 @@ public class WebAccessor {
 	 * Get a web resource asynchronously
 	 * @param url  The url of the web resource
 	 * @param callback  The callback that is called once the content has been retrieved (or an error
-	 *                  has occurred)
+	 *				  has occurred)
 	 */
 	public static void getAsynch(final String url, final WebAccessedCallback callback) {
 
@@ -108,28 +108,28 @@ public class WebAccessor {
 	public static String post(String url, Map<String, String> parameters) {
 		return getPutPost(url, mapToMessageBody(parameters), "POST", null);
 	}
-	
+
 	private static String mapToUrlSuffix(Map<String, String> parameters) {
-		
+
 		String result = mapToMessageBody(parameters);
-		
+
 		if (result.length() > 0) {
 			return "?" + result;
 		}
-		
+
 		return "";
 	}
-	
+
 	private static String mapToMessageBody(Map<String, String> parameters) {
-	
+
 		if (parameters == null) {
 			return "";
 		}
-		
+
 		StringBuilder result = new StringBuilder();
-		
+
 		String separator = "";
-		
+
 		for (Map.Entry<String, String> parameter : parameters.entrySet()) {
 			result.append(separator);
 			separator = "&";
@@ -137,7 +137,7 @@ public class WebAccessor {
 			result.append("=");
 			result.append(UrlEncoder.encodeFormData(parameter.getValue()));
 		}
-		
+
 		return result.toString();
 	}
 
@@ -160,7 +160,7 @@ public class WebAccessor {
 					connection.setRequestProperty(extraHeader.getKey(), extraHeader.getValue());
 				}
 			}
-			
+
 			if ("GET".equals(requestKind)) {
 			} else {
 				connection.setDoOutput(true);

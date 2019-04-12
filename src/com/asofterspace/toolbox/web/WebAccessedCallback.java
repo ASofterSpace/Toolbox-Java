@@ -1,5 +1,5 @@
 /**
- * Unlicensed code created by A Softer Space, 2018
+ * Unlicensed code created by A Softer Space, 2017
  * www.asofterspace.com/licenses/unlicense.txt
  */
 package com.asofterspace.toolbox.web;
@@ -11,14 +11,14 @@ package com.asofterspace.toolbox.web;
  */
 public interface WebAccessedCallback {
 
-    /**
-     * An error occurred during retrieval
-     */
-    void gotError();
+	/**
+	 * An error occurred during retrieval
+	 */
+	void gotError();
 
-    /**
-     * The requested content has been retrieved
-     * @param content  The content that was requested
-     */
-    void gotContent(String content);
+	/**
+	 * The requested content has been retrieved
+	 * @param content  The content that was requested
+	 */
+	void gotContent(String content);
 }
