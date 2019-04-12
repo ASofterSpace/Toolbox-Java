@@ -114,7 +114,7 @@ public class File {
 		return basePath.toAbsolutePath().toString();
 	}
 
- 	/**
+	/**
 	 * Get the canonical filename associated with this file object,
 	 * or if it is unavailable, at lest the absolute filename
 	 */
@@ -277,6 +277,26 @@ public class File {
 		}
 
 		return thisFile;
+	}
+
+	/**
+	 * Gets the length of the file content in bytes (from the disk, so if you have written content
+	 * but not saved it, this will not return updated information)
+	 */
+	public long getContentLength() {
+		return getJavaFile().length();
+	}
+
+	/**
+	 * Gets the content type - which you might want to override when extending this class ;)
+	 */
+	public String getContentType() {
+
+		if (filename.endsWith(".htm") || filename.endsWith(".html")) {
+			return "text/html";
+		}
+
+		return "text/plain";
 	}
 
 	/**

@@ -4,9 +4,13 @@
  */
 package com.asofterspace.toolbox.web;
 
+import com.asofterspace.toolbox.io.Directory;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -20,12 +24,20 @@ public class WebServer {
 
 	private int port;
 
+	private Directory webRoot;
 
-	public WebServer() {
+	private List<String> fileLocationWhitelist;
+
+
+	public WebServer(Directory webRoot) {
 
 		port = 8080;
 
 		serverRunning = false;
+
+		this.webRoot = webRoot;
+
+		fileLocationWhitelist = new ArrayList<>();
 	}
 
 	public void serve() {
@@ -42,7 +54,7 @@ public class WebServer {
 				Socket request = socket.accept();
 
 				// ... and handle it expertly through one of our handlers :)
-				WebServerRequestHandler handler = new WebServerRequestHandler(request);
+				WebServerRequestHandler handler = new WebServerRequestHandler(this, request, webRoot);
 				Thread handlerThread = new Thread(handler);
 				handlerThread.start();
 			}
@@ -51,5 +63,13 @@ public class WebServer {
 			System.err.println("Something unexpected happened to the server!");
 			System.err.println(e);
 		}
+	}
+
+	public void setFileLocationWhitelist(List<String> whitelist) {
+		this.fileLocationWhitelist = whitelist;
+	}
+
+	public List<String> getFileLocationWhitelist() {
+		return fileLocationWhitelist;
 	}
 }
