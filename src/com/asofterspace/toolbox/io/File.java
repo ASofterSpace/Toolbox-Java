@@ -296,6 +296,18 @@ public class File {
 			return "text/html";
 		}
 
+		if (filename.endsWith(".css")) {
+			return "text/css";
+		}
+
+		if (filename.endsWith(".js")) {
+			return "text/javascript";
+		}
+
+		if (filename.endsWith(".png")) {
+			return "image/png";
+		}
+
 		return "text/plain";
 	}
 
