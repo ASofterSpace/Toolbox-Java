@@ -142,16 +142,30 @@ public class WebServerRequestHandler implements Runnable {
 
 	private String receive() throws IOException {
 
-		String result = null;
+		try {
+			// one minute (60 seconds) long, check every 100 ms if data became available...
+			for (int i = 0; i < 600; i++) {
 
-		if (input.ready()) {
-			result = input.readLine();
-		} else {
-			System.out.println("Input of request #" + socketNum + " not ready to be read!");
-			// TODO :: wait for a while, then check again...
+				// ... and if yes, return!
+				if (input.ready()) {
+					return input.readLine();
+				}
+
+				Thread.sleep(100);
+			}
+		} catch (InterruptedException e) {
+			// our sleep was interrupted, so no more sleeping...
 		}
 
-		return result;
+		// check one last time...
+		if (input.ready()) {
+			return input.readLine();
+		}
+
+		// and if not, well, then tough luck...
+		System.out.println("Input of request #" + socketNum + " not ready to be read!");
+
+		return null;
 	}
 
 	private void send(String line) throws IOException {
@@ -171,9 +185,23 @@ public class WebServerRequestHandler implements Runnable {
 
 		if (fileToSend == null) {
 
+			// never keep these (as there is no big file involved anyway...)
+			send("Cache-Control: no-store");
+
 			send("");
 
 		} else {
+
+			String fn = fileToSend.getFilename();
+
+			if (fn.endsWith(".png") || fn.endsWith(".js")) {
+				// keep these a week long
+				// (if we want to invalidate, we should add a ?v=version to the request)
+				send("Cache-Control: max-age=604800");
+			} else {
+				// never keep these
+				send("Cache-Control: no-store");
+			}
 
 			long length = fileToSend.getContentLength();
 
@@ -238,7 +266,7 @@ public class WebServerRequestHandler implements Runnable {
 		String[] arguments = new String[0];
 
 		if (location.contains("?")) {
-			String[] locations = location.split("?");
+			String[] locations = location.split("\\?");
 			location = locations[0];
 			arguments = locations[1].split("&");
 		}
