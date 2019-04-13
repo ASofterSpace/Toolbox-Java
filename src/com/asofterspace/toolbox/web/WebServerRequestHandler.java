@@ -46,7 +46,7 @@ public class WebServerRequestHandler implements Runnable {
 
 		socketNum = globalSocketNum++;
 
-		System.out.println("Request #" + socketNum + " incoming!");
+		// System.out.println("Request #" + socketNum + " incoming!");
 
 		this.server = server;
 
@@ -61,20 +61,20 @@ public class WebServerRequestHandler implements Runnable {
 	@SuppressWarnings("fallthrough")
 	public void run() {
 
-		System.out.println("Handler for request #" + socketNum + " starting up...");
+		// System.out.println("Handler for request #" + socketNum + " starting up...");
 
 		try (
 			BufferedReader inputReader = new BufferedReader(new InputStreamReader(request.getInputStream()));
 			BufferedOutputStream outputWriter = new BufferedOutputStream(request.getOutputStream())
 		) {
-			System.out.println("Starting to read request #" + socketNum + "...");
+			// System.out.println("Starting to read request #" + socketNum + "...");
 
 			this.input = inputReader;
 			this.output = outputWriter;
 
 			String line = receive();
 
-			System.out.println("First line of request #" + socketNum + ": '" + line + "'");
+			// System.out.println("First line of request #" + socketNum + ": '" + line + "'");
 
 			// well if there is no request...
 			if (line == null) {
@@ -163,7 +163,7 @@ public class WebServerRequestHandler implements Runnable {
 		}
 
 		// and if not, well, then tough luck...
-		System.out.println("Input of request #" + socketNum + " not ready to be read!");
+		// System.out.println("Input of request #" + socketNum + " not ready to be read!");
 
 		return null;
 	}
@@ -177,7 +177,7 @@ public class WebServerRequestHandler implements Runnable {
 
 	private void respond(String status, File fileToSend) throws IOException {
 
-		System.out.println("Sending a " + status + " response for request #" + socketNum + "...");
+		// System.out.println("Sending a " + status + " response for request #" + socketNum + "...");
 
 		send("HTTP/1.1 " + status);
 
