@@ -484,7 +484,7 @@ public class JSON {
 	 * @param key the key to search for
 	 * @return the JSON array stored in the key
 	 */
-	public List<JSON> getArray(String key) {
+	public List<JSON> getArray(Object key) {
 
 		JSON result = get(key);
 
@@ -493,6 +493,34 @@ public class JSON {
 		}
 
 		return result.arrContents;
+	}
+
+	/**
+	 * Get a list of strings corresponding to a JSON array
+	 * filled with strings stored in a particular key of a
+	 * JSON object (entries that are not strings will be ignored!)
+	 * @param key the key to search for
+	 * @return the list of strings stored in the array at the key
+	 */
+	public List<String> getArrayAsStringList(Object key) {
+
+		JSON result = get(key);
+
+		if ((result == null) || (result.arrContents == null)) {
+			return new ArrayList<>();
+		}
+
+		List<String> resultList = new ArrayList<>();
+
+		for (JSON entry : result.arrContents) {
+			if (entry != null) {
+				if (entry.kind == JSONkind.STRING) {
+					resultList.add(entry.simpleContents.toString());
+				}
+			}
+		}
+
+		return resultList;
 	}
 
 	/**
@@ -528,7 +556,7 @@ public class JSON {
 	 * @param key  the key to be searched for
 	 * @return the boolean value stored in the key
 	 */
-	public Boolean getBoolean(String key) {
+	public Boolean getBoolean(Object key) {
 
 		JSON result = get(key);
 
@@ -548,7 +576,7 @@ public class JSON {
 	 * @param key  the key to be searched for
 	 * @return the integer value stored in the key
 	 */
-	public Integer getInteger(String key) {
+	public Integer getInteger(Object key) {
 
 		JSON result = get(key);
 
@@ -588,7 +616,7 @@ public class JSON {
 	 * @param key  the key to be searched for
 	 * @return the integer value stored in the key
 	 */
-	public Long getLong(String key) {
+	public Long getLong(Object key) {
 
 		JSON result = get(key);
 
@@ -628,7 +656,7 @@ public class JSON {
 	 * @param key  the key to be searched for
 	 * @return the integer value stored in the key
 	 */
-	public Double getDouble(String key) {
+	public Double getDouble(Object key) {
 
 		JSON result = get(key);
 

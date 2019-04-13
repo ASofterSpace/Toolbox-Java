@@ -41,6 +41,10 @@ public class WebTemplateEngine {
 		this.config = config;
 	}
 
+	public void compileTo(Directory targetDir) {
+		compileTo(targetDir, "", true);
+	}
+
 	public void compileTo(Directory targetDir, String contentkind, boolean convertPhpToHtm) {
 
 		JSON files = config.get("files");
@@ -57,17 +61,21 @@ public class WebTemplateEngine {
 
 				String content = indexIn.getContent();
 
-				if (currentFile.endsWith(".php")) {
+				boolean isHtml = currentFile.endsWith(".htm") || currentFile.endsWith(".html");
+				boolean isPhp = currentFile.endsWith(".php");
 
+				// perform the PHP templating (both for regular HTML files and for PHP files)
+				if (isHtml || isPhp) {
 					content = compilePhp(content, contentkind);
+				}
 
-					if (convertPhpToHtm) {
-						content = removePhp(content);
+				// convert PHP to HTML - if we have a PHP file, and if the conversion is wanted
+				if (isPhp && convertPhpToHtm) {
+					content = removePhp(content);
 
-						content = makeLinksRelative(content);
+					content = makeLinksRelative(content);
 
-						currentFile = currentFile.substring(0, currentFile.length() - 4) + ".htm";
-					}
+					currentFile = currentFile.substring(0, currentFile.length() - 4) + ".htm";
 				}
 
 				SimpleFile indexOut = new SimpleFile(targetDir, currentFile);

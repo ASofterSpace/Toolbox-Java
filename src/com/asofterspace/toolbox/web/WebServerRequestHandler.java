@@ -251,10 +251,10 @@ public class WebServerRequestHandler implements Runnable {
 
 		for (String entry : whitelist) {
 
-			if (location.equals(entry)) {
+			if (location.equals("/" + entry)) {
 
 				// actually get the file
-				return webRoot.getFile(location.substring(1));
+				return webRoot.getFile(entry);
 			}
 		}
 

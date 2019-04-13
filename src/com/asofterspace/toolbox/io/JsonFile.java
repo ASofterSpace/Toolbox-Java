@@ -32,6 +32,18 @@ public class JsonFile extends SimpleFile {
 		super(regularFile);
 	}
 
+	/**
+	 * Create a new JsonFile instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public JsonFile(Directory directory, String filename) {
+
+		super(directory, filename);
+	}
+
+
 	protected void loadJsonContents() {
 
 		jsonContent = new JSON(getContent(false));
