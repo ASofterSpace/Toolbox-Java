@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.web;
 
+import com.asofterspace.toolbox.io.JSON;
+
 import java.nio.charset.StandardCharsets;
 
 
@@ -21,6 +23,11 @@ public class WebServerAnswerInJson implements WebServerAnswer {
 	public WebServerAnswerInJson(String jsonData) {
 
 		this.data = jsonData;
+	}
+
+	public WebServerAnswerInJson(JSON jsonData) {
+
+		this.data = jsonData.toString();
 	}
 
 	public long getContentLength() {
