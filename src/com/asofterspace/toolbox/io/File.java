@@ -304,6 +304,10 @@ public class File {
 			return "text/javascript";
 		}
 
+		if (filename.endsWith(".json")) {
+			return "application/json";
+		}
+
 		if (filename.endsWith(".png")) {
 			return "image/png";
 		}

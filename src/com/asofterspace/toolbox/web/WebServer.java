@@ -24,7 +24,7 @@ public class WebServer {
 
 	private int port;
 
-	private Directory webRoot;
+	protected Directory webRoot;
 
 	private List<String> fileLocationWhitelist;
 
@@ -54,7 +54,7 @@ public class WebServer {
 				Socket request = socket.accept();
 
 				// ... and handle it expertly through one of our handlers :)
-				WebServerRequestHandler handler = new WebServerRequestHandler(this, request, webRoot);
+				WebServerRequestHandler handler = getHandler(request);
 				Thread handlerThread = new Thread(handler);
 				handlerThread.start();
 			}
@@ -63,6 +63,10 @@ public class WebServer {
 			System.err.println("Something unexpected happened to the server!");
 			System.err.println(e);
 		}
+	}
+
+	protected WebServerRequestHandler getHandler(Socket request) {
+		return new WebServerRequestHandler(this, request, webRoot);
 	}
 
 	public void setFileLocationWhitelist(List<String> whitelist) {

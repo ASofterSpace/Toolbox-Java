@@ -31,9 +31,9 @@ public class WebServerRequestHandler implements Runnable {
 
 	private Directory webRoot;
 
-	private BufferedReader input;
+	protected BufferedReader input;
 
-	private BufferedOutputStream output;
+	protected BufferedOutputStream output;
 
 	private boolean doNotSendBody;
 
@@ -93,8 +93,6 @@ public class WebServerRequestHandler implements Runnable {
 
 				if (httpVersion.startsWith("HTTP/1.1")) {
 
-					File requestedFile = getFile(fileLocation);
-
 					switch (requestKind) {
 
 						// a HEAD request is the same as a GET request, but it ONLY gives
@@ -104,24 +102,19 @@ public class WebServerRequestHandler implements Runnable {
 							// fall into GET... brilliant! :D
 
 						case "GET":
-							if (requestedFile == null) {
-								// only if the file was not found anyway...
-								if ("/coffee".equals(fileLocation)) {
-									// ... show an easteregg :)
-									respond(418);
-								} else {
-									// TODO :: put in a 404 default file
-									respond(404);
-								}
-							} else {
-								respond(200, requestedFile);
-							}
+							handleGet(fileLocation);
+							break;
+
+						case "PUT":
+							handlePut(fileLocation);
+							break;
+
+						case "POST":
+							handlePost(fileLocation);
 							break;
 
 						case "DELETE":
-							// sure we COULD delete the requestedFile...
-							// but seriously, why would we? just because someone said we should? bushwah!
-							respond(403);
+							handleDelete(fileLocation);
 							break;
 
 						default:
@@ -140,7 +133,44 @@ public class WebServerRequestHandler implements Runnable {
 		}
 	}
 
-	private String receive() throws IOException {
+	protected void handleGet(String fileLocation) throws IOException {
+
+		File requestedFile = getFile(fileLocation);
+
+		if (requestedFile == null) {
+			// only if the file was not found anyway...
+			if ("/coffee".equals(fileLocation)) {
+				// ... show an easteregg :)
+				respond(418);
+			} else {
+				// TODO :: put in a 404 default file
+				respond(404);
+			}
+		} else {
+			WebServerAnswer answer = new WebServerAnswerBasedOnFile(requestedFile);
+			respond(200, answer);
+		}
+	}
+
+	protected void handlePut(String fileLocation) throws IOException {
+
+		respond(501);
+	}
+
+	protected void handlePost(String fileLocation) throws IOException {
+
+		respond(501);
+	}
+
+	protected void handleDelete(String fileLocation) throws IOException {
+
+		// sure we COULD delete the file in fileLocation...
+		// but seriously, why would we? just because someone said we should? bushwah!
+		respond(403);
+	}
+
+	// receive a whole line
+	protected String receive() throws IOException {
 
 		try {
 			// one minute (60 seconds) long, check every 100 ms if data became available...
@@ -168,6 +198,53 @@ public class WebServerRequestHandler implements Runnable {
 		return null;
 	}
 
+	// receive the json content of the request, if json content has been sent along with the request
+	// (and return null otherwise)
+	protected String receiveJsonContent() throws IOException {
+
+		int length = 0;
+
+		String contentType = null;
+
+		while (true) {
+
+			String line = receive();
+
+			if (line == null) {
+				break;
+			}
+
+			if (line.toLowerCase().startsWith("content-length: ")) {
+				try {
+					length = Integer.parseInt(line.substring(16));
+				} catch (NumberFormatException e) {
+				}
+			}
+
+			if (line.toLowerCase().startsWith("content-type: ")) {
+				contentType = line.substring(14);
+			}
+
+			if ("".equals(line)) {
+				if ((length > 0) && "application/json".equals(contentType)) {
+					StringBuilder readData = new StringBuilder();
+					for (int i = 0; i < length; i++) {
+						// TODO :: maybe actually wait a bit here and retry instead of just abandoning the reading
+						if (input.ready()) {
+							readData.append((char) input.read());
+						} else {
+							break;
+						}
+					}
+					return readData.toString();
+				}
+				break;
+			}
+		}
+
+		return null;
+	}
+
 	private void send(String line) throws IOException {
 
 		line = line + "\r\n";
@@ -175,7 +252,7 @@ public class WebServerRequestHandler implements Runnable {
 		output.write(line.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private void respond(String status, File fileToSend) throws IOException {
+	protected void respond(String status, WebServerAnswer answer) throws IOException {
 
 		// System.out.println("Sending a " + status + " response for request #" + socketNum + "...");
 
@@ -183,7 +260,7 @@ public class WebServerRequestHandler implements Runnable {
 
 		send("Server: A Softer Space Java Server version " + Utils.TOOLBOX_VERSION_NUMBER);
 
-		if (fileToSend == null) {
+		if (answer == null) {
 
 			// never keep these (as there is no big file involved anyway...)
 			send("Cache-Control: no-store");
@@ -192,72 +269,61 @@ public class WebServerRequestHandler implements Runnable {
 
 		} else {
 
-			String fn = fileToSend.getFilename();
+			long length = answer.getContentLength();
 
-			if (fn.endsWith(".png") || fn.endsWith(".js")) {
-				// keep these a week long
-				// (if we want to invalidate, we should add a ?v=version to the request)
-				send("Cache-Control: max-age=604800");
-			} else {
-				// never keep these
-				send("Cache-Control: no-store");
-			}
+			send("Content-Control: " + answer.getPreferredCacheParadigm());
 
-			long length = fileToSend.getContentLength();
+			send("Content-Type: " + answer.getContentType());
 
-			send("Content-type: " + fileToSend.getContentType());
-
-			send("Content-length: " + length);
+			send("Content-Length: " + length);
 
 			send("");
 
 			if (!doNotSendBody) {
 
-				BinaryFile binaryFile = new BinaryFile(fileToSend);
+				byte[] binaryContent = answer.getBinaryContent();
 
-				byte[] binaryFileContent = binaryFile.loadContent();
-
-				output.write(binaryFileContent, 0, (int) length);
+				output.write(binaryContent, 0, (int) length);
 			}
 		}
 
 		output.flush();
 	}
 
-	private void respond(int status, File fileToSend) throws IOException {
+	protected void respond(int status, WebServerAnswer answer) throws IOException {
 
 		switch (status) {
 			case 200:
-				respond("200 OK", fileToSend);
+				respond("200 OK", answer);
 				break;
 			case 400:
-				respond("400 Bad Request", fileToSend);
+				respond("400 Bad Request", answer);
 				break;
 			case 403:
-				respond("403 Forbidden", fileToSend);
+				respond("403 Forbidden", answer);
 				break;
 			case 404:
-				respond("404 Not Found", fileToSend);
+				respond("404 Not Found", answer);
 				break;
 			case 418:
-				respond("418 I'm a teapot", fileToSend);
+				respond("418 I'm a teapot", answer);
 				break;
 			case 501:
-				respond("501 Not Implemented", fileToSend);
+				respond("501 Not Implemented", answer);
 				break;
 			case 505:
-				respond("505 HTTP Version Not Supported", fileToSend);
+				respond("505 HTTP Version Not Supported", answer);
 				break;
 			default:
-				respond("500 Internal Server Error", fileToSend);
+				respond("500 Internal Server Error", answer);
 		}
 	}
 
-	private void respond(String status) throws IOException {
+	protected void respond(String status) throws IOException {
 		respond(status, null);
 	}
 
-	private void respond(int status) throws IOException {
+	protected void respond(int status) throws IOException {
 		respond(status, null);
 	}
 

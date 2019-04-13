@@ -4,9 +4,9 @@
  */
 package com.asofterspace.toolbox.io;
 
-import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,7 +33,7 @@ public class XmlFile extends File {
 	protected XmlMode mode = XmlMode.NONE_LOADED;
 
 	protected XmlElement rootElement = null;
-	
+
 	protected XmlElement currentElement = null;
 
 
@@ -52,7 +52,18 @@ public class XmlFile extends File {
 
 		super(regularFile);
 	}
-	
+
+	/**
+	 * Create a new XmlFile instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public XmlFile(Directory directory, String filename) {
+
+		super(directory, filename);
+	}
+
 	/**
 	 * For an XML file, call getRoot() to get access to its contents,
 	 * not getContents() / setContents() as for a regular File (the
@@ -91,23 +102,23 @@ public class XmlFile extends File {
 			}
 			currentElement = newElement;
 		}
-		
+
 		@Override
 		public void characters(char ch[], int start, int length) throws SAXException {
 			currentElement.appendInnerText(new String(ch, start, length));
 		}
-		
+
 		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			currentElement = currentElement.getXmlParent();
 		}
 	}
-	
+
 	protected void loadXmlContents() {
 
 		parseXml(getJavaFile());
 	}
-	
+
 	/**
 	 * The source can be a Java File object or an InputStream
 	 */
@@ -120,21 +131,21 @@ public class XmlFile extends File {
 
 			rootElement = null;
 			currentElement = null;
-			
+
 			XmlHandler handler = new XmlHandler();
-			
+
 			if (source instanceof java.io.File) {
-			
+
 				parser.parse((java.io.File) source, handler);
-			
+
 			} else if (source instanceof InputStream) {
-			
+
 				parser.parse((InputStream) source, handler);
-			
+
 			} else {
 				System.err.println("Could not parse XML as the source was neither a File nor an InputStream!");
 			}
-			
+
 			mode = XmlMode.XML_LOADED;
 
 		} catch (SAXException | ParserConfigurationException | IOException e) {
@@ -230,23 +241,23 @@ public class XmlFile extends File {
 				result.addAll(elem.getChildNodes());
 			}
 		}
-		
+
 		return result;
 	}
 
 	public void domSetAttributeForElems(String tagName, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			elem.setAttribute(setAttributeName, setAttributeValue);
 		}
 	}
-	
+
 	public void domSetAttributeForElems(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
 				elem.setAttribute(setAttributeName, setAttributeValue);
@@ -257,16 +268,16 @@ public class XmlFile extends File {
 	public void domSetAttributeForElems(String[] tagNames, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagNames(tagNames);
-		
+
 		for (XmlElement elem : elems) {
 			elem.setAttribute(setAttributeName, setAttributeValue);
 		}
 	}
-	
+
 	public void domSetAttributeForElems(String[] tagNames, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagNames(tagNames);
-		
+
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
 				elem.setAttribute(setAttributeName, setAttributeValue);
@@ -277,7 +288,7 @@ public class XmlFile extends File {
 	public void domSetAttributeForElemsIfAttrIsMissing(String tagName, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (elem.getAttribute(setAttributeName) == null) {
 				elem.setAttribute(setAttributeName, setAttributeValue);
@@ -288,7 +299,7 @@ public class XmlFile extends File {
 	public void domSetAttributeForElemsIfAttrIsMissing(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
 				if (elem.getAttribute(setAttributeName) == null) {
@@ -301,7 +312,7 @@ public class XmlFile extends File {
 	public void domSetAttributeForNonHrefElemsIfAttrIsMissing(String tagName, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (elem.getAttribute("href") == null) {
 				if (elem.getAttribute(setAttributeName) == null) {
@@ -314,7 +325,7 @@ public class XmlFile extends File {
 	public void domSetAttributeForNonHrefElemsIfAttrIsMissing(String tagName, String hasAttributeName, String hasAttributeValue, String setAttributeName, String setAttributeValue) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
 				if (elem.getAttribute("href") == null) {
@@ -329,7 +340,7 @@ public class XmlFile extends File {
 	public void domRemoveAttributeFromElems(String tagName, String removeAttributeName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			elem.removeAttribute(removeAttributeName);
 		}
@@ -338,7 +349,7 @@ public class XmlFile extends File {
 	public void domRemoveAttributeFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeAttributeName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
 				elem.removeAttribute(removeAttributeName);
@@ -354,7 +365,7 @@ public class XmlFile extends File {
 	public void domRemoveChildrenFromElems(String tagName, String removeChildName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(removeChildName);
-		
+
 		for (XmlElement elem : elems) {
 			XmlElement parent = elem.getXmlParent();
 
@@ -376,7 +387,7 @@ public class XmlFile extends File {
 	public void domRemoveChildrenFromElems(String tagName, String hasAttributeName, String hasAttributeValue, String removeChildName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(removeChildName);
-		
+
 		for (XmlElement elem : elems) {
 			XmlElement parent = elem.getXmlParent();
 
@@ -395,7 +406,7 @@ public class XmlFile extends File {
 	public void domRenameElems(String fromTagName, String toTagName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(fromTagName);
-		
+
 		for (XmlElement elem : elems) {
 			elem.setNodeName(toTagName);
 		}
@@ -404,7 +415,7 @@ public class XmlFile extends File {
 	public void domRenameElems(String fromTagName, String hasAttributeName, String hasAttributeValue, String toTagName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(fromTagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
 				elem.setNodeName(toTagName);
@@ -415,7 +426,7 @@ public class XmlFile extends File {
 	public void domRenameChildrenOfElems(String tagName, String fromChildName, String toChildName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(fromChildName);
-		
+
 		for (XmlElement elem : elems) {
 			XmlElement parent = elem.getXmlParent();
 
@@ -430,9 +441,9 @@ public class XmlFile extends File {
 	}
 
 	public void domRenameChildrenOfElems(String tagName, String hasAttributeName, String hasAttributeValue, String fromChildName, String toChildName) {
-	
+
 		List<XmlElement> elems = getRoot().getElementsByTagName(fromChildName);
-		
+
 		for (XmlElement elem : elems) {
 			XmlElement parent = elem.getXmlParent();
 
@@ -451,7 +462,7 @@ public class XmlFile extends File {
 	public void domRenameAttributes(String tagName, String fromAttributeName, String toAttributeName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			String attrVal = elem.getAttribute(fromAttributeName);
 			if (attrVal != null) {
@@ -464,7 +475,7 @@ public class XmlFile extends File {
 	public void domRenameAttributes(String tagName, String hasAttributeName, String hasAttributeValue, String fromAttributeName, String toAttributeName) {
 
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
-		
+
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
 				String attrVal = elem.getAttribute(fromAttributeName);
@@ -504,7 +515,7 @@ public class XmlFile extends File {
 	public void saveTo(String newLocation) {
 
 		filename = newLocation;
-		
+
 		java.io.File javaFile = getJavaFile();
 
 		// create parent directories
@@ -515,15 +526,15 @@ public class XmlFile extends File {
 		XmlElement root = getRoot();
 
 		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(javaFile), StandardCharsets.UTF_8)) {
-			
+
 			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-			
+
 			if (root != null) {
 				root.writeToFile(writer);
 			}
 
 			writer.flush();
-			
+
 		} catch (IOException e) {
 			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + getFilename() + " - inconceivable!");
 		}
