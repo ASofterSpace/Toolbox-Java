@@ -329,6 +329,10 @@ public class WebServerRequestHandler implements Runnable {
 
 	private File getFile(String location) {
 
+		if (location == null) {
+			location = "";
+		}
+
 		String[] arguments = new String[0];
 
 		if (location.contains("?")) {
@@ -340,6 +344,16 @@ public class WebServerRequestHandler implements Runnable {
 		if (location.equals("/")) {
 			location = "/index.htm";
 		}
+
+		return getFileFromLocation(location, arguments);
+	}
+
+	/**
+	 * For a request like /bla.htm?foo=bar&thoom=floom,
+	 * location is /bla.htm
+	 * arguments is ["foo=bar", "thoom=floom"]
+	 */
+	protected File getFileFromLocation(String location, String[] arguments) {
 
 		List<String> whitelist = server.getFileLocationWhitelist();
 

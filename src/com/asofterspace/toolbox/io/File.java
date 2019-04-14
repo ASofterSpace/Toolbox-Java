@@ -312,6 +312,10 @@ public class File {
 			return "image/png";
 		}
 
+		if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+			return "image/jpeg";
+		}
+
 		return "text/plain";
 	}
 
