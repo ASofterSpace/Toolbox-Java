@@ -236,6 +236,11 @@ public class JSON {
 				jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
 			}
 
+			// TODO :: add more escaped things
+			simpleContentsStr = simpleContentsStr.replace("\\n", "\n");
+			simpleContentsStr = simpleContentsStr.replace("\\r", "\r");
+			simpleContentsStr = simpleContentsStr.replace("\\\\", "\\");
+
 			simpleContents = simpleContentsStr;
 
 			return jsonString;
@@ -730,8 +735,9 @@ public class JSON {
 		}
 
 		str = str.replace("\\", "\\\\");
-
 		str = str.replace("\"", "\\\"");
+		str = str.replace("\n", "\\n");
+		str = str.replace("\r", "\\r");
 
 		return str;
 	}
