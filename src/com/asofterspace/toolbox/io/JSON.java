@@ -723,7 +723,13 @@ public class JSON {
 	 * @param str  a string that possibly contains " signs
 	 * @return a string in which every " sign is escaped
 	 */
-	private String escapeJSONstr(String str) {
+	public static String escapeJSONstr(String str) {
+
+		if (str == null) {
+			return "";
+		}
+
+		str = str.replace("\\", "\\\\");
 
 		str = str.replace("\"", "\\\"");
 

@@ -17,22 +17,22 @@ import java.nio.charset.StandardCharsets;
  */
 public class WebServerAnswerInJson implements WebServerAnswer {
 
-	private String data;
+	private byte[] data;
 
 
 	public WebServerAnswerInJson(String jsonData) {
 
-		this.data = jsonData;
+		this.data = jsonData.getBytes(StandardCharsets.UTF_8);
 	}
 
 	public WebServerAnswerInJson(JSON jsonData) {
 
-		this.data = jsonData.toString();
+		this(jsonData.toString());
 	}
 
 	public long getContentLength() {
 
-		return data.length();
+		return data.length;
 	}
 
 	public String getPreferredCacheParadigm() {
@@ -48,6 +48,6 @@ public class WebServerAnswerInJson implements WebServerAnswer {
 
 	public byte[] getBinaryContent() {
 
-		return data.getBytes(StandardCharsets.UTF_8);
+		return data;
 	}
 }
