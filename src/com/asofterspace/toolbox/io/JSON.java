@@ -161,6 +161,7 @@ public class JSON {
 					break;
 				}
 
+				// this is "foo": "bar" (here being in the "foo" part)
 				// this should be the case - keys should be inside quote marks
 				if (jsonString.startsWith("\"")) {
 					jsonString = jsonString.substring(1).trim();
@@ -177,11 +178,16 @@ public class JSON {
 					continue;
 				}
 
+				// this is foo: "bar", or 'foo': "bar"
 				// this should NOT be the case - the key is not in a quote mark!
 				// but we will grudgingly accept it anyway, as we are nice people...
 				int endIndex = jsonString.indexOf(":");
-				String key = jsonString.substring(0, endIndex);
-				jsonString = jsonString.substring(endIndex + 1);
+				String key = jsonString.substring(0, endIndex).trim();
+				// in case someone did escape the key, but with ' instead of ", also handle that gracefully...
+				if ((key.length() > 2) && key.startsWith("'") && key.endsWith("'")) {
+					key = key.substring(1, key.length() - 1);
+				}
+				jsonString = jsonString.substring(endIndex + 1).trim();
 				JSON value = new JSON();
 				jsonString = value.init(jsonString).trim();
 				objContents.put(key, value);
@@ -220,20 +226,33 @@ public class JSON {
 			return jsonString;
 		}
 
+		String doStringWith = null;
+
+		// this is "foo": "bar" (here being in the "bar" part)
 		if (jsonString.startsWith("\"")) {
+			doStringWith = "\"";
+		}
+
+		// this is "foo": 'bar', which is WRONG, but we want to be so generous as to still accept it...
+		if (jsonString.startsWith("'")) {
+			doStringWith = "'";
+		}
+
+		if (doStringWith != null) {
+
 			kind = JSONkind.STRING;
 
 			jsonString = jsonString.substring(1);
 
-			String simpleContentsStr = jsonString.substring(0, jsonString.indexOf("\""));
-			jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
+			String simpleContentsStr = jsonString.substring(0, jsonString.indexOf(doStringWith));
+			jsonString = jsonString.substring(jsonString.indexOf(doStringWith) + 1);
 
 			// also allow escaping " (basically, by checking here is simpleContentsStr
 			// ends with \ - in which case we add the " instead and carry on searching forward)
 			while (simpleContentsStr.endsWith("\\")) {
-				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length()-1) + "\"";
-				simpleContentsStr += jsonString.substring(0, jsonString.indexOf("\""));
-				jsonString = jsonString.substring(jsonString.indexOf("\"") + 1);
+				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length()-1) + doStringWith;
+				simpleContentsStr += jsonString.substring(0, jsonString.indexOf(doStringWith));
+				jsonString = jsonString.substring(jsonString.indexOf(doStringWith) + 1);
 			}
 
 			// TODO :: add more escaped things
@@ -398,9 +417,10 @@ public class JSON {
 					if (objFirstEntry) {
 						objFirstEntry = false;
 					} else {
-						objResult.append(", ");
-						if (!compressed) {
-							objResult.append("\n" + linePrefix + "\t");
+						if (compressed) {
+							objResult.append(", ");
+						} else {
+							objResult.append(",\n" + linePrefix + "\t");
 						}
 					}
 

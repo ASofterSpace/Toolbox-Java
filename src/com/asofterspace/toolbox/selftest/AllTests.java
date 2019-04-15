@@ -18,6 +18,8 @@ public class AllTests {
 
 	static final String XML_TEST_DATA_PATH = "testdata/xml";
 
+	static final String JSON_TEST_DATA_PATH = "testdata/json";
+
 
 	public static void main(String[] args) {
 

@@ -1,0 +1,15 @@
+{"foo": "",
+"bar": "\"",
+'blu': "blubb",
+"newline": "\n",
+"array": ["of", "string"],
+"array2": [{"of": "obj"}],
+"subobject": {"is": "allowed"},
+"int": 9,
+"bool": true,
+"otherbool": false,
+	"indented":
+"nonsense",
+leftout: 'the Gänsefüßchen',
+"several": "in", "a": "line", "are": "also", "possible": "right?",
+}
