@@ -5,8 +5,8 @@
 package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
-import com.asofterspace.toolbox.utils.EnumeratedCollection;
 import com.asofterspace.toolbox.io.XmlElement;
+import com.asofterspace.toolbox.utils.EnumeratedCollection;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -71,7 +71,7 @@ public class CdmMonitoringControlElement extends CdmNode implements TreeNode {
 		List<XmlElement> subElementList = getChildNodes();
 
 		for (XmlElement subElement : subElementList) {
-			if ("subElements".equals(subElement.getNodeName())) {
+			if ("subElements".equals(subElement.getTagName())) {
 				this.subElementIds.add(UuidEncoderDecoder.getIdFromEcoreLink(subElement.getAttribute("href")));
 			}
 		}

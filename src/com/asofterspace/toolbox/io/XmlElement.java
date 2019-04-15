@@ -97,11 +97,11 @@ public class XmlElement {
 		other.xmlChildren = xmlChildren;
 	}
 
-	public String getNodeName() {
+	public String getTagName() {
 		return name;
 	}
 
-	public void setNodeName(String name) {
+	public void setTagName(String name) {
 		this.name = name;
 	}
 
@@ -319,7 +319,7 @@ public class XmlElement {
 		// if we did not find an attrOrChildName as attribute, maybe we can find one as child?
 		List<XmlElement> children = getChildNodes();
 		for (XmlElement child : children) {
-			if (attrOrChildName.equals(child.getNodeName())) {
+			if (attrOrChildName.equals(child.getTagName())) {
 				String href = child.getAttribute("href");
 
 				if (href != null) {

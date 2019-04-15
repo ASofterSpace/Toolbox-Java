@@ -50,12 +50,12 @@ public class CdmActivity extends CdmNode {
 		List<XmlElement> aliassesAndArgs = getChildNodes();
 
 		for (XmlElement aliasOrArg : aliassesAndArgs) {
-			if ("aliases".equals(aliasOrArg.getNodeName())) {
+			if ("aliases".equals(aliasOrArg.getTagName())) {
 				this.alias = aliasOrArg.getAttribute("alias");
 			}
 		}
 
-		this.isDefinition = "monitoringControlElementDefinition".equals(getXmlParent().getNodeName());
+		this.isDefinition = "monitoringControlElementDefinition".equals(getXmlParent().getTagName());
 
 		// TODO :: also take care of arguments, e.g.
 		// <arguments xsi:type="monitoringcontrolmodel:EngineeringArgument" xmi:id="_AAAAACqUzEIAAAAAAAABoA" engineeringArgumentDefinition="______91W8zUAAAAAAAAB8w">

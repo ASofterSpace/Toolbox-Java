@@ -38,11 +38,11 @@ public class CdmScript2Activity extends CdmNode {
 			// this here relies on the fact that inside the mapper, ALL links are file-based, and none are local... but fuuu does it feel ugly!
 			String[] hrefSplit = href.split("#");
 			if (hrefSplit.length > 1) {
-				if ("activity".equals(elem.getNodeName())) {
+				if ("activity".equals(elem.getTagName())) {
 					this.mappedActivityFilename = hrefSplit[0];
 					this.mappedActivityId = hrefSplit[1];
 				}
-				if ("script".equals(elem.getNodeName())) {
+				if ("script".equals(elem.getTagName())) {
 					this.mappedScriptFilename = hrefSplit[0];
 					this.mappedScriptId = hrefSplit[1];
 				}

@@ -164,7 +164,7 @@ public class XmlFile extends File {
 
 	private boolean domIsTagPrefixInUseForSubTree(String prefix, XmlElement subTreeRoot) {
 
-		if (subTreeRoot.getNodeName().startsWith(prefix)) {
+		if (subTreeRoot.getTagName().startsWith(prefix)) {
 			return true;
 		}
 
@@ -220,7 +220,7 @@ public class XmlFile extends File {
 		List<XmlElement> elems = getRoot().getElementsByTagName(tagName);
 		for (XmlElement elem : elems) {
 			for (XmlElement child : elem.getChildNodes()) {
-				if (childName.equals(child.getNodeName())) {
+				if (childName.equals(child.getTagName())) {
 					result.add(child);
 				}
 			}
@@ -373,7 +373,7 @@ public class XmlFile extends File {
 				continue;
 			}
 
-			if (tagName.equals(parent.getNodeName())) {
+			if (tagName.equals(parent.getTagName())) {
 				parent.removeChild(elem);
 			}
 		}
@@ -395,7 +395,7 @@ public class XmlFile extends File {
 				continue;
 			}
 
-			if (tagName.equals(parent.getNodeName())) {
+			if (tagName.equals(parent.getTagName())) {
 				if (hasAttributeValue.equals(parent.getAttribute(hasAttributeName))) {
 					parent.removeChild(elem);
 				}
@@ -408,7 +408,7 @@ public class XmlFile extends File {
 		List<XmlElement> elems = getRoot().getElementsByTagName(fromTagName);
 
 		for (XmlElement elem : elems) {
-			elem.setNodeName(toTagName);
+			elem.setTagName(toTagName);
 		}
 	}
 
@@ -418,7 +418,7 @@ public class XmlFile extends File {
 
 		for (XmlElement elem : elems) {
 			if (hasAttributeValue.equals(elem.getAttribute(hasAttributeName))) {
-				elem.setNodeName(toTagName);
+				elem.setTagName(toTagName);
 			}
 		}
 	}
@@ -434,8 +434,8 @@ public class XmlFile extends File {
 				continue;
 			}
 
-			if (tagName.equals(parent.getNodeName())) {
-				elem.setNodeName(toChildName);
+			if (tagName.equals(parent.getTagName())) {
+				elem.setTagName(toChildName);
 			}
 		}
 	}
@@ -451,9 +451,9 @@ public class XmlFile extends File {
 				continue;
 			}
 
-			if (tagName.equals(parent.getNodeName())) {
+			if (tagName.equals(parent.getTagName())) {
 				if (hasAttributeValue.equals(parent.getAttribute(hasAttributeName))) {
-					elem.setNodeName(toChildName);
+					elem.setTagName(toChildName);
 				}
 			}
 		}
@@ -545,7 +545,7 @@ public class XmlFile extends File {
 	 */
 	@Override
 	public String toString() {
-		return "com.asofterspace.toolbox.io.XmlFile: " + filename + " (root element: " + this.getRoot().getNodeName() + ")";
+		return "com.asofterspace.toolbox.io.XmlFile: " + filename + " (root element: " + this.getRoot().getTagName() + ")";
 	}
 
 }

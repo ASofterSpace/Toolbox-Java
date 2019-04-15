@@ -46,7 +46,7 @@ public abstract class CdmFileBase extends EmfFile {
 		XmlElement root = getRoot();
 
 		if (root != null) {
-			ciType = root.getNodeName();
+			ciType = root.getTagName();
 		}
 	}
 
@@ -56,7 +56,7 @@ public abstract class CdmFileBase extends EmfFile {
 
 	public void setCiType(String newType) {
 
-		getRoot().setNodeName(newType);
+		getRoot().setTagName(newType);
 
 		ciType = newType;
 	}
@@ -420,26 +420,26 @@ public abstract class CdmFileBase extends EmfFile {
 		Example 3 in 1.12.1:
 			<configurationcontrol:PacketCI ...
 			  <packet xmi:id="_1" name="ChangeIcuModeUIntEnum">
-			    <descriptions xmi:id="_2" language="English" description="description" qualifier="Short"/>
-			    <trailer href="_3"/>
-			    <dataField xmi:id="_4" name="ChangeIcuMode_dataField">
-			      <innerElements xsi:type="container:innerContainer" xmi:id="_5" offset="0" repetitionNumber="1">
+				<descriptions xmi:id="_2" language="English" description="description" qualifier="Short"/>
+				<trailer href="_3"/>
+				<dataField xmi:id="_4" name="ChangeIcuMode_dataField">
+				  <innerElements xsi:type="container:innerContainer" xmi:id="_5" offset="0" repetitionNumber="1">
 				<container href="_6"/>
-			      </innerElements>
-			      <innerElements xsi:type="container:innerContainer" xmi:id="_7" offset="0" repetitionNumber="1" container="_8"/>
-			    </dataField>
+				  </innerElements>
+				  <innerElements xsi:type="container:innerContainer" xmi:id="_7" offset="0" repetitionNumber="1" container="_8"/>
+				</dataField>
 
 		Example 3 in 1.13.0bd1:
 			<configurationcontrol:PacketCI ...
 			  <packet xmi:id="_1" name="ChangeIcuModeUIntEnum" namespace="namespace">
-			    <descriptions xmi:id="_2" language="English" description="description" qualifier="Short"/>
-			    <trailer href="_3"/>
-			    <dataField xmi:id="_4" name="ChangeIcuMode_dataField" namespace="namespace">
-			      <innerElements xsi:type="container:InnerContainer" xmi:id="_5" offset="0" repetitionNumber="1">
+				<descriptions xmi:id="_2" language="English" description="description" qualifier="Short"/>
+				<trailer href="_3"/>
+				<dataField xmi:id="_4" name="ChangeIcuMode_dataField" namespace="namespace">
+				  <innerElements xsi:type="container:InnerContainer" xmi:id="_5" offset="0" repetitionNumber="1">
 				<container href="_6"/>
-			      </innerElements>
-			      <innerElements xsi:type="container:InnerContainer" xmi:id="_7" offset="0" repetitionNumber="1" container="_8"/>
-			    </dataField>
+				  </innerElements>
+				  <innerElements xsi:type="container:InnerContainer" xmi:id="_7" offset="0" repetitionNumber="1" container="_8"/>
+				</dataField>
 
 		=> a namespace was added to packets and dataFields (but it is optional - so it does not have to be added for 1.13.0bd1,
 		   but it has to be removed when going backwards!)
@@ -449,26 +449,26 @@ public abstract class CdmFileBase extends EmfFile {
 		Example 4 in 1.12.1:
 			<configurationcontrol:PacketCI
 			  <container name="containerName" xmi:id="_1" xsi:type="container:ParameterContainer">
-			    <innerParameters offset="0" parameter="_2" timeOffset="0.0" xmi:id="_3"/>
-			    <innerParameters offset="2" parameter="_4" timeOffset="0.0" xmi:id="_5"/>
+				<innerParameters offset="0" parameter="_2" timeOffset="0.0" xmi:id="_3"/>
+				<innerParameters offset="2" parameter="_4" timeOffset="0.0" xmi:id="_5"/>
 			  </container>
 
 		Example 4 in 1.13.0bd1:
 			<configurationcontrol:PacketCI
 			  <container xmi:id="_1" name="containerName" namespace="namespace">
-			    <innerElements xsi:type="container:InnerParameter" xmi:id="_3" offset="0" timeOffset="0.0" parameter="_2"/>
-			    <innerElements xsi:type="container:InnerParameter" xmi:id="_5" offset="0" timeOffset="0.0" parameter="_4"/>
+				<innerElements xsi:type="container:InnerParameter" xmi:id="_3" offset="0" timeOffset="0.0" parameter="_2"/>
+				<innerElements xsi:type="container:InnerParameter" xmi:id="_5" offset="0" timeOffset="0.0" parameter="_4"/>
 			  </container>
 
 		Example 4 in 1.13.0bd1 (we think, but definitely possible in 1.14.0, but the previous one also still possible), alternative way of writing this down:
 			<configurationcontrol:PacketCI
 			  <container xmi:id="_1" name="containerName" namespace="namespace">
-			    <innerElements xsi:type="container:InnerParameter" xmi:id="_3" offset="0" timeOffset="0.0">
-			      <parameter xsi:type="parameter:SimplePktParameter" href="_2"/>
-			    </innerElements>
-			    <innerElements xsi:type="container:InnerParameter" xmi:id="_5" offset="0" timeOffset="0.0">
-			      <parameter xsi:type="parameter:SimplePktParameter" href="_4"/>
-			    </innerElements>
+				<innerElements xsi:type="container:InnerParameter" xmi:id="_3" offset="0" timeOffset="0.0">
+				  <parameter xsi:type="parameter:SimplePktParameter" href="_2"/>
+				</innerElements>
+				<innerElements xsi:type="container:InnerParameter" xmi:id="_5" offset="0" timeOffset="0.0">
+				  <parameter xsi:type="parameter:SimplePktParameter" href="_4"/>
+				</innerElements>
 			  </container>
 
 		=> a namespace was added to containers (it is optional - so it does not have to be added for 1.13.0bd1,
@@ -483,7 +483,7 @@ public abstract class CdmFileBase extends EmfFile {
 		Example 5 in 1.13.0bd1:
 			<configurationcontrol:DataTypesCI ...
 			  <abstractDataType xsi:type="monitoringcontrolcommon:EnumerationDataType" xmi:id="_1" name="name" isMostSignificantBitFirst="true" bitLength="32">
-			    <enumDisplayFormat href="_2"/>
+				<enumDisplayFormat href="_2"/>
 			  </abstractDataType>
 			</configurationcontrol:DataTypesCI>
 
@@ -491,8 +491,8 @@ public abstract class CdmFileBase extends EmfFile {
 		Example 5 in 1.14.0b:
 			<configurationcontrol:DataTypesCI ...
 			  <abstractDataType xsi:type="monitoringcontrolcommon:EnumerationDataType" xmi:id="_1" name="name" isMostSignificantBitFirst="true" bitLength="32" defaultText="default">
-			    <enumDisplayFormat href="_2"/>
-			    <enumerationLiterals xmi:id="_3" x="1" y="one"/>
+				<enumDisplayFormat href="_2"/>
+				<enumerationLiterals xmi:id="_3" x="1" y="one"/>
 			  </abstractDataType>
 			</configurationcontrol:DataTypesCI>
 
@@ -597,10 +597,10 @@ public abstract class CdmFileBase extends EmfFile {
 								String typeHref = null;
 
 								for (XmlElement child : event.getChildNodes()) {
-									if ("baseElement".equals(child.getNodeName())) {
+									if ("baseElement".equals(child.getTagName())) {
 										baseHref = child.getAttribute("href");
 									}
-									if ("eventType".equals(child.getNodeName())) {
+									if ("eventType".equals(child.getTagName())) {
 										typeHref = child.getAttribute("href");
 									}
 								}
@@ -946,7 +946,7 @@ public abstract class CdmFileBase extends EmfFile {
 
 								List<XmlElement> children = enumeration.getChildNodes();
 								for (XmlElement child : children) {
-									if ("enumerationLiterals".equals(child.getNodeName())) {
+									if ("enumerationLiterals".equals(child.getTagName())) {
 										hasLiteralChild = true;
 										break;
 									}
@@ -1004,7 +1004,7 @@ public abstract class CdmFileBase extends EmfFile {
 								List<XmlElement> children = packet.getChildNodes();
 
 								for (XmlElement child : children) {
-									if ("parameterValues".equals(child.getNodeName())) {
+									if ("parameterValues".equals(child.getTagName())) {
 
 										// get attribute "parameter"
 										String parameterAttr = child.getAttribute("parameter");
@@ -1242,7 +1242,7 @@ public abstract class CdmFileBase extends EmfFile {
 								"xsi:type", "monitoringcontrolmodel:EngineeringParameter"));
 							for (XmlElement argValue : children) {
 								// for example 2, take value, and for example 6, take defaultValue
-								if (("value".equals(argValue.getNodeName())) || ("defaultValue".equals(argValue.getNodeName()))) {
+								if (("value".equals(argValue.getTagName())) || ("defaultValue".equals(argValue.getTagName()))) {
 									String argValueType = argValue.getAttribute("xsi:type");
 									if (argValueType == null) {
 										argValue.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterEngValue");
@@ -1284,7 +1284,7 @@ public abstract class CdmFileBase extends EmfFile {
 								"xsi:type", "monitoringcontrolmodel:EngineeringParameter"));
 							for (XmlElement argValue : children) {
 								// for example 2, take value, and for example 6, take defaultValue
-								if (("value".equals(argValue.getNodeName())) || ("defaultValue".equals(argValue.getNodeName()))) {
+								if (("value".equals(argValue.getTagName())) || ("defaultValue".equals(argValue.getTagName()))) {
 									String argValueType = argValue.getAttribute("xsi:type");
 									if (argValueType == null) {
 										argValue.setAttribute("xsi:type", "monitoringcontrolmodel:ParameterRawValue");
@@ -1337,8 +1337,8 @@ public abstract class CdmFileBase extends EmfFile {
 	private void findDifferencesRecursivelyFrom(String otherPath, XmlElement otherEl, String curPath, XmlElement curEl, List<String> outResult) {
 
 		// check this node's name
-		if (!curEl.getNodeName().equals(otherEl.getNodeName())) {
-			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getNodeName() + ", which has the name " + otherPath + otherEl.getNodeName() + " in the left CDM.");
+		if (!curEl.getTagName().equals(otherEl.getTagName())) {
+			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getTagName() + ", which has the name " + otherPath + otherEl.getTagName() + " in the left CDM.");
 		}
 
 		// check this node's attributes
@@ -1351,10 +1351,10 @@ public abstract class CdmFileBase extends EmfFile {
 			}
 			String otherNode = otherAttrs.get(curAttrs.getKey(i));
 			if (otherNode == null) {
-				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + ", which in the right CDM contains the attribute \"" + curAttrs.getKey(i) + "\" that is missing from the left CDM.");
+				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getTagName() + ", which in the right CDM contains the attribute \"" + curAttrs.getKey(i) + "\" that is missing from the left CDM.");
 			} else {
 				if (!curAttrs.get(i).equals(otherNode)) {
-					outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getNodeName() + " with the attribute \"" + curAttrs.getKey(i) + "\", which in the right CDM has the value \"" + curAttrs.get(i) + "\" as opposed to the value \"" + otherNode + "\" in the left CDM.");
+					outResult.add(getPathRelativeToCdmRoot() + " contains the element " + curPath + curEl.getTagName() + " with the attribute \"" + curAttrs.getKey(i) + "\", which in the right CDM has the value \"" + curAttrs.get(i) + "\" as opposed to the value \"" + otherNode + "\" in the left CDM.");
 				}
 			}
 		}
@@ -1365,7 +1365,7 @@ public abstract class CdmFileBase extends EmfFile {
 			}
 			String curNode = curAttrs.get(otherAttrs.getKey(i));
 			if (curNode == null) {
-				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + otherPath + otherEl.getNodeName() + ", which in the left CDM contains the attribute \"" + otherAttrs.getKey(i) + "\" that is missing from the right CDM.");
+				outResult.add(getPathRelativeToCdmRoot() + " contains the element " + otherPath + otherEl.getTagName() + ", which in the left CDM contains the attribute \"" + otherAttrs.getKey(i) + "\" that is missing from the right CDM.");
 			}
 			// no need for the else here - if there was a different value, then it was already reported a few lines above ^^
 		}
@@ -1378,15 +1378,15 @@ public abstract class CdmFileBase extends EmfFile {
 
 		if (rightChildEls.size() > leftChildEls.size()) {
 			childrenLen = leftChildEls.size();
-			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getNodeName() + ", which has more children than the corresponding element in the left CDM.");
+			outResult.add(getPathRelativeToCdmRoot() + " in the right CDM contains the element " + curPath + curEl.getTagName() + ", which has more children than the corresponding element in the left CDM.");
 		}
 
 		if (leftChildEls.size() > rightChildEls.size()) {
-			outResult.add(getPathRelativeToCdmRoot() + " in the left CDM contains the element " + otherPath + otherEl.getNodeName() + ", which has more children than the corresponding element in the right CDM.");
+			outResult.add(getPathRelativeToCdmRoot() + " in the left CDM contains the element " + otherPath + otherEl.getTagName() + ", which has more children than the corresponding element in the right CDM.");
 		}
 
-		curPath += curEl.getNodeName() + ".";
-		otherPath += otherEl.getNodeName() + ".";
+		curPath += curEl.getTagName() + ".";
+		otherPath += otherEl.getTagName() + ".";
 
 		for (int i = 0; i < childrenLen; i++) {
 			findDifferencesRecursivelyFrom(otherPath, leftChildEls.get(i), curPath, rightChildEls.get(i), outResult);

@@ -16,6 +16,8 @@ public class AllTests {
 
 	static final String CDM_TEST_DATA_PATH = "testdata/cdm";
 
+	static final String XML_TEST_DATA_PATH = "testdata/xml";
+
 
 	public static void main(String[] args) {
 
@@ -28,6 +30,8 @@ public class AllTests {
 		TestUtils.run(new CoderJavaTest());
 
 		TestUtils.run(new JSONTest());
+
+		TestUtils.run(new XmlTest());
 
 		TestUtils.run(new ImageTest());
 

@@ -24,6 +24,10 @@ public class JSONTest implements Test {
 
 		toStringTestEscapedQuotes();
 
+		fromStringTestEscapedChars();
+
+		toStringTestEscapedChars();
+
 		fromStringTestSpecialChars();
 
 		toStringTestSpecialChars();
@@ -107,6 +111,36 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We stored foo:ba\"r in a JSON object, then converted the object back to JSON - and did not get our input back!");
+	}
+
+	public void fromStringTestEscapedChars() {
+
+		TestUtils.start("JSON from String (with Escaped Characters)");
+
+		JSON testObject = new JSON("{\"foo\":\"ba\\n\\r\"}");
+
+		if (testObject.getString("foo").toString().equals("ba\n\r")) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We stored foo:ba\\n\\r in a JSON object, then read the key foo - and did not get ba\\n\\r!");
+	}
+
+	public void toStringTestEscapedChars() {
+
+		TestUtils.start("JSON to String (with Escaped Characters)");
+
+		String orig = "{\"foo\": \"ba\\n\\r\"}";
+
+		JSON testObject = new JSON(orig);
+
+		if (testObject.toString().equals(orig)) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We stored foo:ba\\n\\r in a JSON object, then converted the object back to JSON - and did not get our input back!");
 	}
 
 	public void fromStringTestSpecialChars() {

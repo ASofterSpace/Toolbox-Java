@@ -416,7 +416,7 @@ public class EmfFile extends XmlFile {
 		XmlElement root = this.getRoot();
 
 		if (root != null) {
-			rootName = root.getNodeName();
+			rootName = root.getTagName();
 		}
 
 		return "com.asofterspace.toolbox.io.EmfFile: " + filename + " (root element: " + rootName + ")";

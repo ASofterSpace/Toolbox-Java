@@ -4,9 +4,10 @@
  */
 package com.asofterspace.toolbox.cdm;
 
+import com.asofterspace.toolbox.io.XmlElement;
+
 import java.util.List;
 import java.util.Set;
-import com.asofterspace.toolbox.io.XmlElement;
 
 
 public class CdmProcedure2Activity extends CdmNode {
@@ -37,11 +38,11 @@ public class CdmProcedure2Activity extends CdmNode {
 			// this here relies on the fact that inside the mapper, ALL links are file-based, and none are local... but fuuu does it feel ugly!
 			String[] hrefSplit = href.split("#");
 			if (hrefSplit.length > 1) {
-				if ("activity".equals(elem.getNodeName())) {
+				if ("activity".equals(elem.getTagName())) {
 					this.mappedActivityFilename = hrefSplit[0];
 					this.mappedActivityId = hrefSplit[1];
 				}
-				if ("procedure".equals(elem.getNodeName())) {
+				if ("procedure".equals(elem.getTagName())) {
 					this.mappedProcedureFilename = hrefSplit[0];
 					this.mappedProcedureId = hrefSplit[1];
 				}

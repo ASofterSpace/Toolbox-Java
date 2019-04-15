@@ -49,10 +49,6 @@ public class CdmNode extends XmlElement {
 		return parentFile;
 	}
 
-	public String getTagName() {
-		return getNodeName();
-	}
-
 	public String getName() {
 		return getAttribute("name");
 	}
@@ -75,7 +71,7 @@ public class CdmNode extends XmlElement {
 	 */
 	public String getPath() {
 
-		String xmlTag = getNodeName();
+		String xmlTag = getTagName();
 
 		if ("monitoringControlElement".equals(xmlTag)) {
 			XmlElement curMCE = getExtendingObject();
@@ -146,7 +142,7 @@ public class CdmNode extends XmlElement {
 			System.out.println("Type: " + type);
 		}
 
-		String xmlTag = getNodeName();
+		String xmlTag = getTagName();
 		if (xmlTag == null) {
 			System.out.println("XML Tag: none");
 		} else {

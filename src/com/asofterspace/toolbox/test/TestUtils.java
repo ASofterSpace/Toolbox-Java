@@ -80,7 +80,16 @@ public class TestUtils {
 	 */
 	public static void run(Test test) {
 
-		test.runAll();
+//		try {
+
+			test.runAll();
+
+/*
+		} catch (Throwable t) {
+
+			TestUtils.fail("There was an exception:\n" + t);
+		}
+*/
 	}
 
 	/**

@@ -6,8 +6,8 @@ package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.io.XmlElement;
 
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 

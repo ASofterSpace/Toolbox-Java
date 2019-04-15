@@ -55,7 +55,7 @@ public class CdmFile extends CdmFileBase {
 		}
 
 		// now actually add the current node to the internal model in the controller - first to specialized lists, and then to the full id map...
-		String nodeName = curNode.getNodeName();
+		String nodeName = curNode.getTagName();
 
 		// TODO :: improve this by somehow directly creating the necessary element,
 		// instead of creating a CdmNode that then is immediately replaced by e.g.
@@ -246,7 +246,7 @@ public class CdmFile extends CdmFileBase {
 		// innocent unless proven otherwise
 		int verdict = 0;
 
-		String nodeName = currentElement.getNodeName();
+		String nodeName = currentElement.getTagName();
 
 		if (nodeName != null) {
 
@@ -454,7 +454,7 @@ public class CdmFile extends CdmFileBase {
 											" has the type " + engXsiDataType +
 											" but also has a limit check with id " +
 											limitCheckDefHref +
-											" which has " + limit.getNodeName() +
+											" which has " + limit.getTagName() +
 											" with value " + value +
 											" - and negative values do not like being" +
 											" limits for unsigned parameters!");
@@ -466,7 +466,7 @@ public class CdmFile extends CdmFileBase {
 											" has the type " + engXsiDataType +
 											" but also has a limit check with id " +
 											limitCheckDefHref +
-											" which has " + limit.getNodeName() +
+											" which has " + limit.getTagName() +
 											" with value " + value +
 											" - and booleans do not like being" +
 											" limits for unsigned parameters!");
@@ -509,13 +509,13 @@ public class CdmFile extends CdmFileBase {
 					mce.getAttribute("xmi:id") +
 					" is a monitoringControlElement but has no definition attached!");
 			} else {
-				if (!"monitoringControlElementDefinition".equals(mceDef.getNodeName())) {
+				if (!"monitoringControlElementDefinition".equals(mceDef.getTagName())) {
 					verdict++;
 					outProblemsFound.add(this.getLocalFilename() + "#" +
 						mce.getAttribute("xmi:id") +
 						" is a monitoringControlElement with definition " +
 						mceDefHref + " - but the tag name of the definition is " +
-						mceDef.getNodeName() + " instead of the expected monitoringControlElementDefinition!");
+						mceDef.getTagName() + " instead of the expected monitoringControlElementDefinition!");
 				}
 			}
 		}
