@@ -31,6 +31,11 @@ public class XmlElement {
 	private XmlElement extendingObject;
 
 
+	public XmlElement(String name) {
+
+		construct(name, new TinyXmlMap());
+	}
+
 	public XmlElement(String name, Attributes attributes) {
 
 		TinyXmlMap attrMap = new TinyXmlMap(attributes.getLength());
@@ -116,6 +121,21 @@ public class XmlElement {
 	public void addChild(XmlElement newChild) {
 		this.xmlChildren.add(newChild);
 		newChild.xmlParent = this;
+	}
+
+	/**
+	 * This takes all the children of the other parent
+	 * and makes them children of this element instead
+	 * - therefore effectively stealing them!
+	 * (They will NOT any longer be children of the
+	 * other parent!)
+	 */
+	public void addChildrenOf(XmlElement otherParent) {
+		this.xmlChildren.addAll(otherParent.xmlChildren);
+		for (XmlElement child : otherParent.xmlChildren) {
+			child.xmlParent = this;
+		}
+		otherParent.xmlChildren.clear();
 	}
 
 	public XmlElement createChild(String tagName) {
@@ -283,6 +303,11 @@ public class XmlElement {
 	}
 
 	public String getInnerText() {
+
+		if (innerText == null) {
+			return "";
+		}
+
 		return innerText;
 	}
 
@@ -346,6 +371,63 @@ public class XmlElement {
 			}
 			writer.write("</" + name + ">\n");
 		}
+	}
+
+	private void toString(StringBuilder result) {
+		result.append("<" + name + attributes.toXmlAttributesStr());
+		if (xmlChildren.size() < 1) {
+			if ((innerText == null) || (innerText.length() < 1)) {
+				result.append("/>\n");
+			} else {
+				result.append(">" + xmlEscape(innerText) + "</" + name + ">\n");
+			}
+		} else {
+			result.append(">\n");
+			for (XmlElement child : xmlChildren) {
+				child.toString(result);
+			}
+			result.append("</" + name + ">\n");
+		}
+	}
+
+	@Override
+	public String toString() {
+
+		StringBuilder result = new StringBuilder();
+
+		toString(result);
+
+		return result.toString();
+	}
+
+	/**
+	 * Converts the XML element <json><foo>bar</foo><blubb>blobb</blubb></json>
+	 * to a JSON object such as {"foo": "bar", "blubb": "blobb"}
+	 * If onlyIncludeFields is left empty, everything is converted; if there is
+	 * at least one field given, then ONLY the given fields are converted!
+	 */
+	public JSON toJson(String... onlyIncludeFields) {
+
+		JSON result = new JSON();
+
+		if (onlyIncludeFields.length == 0) {
+			for (XmlElement child : xmlChildren) {
+				// TODO :: if that child has subchildren,
+				// handle them correctly and assign as object inside JSON :)
+				result.setString(child.getTagName(), child.getInnerText());
+			}
+		} else {
+			for (String field : onlyIncludeFields) {
+				XmlElement child = getChild(field);
+				if (child != null) {
+					// TODO :: if that child has subchildren,
+					// handle them correctly and assign as object inside JSON :)
+					result.setString(child.getTagName(), child.getInnerText());
+				}
+			}
+		}
+
+		return result;
 	}
 
 	/**

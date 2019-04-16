@@ -446,6 +446,37 @@ public class JSON {
 	}
 
 	/**
+	 * Converts the JSON object {"foo": "bar", "blubb": "blobb"} to an XmlElement
+	 * such as <json><foo>bar</foo><blubb>blobb</blubb></json>
+	 * If onlyIncludeFields is left empty, everything is converted; if there is
+	 * at least one field given, then ONLY the given fields are converted!
+	 */
+	public XmlElement toXml(String... onlyIncludeFields) {
+
+		XmlElement result = new XmlElement("json");
+
+		if (objContents == null) {
+			return result;
+		}
+
+		if (onlyIncludeFields.length == 0) {
+			for (String field : objContents.keySet()) {
+				// TODO :: if that child has subchildren,
+				// handle them correctly and assign as object inside XML :)
+				result.createChild(field).setInnerText(getString(field));
+			}
+		} else {
+			for (String field : onlyIncludeFields) {
+				// TODO :: if that child has subchildren,
+				// handle them correctly and assign as object inside XML :)
+				result.createChild(field).setInnerText(getString(field));
+			}
+		}
+
+		return result;
+	}
+
+	/**
 	 * Returns the value of this JSON object as string, without any surrounding " or somesuch;
 	 * meant to be used when you know that your JSON object is of the simple type String, and
 	 * you want to get that String
