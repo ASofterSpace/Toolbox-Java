@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.selftest;
 
+import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
 import com.asofterspace.toolbox.test.Test;
@@ -18,6 +19,10 @@ public class XmlTest implements Test {
 		fromFileTest();
 
 		fromHeaderlessFileTest();
+
+		toJsonAndBackTest();
+
+		advancedToJsonAndBackTest();
 	}
 
 	public void fromFileTest() {
@@ -52,6 +57,74 @@ public class XmlTest implements Test {
 
 		if (!testFile.getRoot().getInnerText().equals("bar")) {
 			TestUtils.fail("We stored <foo>bar</foo> in an XML file, then read the file - and did not get bar inside foo!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void toJsonAndBackTest() {
+
+		TestUtils.start("XML to JSON and Back");
+
+		XmlElement orig = new XmlElement("test");
+		orig.createChild("foo").setInnerText("bar");
+		orig.createChild("foo2").setInnerText("twobar");
+
+		JSON json = orig.toJson();
+
+		XmlElement target = json.toXml();
+
+		if (!target.getChild("foo").getInnerText().equals("bar")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get foo: bar!");
+			return;
+		}
+
+		if (!target.getChild("foo2").getInnerText().equals("twobar")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get foo2: twobar!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void advancedToJsonAndBackTest() {
+
+		TestUtils.start("Advanced XML to JSON and Back");
+
+		XmlElement orig = new XmlElement("test");
+		orig.createChild("foo").setInnerText("bar");
+		orig.createChild("2").setInnerText("two");
+		orig.createChild("newline").setInnerText("\n");
+		orig.createChild("textWithQuote").setInnerText("This is text with a \" sign!");
+		orig.createChild("xmlEntity").setInnerText("</xmlEntity>");
+
+		JSON json = orig.toJson();
+
+		XmlElement target = json.toXml();
+
+		if (!target.getChild("foo").getInnerText().equals("bar")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get foo: bar!");
+			return;
+		}
+
+		if (!target.getChild("2").getInnerText().equals("two")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get 2: two!");
+			return;
+		}
+
+		if (!target.getChild("newline").getInnerText().equals("\n")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get newline: \\n!");
+			return;
+		}
+
+		if (!target.getChild("textWithQuote").getInnerText().equals("This is text with a \" sign!")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get textWithQuote: This is text with a \" sign!");
+			return;
+		}
+
+		if (!target.getChild("xmlEntity").getInnerText().equals("</xmlEntity>")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get xmlEntity: </xmlEntity>!");
 			return;
 		}
 
