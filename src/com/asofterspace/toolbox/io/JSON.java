@@ -469,7 +469,10 @@ public class JSON {
 			for (String field : onlyIncludeFields) {
 				// TODO :: if that child has subchildren,
 				// handle them correctly and assign as object inside XML :)
-				result.createChild(field).setInnerText(getString(field));
+				String fieldData = getString(field);
+				if (fieldData != null) {
+					result.createChild(field).setInnerText(fieldData);
+				}
 			}
 		}
 

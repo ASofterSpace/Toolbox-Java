@@ -23,6 +23,8 @@ public class XmlTest implements Test {
 		toJsonAndBackTest();
 
 		advancedToJsonAndBackTest();
+
+		restrictedToJsonAndBackTest();
 	}
 
 	public void fromFileTest() {
@@ -125,6 +127,43 @@ public class XmlTest implements Test {
 
 		if (!target.getChild("xmlEntity").getInnerText().equals("</xmlEntity>")) {
 			TestUtils.fail("We transferred XML to JSON and back and did not get xmlEntity: </xmlEntity>!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void restrictedToJsonAndBackTest() {
+
+		TestUtils.start("Restricted XML to JSON and Back");
+
+		XmlElement orig = new XmlElement("test");
+		orig.createChild("one").setInnerText("1");
+		orig.createChild("two").setInnerText("2");
+		orig.createChild("three").setInnerText("3");
+		orig.createChild("four").setInnerText("4");
+
+		JSON json = orig.toJson("one", "two", "three");
+
+		XmlElement target = json.toXml("one", "two", "four");
+
+		if (!target.getChild("one").getInnerText().equals("1")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get one: 1!");
+			return;
+		}
+
+		if (!target.getChild("two").getInnerText().equals("2")) {
+			TestUtils.fail("We transferred XML to JSON and back and did not get two: 2!");
+			return;
+		}
+
+		if (target.getChild("three") != null) {
+			TestUtils.fail("We transferred XML to JSON and back and did get three - which should have been filtered out!");
+			return;
+		}
+
+		if (target.getChild("four") != null) {
+			TestUtils.fail("We transferred XML to JSON and back and did get four - which should have been filtered out!");
 			return;
 		}
 
