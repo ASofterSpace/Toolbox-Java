@@ -24,6 +24,8 @@ public class JSONTest implements Test {
 
 		fromStringTest();
 
+		fromNumberStringTest();
+
 		malformedFromStringTest();
 
 		toStringTest();
@@ -163,6 +165,20 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We stored foo:bar in a JSON object, then read the key foo - and did not get bar!");
+	}
+
+	public void fromNumberStringTest() {
+
+		TestUtils.start("JSON from Number String");
+
+		JSON testObject = new JSON("{\"foo\":9}");
+
+		if (testObject.getString("foo").toString().equals("9")) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We stored foo:9 in a JSON object, then read the key foo - and did not get 9!");
 	}
 
 	public void malformedFromStringTest() {

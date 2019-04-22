@@ -342,10 +342,32 @@ public class WebServerRequestHandler implements Runnable {
 		}
 
 		if (location.equals("/")) {
-			location = "/index.htm";
+			location = "/index";
 		}
 
-		return getFileFromLocation(location, arguments);
+		// at first, try the file itself
+		File result = getFileFromLocation(location, arguments);
+
+		if (result != null) {
+			return result;
+		}
+
+		// then try serving a .php file that was navigated to without extension
+		result = getFileFromLocation(location + ".php", arguments);
+
+		if (result != null) {
+			return result;
+		}
+
+		// finally, if no .php file was found either, try to navigate to an .htm file...
+		result = getFileFromLocation(location + ".htm", arguments);
+
+		if (result != null) {
+			return result;
+		}
+
+		// ... or a .html file instead
+		return getFileFromLocation(location + ".html", arguments);
 	}
 
 	/**

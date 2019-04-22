@@ -298,7 +298,6 @@ public class JSON {
 		while (charPos < jsonString.length()) {
 
 			Character curChar = jsonString.charAt(charPos);
-			charPos++;
 
 			if (Character.isDigit(curChar) ||
 				curChar.equals('.') || curChar.equals('-') ||
@@ -311,6 +310,8 @@ public class JSON {
 				// we are not reading any further numerical digits - escape!
 				break;
 			}
+
+			charPos++;
 		}
 
 		jsonString = jsonString.substring(charPos);
