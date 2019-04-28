@@ -8,11 +8,15 @@ import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 
 /**
  * A QR Code based either on some image data,
- * or on some bits that are set as datapoints directly
+ * or on some bits that are set as datapoints directly,
+ * or on some text that you want to encode
+ * (so yes, this class can be used for encoding and
+ * for decoding QR codes - whoop whoop!)
  *
  * @author Moya (a softer space), 2019
  */
@@ -27,13 +31,9 @@ public class QrCode {
 	// rotate the input?
 	private int rotate;
 
-	// some people seem to define an additional format mask,
-	// meaning that the edcLevel and maskPattern that are read
-	// out change, and that the constants change, but others
-	// do neither - we opt for neither, which also works fine :)
-	private int edcLevel;
+	private QrCodeQualityLevel edcLevel;
 
-	private int maskPattern;
+	private QrCodeMaskPattern maskPattern;
 
 	private boolean[][] data;
 
@@ -50,7 +50,9 @@ public class QrCode {
 	// attempts to read from the image with one image pixel being one qr code pixel
 	public QrCode(Image readFromImage) {
 
-		this(widthToVersion(readFromImage.getWidth()));
+		int version = widthToVersion(readFromImage.getWidth());
+
+		initBasedOnVersion(version);
 
 		setDatapoints(readFromImage);
 	}
@@ -58,13 +60,45 @@ public class QrCode {
 	// attempts to read from the image a certain qr code version, resizing the image
 	public QrCode(Image readFromImage, int version) {
 
-		this(version);
+		initBasedOnVersion(version);
 
 		setDatapoints(readFromImage);
 	}
 
+	// writes a QR Code based on a text that you want to encode
+	public QrCode(String data) {
+
+		this.rotate = 0;
+
+		boolean[] datastream = encodeData(data);
+
+		int version = streamLengthToVersion(datastream);
+
+		initBasedOnVersion(version);
+
+		writeInaccessibleFields();
+
+		this.edcLevel = QrCodeQualityLevel.LOW_QUALITY;
+
+		writeEdcLevel();
+
+		// TODO :: actually decide upon the pattern based on what we want to encode!
+		this.maskPattern = QrCodeMaskPattern.PATTERN_0;
+
+		writeMaskPattern();
+
+		writeData(datastream);
+
+		writeErrorCorrectionCode();
+	}
+
 	// creates a new empty qr code of a certain version
 	public QrCode(int version) {
+
+		initBasedOnVersion(version);
+	}
+
+	private void initBasedOnVersion(int version) {
 
 		this.version = version;
 
@@ -79,6 +113,15 @@ public class QrCode {
 		// (this here should work for all small QR codes that have only one small alignment block...
 		// once you have more alignment blocks - and especially once you have the version bits
 		// from version 7 onwards - this needs to be adjusted!)
+
+		// horizontal alignment bar
+		for (int x = 0; x < width; x++) {
+			inaccessibleFields[x][6] = true;
+		}
+		// vertical alignment bar
+		for (int y = 0; y < height; y++) {
+			inaccessibleFields[6][y] = true;
+		}
 
 		// top left block
 		for (int x = 0; x < 9; x++) {
@@ -104,14 +147,94 @@ public class QrCode {
 				inaccessibleFields[x][y] = true;
 			}
 		}
+	}
+
+	private void writeInaccessibleFields() {
+
+		// TODO :: add info about inaccessible fields for other versions too!
+		// (this here should work for all small QR codes that have only one small alignment block...
+		// once you have more alignment blocks - and especially once you have the version bits
+		// from version 7 onwards - this needs to be adjusted!)
+
 		// horizontal alignment bar
 		for (int x = 0; x < width; x++) {
-			inaccessibleFields[x][6] = true;
+			setRotatedBit(x, 6, (x % 2) == 0);
 		}
 		// vertical alignment bar
 		for (int y = 0; y < height; y++) {
-			inaccessibleFields[6][y] = true;
+			setRotatedBit(6, y, (y % 2) == 0);
 		}
+
+		// top left block
+		writePositionBlockAt(0, 0);
+		// top right block
+		writePositionBlockAt(width - 7, 0);
+		// bottom left block
+		writePositionBlockAt(0, height - 7);
+
+		// small alignment block
+		writeSmallPositionBlockAt(width - 9, height - 9);
+
+		// add dark module
+		setRotatedBit(8, height - 8, true);
+	}
+
+	private void writePositionBlockAt(int offsetX, int offsetY) {
+
+		// write all black...
+		for (int x = offsetX; x < offsetX + 7; x++) {
+			for (int y = offsetY; y < offsetY + 7; y++) {
+				setRotatedBit(x, y, true);
+			}
+		}
+
+		// add the white details!
+		for (int x = offsetX + 1; x < offsetX + 6; x++) {
+			setRotatedBit(x, offsetY + 1, false);
+		}
+		for (int x = offsetX + 1; x < offsetX + 6; x++) {
+			setRotatedBit(x, offsetY + 5, false);
+		}
+		for (int y = offsetY + 1; y < offsetY + 6; y++) {
+			setRotatedBit(offsetX + 1, y, false);
+		}
+		for (int y = offsetY + 1; y < offsetY + 6; y++) {
+			setRotatedBit(offsetX + 5, y, false);
+		}
+	}
+
+	private void writeSmallPositionBlockAt(int offsetX, int offsetY) {
+
+		// write all black...
+		for (int x = offsetX; x < offsetX + 5; x++) {
+			for (int y = offsetY; y < offsetY + 5; y++) {
+				setRotatedBit(x, y, true);
+			}
+		}
+
+		// add the white details!
+		for (int x = offsetX + 1; x < offsetX + 4; x++) {
+			setRotatedBit(x, offsetY + 1, false);
+		}
+		for (int x = offsetX + 1; x < offsetX + 4; x++) {
+			setRotatedBit(x, offsetY + 3, false);
+		}
+		for (int y = offsetY + 1; y < offsetY + 4; y++) {
+			setRotatedBit(offsetX + 1, y, false);
+		}
+		for (int y = offsetY + 1; y < offsetY + 4; y++) {
+			setRotatedBit(offsetX + 3, y, false);
+		}
+	}
+
+	private static int streamLengthToVersion(boolean[] datastream) {
+
+		int length = datastream.length;
+
+		// TODO - actually do some thinking here...
+		// (and base this on the edcLevel!)
+
+		return 4;
 	}
 
 	private static int widthToVersion(int width) {
@@ -206,56 +329,49 @@ public class QrCode {
 		return false;
 	}
 
+	// set the bit at this position, but keep track of rotations!
+	private void setRotatedBit(int x, int y, boolean bit) {
+
+		// do the rotation
+		switch (rotate) {
+			case 0:
+				data[x][y] = bit;
+				break;
+			case 1:
+				// top right requested - return top left
+				// bottom right requested - return top right
+				// ...
+				data[y][height - x - 1] = bit;
+				break;
+			case 2:
+				data[width - x - 1][height - y - 1] = bit;
+				break;
+			case 3:
+				data[width - y - 1][x] = bit;
+				break;
+		}
+	}
+
 	// get the bit at this position, but keep track of rotations and keep track of inversions too!
 	private boolean bit(int x, int y) {
 
 		boolean result = rotatedBit(x, y);
 
-		// do the inversion
-		switch (maskPattern) {
-			case 0:
-				if (((y*x) % 2) + ((y*x) % 3) == 0) {
-					return !result;
-				}
-				return result;
-			case 1:
-				if (((y/2) + (x/3)) % 2 == 0) {
-					return !result;
-				}
-				return result;
-			case 2:
-				if (((y*x) % 3 + y + x) % 2 == 0) {
-					return !result;
-				}
-				return result;
-			case 3:
-				if (((y*x) % 3 + (y*x)) % 2 == 0) {
-					return !result;
-				}
-				return result;
-			case 4:
-				if (y % 2 == 0) {
-					return !result;
-				}
-				return result;
-			case 5:
-				if ((y + x) % 2 == 0) {
-					return !result;
-				}
-				return result;
-			case 6:
-				if ((y + x) % 3 == 0) {
-					return !result;
-				}
-				return result;
-			case 7:
-				if (x % 3 == 0) {
-					return !result;
-				}
-				return result;
+		if (maskPattern != null) {
+			result = maskPattern.applyMaskToBit(x, y, result);
 		}
 
 		return result;
+	}
+
+	// set the bit at this position, but keep track of rotations and keep track of inversions too!
+	private void setBit(int x, int y, boolean bit) {
+
+		if (maskPattern != null) {
+			bit = maskPattern.applyMaskToBit(x, y, bit);
+		}
+
+		setRotatedBit(x, y, bit);
 	}
 
 	private byte bitsToNibble(boolean b1, boolean b2, boolean b3, boolean b4) {
@@ -278,6 +394,24 @@ public class QrCode {
 		return result;
 	}
 
+	private boolean[] intToBits(int input) {
+
+		int length = 32;
+
+		boolean[] result = new boolean[length];
+
+		int twoThePower = 1;
+
+		for (int i = length - 1; i >= 0; i--) {
+			if ((input / twoThePower) % 2 == 1) {
+				result[i] = true;
+			}
+			twoThePower *= 2;
+		}
+
+		return result;
+	}
+
 	private byte[] bitsToByteArr(boolean[] datastream, int offset, int length) {
 
 		int byteLen = length / 8;
@@ -290,7 +424,7 @@ public class QrCode {
 		return result;
 	}
 
-	private void writeBitsIntoStream(boolean[] datastream, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
+	private void readBitsIntoStream(boolean[] datastream, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
 
 		datastream[offset+0] = b8;
 		datastream[offset+1] = b7;
@@ -300,31 +434,6 @@ public class QrCode {
 		datastream[offset+5] = b3;
 		datastream[offset+6] = b2;
 		datastream[offset+7] = b1;
-	}
-
-	private void constructInversionField() {
-
-		boolean bit1 = rotatedBit(0, 8);
-		boolean bit2 = rotatedBit(1, 8);
-
-		edcLevel = (int) bitsToNibble(false, false, bit1, bit2) & 0xFF;
-
-		bit1 = rotatedBit(2, 8);
-		bit2 = rotatedBit(3, 8);
-		boolean bit3 = rotatedBit(4, 8);
-
-		maskPattern = (int) bitsToNibble(false, bit1, bit2, bit3) & 0xFF;
-	}
-
-	private boolean hasPositionBlockAt(int x, int y) {
-
-		// TODO :: check better, also a bit error-aware etc.
-		// (right now we are just checking the diagonal of the block ^^)
-		if (data[x][y] && !data[x+1][y+1] && data[x+2][y+2] && data[x+3][y+3] && data[x+4][y+4] && !data[x+5][y+5] && data[x+6][y+6]) {
-			return true;
-		}
-
-		return false;
 	}
 
 	private void stepOneFieldAhead() {
@@ -359,19 +468,23 @@ public class QrCode {
 		}
 	}
 
-	// returns true if something could be written,
-	// false otherwise (as no more data is left)
-	private void writeBytesIntoStream(boolean[] datastream) {
+	/**
+	 * Reads data from the data array and puts it into a continuous stream,
+	 * ignoring all the inaccessible / non-data fields
+	 */
+	private void readDataIntoStream(boolean[] datastream) {
 
-		// first of all, we want to get eight fields that are hanging together...
 		int offset = 0;
+
 		while (true) {
+
 			while (inaccessibleFields[currentX][currentY]) {
 				stepOneFieldAhead();
 				if (currentX < 0) {
 					return;
 				}
 			}
+
 			datastream[offset] = bit(currentX, currentY);
 			offset++;
 			stepOneFieldAhead();
@@ -381,7 +494,34 @@ public class QrCode {
 		}
 	}
 
-	public String getContent() {
+	/**
+	 * Takes data from a continuous stream of boolean bits and writes
+	 * it into the data field of the QR code, ignoring all the
+	 * inaccessible / non-data fields
+	 */
+	private void writeStreamIntoDataField(boolean[] datastream) {
+
+		int offset = 0;
+
+		while (offset < datastream.length) {
+
+			while (inaccessibleFields[currentX][currentY]) {
+				stepOneFieldAhead();
+				if (currentX < 0) {
+					return;
+				}
+			}
+
+			setBit(currentX, currentY, datastream[offset]);
+			offset++;
+			stepOneFieldAhead();
+			if (currentX < 0) {
+				return;
+			}
+		}
+	}
+
+	private void detectOrientation() {
 
 		// first of all, figure out the orientation by getting the large blocks on the sides...
 		// ... set rotation to -1 to be able to distinguish the case of no orientation matching
@@ -405,12 +545,135 @@ public class QrCode {
 			// the QR code has been rotated left by 90° (or right by 270°)
 			rotate = 3;
 		}
+	}
 
+	private boolean hasPositionBlockAt(int x, int y) {
+
+		// TODO :: check better, also a bit error-aware etc.
+		// (right now we are just checking the diagonal of the block ^^)
+		if (data[x][y] && !data[x+1][y+1] && data[x+2][y+2] && data[x+3][y+3] && data[x+4][y+4] && !data[x+5][y+5] && data[x+6][y+6]) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private void detectEdcLevel() {
+
+		boolean bit1 = rotatedBit(0, 8);
+		boolean bit2 = rotatedBit(1, 8);
+
+		edcLevel = QrCodeQualityLevel.fromInt((int) bitsToNibble(false, false, bit1, bit2) & 0xFF);
+	}
+
+	private void writeEdcLevel() {
+
+		if (edcLevel == null) {
+			return;
+		}
+
+		int edcInt = edcLevel.toInt();
+
+		boolean[] edcBits = intToBits(edcInt);
+
+		setRotatedBit(0, 8, edcBits[30]);
+		setRotatedBit(1, 8, edcBits[31]);
+	}
+
+	private void detectMaskPattern() {
+
+		boolean bit1 = rotatedBit(2, 8);
+		boolean bit2 = rotatedBit(3, 8);
+		boolean bit3 = rotatedBit(4, 8);
+
+		maskPattern = QrCodeMaskPattern.fromInt((int) bitsToNibble(false, bit1, bit2, bit3) & 0xFF);
+	}
+
+	private void writeMaskPattern() {
+
+		if (maskPattern == null) {
+			return;
+		}
+
+		int maskInt = maskPattern.toInt();
+
+		boolean[] maskBits = intToBits(maskInt);
+
+		setRotatedBit(2, 8, maskBits[29]);
+		setRotatedBit(3, 8, maskBits[30]);
+		setRotatedBit(4, 8, maskBits[31]);
+	}
+
+	/**
+	 * gets the length (in bits) of the data field - of course the data can be truncated
+	 * already before by a 0 nibble, but this is the maximum amount of data that will be
+	 * in a QR code of this error correction level and version
+	 */
+	private int getDataLength() {
+
+		// TODO :: add the values for further versions!
+
+		switch (edcLevel) {
+			case LOW_QUALITY:
+				switch (version) {
+					case 1: return 19;
+					case 2: return 34;
+					case 3: return 55;
+					case 4: return 80;
+					case 5: return 108;
+					case 6: return 136;
+				}
+				break;
+
+			case MEDIUM_QUALITY:
+				switch (version) {
+					case 1: return 16;
+					case 2: return 28;
+					case 3: return 44;
+					case 4: return 64;
+					case 5: return 86;
+					case 6: return 108;
+				}
+				break;
+
+			case QUALITY:
+				switch (version) {
+					case 1: return 13;
+					case 2: return 22;
+					case 3: return 34;
+					case 4: return 48;
+					case 5: return 62;
+					case 6: return 76;
+				}
+				break;
+
+			case HIGH_QUALITY:
+				switch (version) {
+					case 1: return 9;
+					case 2: return 16;
+					case 3: return 26;
+					case 4: return 36;
+					case 5: return 46;
+					case 6: return 60;
+				}
+				break;
+		}
+
+		return 0;
+	}
+
+	public String getContent() {
+
+		detectOrientation();
+
+		// if no rotation could be found, return!
 		if (rotate < 0) {
 			return null;
 		}
 
-		constructInversionField();
+		detectEdcLevel();
+
+		detectMaskPattern();
 
 		// TODO :: also enable other versions!
 		if ((version == 2) || (version == 3) || (version == 4)) {
@@ -420,38 +683,42 @@ public class QrCode {
 			// for large QR codes it is nearly optimal anyway, so whatever)
 			boolean[] ds = new boolean[width*height];
 
+			if (edcLevel == null) {
+				return null;
+			}
+
 			// read out the message data bits
 			switch (edcLevel) {
 
 				// H: high quality
-				case 0:
-					// TODO :: use writeBytesIntoStream here too!
-					writeBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
-					writeBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
-					writeBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
-					writeBitsIntoStream(ds, 24, bit(25, 16), bit(26, 16), bit(25, 15), bit(26, 15), bit(25, 14), bit(26, 14), bit(25, 13), bit(26, 13));
-					writeBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
-					writeBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
-					writeBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
+				case HIGH_QUALITY:
+					// TODO :: use readDataIntoStream here too!
+					readBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
+					readBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
+					readBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
+					readBitsIntoStream(ds, 24, bit(25, 16), bit(26, 16), bit(25, 15), bit(26, 15), bit(25, 14), bit(26, 14), bit(25, 13), bit(26, 13));
+					readBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
+					readBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
+					readBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
 					break;
 
 				// Q: good quality
-				case 1:
+				case QUALITY:
 					// TODO :: implement
 					break;
 
 				// M: medium quality
-				case 2:
+				case MEDIUM_QUALITY:
 					// TODO :: implement
 					break;
 
 				// L: low quality
-				case 3:
+				case LOW_QUALITY:
 					currentX = width - 1;
 					currentY = height - 1;
 					goingUp = true;
 					readingRight = true;
-					writeBytesIntoStream(ds);
+					readDataIntoStream(ds);
 					break;
 			}
 
@@ -477,7 +744,9 @@ public class QrCode {
 			// by default (if no ECI is given) use ASCII...
 			int eciNumber = 27;
 
-			while (cur < ds.length) {
+			int dataLength = getDataLength();
+
+			while (cur < dataLength) {
 				// ... with each data block starting with a 4 bit mode indicator
 				byte modeIndicator = bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
 				cur += 4;
@@ -498,7 +767,7 @@ public class QrCode {
 						// TODO
 						break;
 
-					// ascii bytes
+					// ascii bytes (unless the eci number was fiddled with)
 					case 4:
 
 						// the length of the field length depends on the version, of course .-.
@@ -577,30 +846,151 @@ public class QrCode {
 		return null;
 	}
 
-	public String toString() {
+	private boolean[] encodeData(String data) {
 
-		String qualityStr = "unknown";
+		boolean[] result;
+		int cur = 0;
 
-		switch (edcLevel) {
+		byte[] byteData = data.getBytes(StandardCharsets.UTF_8);
+		byte[] byteDataAscii = data.getBytes(StandardCharsets.US_ASCII);
 
-			case 0:
-				qualityStr = "H / high quality";
-				break;
-
-			case 1:
-				qualityStr = "Q / quality";
-				break;
-
-			case 2:
-				qualityStr = "M / medium";
-				break;
-
-			case 3:
-				qualityStr = "L / low";
-				break;
+		int blockLen;
+		if (version > 9) {
+			blockLen = 16;
+		} else {
+			blockLen = 8;
 		}
 
-		return "QR Code (version " + version + ", " + qualityStr + " error correction level) containing: " + getContent();
+		// we are just using ASCII...
+		if (Arrays.equals(byteData, byteDataAscii)) {
+
+			// 4 bit mode indicator +
+			// 8 or 16 bit length indicator +
+			// 8 bits per string data +
+			// 4 bit end of data marker
+			result = new boolean[4 + blockLen + (8 * byteData.length) + 4];
+
+		} else {
+
+			// 8 bit eci indicator +
+			// 4 bit mode indicator +
+			// 8 or 16 bit length indicator +
+			// 8 bits per string data +
+			// 4 bit end of data marker
+			result = new boolean[8 + 4 + blockLen + (8 * byteData.length) + 4];
+
+			// encode in UTF8
+			int eciNumber = 26;
+
+			boolean[] eciNumberArr = intToBits(eciNumber);
+			result[0] = eciNumberArr[24];
+			result[1] = eciNumberArr[25];
+			result[2] = eciNumberArr[26];
+			result[3] = eciNumberArr[27];
+			result[4] = eciNumberArr[28];
+			result[5] = eciNumberArr[29];
+			result[6] = eciNumberArr[30];
+			result[7] = eciNumberArr[31];
+			cur += 8;
+		}
+
+		boolean[] stringModeArr = intToBits(4);
+		result[cur+0] = stringModeArr[28];
+		result[cur+1] = stringModeArr[29];
+		result[cur+2] = stringModeArr[30];
+		result[cur+3] = stringModeArr[31];
+		cur += 4;
+
+		boolean[] strDataLengthArr = intToBits(byteData.length);
+		if (version > 9) {
+			result[cur+0] = strDataLengthArr[16];
+			result[cur+1] = strDataLengthArr[17];
+			result[cur+2] = strDataLengthArr[18];
+			result[cur+3] = strDataLengthArr[19];
+			result[cur+4] = strDataLengthArr[20];
+			result[cur+5] = strDataLengthArr[21];
+			result[cur+6] = strDataLengthArr[22];
+			result[cur+7] = strDataLengthArr[23];
+			result[cur+8] = strDataLengthArr[24];
+			result[cur+9] = strDataLengthArr[25];
+			result[cur+10] = strDataLengthArr[26];
+			result[cur+11] = strDataLengthArr[27];
+			result[cur+12] = strDataLengthArr[28];
+			result[cur+13] = strDataLengthArr[29];
+			result[cur+14] = strDataLengthArr[30];
+			result[cur+15] = strDataLengthArr[31];
+			cur += 16;
+		} else {
+			result[cur+0] = strDataLengthArr[24];
+			result[cur+1] = strDataLengthArr[25];
+			result[cur+2] = strDataLengthArr[26];
+			result[cur+3] = strDataLengthArr[27];
+			result[cur+4] = strDataLengthArr[28];
+			result[cur+5] = strDataLengthArr[29];
+			result[cur+6] = strDataLengthArr[30];
+			result[cur+7] = strDataLengthArr[31];
+			cur += 8;
+		}
+
+		for (byte curbyte : byteData) {
+			boolean[] curbits = intToBits(curbyte);
+			result[cur+0] = curbits[24];
+			result[cur+1] = curbits[25];
+			result[cur+2] = curbits[26];
+			result[cur+3] = curbits[27];
+			result[cur+4] = curbits[28];
+			result[cur+5] = curbits[29];
+			result[cur+6] = curbits[30];
+			result[cur+7] = curbits[31];
+			cur += 8;
+		}
+
+		return result;
+	}
+
+	private void writeData(boolean[] datastream) {
+
+		if (edcLevel == null) {
+			return;
+		}
+
+		// write the message data bits
+		switch (edcLevel) {
+
+			// H: high quality
+			case HIGH_QUALITY:
+				// TODO :: implement
+				break;
+
+			// Q: good quality
+			case QUALITY:
+				// TODO :: implement
+				break;
+
+			// M: medium quality
+			case MEDIUM_QUALITY:
+				// TODO :: implement
+				break;
+
+			// L: low quality
+			case LOW_QUALITY:
+				currentX = width - 1;
+				currentY = height - 1;
+				goingUp = true;
+				readingRight = true;
+				writeStreamIntoDataField(datastream);
+				break;
+		}
+	}
+
+	private void writeErrorCorrectionCode() {
+
+		// TODO :: actually write the error correction code
+	}
+
+	public String toString() {
+
+		return "QR Code (version " + version + ", " + edcLevel + " error correction level) containing: " + getContent();
 	}
 
 }

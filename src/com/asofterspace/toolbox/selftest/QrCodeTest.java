@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.barcodes.QrCode;
+import com.asofterspace.toolbox.barcodes.QrCodeFactory;
 import com.asofterspace.toolbox.io.DefaultImageFile;
 import com.asofterspace.toolbox.io.PpmFile;
 import com.asofterspace.toolbox.test.Test;
@@ -21,6 +22,8 @@ public class QrCodeTest implements Test {
 		readSmallQrCodeTest();
 
 		readMediumQrCodeTest();
+
+		writeSimpleQrCodeTest();
 	}
 
 	public void getBitsFromImageTest() {
@@ -71,6 +74,20 @@ public class QrCodeTest implements Test {
 		}
 
 		TestUtils.fail("We tried reading a well-known QR Code - but the contents that we read were incorrect!");
+	}
+
+	public void writeSimpleQrCodeTest() {
+
+		TestUtils.start("Writing a Simple QR Code (Version 4)");
+
+		QrCode qrCode = QrCodeFactory.constructFromString("Hello from A Softer Space! :)");
+
+		if ("Hello from A Softer Space! :)".equals(qrCode.getContent().trim())) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We tried reading the QR Code that we just created - but the contents that we read were incorrect!");
 	}
 
 }

@@ -87,6 +87,8 @@ public class TestUtils {
 		} catch (Throwable t) {
 
 			TestUtils.fail("There was an exception:\n" + t);
+			t.printStackTrace();
+			System.out.println("");
 		}
 	}
 

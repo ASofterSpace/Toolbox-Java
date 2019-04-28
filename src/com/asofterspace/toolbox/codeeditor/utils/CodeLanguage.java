@@ -32,7 +32,7 @@ public enum CodeLanguage {
 	XML("XML");
 
 
-	String kindStr;
+	private String kindStr;
 
 
 	CodeLanguage(String kindStr) {

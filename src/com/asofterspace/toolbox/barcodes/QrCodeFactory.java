@@ -15,6 +15,18 @@ import com.asofterspace.toolbox.utils.Image;
 public class QrCodeFactory {
 
 	/**
+	 * creates a QR Code based on a text that you want to encode
+	 * (right now, it will encode the text in the same way always,
+	 * and use the same quality setting always, etc. - maybe create
+	 * a larger consutructor at some point that allows the caller
+	 * to modify all of that stuff ^^)
+	 */
+	public static QrCode constructFromString(String data) {
+
+		return new QrCode(data);
+	}
+
+	/**
 	 * Reads a QR code from an as-arbitrary-as-possible image
 	 * (that is, the QR Code might be hidden somewhere inside the image)
 	 *
