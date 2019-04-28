@@ -7,6 +7,8 @@ package com.asofterspace.toolbox.barcodes;
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
 
+import java.nio.charset.StandardCharsets;
+
 
 /**
  * A QR Code based either on some image data,
@@ -276,6 +278,18 @@ public class QrCode {
 		return result;
 	}
 
+	private byte[] bitsToByteArr(boolean[] datastream, int offset, int length) {
+
+		int byteLen = length / 8;
+		byte[] result = new byte[byteLen];
+
+		for (int i = 0; i < byteLen; i++) {
+			result[i] = (byte) bitsToInt(datastream, offset + 8*i, 8);
+		}
+
+		return result;
+	}
+
 	private void writeBitsIntoStream(boolean[] datastream, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
 
 		datastream[offset+0] = b8;
@@ -498,10 +512,36 @@ public class QrCode {
 							cur += 8;
 						}
 
-						for (int n = 0; n < blockLength; n++) {
-							// TODO :: if eciNumber is not 27, then do... uhm... something to get the correct conversion xD
-							result.append((char) bitsToInt(ds, cur, 8));
-							cur += 8;
+						switch (eciNumber) {
+							case 1:
+							case 3:
+								// ISO8859-1
+								result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.ISO_8859_1));
+								cur += 8*blockLength;
+								break;
+							case 25:
+								// UTF-16BE
+								result.append(new String(bitsToByteArr(ds, cur, 16*blockLength), StandardCharsets.UTF_16BE));
+								cur += 16*blockLength;
+								break;
+							case 26:
+								// UTF-8
+								result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.UTF_8));
+								cur += 8*blockLength;
+								break;
+							case 27:
+							case 170:
+								// ASCII
+								result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.US_ASCII));
+								cur += 8*blockLength;
+								break;
+							// TODO :: add others
+							default:
+								// as default, if we got nothing useful, just add as is and hope and pray...
+								for (int n = 0; n < blockLength; n++) {
+									result.append((char) bitsToInt(ds, cur, 8));
+									cur += 8;
+								}
 						}
 
 						break;
