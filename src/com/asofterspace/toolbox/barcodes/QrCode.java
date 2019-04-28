@@ -70,26 +70,34 @@ public class QrCode {
 
 		this.rotate = 0;
 
+		// the desired edc level has to be set here, as input - as it will be needed immediately
+		// to determine the needed stream length!
+		this.edcLevel = QrCodeQualityLevel.LOW_QUALITY;
+
 		boolean[] datastream = encodeData(data);
 
-		int version = streamLengthToVersion(datastream);
+		int version = setVersionBasedOnDataStreamLength(datastream);
 
 		initBasedOnVersion(version);
 
 		writeInaccessibleFields();
 
-		this.edcLevel = QrCodeQualityLevel.LOW_QUALITY;
-
 		writeEdcLevel();
 
-		// TODO :: actually decide upon the pattern based on what we want to encode!
+		// TODO IMPORTANT :: actually decide upon the pattern based on what we want to encode!
 		this.maskPattern = QrCodeMaskPattern.PATTERN_0;
 
 		writeMaskPattern();
 
-		writeData(datastream);
+		// expand the datastream to also have space for the padding and the error correction codes
+		boolean[] fullDatastream = new boolean[width*height];
+		System.arraycopy(datastream, 0, fullDatastream, 0, datastream.length);
 
-		writeErrorCorrectionCode();
+		writePaddingData(fullDatastream, datastream.length);
+
+		writeErrorCorrectionCode(fullDatastream);
+
+		writeData(fullDatastream);
 	}
 
 	// creates a new empty qr code of a certain version
@@ -227,14 +235,22 @@ public class QrCode {
 		}
 	}
 
-	private static int streamLengthToVersion(boolean[] datastream) {
+	private int setVersionBasedOnDataStreamLength(boolean[] datastream) {
 
 		int length = datastream.length;
 
-		// TODO - actually do some thinking here...
-		// (and base this on the edcLevel!)
+		version = 1;
 
-		return 4;
+		while (getDataLength() < length) {
+			version++;
+
+			if (version > 40) {
+				version = 40;
+				break;
+			}
+		}
+
+		return version;
 	}
 
 	private static int widthToVersion(int width) {
@@ -616,45 +632,45 @@ public class QrCode {
 		switch (edcLevel) {
 			case LOW_QUALITY:
 				switch (version) {
-					case 1: return 19;
-					case 2: return 34;
-					case 3: return 55;
-					case 4: return 80;
-					case 5: return 108;
-					case 6: return 136;
+					case 1: return 8*19;
+					case 2: return 8*34;
+					case 3: return 8*55;
+					case 4: return 8*80;
+					case 5: return 8*108;
+					case 6: return 8*136;
 				}
 				break;
 
 			case MEDIUM_QUALITY:
 				switch (version) {
-					case 1: return 16;
-					case 2: return 28;
-					case 3: return 44;
-					case 4: return 64;
-					case 5: return 86;
-					case 6: return 108;
+					case 1: return 8*16;
+					case 2: return 8*28;
+					case 3: return 8*44;
+					case 4: return 8*64;
+					case 5: return 8*86;
+					case 6: return 8*108;
 				}
 				break;
 
 			case QUALITY:
 				switch (version) {
-					case 1: return 13;
-					case 2: return 22;
-					case 3: return 34;
-					case 4: return 48;
-					case 5: return 62;
-					case 6: return 76;
+					case 1: return 8*13;
+					case 2: return 8*22;
+					case 3: return 8*34;
+					case 4: return 8*48;
+					case 5: return 8*62;
+					case 6: return 8*76;
 				}
 				break;
 
 			case HIGH_QUALITY:
 				switch (version) {
-					case 1: return 9;
-					case 2: return 16;
-					case 3: return 26;
-					case 4: return 36;
-					case 5: return 46;
-					case 6: return 60;
+					case 1: return 8*9;
+					case 2: return 8*16;
+					case 3: return 8*26;
+					case 4: return 8*36;
+					case 5: return 8*46;
+					case 6: return 8*60;
 				}
 				break;
 		}
@@ -867,7 +883,7 @@ public class QrCode {
 			// 4 bit mode indicator +
 			// 8 or 16 bit length indicator +
 			// 8 bits per string data +
-			// 4 bit end of data marker
+			// 4 bit end of data marker -> we always add this for simplicity, although we could leave it out under certain circumstances
 			result = new boolean[4 + blockLen + (8 * byteData.length) + 4];
 
 		} else {
@@ -876,7 +892,7 @@ public class QrCode {
 			// 4 bit mode indicator +
 			// 8 or 16 bit length indicator +
 			// 8 bits per string data +
-			// 4 bit end of data marker
+			// 4 bit end of data marker -> we always add this for simplicity, although we could leave it out under certain circumstances
 			result = new boolean[8 + 4 + blockLen + (8 * byteData.length) + 4];
 
 			// encode in UTF8
@@ -983,9 +999,45 @@ public class QrCode {
 		}
 	}
 
-	private void writeErrorCorrectionCode() {
+	private void writePaddingData(boolean[] datastream, int start) {
 
-		// TODO :: actually write the error correction code
+		// if the written datastream's length is samller than getDataLength(),
+		// while that is so, write 236, 17, 236, 17, again and again...
+		// THE STANDARD DEMANDS IT! \o/
+
+		int dataLength = getDataLength();
+
+		while (start < dataLength) {
+
+			datastream[start+0] = true;
+			datastream[start+1] = true;
+			datastream[start+2] = true;
+			datastream[start+3] = false;
+			datastream[start+4] = true;
+			datastream[start+5] = true;
+			datastream[start+6] = false;
+			datastream[start+7] = false;
+			start += 8;
+
+			if (start >= dataLength) {
+				break;
+			}
+
+			datastream[start+0] = false;
+			datastream[start+1] = false;
+			datastream[start+2] = false;
+			datastream[start+3] = true;
+			datastream[start+4] = false;
+			datastream[start+5] = false;
+			datastream[start+6] = false;
+			datastream[start+7] = true;
+			start += 8;
+		}
+	}
+
+	private void writeErrorCorrectionCode(boolean[] datastream) {
+
+		// TODO IMPORTANT :: actually write the error correction code
 	}
 
 	public String toString() {

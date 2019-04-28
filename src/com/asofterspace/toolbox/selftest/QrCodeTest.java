@@ -78,7 +78,7 @@ public class QrCodeTest implements Test {
 
 	public void writeSimpleQrCodeTest() {
 
-		TestUtils.start("Writing a Simple QR Code (Version 4)");
+		TestUtils.start("Writing a Simple QR Code");
 
 		QrCode qrCode = QrCodeFactory.constructFromString("Hello from A Softer Space! :)");
 
