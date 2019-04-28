@@ -694,175 +694,169 @@ public class QrCode {
 
 		detectMaskPattern();
 
-		// TODO :: also enable other versions!
-		if ((version == 2) || (version == 3) || (version == 4)) {
+		// message data can never be larger than actual QR code size
+		// (for small QR codes this is a waste of space, but they are small;
+		// for large QR codes it is nearly optimal anyway, so whatever)
+		boolean[] ds = new boolean[width*height];
 
-			// message data can never be larger than actual QR code size
-			// (for small QR codes this is a waste of space, but they are small;
-			// for large QR codes it is nearly optimal anyway, so whatever)
-			boolean[] ds = new boolean[width*height];
-
-			if (edcLevel == null) {
-				return null;
-			}
-
-			// read out the message data bits
-			switch (edcLevel) {
-
-				// H: high quality
-				case HIGH_QUALITY:
-					// TODO :: use readDataIntoStream here too!
-					readBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
-					readBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
-					readBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
-					readBitsIntoStream(ds, 24, bit(25, 16), bit(26, 16), bit(25, 15), bit(26, 15), bit(25, 14), bit(26, 14), bit(25, 13), bit(26, 13));
-					readBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
-					readBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
-					readBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
-					break;
-
-				// Q: good quality
-				case QUALITY:
-					// TODO :: implement
-					break;
-
-				// M: medium quality
-				case MEDIUM_QUALITY:
-					// TODO :: implement
-					break;
-
-				// L: low quality
-				case LOW_QUALITY:
-					currentX = width - 1;
-					currentY = height - 1;
-					goingUp = true;
-					readingRight = true;
-					readDataIntoStream(ds);
-					break;
-			}
-
-			boolean debug = false;
-
-			if (debug) {
-				StringBuilder debugInfo = new StringBuilder();
-				for (int i = 0; i < ds.length; i++) {
-					if (ds[i]) {
-						debugInfo.append("1");
-					} else {
-						debugInfo.append("0");
-					}
-				}
-				System.out.println(debugInfo);
-			}
-
-			StringBuilder result = new StringBuilder();
-
-			// now read the encoded data blocks...
-			int cur = 0;
-
-			// by default (if no ECI is given) use ASCII...
-			int eciNumber = 27;
-
-			int dataLength = getDataLength();
-
-			while (cur < dataLength) {
-				// ... with each data block starting with a 4 bit mode indicator
-				byte modeIndicator = bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
-				cur += 4;
-
-				switch (modeIndicator) {
-
-					// end of message
-					case 0:
-						return result.toString();
-
-					// numeric
-					case 1:
-						// TODO
-						break;
-
-					// alphanumeric
-					case 2:
-						// TODO
-						break;
-
-					// ascii bytes (unless the eci number was fiddled with)
-					case 4:
-
-						// the length of the field length depends on the version, of course .-.
-						int blockLength;
-
-						if (version > 9) {
-							blockLength = bitsToInt(ds, cur, 16);
-							cur += 16;
-						} else {
-							blockLength = bitsToInt(ds, cur, 8);
-							cur += 8;
-						}
-
-						switch (eciNumber) {
-							case 1:
-							case 3:
-								// ISO8859-1
-								result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.ISO_8859_1));
-								cur += 8*blockLength;
-								break;
-							case 25:
-								// UTF-16BE
-								result.append(new String(bitsToByteArr(ds, cur, 16*blockLength), StandardCharsets.UTF_16BE));
-								cur += 16*blockLength;
-								break;
-							case 26:
-								// UTF-8
-								result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.UTF_8));
-								cur += 8*blockLength;
-								break;
-							case 27:
-							case 170:
-								// ASCII
-								result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.US_ASCII));
-								cur += 8*blockLength;
-								break;
-							// TODO :: add others
-							default:
-								// as default, if we got nothing useful, just add as is and hope and pray...
-								for (int n = 0; n < blockLength; n++) {
-									result.append((char) bitsToInt(ds, cur, 8));
-									cur += 8;
-								}
-						}
-
-						break;
-
-					// ECI - extended channel interpretation
-					case 7:
-
-						if (ds[cur] == false) {
-							eciNumber = bitsToInt(ds, cur, 8);
-							cur += 8;
-						} else {
-							if (ds[cur+1] == false) {
-								eciNumber = bitsToInt(ds, cur, 16);
-								cur += 16;
-							} else {
-								eciNumber = bitsToInt(ds, cur, 24);
-								cur += 24;
-							}
-						}
-
-						break;
-
-					// kanji
-					case 8:
-						// TODO
-						break;
-				}
-			}
-
-			return result.toString();
+		if (edcLevel == null) {
+			return null;
 		}
 
-		return null;
+		// read out the message data bits
+		switch (edcLevel) {
+
+			// H: high quality
+			case HIGH_QUALITY:
+				// TODO :: use readDataIntoStream here too!
+				readBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
+				readBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
+				readBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
+				readBitsIntoStream(ds, 24, bit(25, 16), bit(26, 16), bit(25, 15), bit(26, 15), bit(25, 14), bit(26, 14), bit(25, 13), bit(26, 13));
+				readBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
+				readBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
+				readBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
+				break;
+
+			// Q: good quality
+			case QUALITY:
+				// TODO :: implement
+				break;
+
+			// M: medium quality
+			case MEDIUM_QUALITY:
+				// TODO :: implement
+				break;
+
+			// L: low quality
+			case LOW_QUALITY:
+				currentX = width - 1;
+				currentY = height - 1;
+				goingUp = true;
+				readingRight = true;
+				readDataIntoStream(ds);
+				break;
+		}
+
+		boolean debug = false;
+
+		if (debug) {
+			StringBuilder debugInfo = new StringBuilder();
+			for (int i = 0; i < ds.length; i++) {
+				if (ds[i]) {
+					debugInfo.append("1");
+				} else {
+					debugInfo.append("0");
+				}
+			}
+			System.out.println(debugInfo);
+		}
+
+		StringBuilder result = new StringBuilder();
+
+		// now read the encoded data blocks...
+		int cur = 0;
+
+		// by default (if no ECI is given) use ASCII...
+		int eciNumber = 27;
+
+		int dataLength = getDataLength();
+
+		while (cur < dataLength) {
+			// ... with each data block starting with a 4 bit mode indicator
+			byte modeIndicator = bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
+			cur += 4;
+
+			switch (modeIndicator) {
+
+				// end of message
+				case 0:
+					return result.toString();
+
+				// numeric
+				case 1:
+					// TODO
+					break;
+
+				// alphanumeric
+				case 2:
+					// TODO
+					break;
+
+				// ascii bytes (unless the eci number was fiddled with)
+				case 4:
+
+					// the length of the field length depends on the version, of course .-.
+					int blockLength;
+
+					if (version > 9) {
+						blockLength = bitsToInt(ds, cur, 16);
+						cur += 16;
+					} else {
+						blockLength = bitsToInt(ds, cur, 8);
+						cur += 8;
+					}
+
+					switch (eciNumber) {
+						case 1:
+						case 3:
+							// ISO8859-1
+							result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.ISO_8859_1));
+							cur += 8*blockLength;
+							break;
+						case 25:
+							// UTF-16BE
+							result.append(new String(bitsToByteArr(ds, cur, 16*blockLength), StandardCharsets.UTF_16BE));
+							cur += 16*blockLength;
+							break;
+						case 26:
+							// UTF-8
+							result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.UTF_8));
+							cur += 8*blockLength;
+							break;
+						case 27:
+						case 170:
+							// ASCII
+							result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.US_ASCII));
+							cur += 8*blockLength;
+							break;
+						// TODO :: add others
+						default:
+							// as default, if we got nothing useful, just add as is and hope and pray...
+							for (int n = 0; n < blockLength; n++) {
+								result.append((char) bitsToInt(ds, cur, 8));
+								cur += 8;
+							}
+					}
+
+					break;
+
+				// ECI - extended channel interpretation
+				case 7:
+
+					if (ds[cur] == false) {
+						eciNumber = bitsToInt(ds, cur, 8);
+						cur += 8;
+					} else {
+						if (ds[cur+1] == false) {
+							eciNumber = bitsToInt(ds, cur, 16);
+							cur += 16;
+						} else {
+							eciNumber = bitsToInt(ds, cur, 24);
+							cur += 24;
+						}
+					}
+
+					break;
+
+				// kanji
+				case 8:
+					// TODO
+					break;
+			}
+		}
+
+		return result.toString();
 	}
 
 	private boolean[] encodeData(String data) {
