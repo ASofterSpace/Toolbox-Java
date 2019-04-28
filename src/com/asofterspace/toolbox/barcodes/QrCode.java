@@ -98,6 +98,9 @@ public class QrCode {
 		writeErrorCorrectionCode(fullDatastream);
 
 		writeData(fullDatastream);
+
+		// TODO IMPORTANT :: add the error correction code for the edc level and mask pattern
+		// into the inaccessible area!
 	}
 
 	// creates a new empty qr code of a certain version

@@ -82,6 +82,14 @@ public class QrCodeTest implements Test {
 
 		QrCode qrCode = QrCodeFactory.constructFromString("Hello from A Softer Space! :)");
 
+		// DEBUG START
+		PpmFile imgFile = new PpmFile(AllTests.TEST_PATH + "/../qrtest.ppm");
+
+		imgFile.assign(qrCode.getDatapointsAsImage());
+
+		imgFile.save();
+		// DEBUG END
+
 		if ("Hello from A Softer Space! :)".equals(qrCode.getContent().trim())) {
 			TestUtils.succeed();
 			return;
