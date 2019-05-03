@@ -33,3 +33,4 @@ src/sourcefiles.list
 # test files
 config
 test
+*.ppm
