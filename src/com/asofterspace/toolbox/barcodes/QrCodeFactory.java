@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
+import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
 
 
@@ -24,6 +25,34 @@ public class QrCodeFactory {
 	public static QrCode constructFromString(String data) {
 
 		return new QrCode(data);
+	}
+
+	/**
+	 * creates an image containing a QR code with the given text
+	 */
+	public static Image createImageFromString(String data) {
+
+		QrCode code = new QrCode(data);
+
+		return code.getDatapointsAsImage();
+	}
+
+	/**
+	 * creates an image containing a QR code with the given text,
+	 * including the mandatory whitespace around the QR code itself
+	 */
+	public static Image createWhitespacedImageFromString(String data) {
+
+		QrCode code = new QrCode(data);
+
+		Image result = code.getDatapointsAsImage();
+
+		ColorRGB white = new ColorRGB(255, 255, 255);
+
+		// surround the QR code by three white modules
+		result.expand(3, 3, 3, 3, white);
+
+		return result;
 	}
 
 	/**

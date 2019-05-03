@@ -29,8 +29,8 @@ public class Image {
 
 		ColorRGB defaultCol = new ColorRGB();
 
-		for (int y = 0; y < getHeight(); y++) {
-			for (int x = 0; x < getWidth(); x++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				this.data[y][x] = defaultCol;
 			}
 		}
@@ -67,6 +67,67 @@ public class Image {
 
 	public void setPixel(int x, int y, ColorRGB pix) {
 		data[y][x] = pix;
+	}
+
+	/**
+	 * Add the amount of pixels to the top, right, bottom and left of the image,
+	 * filling the new space with the fillWith color
+	 * (negative values are allowed, in that case the image will shrink)
+	 */
+	public void expand(int top, int right, int bottom, int left, ColorRGB fillWith) {
+
+		int newwidth = width + right + left;
+
+		int newheight = height + top + bottom;
+
+		if (newheight < 0) {
+			newheight = 0;
+		}
+
+		if (newwidth < 0) {
+			newwidth = 0;
+		}
+
+		ColorRGB[][] newdata = new ColorRGB[newheight][newwidth];
+
+		if ((newheight > 0) && (newwidth > 0)) {
+
+			for (int y = 0; y < newheight; y++) {
+				for (int x = 0; x < newwidth; x++) {
+					newdata[y][x] = fillWith;
+				}
+			}
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if ((top+y >= 0) && (left+x >= 0) && (top+y < newheight) && (left+x < newwidth)) {
+						newdata[top+y][left+x] = data[y][x];
+					}
+				}
+			}
+		}
+
+		this.width = newwidth;
+
+		this.height = newheight;
+
+		this.data = newdata;
+	}
+
+	public void expandTop(int howMuch, ColorRGB fillWith) {
+		expand(howMuch, 0, 0, 0, fillWith);
+	}
+
+	public void expandRight(int howMuch, ColorRGB fillWith) {
+		expand(0, howMuch, 0, 0, fillWith);
+	}
+
+	public void expandBottom(int howMuch, ColorRGB fillWith) {
+		expand(0, 0, howMuch, 0, fillWith);
+	}
+
+	public void expandLeft(int howMuch, ColorRGB fillWith) {
+		expand(0, 0, 0, howMuch, fillWith);
 	}
 
 	@Override

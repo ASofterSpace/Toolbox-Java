@@ -10,6 +10,7 @@ import com.asofterspace.toolbox.io.DefaultImageFile;
 import com.asofterspace.toolbox.io.PpmFile;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
+import com.asofterspace.toolbox.utils.Image;
 
 
 public class QrCodeTest implements Test {
@@ -24,6 +25,8 @@ public class QrCodeTest implements Test {
 		readMediumQrCodeTest();
 
 		writeSimpleQrCodeTest();
+
+		writeQrCodeWithWhitespaceTest();
 	}
 
 	public void getBitsFromImageTest() {
@@ -78,9 +81,9 @@ public class QrCodeTest implements Test {
 
 	public void writeSimpleQrCodeTest() {
 
-		TestUtils.start("Writing a Simple QR Code");
+		TestUtils.start("Writing a simple QR Code");
 
-		QrCode qrCode = QrCodeFactory.constructFromString("Hello from A Softer Space! :)");
+		QrCode qrCode = QrCodeFactory.constructFromString("Hello, we are A Softer Space! :)");
 
 		// DEBUG START
 		PpmFile imgFile = new PpmFile(AllTests.TEST_PATH + "/../qrtest.ppm");
@@ -90,12 +93,31 @@ public class QrCodeTest implements Test {
 		imgFile.save();
 		// DEBUG END
 
-		if ("Hello from A Softer Space! :)".equals(qrCode.getContent().trim())) {
+		if ("Hello, we are A Softer Space! :)".equals(qrCode.getContent())) {
 			TestUtils.succeed();
 			return;
 		}
 
-		TestUtils.fail("We tried reading the QR Code that we just created - but the contents that we read were incorrect!");
+		TestUtils.fail("We tried creating a QR code surrounded by whitespace, but we did not get the correct result!");
+	}
+
+	public void writeQrCodeWithWhitespaceTest() {
+
+		TestUtils.start("Writing a QR Code with whitespace");
+
+		Image qrImage = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^");
+
+		// DEBUG START
+		PpmFile imgFile = new PpmFile(AllTests.TEST_PATH + "/../qrtest_whitespace.ppm");
+
+		imgFile.assign(qrImage);
+
+		imgFile.save();
+		// DEBUG END
+
+		// TODO :: add success possibility, otherwise the test is a bit harsh ^^
+
+		TestUtils.fail("We tried creating a QR code surrounded by whitespace, but we did not get the correct result!");
 	}
 
 }
