@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.barcodes.QrCode;
 import com.asofterspace.toolbox.barcodes.QrCodeFactory;
+import com.asofterspace.toolbox.barcodes.QrCodeQualityLevel;
 import com.asofterspace.toolbox.io.DefaultImageFile;
 import com.asofterspace.toolbox.io.PpmFile;
 import com.asofterspace.toolbox.test.Test;
@@ -23,6 +24,8 @@ public class QrCodeTest implements Test {
 		readSmallQrCodeTest();
 
 		readMediumQrCodeTest();
+
+		calculateQrErrorCodeTest();
 
 		writeSimpleQrCodeTest();
 
@@ -77,6 +80,19 @@ public class QrCodeTest implements Test {
 		}
 
 		TestUtils.fail("We tried reading a well-known QR Code - but the contents that we read were incorrect!");
+	}
+
+	public void calculateQrErrorCodeTest() {
+
+		TestUtils.start("Calculating some QR Error Codes");
+
+		QrCode qrCode = new QrCode(1);
+
+		System.out.println("addAlpha(0, 1): " + qrCode.addAlpha(0, 1));
+
+		qrCode.setEdcLevel(QrCodeQualityLevel.MEDIUM_QUALITY);
+
+		TestUtils.fail("We tried generating some error codes for a QR code but did not get the correct result!");
 	}
 
 	public void writeSimpleQrCodeTest() {

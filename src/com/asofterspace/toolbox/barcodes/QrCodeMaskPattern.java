@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
+import com.asofterspace.toolbox.Utils;
+
 
 /**
  * An enum containing the different possible QR code mask patterns
@@ -49,6 +51,11 @@ public enum QrCodeMaskPattern {
 	public int toInt() {
 
 		return intEncodedMaskPattern;
+	}
+
+	public boolean[] toBits() {
+
+		return Utils.intToBits(intEncodedMaskPattern);
 	}
 
 	/**

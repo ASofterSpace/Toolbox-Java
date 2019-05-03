@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.barcodes;
 
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
+import com.asofterspace.toolbox.Utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -45,6 +46,10 @@ public class QrCode {
 	private int currentY = 0;
 	private boolean goingUp = true;
 	private boolean readingRight = true;
+
+	// convert between numbers and alphas (exponents of 2 in the GF256 according to the QR standard)
+	private static int[] NUM_TO_ALPHA = null;
+	private static int[] ALPHA_TO_NUM = null;
 
 
 	// attempts to read from the image with one image pixel being one qr code pixel
@@ -111,6 +116,8 @@ public class QrCode {
 
 	private void initBasedOnVersion(int version) {
 
+		generateLookupTables();
+
 		this.version = version;
 
 		width = versionToWidth(version);
@@ -158,6 +165,34 @@ public class QrCode {
 				inaccessibleFields[x][y] = true;
 			}
 		}
+	}
+
+	private void generateLookupTables() {
+
+		if (NUM_TO_ALPHA != null) {
+			return;
+		}
+
+		NUM_TO_ALPHA = new int[256];
+		ALPHA_TO_NUM = new int[256];
+
+		int prev = 1;
+		NUM_TO_ALPHA[prev] = 0;
+		ALPHA_TO_NUM[0] = prev;
+
+		for (int i = 1; i < 256; i++) {
+			prev = prev * 2;
+
+			if (prev > 255) {
+				prev = prev ^ 285;
+			}
+
+			NUM_TO_ALPHA[prev] = i;
+			ALPHA_TO_NUM[i] = prev;
+		}
+
+		// we have a^0 = 1 AND a^255 = 1, but it is advantageous to insist on 1 = a^0, not 255 = a^0
+		NUM_TO_ALPHA[1] = 0;
 	}
 
 	private void writeInaccessibleFields() {
@@ -393,68 +428,6 @@ public class QrCode {
 		setRotatedBit(x, y, bit);
 	}
 
-	private byte bitsToNibble(boolean b1, boolean b2, boolean b3, boolean b4) {
-
-		return (byte) ((b1?8:0) + (b2?4:0) + (b3?2:0) + (b4?1:0));
-	}
-
-	private int bitsToInt(boolean[] datastream, int offset, int length) {
-
-		int result = 0;
-		int twoThePower = 1;
-
-		for (int i = length - 1; i >= 0; i--) {
-			if (datastream[offset + i]) {
-				result += twoThePower;
-			}
-			twoThePower *= 2;
-		}
-
-		return result;
-	}
-
-	private boolean[] intToBits(int input) {
-
-		int length = 32;
-
-		boolean[] result = new boolean[length];
-
-		int twoThePower = 1;
-
-		for (int i = length - 1; i >= 0; i--) {
-			if ((input / twoThePower) % 2 == 1) {
-				result[i] = true;
-			}
-			twoThePower *= 2;
-		}
-
-		return result;
-	}
-
-	private byte[] bitsToByteArr(boolean[] datastream, int offset, int length) {
-
-		int byteLen = length / 8;
-		byte[] result = new byte[byteLen];
-
-		for (int i = 0; i < byteLen; i++) {
-			result[i] = (byte) bitsToInt(datastream, offset + 8*i, 8);
-		}
-
-		return result;
-	}
-
-	private void readBitsIntoStream(boolean[] datastream, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
-
-		datastream[offset+0] = b8;
-		datastream[offset+1] = b7;
-		datastream[offset+2] = b6;
-		datastream[offset+3] = b5;
-		datastream[offset+4] = b4;
-		datastream[offset+5] = b3;
-		datastream[offset+6] = b2;
-		datastream[offset+7] = b1;
-	}
-
 	private void stepOneFieldAhead() {
 		if (readingRight) {
 			readingRight = false;
@@ -577,12 +550,25 @@ public class QrCode {
 		return false;
 	}
 
+	public QrCodeQualityLevel getEdcLevel() {
+		return edcLevel;
+	}
+
+	/**
+	 * The EDC level should be given in the constructor or autodetected during the construction;
+	 * this explicit setter is used for testing only!
+	 */
+	public void setEdcLevel(QrCodeQualityLevel newLevel) {
+
+		this.edcLevel = newLevel;
+	}
+
 	private void detectEdcLevel() {
 
 		boolean bit1 = rotatedBit(0, 8);
 		boolean bit2 = rotatedBit(1, 8);
 
-		edcLevel = QrCodeQualityLevel.fromInt((int) bitsToNibble(false, false, bit1, bit2) & 0xFF);
+		edcLevel = QrCodeQualityLevel.fromInt((int) Utils.bitsToNibble(false, false, bit1, bit2) & 0xFF);
 	}
 
 	private void writeEdcLevel() {
@@ -591,9 +577,7 @@ public class QrCode {
 			return;
 		}
 
-		int edcInt = edcLevel.toInt();
-
-		boolean[] edcBits = intToBits(edcInt);
+		boolean[] edcBits = edcLevel.toBits();
 
 		setRotatedBit(0, 8, edcBits[30]);
 		setRotatedBit(1, 8, edcBits[31]);
@@ -605,7 +589,7 @@ public class QrCode {
 		boolean bit2 = rotatedBit(3, 8);
 		boolean bit3 = rotatedBit(4, 8);
 
-		maskPattern = QrCodeMaskPattern.fromInt((int) bitsToNibble(false, bit1, bit2, bit3) & 0xFF);
+		maskPattern = QrCodeMaskPattern.fromInt((int) Utils.bitsToNibble(false, bit1, bit2, bit3) & 0xFF);
 	}
 
 	private void writeMaskPattern() {
@@ -614,9 +598,7 @@ public class QrCode {
 			return;
 		}
 
-		int maskInt = maskPattern.toInt();
-
-		boolean[] maskBits = intToBits(maskInt);
+		boolean[] maskBits = maskPattern.toBits();
 
 		setRotatedBit(2, 8, maskBits[29]);
 		setRotatedBit(3, 8, maskBits[30]);
@@ -681,6 +663,61 @@ public class QrCode {
 		return 0;
 	}
 
+	private int getEcCodewordsPerBlock() {
+
+		// TODO :: add the EC codewords per block for further versions!
+
+		// TODO :: add a function to get the amount of blocks, as needed in higher versions!
+
+		switch (edcLevel) {
+			case LOW_QUALITY:
+				switch (version) {
+					case 1: return 7;
+					case 2: return 10;
+					case 3: return 15;
+					case 4: return 20;
+					case 5: return 26;
+					case 6: return 18; // 2 blocks!
+				}
+				break;
+
+			case MEDIUM_QUALITY:
+				switch (version) {
+					case 1: return 10;
+					case 2: return 16;
+					case 3: return 26;
+					case 4: return 18; // 2 blocks!
+					case 5: return 24; // 2 blocks!
+					case 6: return 16; // 4 blocks!
+				}
+				break;
+
+			case QUALITY:
+				switch (version) {
+					case 1: return 13;
+					case 2: return 22;
+					case 3: return 18; // 2 blocks!
+					case 4: return 26; // 2 blocks!
+					case 5: return 18; // 2 blocks twice!
+					case 6: return 24; // 4 blocks!
+				}
+				break;
+
+			case HIGH_QUALITY:
+				switch (version) {
+					case 1: return 17;
+					case 2: return 28;
+					case 3: return 22; // 2 blocks!
+					case 4: return 16; // 4 blocks!
+					case 5: return 22; // 2 blocks twice!
+					case 6: return 28; // 4 blocks!
+				}
+				break;
+		}
+
+		return 0;
+	}
+
 	public String getContent() {
 
 		detectOrientation();
@@ -709,13 +746,13 @@ public class QrCode {
 			// H: high quality
 			case HIGH_QUALITY:
 				// TODO :: use readDataIntoStream here too!
-				readBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
-				readBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
-				readBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
-				readBitsIntoStream(ds, 24, bit(25, 16), bit(26, 16), bit(25, 15), bit(26, 15), bit(25, 14), bit(26, 14), bit(25, 13), bit(26, 13));
-				readBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
-				readBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
-				readBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
+				Utils.readBitsIntoStream(ds,  0, bit(27, 25), bit(28, 25), bit(27, 26), bit(28, 26), bit(27, 27), bit(28, 27), bit(27, 28), bit(28, 28));
+				Utils.readBitsIntoStream(ds,  8, bit(27, 17), bit(28, 17), bit(27, 18), bit(28, 18), bit(27, 19), bit(28, 19), bit(27, 20), bit(28, 20));
+				Utils.readBitsIntoStream(ds, 16, bit(27,  9), bit(28,  9), bit(27, 10), bit(28, 10), bit(27, 11), bit(28, 11), bit(27, 12), bit(28, 12));
+				Utils.readBitsIntoStream(ds, 24, bit(25, 16), bit(26, 16), bit(25, 15), bit(26, 15), bit(25, 14), bit(26, 14), bit(25, 13), bit(26, 13));
+				Utils.readBitsIntoStream(ds, 32, bit(25, 16+8), bit(26, 16+8), bit(25, 15+8), bit(26, 15+8), bit(25, 14+8), bit(26, 14+8), bit(25, 13+8), bit(26, 13+8));
+				Utils.readBitsIntoStream(ds, 40, bit(23, 25), bit(24, 25), bit(23, 26), bit(24, 26), bit(23, 27), bit(24, 27), bit(23, 28), bit(24, 28));
+				Utils.readBitsIntoStream(ds, 48, bit(23, 12), bit(24, 12), bit(23, 13), bit(24, 13), bit(23, 14), bit(24, 14), bit(23, 15), bit(24, 15));
 				break;
 
 			// Q: good quality
@@ -764,7 +801,7 @@ public class QrCode {
 
 		while (cur < dataLength) {
 			// ... with each data block starting with a 4 bit mode indicator
-			byte modeIndicator = bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
+			byte modeIndicator = Utils.bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
 			cur += 4;
 
 			switch (modeIndicator) {
@@ -790,10 +827,10 @@ public class QrCode {
 					int blockLength;
 
 					if (version > 9) {
-						blockLength = bitsToInt(ds, cur, 16);
+						blockLength = Utils.bitsToInt(ds, cur, 16);
 						cur += 16;
 					} else {
-						blockLength = bitsToInt(ds, cur, 8);
+						blockLength = Utils.bitsToInt(ds, cur, 8);
 						cur += 8;
 					}
 
@@ -801,30 +838,30 @@ public class QrCode {
 						case 1:
 						case 3:
 							// ISO8859-1
-							result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.ISO_8859_1));
+							result.append(new String(Utils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.ISO_8859_1));
 							cur += 8*blockLength;
 							break;
 						case 25:
 							// UTF-16BE
-							result.append(new String(bitsToByteArr(ds, cur, 16*blockLength), StandardCharsets.UTF_16BE));
+							result.append(new String(Utils.bitsToByteArr(ds, cur, 16*blockLength), StandardCharsets.UTF_16BE));
 							cur += 16*blockLength;
 							break;
 						case 26:
 							// UTF-8
-							result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.UTF_8));
+							result.append(new String(Utils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.UTF_8));
 							cur += 8*blockLength;
 							break;
 						case 27:
 						case 170:
 							// ASCII
-							result.append(new String(bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.US_ASCII));
+							result.append(new String(Utils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.US_ASCII));
 							cur += 8*blockLength;
 							break;
 						// TODO :: add others
 						default:
 							// as default, if we got nothing useful, just add as is and hope and pray...
 							for (int n = 0; n < blockLength; n++) {
-								result.append((char) bitsToInt(ds, cur, 8));
+								result.append((char) Utils.bitsToInt(ds, cur, 8));
 								cur += 8;
 							}
 					}
@@ -835,14 +872,14 @@ public class QrCode {
 				case 7:
 
 					if (ds[cur] == false) {
-						eciNumber = bitsToInt(ds, cur, 8);
+						eciNumber = Utils.bitsToInt(ds, cur, 8);
 						cur += 8;
 					} else {
 						if (ds[cur+1] == false) {
-							eciNumber = bitsToInt(ds, cur, 16);
+							eciNumber = Utils.bitsToInt(ds, cur, 16);
 							cur += 16;
 						} else {
-							eciNumber = bitsToInt(ds, cur, 24);
+							eciNumber = Utils.bitsToInt(ds, cur, 24);
 							cur += 24;
 						}
 					}
@@ -895,7 +932,7 @@ public class QrCode {
 			// encode in UTF8
 			int eciNumber = 26;
 
-			boolean[] eciNumberArr = intToBits(eciNumber);
+			boolean[] eciNumberArr = Utils.intToBits(eciNumber);
 			result[0] = eciNumberArr[24];
 			result[1] = eciNumberArr[25];
 			result[2] = eciNumberArr[26];
@@ -907,14 +944,14 @@ public class QrCode {
 			cur += 8;
 		}
 
-		boolean[] stringModeArr = intToBits(4);
+		boolean[] stringModeArr = Utils.intToBits(4);
 		result[cur+0] = stringModeArr[28];
 		result[cur+1] = stringModeArr[29];
 		result[cur+2] = stringModeArr[30];
 		result[cur+3] = stringModeArr[31];
 		cur += 4;
 
-		boolean[] strDataLengthArr = intToBits(byteData.length);
+		boolean[] strDataLengthArr = Utils.intToBits(byteData.length);
 		if (version > 9) {
 			result[cur+0] = strDataLengthArr[16];
 			result[cur+1] = strDataLengthArr[17];
@@ -946,7 +983,7 @@ public class QrCode {
 		}
 
 		for (byte curbyte : byteData) {
-			boolean[] curbits = intToBits(curbyte);
+			boolean[] curbits = Utils.intToBits(curbyte);
 			result[cur+0] = curbits[24];
 			result[cur+1] = curbits[25];
 			result[cur+2] = curbits[26];
@@ -1034,7 +1071,96 @@ public class QrCode {
 
 	private void writeErrorCorrectionCode(boolean[] datastream) {
 
-		// TODO IMPORTANT :: actually write the error correction code
+		int dataLength = getDataLength();
+
+		int[] messagePolynomial = Utils.bitsToUnsignedByteArr(datastream, 0, dataLength);
+
+		int[] errorCorrectionCodewords = getErrorCorrectionCodewords(messagePolynomial);
+
+		boolean[] errorCorrectionBits = Utils.unsignedBytesToBits(errorCorrectionCodewords);
+
+		System.arraycopy(errorCorrectionBits, 0, datastream, dataLength, errorCorrectionBits.length);
+	}
+
+	/**
+	 * add two alphas, so a^alphaOne + a^alphaTwo, in the Galois field 256
+	 * public for testing purposes
+	 */
+	public int addAlpha(int alphaOne, int alphaTwo) {
+
+		// we XOR the numerical representations of the alphas...
+		int result = ALPHA_TO_NUM[alphaOne] ^ ALPHA_TO_NUM[alphaTwo];
+
+		// ... and convert back to alphas
+		return NUM_TO_ALPHA[result];
+	}
+
+	/**
+	 * multiply two alphas, so a^alphaOne * a^alphaTwo, in the Galois field 256
+	 */
+	private int multiplyAlpha(int alphaOne, int alphaTwo) {
+
+		int alphaSum = alphaOne + alphaTwo;
+
+		return (alphaSum % 256) + (alphaSum / 256);
+	}
+
+	/**
+	 * gets the generator polynomial, expressed in alphas
+	 */
+	private int[] getGeneratorPolynomial(int ecAmount) {
+
+		int length = ecAmount - 1;
+
+		int[] result = new int[length + 2];
+
+		// we multiply (a^0 x + a^i) for increasing i from 0 to ecAmount
+		// so e.g. for i = 2 we have (a^0 x + a^0) (a^0 x + a^1) (a^0 x + a^2)
+
+		// therefore, we use recursion, ending at (a^0 x + a^0)...
+
+		if (ecAmount < 2) {
+			result[0] = 0;
+			result[1] = 0;
+			return result;
+		}
+
+		// ... and just generating the very last step here, in which we now have e.g.
+		//   (a^k x^2 + a^m x + a^n) (a^0 x + a^ecAmount)
+		// = a^k a^0 x^3 + (a^k a^ecAmount + a^m a^0) x^2 + (a^m a^ecAmount + a^n a^0) x + a^n a^ecAmount
+		// = a^k x^3 + (a^k a^ecAmount + a^m) x^2 + (a^m a^ecAmount + a^n) x + a^n a^ecAmount
+		int[] smallerPolynomial = getGeneratorPolynomial(ecAmount - 1);
+
+		result[0] = smallerPolynomial[0];
+		for (int i = 1; i < length + 1; i++) {
+			result[i] = addAlpha(multiplyAlpha(smallerPolynomial[i - 1], length), smallerPolynomial[i]);
+		}
+		result[length + 1] = multiplyAlpha(smallerPolynomial[length], length);
+
+		return result;
+	}
+
+	/**
+	 * public for testing, not intended for outside use
+	 */
+	public int[] getErrorCorrectionCodewords(int[] messagePolynomial) {
+
+		// TODO IMPORTANT :: actually calculate the error correction code correctly
+
+		int ecAmount = getEcCodewordsPerBlock();
+
+		// we get the generator polynomial in alpha notation
+		System.out.println("we are getting the generator polynomial for ecAmount: " + ecAmount);
+		int[] generatorPolynomial = getGeneratorPolynomial(ecAmount);
+		System.out.println("we are generating:");
+		for (int g : generatorPolynomial) {
+			System.out.println(g + ", ");
+		}
+		System.out.println("done");
+
+		int[] result = new int[ecAmount];
+
+		return result;
 	}
 
 	public String toString() {

@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
+import com.asofterspace.toolbox.Utils;
+
 
 /**
  * An enum containing the different possible QR code quality levels
@@ -52,6 +54,11 @@ public enum QrCodeQualityLevel {
 	public int toInt() {
 
 		return intEncodedLevel;
+	}
+
+	public boolean[] toBits() {
+
+		return Utils.intToBits(intEncodedLevel);
 	}
 
 	public String toString() {
