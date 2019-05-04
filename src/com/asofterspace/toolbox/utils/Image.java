@@ -82,6 +82,39 @@ public class Image {
 		}
 	}
 
+	public void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
+
+		// ensure we draw from top left to bottom right
+		if (startX > endX) {
+			int buf = endX;
+			endX = startX;
+			startX = buf;
+		}
+
+		if (startY > endY) {
+			int buf = endY;
+			endY = startY;
+			startY = buf;
+		}
+
+		// figure out how far we draw horizontally and vertically
+		int lineWidth = endX - startX;
+		int lineHeight = endY - startY;
+
+		// actually do the drawing - mainly horizontally or mainly vertically
+		if (lineWidth > lineHeight) {
+			for (int x = startX; x <= endX; x++) {
+				int y = startY + (((x - startX) * lineHeight) / lineWidth);
+				data[y][x] = lineColor;
+			}
+		} else {
+			for (int y = startY; y <= endY; y++) {
+				int x = startX + (((y - startY) * lineWidth) / lineHeight);
+				data[y][x] = lineColor;
+			}
+		}
+	}
+
 	/**
 	 * Resample the image by some amount horizontally and vertically
 	 * This does a straightforward resample, not a filtered resize -
