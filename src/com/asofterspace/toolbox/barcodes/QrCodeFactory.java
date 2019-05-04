@@ -20,7 +20,19 @@ public class QrCodeFactory {
 	 */
 	public static QrCode createFromString(String data) {
 
-		QrCodeQualityLevel edcLevel = QrCodeQualityLevel.LOW_QUALITY;
+		return createFromString(data, null, null);
+	}
+
+	/**
+	 * creates a QR Code based on a text that you want to encode,
+	 * using a specific edc level and a specific mask pattern
+	 * (leave any of these two at null to use the default one)
+	 */
+	public static QrCode createFromString(String data, QrCodeQualityLevel edcLevel, QrCodeMaskPattern maskPattern) {
+
+		if (edcLevel == null) {
+			edcLevel = QrCodeQualityLevel.LOW_QUALITY;
+		}
 
 		// we iterate over versions (but skipping some) to find the correct one, ...
 		int version = 1;
@@ -63,13 +75,45 @@ public class QrCodeFactory {
 		// add error correction codes to the fullDatastream
 		result.writeErrorCorrectionCode(fullDatastream);
 
-		// TODO IMPORTANT :: actually decide upon the pattern based on what we want to encode!
-		result.setMaskPattern(QrCodeMaskPattern.PATTERN_0);
+		// if no mask pattern is explicitly requested (which is the usual case - a pattern
+		// should only be explicitly requested for testing, or for other nefarious purposes
+		// like to show examples during teaching about QR codes or somesuch ^^)...
+		if (maskPattern == null) {
 
-		// actually write the data (data + padding + error correction) into the QR code
+			// ... then actually decide upon the pattern based on what we want to encode!
+			QrCodeMaskPattern bestPattern = null;
+			int bestPenalty = Integer.MAX_VALUE;
+
+			// to do so, iterate over all possible patterns...
+			for (QrCodeMaskPattern curPattern : QrCodeMaskPattern.values()) {
+
+				// ... for each one, pretend that we are using it and write all data with it...
+				result.setMaskPattern(curPattern);
+				result.writeData(fullDatastream);
+				result.writeEdcLevel();
+				result.writeMaskPattern();
+				result.writeFormatStringErrorCorrection();
+
+				// ... then calculate its overall penalty...
+				currentPenalty = result.calculatePatternPenalty();
+
+				// ... and if it is lower than the current best contender, the current one is the best for now!
+				if (currentPenalty < bestPenalty) {
+					bestPattern = curPattern;
+					bestPenalty = currentPenalty;
+				}
+			}
+
+			maskPattern = bestPattern;
+		}
+
+		// now actually apply the pattern...
+		result.setMaskPattern(maskPattern);
+
+		// ... and really write the data (data + padding + error correction) into the QR code
 		result.writeData(fullDatastream);
 
-		// now write the format string, consisting of edc level, mask pattern and their own error correction
+		// also write the format string, consisting of edc level, mask pattern and their own error correction
 		result.writeEdcLevel();
 		result.writeMaskPattern();
 		result.writeFormatStringErrorCorrection();

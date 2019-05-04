@@ -117,7 +117,7 @@ public class QrCodeTest implements Test {
 
 		TestUtils.start("Writing a simple QR Code");
 
-		QrCode qrCode = QrCodeFactory.createFromString("Hello, we are A Softer Space! :)");
+		QrCode qrCode = QrCodeFactory.createFromString("Hello, we are A Softer Space! :)", null, QrCodeMaskPattern.PATTERN_0);
 		Image generatedQrImg = qrCode.toImage();
 
 		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest.ppm");
@@ -149,7 +149,7 @@ public class QrCodeTest implements Test {
 
 		TestUtils.start("Writing a QR Code with whitespace");
 
-		Image generatedQrImg = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^");
+		Image generatedQrImg = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^", null, QrCodeMaskPattern.PATTERN_0);
 
 		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_whitespace.ppm");
 		Image loadedQrImg = imgFile.getImage();

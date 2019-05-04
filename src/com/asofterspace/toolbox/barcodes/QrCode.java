@@ -698,6 +698,31 @@ public class QrCode {
 		System.arraycopy(errorCorrectionBits, 0, datastream, dataLength, errorCorrectionBits.length);
 	}
 
+	/**
+	 * calculate the mask pattern penalty based on the current data
+	 * (just as it is written right now)
+	 */
+	int calculatePatternPenalty() {
+
+		// we start with a perfect score: no penalty!
+		// (no worries, it WILL go downhill from here...)
+		int result = 0;
+
+		// evaluation condition 1 - penalty for five same bits in a row (or column)
+		// TODO
+
+		// evaluation condition 2 - penalty for each same bit 2x2 area
+		// TODO
+
+		// evaluation condition 3 - penalty for patterns that look like finder patterns
+		// TODO
+
+		// evaluation condition 4 - penalty for uneven distribution of white and black
+		// TODO
+
+		return result;
+	}
+
 	public String toString() {
 
 		return "QR Code (version " + version + ", " + edcLevel + " error correction level) containing: " + getContent();
