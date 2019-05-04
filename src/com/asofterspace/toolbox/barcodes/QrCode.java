@@ -708,17 +708,138 @@ public class QrCode {
 		// (no worries, it WILL go downhill from here...)
 		int result = 0;
 
+
 		// evaluation condition 1 - penalty for five same bits in a row (or column)
-		// TODO
+
+		// horizontal
+		for (int x = 0; x < width; x++) {
+			boolean currentColor = !data[x][0];
+			int currentRepetitions = 0;
+			for (int y = 0; y < height; y++) {
+				if (data[x][y] == currentColor) {
+					currentRepetitions++;
+					if (currentRepetitions == 5) {
+						result += 3;
+					}
+					if (currentRepetitions > 5) {
+						result++;
+					}
+				} else {
+					currentColor = !currentColor;
+					currentRepetitions = 1;
+				}
+			}
+		}
+
+		// vertical
+		for (int y = 0; y < height; y++) {
+			boolean currentColor = !data[0][y];
+			int currentRepetitions = 0;
+			for (int x = 0; x < width; x++) {
+				if (data[x][y] == currentColor) {
+					currentRepetitions++;
+					if (currentRepetitions == 5) {
+						result += 3;
+					}
+					if (currentRepetitions > 5) {
+						result++;
+					}
+				} else {
+					currentColor = !currentColor;
+					currentRepetitions = 1;
+				}
+			}
+		}
+
 
 		// evaluation condition 2 - penalty for each same bit 2x2 area
-		// TODO
+		for (int x = 0; x < width-1; x++) {
+			for (int y = 0; y < height-1; y++) {
+				if ((data[x][y] == data[x+1][y]) && (data[x][y] == data[x][y+1]) && (data[x][y+1] == data[x+1][y+1])) {
+					result += 3;
+				}
+			}
+		}
+
 
 		// evaluation condition 3 - penalty for patterns that look like finder patterns
-		// TODO
+
+		// horizontal
+		for (int x = 0; x < width-10; x++) {
+			for (int y = 0; y < height; y++) {
+				if (data[x][y] && !data[x+1][y] && data[x+2][y] && data[x+3][y] && data[x+4][y] && !data[x+5][y] &&
+					data[x+6][y] && !data[x+7][y] && !data[x+8][y] && !data[x+9][y] && !data[x+10][y]) {
+					result += 40;
+				}
+				if (!data[x][y] && !data[x+1][y] && !data[x+2][y] && !data[x+3][y] && data[x+4][y] &&
+					!data[x+5][y] && data[x+6][y] && data[x+7][y] && data[x+8][y] && !data[x+9][y] && data[x+10][y]) {
+					result += 40;
+				}
+			}
+		}
+
+		// vertical
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height-10; y++) {
+				if (data[x][y] && !data[x][y+1] && data[x][y+2] && data[x][y+3] && data[x][y+4] && !data[x][y+5] &&
+					data[x][y+6] && !data[x][y+7] && !data[x][y+8] && !data[x][y+9] && !data[x][y+10]) {
+					result += 40;
+				}
+				if (!data[x][y] && !data[x][y+1] && !data[x][y+2] && !data[x][y+3] && data[x][y+4] &&
+					!data[x][y+5] && data[x][y+6] && data[x][y+7] && data[x][y+8] && !data[x][y+9] && data[x][y+10]) {
+					result += 40;
+				}
+			}
+		}
+
 
 		// evaluation condition 4 - penalty for uneven distribution of white and black
-		// TODO
+
+		// find total
+		int totalBits = width * height;
+
+		// find dark ones
+		int darkBits = 0;
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (data[x][y]) {
+					darkBits++;
+				}
+			}
+		}
+
+		// get percentage
+		int percDark = (100 * darkBits) / totalBits;
+
+		// put percentage in five-percent-brackets
+		int prevFive = (percDark / 5) * 5;
+		int nextFive = prevFive + 5;
+
+		// subtract fifty
+		prevFive -= 50;
+		nextFive -= 50;
+
+		// get absolutes
+		if (prevFive < 0) {
+			prevFive = -prevFive;
+		}
+		if (nextFive < 0) {
+			nextFive = -nextFive;
+		}
+
+		// divide by five again .-.
+		prevFive /= 5;
+		nextFive /= 5;
+
+		// take the smaller one
+		int smallOne = nextFive;
+		if (prevFive < nextFive) {
+			smallOne = prevFive;
+		}
+
+		// add ten times that to the result .-.
+		result += 10 * smallOne;
+
 
 		return result;
 	}

@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.barcodes.QrCode;
 import com.asofterspace.toolbox.barcodes.QrCodeFactory;
+import com.asofterspace.toolbox.barcodes.QrCodeMaskPattern;
 import com.asofterspace.toolbox.barcodes.QrCodeQualityLevel;
 import com.asofterspace.toolbox.barcodes.QrCodeUtils;
 import com.asofterspace.toolbox.io.DefaultImageFile;
@@ -33,6 +34,8 @@ public class QrCodeTest implements Test {
 		writeAndReadQrCodeTest();
 
 		writeQrCodeWithWhitespaceTest();
+
+		writeSlightlyLargerQrCodeTest();
 	}
 
 	public void getBitsFromImageTest() {
@@ -117,18 +120,29 @@ public class QrCodeTest implements Test {
 
 		TestUtils.start("Writing a simple QR Code");
 
-		QrCode qrCode = QrCodeFactory.createFromString("Hello, we are A Softer Space! :)", null, QrCodeMaskPattern.PATTERN_0);
+		QrCode qrCode = QrCodeFactory.createFromString("Hello, we are A Softer Space! :)");
 		Image generatedQrImg = qrCode.toImage();
 
-		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest.ppm");
+		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_simple_automask.ppm");
 		Image loadedQrImg = imgFile.getImage();
 
-		if (generatedQrImg.equals(loadedQrImg)) {
-			TestUtils.succeed();
+		if (!generatedQrImg.equals(loadedQrImg)) {
+			TestUtils.fail("We tried creating a simple QR code using an automatically chosen mask pattern, but we did not get the correct result!");
 			return;
 		}
 
-		TestUtils.fail("We tried creating a simple QR code, but we did not get the correct result!");
+		qrCode = QrCodeFactory.createFromString("Hello, we are A Softer Space! :)", null, QrCodeMaskPattern.PATTERN_0);
+		generatedQrImg = qrCode.toImage();
+
+		imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_simple.ppm");
+		loadedQrImg = imgFile.getImage();
+
+		if (!generatedQrImg.equals(loadedQrImg)) {
+			TestUtils.fail("We tried creating a simple QR code using a fixed mask pattern, but we did not get the correct result!");
+			return;
+		}
+
+		TestUtils.succeed();
 	}
 
 	public void writeAndReadQrCodeTest() {
@@ -149,9 +163,36 @@ public class QrCodeTest implements Test {
 
 		TestUtils.start("Writing a QR Code with whitespace");
 
-		Image generatedQrImg = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^", null, QrCodeMaskPattern.PATTERN_0);
+		Image generatedQrImg = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^");
 
-		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_whitespace.ppm");
+		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_whitespace_automask.ppm");
+		Image loadedQrImg = imgFile.getImage();
+
+		if (!generatedQrImg.equals(loadedQrImg)) {
+			TestUtils.fail("We tried creating a QR code surrounded by whitespace using an automatically chosen mask pattern, but we did not get the correct result!");
+			return;
+		}
+
+		generatedQrImg = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^", null, QrCodeMaskPattern.PATTERN_0);
+
+		imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_whitespace.ppm");
+		loadedQrImg = imgFile.getImage();
+
+		if (!generatedQrImg.equals(loadedQrImg)) {
+			TestUtils.fail("We tried creating a QR code surrounded by whitespace using a fixed mask pattern, but we did not get the correct result!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void writeSlightlyLargerQrCodeTest() {
+
+		TestUtils.start("Writing a slightly larger QR Code");
+
+		Image generatedQrImg = QrCodeFactory.createImageFromString("The mask pattern here is chosen automagically!");
+
+		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_large_automask.ppm");
 		Image loadedQrImg = imgFile.getImage();
 
 		if (generatedQrImg.equals(loadedQrImg)) {
@@ -159,7 +200,8 @@ public class QrCodeTest implements Test {
 			return;
 		}
 
-		TestUtils.fail("We tried creating a QR code surrounded by whitespace, but we did not get the correct result!");
+		TestUtils.fail("We tried creating a QR code with an automatically chosen mask pattern, but we did not get the correct result!");
 	}
+
 
 }

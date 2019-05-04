@@ -95,7 +95,7 @@ public class QrCodeFactory {
 				result.writeFormatStringErrorCorrection();
 
 				// ... then calculate its overall penalty...
-				currentPenalty = result.calculatePatternPenalty();
+				int currentPenalty = result.calculatePatternPenalty();
 
 				// ... and if it is lower than the current best contender, the current one is the best for now!
 				if (currentPenalty < bestPenalty) {
@@ -126,7 +126,17 @@ public class QrCodeFactory {
 	 */
 	public static Image createImageFromString(String data) {
 
-		QrCode code = createFromString(data);
+		return createImageFromString(data, null, null);
+	}
+
+	/**
+	 * creates an image containing a QR code with the given text,
+	 * using a specific edc level and a specific mask pattern
+	 * (leave any of these two at null to use the default one)
+	 */
+	public static Image createImageFromString(String data, QrCodeQualityLevel edcLevel, QrCodeMaskPattern maskPattern) {
+
+		QrCode code = createFromString(data, edcLevel, maskPattern);
 
 		return code.toImage();
 	}
@@ -137,7 +147,18 @@ public class QrCodeFactory {
 	 */
 	public static Image createWhitespacedImageFromString(String data) {
 
-		Image result = createImageFromString(data);
+		return createWhitespacedImageFromString(data, null, null);
+	}
+
+	/**
+	 * creates an image containing a QR code with the given text,
+	 * including the mandatory whitespace around the QR code itself,
+	 * using a specific edc level and a specific mask pattern
+	 * (leave any of these two at null to use the default one)
+	 */
+	public static Image createWhitespacedImageFromString(String data, QrCodeQualityLevel edcLevel, QrCodeMaskPattern maskPattern) {
+
+		Image result = createImageFromString(data, edcLevel, maskPattern);
 
 		ColorRGB white = new ColorRGB(255, 255, 255);
 
