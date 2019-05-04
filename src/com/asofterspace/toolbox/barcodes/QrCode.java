@@ -96,13 +96,18 @@ public class QrCode {
 
 		// expand the datastream to also have space for the padding and the error correction codes
 		boolean[] fullDatastream = new boolean[width*height];
+
+		// add actual data to the new fullDatastream
 		System.arraycopy(datastream, 0, fullDatastream, 0, datastream.length);
 
+		// add padding between data and error correction codes to the fullDatastream
 		writePaddingData(fullDatastream, datastream.length);
 
-		writeData(fullDatastream);
-
+		// add error correction codes to the fullDatastream
 		writeErrorCorrectionCode(fullDatastream);
+
+		// actually write the data into the QR code
+		writeData(fullDatastream);
 
 		// TODO IMPORTANT :: add the error correction code for the edc level and mask pattern
 		// into the inaccessible area!
