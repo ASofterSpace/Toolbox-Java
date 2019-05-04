@@ -118,6 +118,38 @@ public class Image {
 		this.height = newHeight;
 	}
 
+	public void rotateLeft() {
+
+		int newHeight = width;
+		int newWidth = height;
+
+		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				rotatedData[y][x] = data[x][width - y - 1];
+			}
+		}
+
+		this.data = rotatedData;
+	}
+
+	public void rotateRight() {
+
+		int newHeight = width;
+		int newWidth = height;
+
+		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				rotatedData[y][x] = data[height - x - 1][y];
+			}
+		}
+
+		this.data = rotatedData;
+	}
+
 	/**
 	 * Add the amount of pixels to the top, right, bottom and left of the image,
 	 * filling the new space with the fillWith color
