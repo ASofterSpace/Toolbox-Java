@@ -88,9 +88,28 @@ public class QrCodeTest implements Test {
 
 		QrCode qrCode = new QrCode(1);
 
-		System.out.println("addAlpha(0, 1): " + qrCode.addAlpha(0, 1));
+		if (25 != qrCode.addAlpha(0, 1)) {
+			TestUtils.fail("We tried generating some error codes for a QR code but already adding some alpha values did not work out!");
+		}
+
+		int[] genPoly = qrCode.getGeneratorPolynomialAlphas(3);
+
+		if ((genPoly.length != 4) || (genPoly[0] != 0) || (genPoly[1] != 198) || (genPoly[2] != 199) || (genPoly[3] != 3)) {
+			TestUtils.fail("We tried generating some error codes for a QR code but already generating a generator polynomial failed!");
+		}
 
 		qrCode.setEdcLevel(QrCodeQualityLevel.MEDIUM_QUALITY);
+
+		int[] messagePolynomial = {64, 116, 214, 86, 247, 114, 3, 162, 144, 236, 17, 236, 17, 236, 17, 236};
+
+		int[] result = qrCode.getErrorCorrectionCodewords(messagePolynomial);
+
+		if ((result[0] == 215) && (result[1] == 212) && (result[2] == 220) && (result[3] ==  27) &&
+			(result[4] == 104) && (result[5] == 235) && (result[6] ==  76) && (result[7] == 122) &&
+			(result[8] == 104) && (result[9] ==   8)) {
+			TestUtils.succeed();
+			return;
+		}
 
 		TestUtils.fail("We tried generating some error codes for a QR code but did not get the correct result!");
 	}
@@ -114,7 +133,7 @@ public class QrCodeTest implements Test {
 			return;
 		}
 
-		TestUtils.fail("We tried creating a QR code surrounded by whitespace, but we did not get the correct result!");
+		TestUtils.fail("We tried creating a simple QR code, but we did not get the correct result!");
 	}
 
 	public void writeQrCodeWithWhitespaceTest() {

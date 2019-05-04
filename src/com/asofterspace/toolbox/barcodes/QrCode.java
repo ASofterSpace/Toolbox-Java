@@ -100,9 +100,9 @@ public class QrCode {
 
 		writePaddingData(fullDatastream, datastream.length);
 
-		writeErrorCorrectionCode(fullDatastream);
-
 		writeData(fullDatastream);
+
+		writeErrorCorrectionCode(fullDatastream);
 
 		// TODO IMPORTANT :: add the error correction code for the edc level and mask pattern
 		// into the inaccessible area!
@@ -778,15 +778,15 @@ public class QrCode {
 		boolean debug = false;
 
 		if (debug) {
-			StringBuilder debugInfo = new StringBuilder();
+			StringBuilder Info = new StringBuilder();
 			for (int i = 0; i < ds.length; i++) {
 				if (ds[i]) {
-					debugInfo.append("1");
+					Info.append("1");
 				} else {
-					debugInfo.append("0");
+					Info.append("0");
 				}
 			}
-			System.out.println(debugInfo);
+			System.out.println(Info);
 		}
 
 		StringBuilder result = new StringBuilder();
@@ -1107,8 +1107,9 @@ public class QrCode {
 
 	/**
 	 * gets the generator polynomial, expressed in alphas
+	 * public for testing
 	 */
-	private int[] getGeneratorPolynomial(int ecAmount) {
+	public int[] getGeneratorPolynomialAlphas(int ecAmount) {
 
 		int length = ecAmount - 1;
 
@@ -1129,7 +1130,7 @@ public class QrCode {
 		//   (a^k x^2 + a^m x + a^n) (a^0 x + a^ecAmount)
 		// = a^k a^0 x^3 + (a^k a^ecAmount + a^m a^0) x^2 + (a^m a^ecAmount + a^n a^0) x + a^n a^ecAmount
 		// = a^k x^3 + (a^k a^ecAmount + a^m) x^2 + (a^m a^ecAmount + a^n) x + a^n a^ecAmount
-		int[] smallerPolynomial = getGeneratorPolynomial(ecAmount - 1);
+		int[] smallerPolynomial = getGeneratorPolynomialAlphas(ecAmount - 1);
 
 		result[0] = smallerPolynomial[0];
 		for (int i = 1; i < length + 1; i++) {
@@ -1138,6 +1139,24 @@ public class QrCode {
 		result[length + 1] = multiplyAlpha(smallerPolynomial[length], length);
 
 		return result;
+	}
+
+	private int[] polynomialToNum(int[] polynomial) {
+
+		for (int i = 0; i < polynomial.length; i++) {
+			polynomial[i] = ALPHA_TO_NUM[polynomial[i]];
+		}
+
+		return polynomial;
+	}
+
+	private int[] polynomialToAlpha(int[] polynomial) {
+
+		for (int i = 0; i < polynomial.length; i++) {
+			polynomial[i] = NUM_TO_ALPHA[polynomial[i]];
+		}
+
+		return polynomial;
 	}
 
 	/**
@@ -1149,16 +1168,40 @@ public class QrCode {
 
 		int ecAmount = getEcCodewordsPerBlock();
 
-		// we get the generator polynomial in alpha notation
-		System.out.println("we are getting the generator polynomial for ecAmount: " + ecAmount);
-		int[] generatorPolynomial = getGeneratorPolynomial(ecAmount);
-		System.out.println("we are generating:");
-		for (int g : generatorPolynomial) {
-			System.out.println(g + ", ");
-		}
-		System.out.println("done");
-
 		int[] result = new int[ecAmount];
+
+		// we get the generator polynomial in alpha notation
+		int[] generatorPolynomial = getGeneratorPolynomialAlphas(ecAmount);
+
+		// we transfer the generator polynomial to numerical notation
+		generatorPolynomial = polynomialToNum(generatorPolynomial);
+
+		// multiply message polynomial by x^n, which basically just means making the array n wider,
+		// where n is the ecAmount
+		int[] messagePolyWider = new int[messagePolynomial.length + ecAmount];
+		System.arraycopy(messagePolynomial, 0, messagePolyWider, 0, messagePolynomial.length);
+
+		// and some space to work within...
+		int[] curGenPolyWider = new int[messagePolyWider.length];
+
+		// multiply generator poly by lead term of message poly
+		for (int curpos = 0; curpos < messagePolynomial.length; curpos++) {
+			int leadTerm = messagePolyWider[curpos];
+			leadTerm = NUM_TO_ALPHA[leadTerm];
+			for (int j = 0; j < messagePolyWider.length; j++) {
+				int i = j - curpos;
+				if ((i > 0) && (i < generatorPolynomial.length) && (generatorPolynomial[i] > 0)) {
+					curGenPolyWider[j] = ALPHA_TO_NUM[multiplyAlpha(leadTerm, NUM_TO_ALPHA[generatorPolynomial[i]])];
+				} else {
+					curGenPolyWider[j] = 0;
+				}
+				// XOR generatorPolyWider with the message polynomial
+				messagePolyWider[j] = curGenPolyWider[j] ^ messagePolyWider[j];
+			}
+		}
+
+		// assign resulting coefficients as result
+		System.arraycopy(messagePolyWider, messagePolyWider.length - ecAmount, result, 0, ecAmount);
 
 		return result;
 	}
