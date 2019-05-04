@@ -58,7 +58,23 @@ public enum QrCodeQualityLevel {
 
 	public boolean[] toBits() {
 
-		return Utils.intToBits(intEncodedLevel);
+		boolean[] result = new boolean[2];
+
+		boolean[] bits = Utils.intToBits(intEncodedLevel);
+
+		result[0] = bits[30];
+		result[1] = bits[31];
+
+		return result;
+	}
+
+	public boolean[] toNonXoredBits() {
+
+		boolean[] result = toBits();
+
+		result[0] = !result[0];
+
+		return result;
 	}
 
 	public String toString() {

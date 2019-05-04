@@ -55,7 +55,25 @@ public enum QrCodeMaskPattern {
 
 	public boolean[] toBits() {
 
-		return Utils.intToBits(intEncodedMaskPattern);
+		boolean[] result = new boolean[3];
+
+		boolean[] bits = Utils.intToBits(intEncodedMaskPattern);
+
+		result[0] = bits[29];
+		result[1] = bits[30];
+		result[2] = bits[31];
+
+		return result;
+	}
+
+	public boolean[] toNonXoredBits() {
+
+		boolean[] result = toBits();
+
+		result[0] = !result[0];
+		result[2] = !result[2];
+
+		return result;
 	}
 
 	/**

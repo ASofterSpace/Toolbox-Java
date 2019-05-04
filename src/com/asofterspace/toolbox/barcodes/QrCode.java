@@ -87,13 +87,6 @@ public class QrCode {
 
 		writeInaccessibleFields();
 
-		writeEdcLevel();
-
-		// TODO IMPORTANT :: actually decide upon the pattern based on what we want to encode!
-		this.maskPattern = QrCodeMaskPattern.PATTERN_0;
-
-		writeMaskPattern();
-
 		// expand the datastream to also have space for the padding and the error correction codes
 		boolean[] fullDatastream = new boolean[width*height];
 
@@ -106,8 +99,16 @@ public class QrCode {
 		// add error correction codes to the fullDatastream
 		writeErrorCorrectionCode(fullDatastream);
 
-		// actually write the data into the QR code
+		// TODO IMPORTANT :: actually decide upon the pattern based on what we want to encode!
+		this.maskPattern = QrCodeMaskPattern.PATTERN_0;
+
+		// actually write the data (data + padding + error correction) into the QR code
 		writeData(fullDatastream);
+
+		// now write the format string, consisting of edc level, mask pattern and their own error correction
+		writeEdcLevel();
+		writeMaskPattern();
+		writeFormatStringErrorCorrection();
 
 		// TODO IMPORTANT :: add the error correction code for the edc level and mask pattern
 		// into the inaccessible area!
@@ -584,8 +585,11 @@ public class QrCode {
 
 		boolean[] edcBits = edcLevel.toBits();
 
-		setRotatedBit(0, 8, edcBits[30]);
-		setRotatedBit(1, 8, edcBits[31]);
+		setRotatedBit(0, 8, edcBits[0]);
+		setRotatedBit(1, 8, edcBits[1]);
+
+		setRotatedBit(8, height - 1, edcBits[0]);
+		setRotatedBit(8, height - 2, edcBits[1]);
 	}
 
 	private void detectMaskPattern() {
@@ -605,9 +609,78 @@ public class QrCode {
 
 		boolean[] maskBits = maskPattern.toBits();
 
-		setRotatedBit(2, 8, maskBits[29]);
-		setRotatedBit(3, 8, maskBits[30]);
-		setRotatedBit(4, 8, maskBits[31]);
+		setRotatedBit(2, 8, maskBits[0]);
+		setRotatedBit(3, 8, maskBits[1]);
+		setRotatedBit(4, 8, maskBits[2]);
+
+		setRotatedBit(8, height - 3, maskBits[0]);
+		setRotatedBit(8, height - 4, maskBits[1]);
+		setRotatedBit(8, height - 5, maskBits[2]);
+	}
+
+	private void writeFormatStringErrorCorrection() {
+
+		boolean[] formatPolynomial = new boolean[15];
+
+		boolean[] edcBits = edcLevel.toNonXoredBits();
+		formatPolynomial[0] = edcBits[0];
+		formatPolynomial[1] = edcBits[1];
+
+		boolean[] maskBits = maskPattern.toNonXoredBits();
+		formatPolynomial[2] = maskBits[0];
+		formatPolynomial[3] = maskBits[1];
+		formatPolynomial[4] = maskBits[2];
+
+		boolean[] generatorPolynomial = {true, false, true, false, false, true, true, false, true, true, true};
+
+
+		// jump over leading zeroes
+		int curpos = 0;
+
+		while ((curpos < formatPolynomial.length) && (formatPolynomial[curpos] == false)) {
+			curpos++;
+		}
+
+		while (formatPolynomial.length - curpos >= generatorPolynomial.length) {
+
+			for (int c = curpos; c < formatPolynomial.length; c++) {
+				int i = c - curpos;
+				if (i < generatorPolynomial.length) {
+					formatPolynomial[c] = formatPolynomial[c] ^ generatorPolynomial[i];
+				}
+			}
+
+			while ((curpos < formatPolynomial.length) && (formatPolynomial[curpos] == false)) {
+				curpos++;
+			}
+		}
+
+		// the actual bits that we are interested in are now in formatPolynomial, 5 through 14...
+		// however, we still have to XOR with 10010:
+		formatPolynomial[10] = !formatPolynomial[10];
+		formatPolynomial[13] = !formatPolynomial[13];
+
+		setRotatedBit(5, 8, formatPolynomial[5]);
+		setRotatedBit(7, 8, formatPolynomial[6]);
+		setRotatedBit(8, 8, formatPolynomial[7]);
+		setRotatedBit(8, 7, formatPolynomial[8]);
+		setRotatedBit(8, 5, formatPolynomial[9]);
+		setRotatedBit(8, 4, formatPolynomial[10]);
+		setRotatedBit(8, 3, formatPolynomial[11]);
+		setRotatedBit(8, 2, formatPolynomial[12]);
+		setRotatedBit(8, 1, formatPolynomial[13]);
+		setRotatedBit(8, 0, formatPolynomial[14]);
+
+		setRotatedBit(8, height - 6, formatPolynomial[5]);
+		setRotatedBit(8, height - 7, formatPolynomial[6]);
+		setRotatedBit(width - 8, 8, formatPolynomial[7]);
+		setRotatedBit(width - 7, 8, formatPolynomial[8]);
+		setRotatedBit(width - 6, 8, formatPolynomial[9]);
+		setRotatedBit(width - 5, 8, formatPolynomial[10]);
+		setRotatedBit(width - 4, 8, formatPolynomial[11]);
+		setRotatedBit(width - 3, 8, formatPolynomial[12]);
+		setRotatedBit(width - 2, 8, formatPolynomial[13]);
+		setRotatedBit(width - 1, 8, formatPolynomial[14]);
 	}
 
 	/**
