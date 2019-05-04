@@ -4,9 +4,9 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.BitUtils;
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
-import com.asofterspace.toolbox.Utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -122,7 +122,7 @@ public class PbmFile extends RasterImageFile {
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
 					if (curInBuffer >= 8) {
-						buffer = Utils.byteToBits(binaryContent[cur++]);
+						buffer = BitUtils.byteToBits(binaryContent[cur++]);
 						curInBuffer = 0;
 					}
 					if (buffer[curInBuffer]) {
@@ -174,7 +174,7 @@ public class PbmFile extends RasterImageFile {
 					buffer[cur] = img.getPixel(x, y).isDark();
 					cur++;
 					if (cur >= 8) {
-						stream.write(Utils.bitsToByte(buffer));
+						stream.write(BitUtils.bitsToByte(buffer));
 						cur = 0;
 					}
 				}
@@ -184,7 +184,7 @@ public class PbmFile extends RasterImageFile {
 				for (; cur < 8; cur++) {
 					buffer[cur] = false;
 				}
-				stream.write(Utils.bitsToByte(buffer));
+				stream.write(BitUtils.bitsToByte(buffer));
 			}
 
 		} catch (IOException e) {

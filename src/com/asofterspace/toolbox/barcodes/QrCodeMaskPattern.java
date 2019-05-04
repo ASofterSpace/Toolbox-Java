@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.BitUtils;
 
 
 /**
@@ -57,7 +57,7 @@ public enum QrCodeMaskPattern {
 
 		boolean[] result = new boolean[3];
 
-		boolean[] bits = Utils.intToBits(intEncodedMaskPattern);
+		boolean[] bits = BitUtils.intToBits(intEncodedMaskPattern);
 
 		result[0] = bits[29];
 		result[1] = bits[30];

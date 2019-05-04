@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.BitUtils;
 
 
 /**
@@ -60,7 +60,7 @@ public enum QrCodeQualityLevel {
 
 		boolean[] result = new boolean[2];
 
-		boolean[] bits = Utils.intToBits(intEncodedLevel);
+		boolean[] bits = BitUtils.intToBits(intEncodedLevel);
 
 		result[0] = bits[30];
 		result[1] = bits[31];

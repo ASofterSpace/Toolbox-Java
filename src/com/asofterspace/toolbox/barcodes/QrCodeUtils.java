@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.BitUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -359,7 +359,7 @@ public class QrCodeUtils {
 			// encode in UTF8
 			int eciNumber = 26;
 
-			boolean[] eciNumberArr = Utils.intToBits(eciNumber);
+			boolean[] eciNumberArr = BitUtils.intToBits(eciNumber);
 			result[0] = eciNumberArr[24];
 			result[1] = eciNumberArr[25];
 			result[2] = eciNumberArr[26];
@@ -371,14 +371,14 @@ public class QrCodeUtils {
 			cur += 8;
 		}
 
-		boolean[] stringModeArr = Utils.intToBits(4);
+		boolean[] stringModeArr = BitUtils.intToBits(4);
 		result[cur+0] = stringModeArr[28];
 		result[cur+1] = stringModeArr[29];
 		result[cur+2] = stringModeArr[30];
 		result[cur+3] = stringModeArr[31];
 		cur += 4;
 
-		boolean[] strDataLengthArr = Utils.intToBits(byteData.length);
+		boolean[] strDataLengthArr = BitUtils.intToBits(byteData.length);
 		if (version > 9) {
 			result[cur+0] = strDataLengthArr[16];
 			result[cur+1] = strDataLengthArr[17];
@@ -410,7 +410,7 @@ public class QrCodeUtils {
 		}
 
 		for (byte curbyte : byteData) {
-			boolean[] curbits = Utils.intToBits(curbyte);
+			boolean[] curbits = BitUtils.intToBits(curbyte);
 			result[cur+0] = curbits[24];
 			result[cur+1] = curbits[25];
 			result[cur+2] = curbits[26];
@@ -442,7 +442,7 @@ public class QrCodeUtils {
 
 		while (cur < dataLength) {
 			// ... with each data block starting with a 4 bit mode indicator
-			byte modeIndicator = Utils.bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
+			byte modeIndicator = BitUtils.bitsToNibble(ds[cur], ds[cur+1], ds[cur+2], ds[cur+3]);
 			cur += 4;
 
 			switch (modeIndicator) {
@@ -468,10 +468,10 @@ public class QrCodeUtils {
 					int blockLength;
 
 					if (version > 9) {
-						blockLength = Utils.bitsToInt(ds, cur, 16);
+						blockLength = BitUtils.bitsToInt(ds, cur, 16);
 						cur += 16;
 					} else {
-						blockLength = Utils.bitsToInt(ds, cur, 8);
+						blockLength = BitUtils.bitsToInt(ds, cur, 8);
 						cur += 8;
 					}
 
@@ -479,30 +479,30 @@ public class QrCodeUtils {
 						case 1:
 						case 3:
 							// ISO8859-1
-							result.append(new String(Utils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.ISO_8859_1));
+							result.append(new String(BitUtils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.ISO_8859_1));
 							cur += 8*blockLength;
 							break;
 						case 25:
 							// UTF-16BE
-							result.append(new String(Utils.bitsToByteArr(ds, cur, 16*blockLength), StandardCharsets.UTF_16BE));
+							result.append(new String(BitUtils.bitsToByteArr(ds, cur, 16*blockLength), StandardCharsets.UTF_16BE));
 							cur += 16*blockLength;
 							break;
 						case 26:
 							// UTF-8
-							result.append(new String(Utils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.UTF_8));
+							result.append(new String(BitUtils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.UTF_8));
 							cur += 8*blockLength;
 							break;
 						case 27:
 						case 170:
 							// ASCII
-							result.append(new String(Utils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.US_ASCII));
+							result.append(new String(BitUtils.bitsToByteArr(ds, cur, 8*blockLength), StandardCharsets.US_ASCII));
 							cur += 8*blockLength;
 							break;
 						// TODO :: add others
 						default:
 							// as default, if we got nothing useful, just add as is and hope and pray...
 							for (int n = 0; n < blockLength; n++) {
-								result.append((char) Utils.bitsToInt(ds, cur, 8));
+								result.append((char) BitUtils.bitsToInt(ds, cur, 8));
 								cur += 8;
 							}
 					}
@@ -513,14 +513,14 @@ public class QrCodeUtils {
 				case 7:
 
 					if (ds[cur] == false) {
-						eciNumber = Utils.bitsToInt(ds, cur, 8);
+						eciNumber = BitUtils.bitsToInt(ds, cur, 8);
 						cur += 8;
 					} else {
 						if (ds[cur+1] == false) {
-							eciNumber = Utils.bitsToInt(ds, cur, 16);
+							eciNumber = BitUtils.bitsToInt(ds, cur, 16);
 							cur += 16;
 						} else {
-							eciNumber = Utils.bitsToInt(ds, cur, 24);
+							eciNumber = BitUtils.bitsToInt(ds, cur, 24);
 							cur += 24;
 						}
 					}

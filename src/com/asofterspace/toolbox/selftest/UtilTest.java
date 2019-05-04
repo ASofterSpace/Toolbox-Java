@@ -16,7 +16,7 @@ public class UtilTest implements Test {
 
 		countStringInStringTest();
 
-		intToHumanReadableByteAmountTest();
+		longToHumanReadableByteAmountTest();
 	}
 
 	public void countStringInStringTest() {
@@ -47,37 +47,37 @@ public class UtilTest implements Test {
 	}
 
 
-	public void intToHumanReadableByteAmountTest() {
+	public void longToHumanReadableByteAmountTest() {
 
-		TestUtils.start("Int to Human Readable Byte Amount");
+		TestUtils.start("Long to Human Readable Byte Amount");
 
-		if (!"0 B".equals(Utils.intToHumanReadableByteAmount(0))) {
-			TestUtils.fail("We tried to convert 0 B, but we got " + Utils.intToHumanReadableByteAmount(0) + "!");
+		if (!"0 B".equals(Utils.longToHumanReadableByteAmount(0))) {
+			TestUtils.fail("We tried to convert 0 B, but we got " + Utils.longToHumanReadableByteAmount(0) + "!");
 			return;
 		}
 
-		if (!"1 B".equals(Utils.intToHumanReadableByteAmount(1))) {
-			TestUtils.fail("We tried to convert 1 B, but we got " + Utils.intToHumanReadableByteAmount(1) + "!");
+		if (!"1 B".equals(Utils.longToHumanReadableByteAmount(1))) {
+			TestUtils.fail("We tried to convert 1 B, but we got " + Utils.longToHumanReadableByteAmount(1) + "!");
 			return;
 		}
 
-		if (!"100.00 KB".equals(Utils.intToHumanReadableByteAmount(100*1024))) {
-			TestUtils.fail("We tried to convert 100.00 KB, but we got " + Utils.intToHumanReadableByteAmount(100*1024) + "!");
+		if (!"100.00 KB".equals(Utils.longToHumanReadableByteAmount(100*1024))) {
+			TestUtils.fail("We tried to convert 100.00 KB, but we got " + Utils.longToHumanReadableByteAmount(100*1024) + "!");
 			return;
 		}
 
-		if (!"26.76 KB".equals(Utils.intToHumanReadableByteAmount(27398))) {
-			TestUtils.fail("We tried to convert 26.76 KB, but we got " + Utils.intToHumanReadableByteAmount(27398) + "!");
+		if (!"26.76 KB".equals(Utils.longToHumanReadableByteAmount(27398))) {
+			TestUtils.fail("We tried to convert 26.76 KB, but we got " + Utils.longToHumanReadableByteAmount(27398) + "!");
 			return;
 		}
 
-		if (!"200.00 MB".equals(Utils.intToHumanReadableByteAmount(200*1024*1024l))) {
-			TestUtils.fail("We tried to convert 200.00 MB, but we got " + Utils.intToHumanReadableByteAmount(200*1024*1024l) + "!");
+		if (!"200.00 MB".equals(Utils.longToHumanReadableByteAmount(200*1024*1024l))) {
+			TestUtils.fail("We tried to convert 200.00 MB, but we got " + Utils.longToHumanReadableByteAmount(200*1024*1024l) + "!");
 			return;
 		}
 
-		if (!"300.00 GB".equals(Utils.intToHumanReadableByteAmount(300*1024*1024*1024l))) {
-			TestUtils.fail("We tried to convert 300.00 GB, but we got " + Utils.intToHumanReadableByteAmount(300*1024*1024*1024l) + "!");
+		if (!"300.00 GB".equals(Utils.longToHumanReadableByteAmount(300*1024*1024*1024l))) {
+			TestUtils.fail("We tried to convert 300.00 GB, but we got " + Utils.longToHumanReadableByteAmount(300*1024*1024*1024l) + "!");
 			return;
 		}
 

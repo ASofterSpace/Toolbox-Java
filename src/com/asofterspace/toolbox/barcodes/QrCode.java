@@ -4,9 +4,9 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
+import com.asofterspace.toolbox.utils.BitUtils;
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
-import com.asofterspace.toolbox.Utils;
 
 
 /**
@@ -441,7 +441,7 @@ public class QrCode {
 		boolean bit1 = rotatedBit(0, 8);
 		boolean bit2 = rotatedBit(1, 8);
 
-		edcLevel = QrCodeQualityLevel.fromInt((int) Utils.bitsToNibble(false, false, bit1, bit2) & 0xFF);
+		edcLevel = QrCodeQualityLevel.fromInt((int) BitUtils.bitsToNibble(false, false, bit1, bit2) & 0xFF);
 	}
 
 	void writeEdcLevel() {
@@ -475,7 +475,7 @@ public class QrCode {
 		boolean bit2 = rotatedBit(3, 8);
 		boolean bit3 = rotatedBit(4, 8);
 
-		maskPattern = QrCodeMaskPattern.fromInt((int) Utils.bitsToNibble(false, bit1, bit2, bit3) & 0xFF);
+		maskPattern = QrCodeMaskPattern.fromInt((int) BitUtils.bitsToNibble(false, bit1, bit2, bit3) & 0xFF);
 	}
 
 	void writeMaskPattern() {
@@ -689,11 +689,11 @@ public class QrCode {
 
 		int dataLength = QrCodeUtils.getDataLength(version, edcLevel);
 
-		int[] messagePolynomial = Utils.bitsToUnsignedByteArr(datastream, 0, dataLength);
+		int[] messagePolynomial = BitUtils.bitsToUnsignedByteArr(datastream, 0, dataLength);
 
 		int[] errorCorrectionCodewords = QrCodeUtils.getErrorCorrectionCodewords(messagePolynomial, version, edcLevel);
 
-		boolean[] errorCorrectionBits = Utils.unsignedBytesToBits(errorCorrectionCodewords);
+		boolean[] errorCorrectionBits = BitUtils.unsignedBytesToBits(errorCorrectionCodewords);
 
 		System.arraycopy(errorCorrectionBits, 0, datastream, dataLength, errorCorrectionBits.length);
 	}
