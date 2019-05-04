@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.io;
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -196,7 +197,7 @@ public class PpmFile extends RasterImageFile {
 		out.append("\n");
 
 		// fill file with data
-		try (FileOutputStream stream = new FileOutputStream(initSave())) {
+		try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(initSave()))) {
 
 			stream.write(out.toString().getBytes());
 

@@ -70,6 +70,19 @@ public class Image {
 	}
 
 	/**
+	 * Draw another image on top of this one, starting (top left) at
+	 * coordinates x and y (respective to this image)
+	 */
+	public void draw(Image other, int drawAtX, int drawAtY) {
+
+		for (int x = drawAtX; (x < other.width) && (x < width); x++) {
+			for (int y = drawAtY; (y < other.height) && (y < height); y++) {
+				data[y][x] = other.data[y][x];
+			}
+		}
+	}
+
+	/**
 	 * Add the amount of pixels to the top, right, bottom and left of the image,
 	 * filling the new space with the fillWith color
 	 * (negative values are allowed, in that case the image will shrink)

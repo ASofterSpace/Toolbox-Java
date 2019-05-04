@@ -12,7 +12,7 @@ package com.asofterspace.toolbox.utils;
  *			bytes .. eight bits (java-ly interpreted as -128..127)
  * unsigned bytes .. eight bits, as int, such that they are 0..255
  *			 ints .. java ints, so 32 bits
- *	   datastream .. array or bits (so booleans)
+ *		bit array .. array or bits (so booleans)
  *
  * @author Moya (a softer space), 2019
  */
@@ -137,13 +137,13 @@ public class BitUtils {
 		return ((b[0]?128:0) + (b[1]?64:0) + (b[2]?32:0) + (b[3]?16:0) + (b[4]?8:0) + (b[5]?4:0) + (b[6]?2:0) + (b[7]?1:0));
 	}
 
-	public static int bitsToInt(boolean[] datastream, int offset, int length) {
+	public static int bitsToInt(boolean[] bitArr, int offset, int length) {
 
 		int result = 0;
 		int twoThePower = 1;
 
 		for (int i = length - 1; i >= 0; i--) {
-			if (datastream[offset + i]) {
+			if (bitArr[offset + i]) {
 				result += twoThePower;
 			}
 			twoThePower *= 2;
@@ -152,13 +152,13 @@ public class BitUtils {
 		return result;
 	}
 
-	public static byte[] bitsToByteArr(boolean[] datastream, int offset, int length) {
+	public static byte[] bitsToByteArr(boolean[] bitArr, int offset, int length) {
 
 		int byteLen = length / 8;
 		byte[] result = new byte[byteLen];
 
 		for (int i = 0; i < byteLen; i++) {
-			result[i] = (byte) bitsToInt(datastream, offset + 8*i, 8);
+			result[i] = (byte) bitsToInt(bitArr, offset + 8*i, 8);
 		}
 
 		return result;
@@ -168,28 +168,28 @@ public class BitUtils {
 	 * Reads an array of bits (expressed as booleans) into an array of unsigned bytes -
 	 * and as unsigned bytes don't exist in Java, they are represented by ints...
 	 */
-	public static int[] bitsToUnsignedByteArr(boolean[] datastream, int offset, int length) {
+	public static int[] bitsToUnsignedByteArr(boolean[] bitArr, int offset, int length) {
 
 		int byteLen = length / 8;
 		int[] result = new int[byteLen];
 
 		for (int i = 0; i < byteLen; i++) {
-			result[i] = bitsToInt(datastream, offset + 8*i, 8);
+			result[i] = bitsToInt(bitArr, offset + 8*i, 8);
 		}
 
 		return result;
 	}
 
-	public static void readBitsIntoStream(boolean[] datastream, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
+	public static void readBitsIntoBitArr(boolean[] bitArr, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
 
-		datastream[offset+0] = b8;
-		datastream[offset+1] = b7;
-		datastream[offset+2] = b6;
-		datastream[offset+3] = b5;
-		datastream[offset+4] = b4;
-		datastream[offset+5] = b3;
-		datastream[offset+6] = b2;
-		datastream[offset+7] = b1;
+		bitArr[offset+0] = b8;
+		bitArr[offset+1] = b7;
+		bitArr[offset+2] = b6;
+		bitArr[offset+3] = b5;
+		bitArr[offset+4] = b4;
+		bitArr[offset+5] = b3;
+		bitArr[offset+6] = b2;
+		bitArr[offset+7] = b1;
 	}
 
 }

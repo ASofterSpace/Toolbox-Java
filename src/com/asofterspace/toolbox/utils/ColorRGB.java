@@ -12,9 +12,12 @@ package com.asofterspace.toolbox.utils;
  */
 public class ColorRGB {
 
-	private byte r;
-	private byte g;
-	private byte b;
+	// these fields are final as we want to be able to re-use pixels between images,
+	// and just because someone paints one image green we do not want all others to
+	// be green too! ;)
+	private final byte r;
+	private final byte g;
+	private final byte b;
 
 
 	// by default, just a white pixel
