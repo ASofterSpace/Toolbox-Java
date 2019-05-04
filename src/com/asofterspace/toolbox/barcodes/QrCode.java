@@ -633,10 +633,8 @@ public class QrCode {
 
 		boolean[] generatorPolynomial = {true, false, true, false, false, true, true, false, true, true, true};
 
-
 		// jump over leading zeroes
 		int curpos = 0;
-
 		while ((curpos < formatPolynomial.length) && (formatPolynomial[curpos] == false)) {
 			curpos++;
 		}
@@ -650,6 +648,7 @@ public class QrCode {
 				}
 			}
 
+			// jump over leading zeroes, again
 			while ((curpos < formatPolynomial.length) && (formatPolynomial[curpos] == false)) {
 				curpos++;
 			}

@@ -29,6 +29,8 @@ public class QrCodeTest implements Test {
 
 		writeSimpleQrCodeTest();
 
+		writeAndReadQrCodeTest();
+
 		writeQrCodeWithWhitespaceTest();
 	}
 
@@ -119,16 +121,12 @@ public class QrCodeTest implements Test {
 		TestUtils.start("Writing a simple QR Code");
 
 		QrCode qrCode = QrCodeFactory.constructFromString("Hello, we are A Softer Space! :)");
+		Image generatedQrImg = qrCode.getDatapointsAsImage();
 
-		// DEBUG START
-		PpmFile imgFile = new PpmFile(AllTests.TEST_PATH + "/../qrtest.ppm");
+		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest.ppm");
+		Image loadedQrImg = imgFile.getImage();
 
-		imgFile.assign(qrCode.getDatapointsAsImage());
-
-		imgFile.save();
-		// DEBUG END
-
-		if ("Hello, we are A Softer Space! :)".equals(qrCode.getContent())) {
+		if (generatedQrImg.equals(loadedQrImg)) {
 			TestUtils.succeed();
 			return;
 		}
@@ -136,21 +134,33 @@ public class QrCodeTest implements Test {
 		TestUtils.fail("We tried creating a simple QR code, but we did not get the correct result!");
 	}
 
+	public void writeAndReadQrCodeTest() {
+
+		TestUtils.start("Writing and reading a QR Code");
+
+		QrCode qrCode = QrCodeFactory.constructFromString("We do like space, and science in general...");
+
+		if ("We do like space, and science in general...".equals(qrCode.getContent())) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We tried creating a QR code and reading it again, but we did not get the correct result!");
+	}
+
 	public void writeQrCodeWithWhitespaceTest() {
 
 		TestUtils.start("Writing a QR Code with whitespace");
 
-		Image qrImage = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^");
+		Image generatedQrImg = QrCodeFactory.createWhitespacedImageFromString("Hi, it is us again! ^^");
 
-		// DEBUG START
-		PpmFile imgFile = new PpmFile(AllTests.TEST_PATH + "/../qrtest_whitespace.ppm");
+		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_whitespace.ppm");
+		Image loadedQrImg = imgFile.getImage();
 
-		imgFile.assign(qrImage);
-
-		imgFile.save();
-		// DEBUG END
-
-		// TODO :: add success possibility, otherwise the test is a bit harsh ^^
+		if (generatedQrImg.equals(loadedQrImg)) {
+			TestUtils.succeed();
+			return;
+		}
 
 		TestUtils.fail("We tried creating a QR code surrounded by whitespace, but we did not get the correct result!");
 	}
