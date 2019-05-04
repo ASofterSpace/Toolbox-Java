@@ -69,6 +69,32 @@ public class Image {
 		data[y][x] = pix;
 	}
 
+	private int clipHorz(int x) {
+
+		if (x < 0) {
+			x = 0;
+		}
+
+		if (x >= width) {
+			x = width - 1;
+		}
+
+		return x;
+	}
+
+	private int clipVert(int y) {
+
+		if (y < 0) {
+			y = 0;
+		}
+
+		if (y >= height) {
+			y = height - 1;
+		}
+
+		return y;
+	}
+
 	/**
 	 * Draw another image on top of this one, starting (top left) at
 	 * coordinates x and y (respective to this image)
@@ -77,12 +103,20 @@ public class Image {
 
 		for (int x = 0; (x < other.width) && (x + drawAtX < width); x++) {
 			for (int y = 0; (y < other.height) && (y + drawAtY < height); y++) {
-				data[y + drawAtY][x + drawAtX] = other.data[y][x];
+				if ((x + drawAtX >= 0) && (y + drawAtY >= 0)) {
+					data[y + drawAtY][x + drawAtX] = other.data[y][x];
+				}
 			}
 		}
 	}
 
 	public void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
+
+		// ensure we stay in the drawable area
+		startX = clipHorz(startX);
+		endX = clipHorz(endX);
+		startY = clipVert(startY);
+		endY = clipVert(endY);
 
 		// ensure we draw from top left to bottom right
 		if (startX > endX) {
@@ -116,16 +150,71 @@ public class Image {
 	}
 
 	/**
-	 * Resample the image by some amount horizontally and vertically
-	 * This does a straightforward resample, not a filtered resize -
-	 * meaning it is faster (and pixel-perfect), but not smooth
+	 * Resample the image to some new size,
+	 * applying some nice filters to obtain a smooth result
 	 */
-	public void resample(double horizontalStretch, double verticalStretch) {
+	public void resampleTo(int newWidth, int newHeight) {
+
+		// nothing needs to be changed... great, that makes it easier xD
+		if ((newWidth == width) && (newHeight == height)) {
+			return;
+		}
+
+		ColorRGB[][] horzData = new ColorRGB[height][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < height; y++) {
+				double newX = (x * width) / ((double) newWidth);
+				int loX = (int) Math.floor(newX);
+				int hiX = (int) Math.ceil(newX);
+				double loAmount = newX - loX;
+				horzData[y][x] = ColorRGB.intermix(data[y][loX], data[y][hiX], loAmount);
+			}
+		}
+
+		ColorRGB[][] fullData = new ColorRGB[newHeight][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				double newY = (y * height) / ((double) newHeight);
+				int loY = (int) Math.floor(newY);
+				int hiY = (int) Math.ceil(newY);
+				double loAmount = newY - loY;
+				fullData[y][x] = ColorRGB.intermix(horzData[loY][x], horzData[hiY][x], loAmount);
+			}
+		}
+
+		this.data = fullData;
+		this.width = newWidth;
+		this.height = newHeight;
+	}
+
+	public void resampleToWidth(int newWidth) {
+		resampleTo(newWidth, (height * newWidth) / width);
+	}
+
+	public void resampleToHeight(int newHeight) {
+		resampleTo((width * newHeight) / height, newHeight);
+	}
+
+	/**
+	 * Resample the image by some amount horizontally and vertically,
+	 * applying some nice filters to obtain a smooth result
+	 */
+	public void resampleBy(double horizontalStretch, double verticalStretch) {
 
 		int newWidth = (int) (width * horizontalStretch);
 		int newHeight = (int) (height * verticalStretch);
 
-		// nothing needs to be resampled... great, that makes it easier xD
+		resampleTo(newWidth, newHeight);
+	}
+
+	/**
+	 * Plainly resize the image to some new size
+	 */
+	public void resizeTo(int newWidth, int newHeight) {
+
+		// nothing needs to be changed... great, that makes it easier xD
 		if ((newWidth == width) && (newHeight == height)) {
 			return;
 		}
@@ -149,6 +238,25 @@ public class Image {
 		this.data = fullData;
 		this.width = newWidth;
 		this.height = newHeight;
+	}
+
+	public void resizeToWidth(int newWidth) {
+		resizeTo(newWidth, (height * newWidth) / width);
+	}
+
+	public void resizeToHeight(int newHeight) {
+		resizeTo((width * newHeight) / height, newHeight);
+	}
+
+	/**
+	 * Plainly resize the image by some amount horizontally and vertically
+	 */
+	public void resizeBy(double horizontalStretch, double verticalStretch) {
+
+		int newWidth = (int) (width * horizontalStretch);
+		int newHeight = (int) (height * verticalStretch);
+
+		resizeTo(newWidth, newHeight);
 	}
 
 	public void rotateLeft() {

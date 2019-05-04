@@ -32,6 +32,28 @@ public class ColorRGB {
 	}
 
 	public ColorRGB(int r, int g, int b) {
+
+		if (r > 255) {
+			r = 255;
+		}
+		if (r < 0) {
+			r = 0;
+		}
+
+		if (g > 255) {
+			g = 255;
+		}
+		if (g < 0) {
+			g = 0;
+		}
+
+		if (b > 255) {
+			b = 255;
+		}
+		if (b < 0) {
+			b = 0;
+		}
+
 		this.r = (byte) r;
 		this.g = (byte) g;
 		this.b = (byte) b;
@@ -52,15 +74,15 @@ public class ColorRGB {
 	}
 
 	public int getR() {
-		return r;
+		return r & 0xFF;
 	}
 
 	public int getG() {
-		return g;
+		return g & 0xFF;
 	}
 
 	public int getB() {
-		return b;
+		return b & 0xFF;
 	}
 
 	public byte getRByte() {
@@ -126,6 +148,29 @@ public class ColorRGB {
 
 	public boolean fastEquals(ColorRGB other) {
 		return (this.r == other.r) && (this.g == other.g) && (this.b == other.b);
+	}
+
+	/**
+	 * intermix two colors, where the amount of the first color in the mix is given,
+	 * e.g. 0.45 for 45% one, 55% two
+	 */
+	public static ColorRGB intermix(ColorRGB one, ColorRGB two, double amountOfOne) {
+
+		if (amountOfOne < 0) {
+			amountOfOne = 0;
+		}
+		if (amountOfOne > 1) {
+			amountOfOne = 1;
+		}
+
+		double aO = amountOfOne;
+		double aT = 1 - amountOfOne;
+
+		return new ColorRGB(
+			(int) (((((int) one.r) & 0xFF) * aO) + ((((int) two.r) & 0xFF) * aT)),
+			(int) (((((int) one.g) & 0xFF) * aO) + ((((int) two.g) & 0xFF) * aT)),
+			(int) (((((int) one.b) & 0xFF) * aO) + ((((int) two.b) & 0xFF) * aT))
+		);
 	}
 
 	public String toString() {

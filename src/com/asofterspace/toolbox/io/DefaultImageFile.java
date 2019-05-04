@@ -15,8 +15,8 @@ import javax.imageio.ImageIO;
 
 /**
  * A default image file can be used to load an image file with the
- * default Java ImageIO approach (which usually can load Bitmaps
- * and JPEGs, but can also be augmented by adding further image
+ * default Java ImageIO approach (which usually can load Bitmaps,
+ * JPEGs and PNGs, but can also be augmented by adding further image
  * extension libraries.)
  *
  * @author Moya (a softer space), 2019
@@ -54,9 +54,13 @@ public class DefaultImageFile extends RasterImageFile {
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
 					int rgb = javaImg.getRGB(x, y);
+					int a = (rgb >> 24) & 0xFF;
 					int r = (rgb >> 16) & 0xFF;
 					int g = (rgb >> 8) & 0xFF;
 					int b = (rgb) & 0xFF;
+					r = ((a * r) / 255) + 255 - a;
+					g = ((a * g) / 255) + 255 - a;
+					b = ((a * b) / 255) + 255 - a;
 
 					uncompressedData[y][x] = new ColorRGB(r, g, b);
 				}
@@ -71,7 +75,38 @@ public class DefaultImageFile extends RasterImageFile {
 
 	@Override
 	public void save() {
-		System.err.println("[ERROR] No saving mechanism for default image files has been implemented, so " + filename + " cannot be created!");
+		try {
+			if (img == null) {
+				loadImageContents();
+			}
+
+			File file = new File(this.filename);
+
+			BufferedImage javaImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+
+			ColorRGB[][] data = img.getData();
+
+			for (int y = 0; y < img.getHeight(); y++) {
+				for (int x = 0; x < img.getWidth(); x++) {
+					ColorRGB c = data[y][x];
+					int rgb = c.getR() << 16;
+					rgb |= c.getG() << 8;
+					rgb |= c.getB();
+					javaImg.setRGB(x, y, rgb);
+				}
+			}
+
+			if (filename.toLowerCase().endsWith(".bmp")) {
+				ImageIO.write(javaImg, "bmp", file.getJavaFile());
+			} else if (filename.toLowerCase().endsWith(".png")) {
+				ImageIO.write(javaImg, "png", file.getJavaFile());
+			} else {
+				ImageIO.write(javaImg, "jpeg", file.getJavaFile());
+			}
+
+		} catch (IOException e) {
+			System.err.println("[ERROR] Trying to save the default image file " + filename + ", but there was an exception - inconceivable!\n" + e);
+		}
 	}
 
 	/**
