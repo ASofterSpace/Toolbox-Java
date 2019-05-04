@@ -255,12 +255,47 @@ public class JSON {
 				jsonString = jsonString.substring(jsonString.indexOf(doStringWith) + 1);
 			}
 
-			// TODO :: add more escaped things
-			simpleContentsStr = simpleContentsStr.replace("\\n", "\n");
-			simpleContentsStr = simpleContentsStr.replace("\\r", "\r");
-			simpleContentsStr = simpleContentsStr.replace("\\\\", "\\");
+			// escape front to back - if we find, e.g., \\, this is a slash, but if we find \n, this is a newline
+			StringBuilder simpleContentBuilder = new StringBuilder();
+			int pos = 0;
+			int nextPos = simpleContentsStr.indexOf("\\", pos);
+			while (nextPos > -1) {
+				simpleContentBuilder.append(simpleContentsStr.substring(pos, nextPos));
+				pos = nextPos + 1;
+				if (nextPos+1 >= simpleContentsStr.length()) {
+					break;
+				}
+				pos++;
+				switch (simpleContentsStr.charAt(nextPos+1)) {
+					case 'n':
+						simpleContentBuilder.append('\n');
+						break;
+					case 'r':
+						simpleContentBuilder.append('\r');
+						break;
+					case 't':
+						simpleContentBuilder.append('\t');
+						break;
+					case 'b':
+						simpleContentBuilder.append('\b');
+						break;
+					case 'f':
+						simpleContentBuilder.append('\f');
+						break;
+					case '\\':
+						simpleContentBuilder.append('\\');
+						break;
+					default:
+						// append the backslash, but do not increase the pos as far as we otherwise would,
+						// as we did not actually do anything with the previous character!
+						simpleContentBuilder.append('\\');
+						pos--;
+				}
+				nextPos = simpleContentsStr.indexOf("\\", pos);
+			}
+			simpleContentBuilder.append(simpleContentsStr.substring(pos, simpleContentsStr.length()));
 
-			simpleContents = simpleContentsStr;
+			simpleContents = simpleContentBuilder.toString();
 
 			return jsonString;
 		}
@@ -783,16 +818,21 @@ public class JSON {
 	 * @param str  a string that possibly contains " signs
 	 * @return a string in which every " sign is escaped
 	 */
-	public static String escapeJSONstr(String str) {
+	public static String escapeJSONstr(Object strToEscape) {
 
-		if (str == null) {
+		if (strToEscape == null) {
 			return "";
 		}
+
+		String str = strToEscape.toString();
 
 		str = str.replace("\\", "\\\\");
 		str = str.replace("\"", "\\\"");
 		str = str.replace("\n", "\\n");
 		str = str.replace("\r", "\\r");
+		str = str.replace("\t", "\\t");
+		str = str.replace("\b", "\\b");
+		str = str.replace("\f", "\\f");
 
 		return str;
 	}

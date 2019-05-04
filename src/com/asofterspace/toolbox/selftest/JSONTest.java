@@ -28,6 +28,8 @@ public class JSONTest implements Test {
 
 		malformedFromStringTest();
 
+		doubleBackslashBeforeNewlineTest();
+
 		toStringTest();
 
 		fromStringTestEscapedQuotes();
@@ -193,6 +195,20 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We stored a malformed JSON string in a JSON object and would expect it to cope with that - but it did not!\nOutput: " + testObject.toString());
+	}
+
+	public void doubleBackslashBeforeNewlineTest() {
+
+		TestUtils.start("Double Backslash before Newline");
+
+		JSON testObject = new JSON("{\"key\":\"value\\\\right?\"}");
+
+		if (testObject.getString("key").equals("value\\" + "right?")) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We loaded a JSON string containing backslash backslash r - which should give backslash r, but instead got some worrisome newline or whatever!\nOutput: " + testObject.getString("key"));
 	}
 
 	public void toStringTest() {
