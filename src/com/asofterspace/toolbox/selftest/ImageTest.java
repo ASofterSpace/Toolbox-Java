@@ -17,6 +17,8 @@ public class ImageTest implements Test {
 
 		testColorRGBComparison();
 
+		testColorRGBMixing();
+
 		testColorRGBDarknessDetection();
 
 		testImageComparison();
@@ -49,6 +51,33 @@ public class ImageTest implements Test {
 
 		if (white.fastEquals(blackTwo)) {
 			TestUtils.fail("White fast equals black!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void testColorRGBMixing() {
+
+		TestUtils.start("Color RGB Mixing");
+
+		ColorRGB black = new ColorRGB(0, 0, 0);
+		ColorRGB red = new ColorRGB(254, 0, 0);
+		ColorRGB white = new ColorRGB(254, 252, 252);
+
+		ColorRGB blackred = new ColorRGB(127, 0, 0);
+		ColorRGB blackredMix = ColorRGB.intermix(black, red, 0.5);
+
+		if (!blackred.equals(blackredMix)) {
+			TestUtils.fail("Black mixed with red does not give the correct result!");
+			return;
+		}
+
+		ColorRGB redredredwhite = new ColorRGB(254, 63, 63);
+		ColorRGB redredredwhiteMix = ColorRGB.intermix(red, white, 0.75);
+
+		if (!redredredwhite.equals(redredredwhiteMix)) {
+			TestUtils.fail("Lots of red mixed with white does not give the correct result!");
 			return;
 		}
 
