@@ -83,6 +83,42 @@ public class Image {
 	}
 
 	/**
+	 * Resample the image by some amount horizontally and vertically
+	 * This does a straightforward resample, not a filtered resize -
+	 * meaning it is faster (and pixel-perfect), but not smooth
+	 */
+	public void resample(double horizontalStretch, double verticalStretch) {
+
+		int newWidth = (int) (width * horizontalStretch);
+		int newHeight = (int) (height * verticalStretch);
+
+		// nothing needs to be resampled... great, that makes it easier xD
+		if ((newWidth == width) && (newHeight == height)) {
+			return;
+		}
+
+		ColorRGB[][] horzData = new ColorRGB[height][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < height; y++) {
+				horzData[y][x] = data[y][(x * width) / newWidth];
+			}
+		}
+
+		ColorRGB[][] fullData = new ColorRGB[newHeight][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				fullData[y][x] = horzData[(y * height) / newHeight][x];
+			}
+		}
+
+		this.data = fullData;
+		this.width = newWidth;
+		this.height = newHeight;
+	}
+
+	/**
 	 * Add the amount of pixels to the top, right, bottom and left of the image,
 	 * filling the new space with the fillWith color
 	 * (negative values are allowed, in that case the image will shrink)
