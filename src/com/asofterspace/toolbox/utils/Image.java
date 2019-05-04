@@ -75,9 +75,9 @@ public class Image {
 	 */
 	public void draw(Image other, int drawAtX, int drawAtY) {
 
-		for (int x = drawAtX; (x < other.width) && (x < width); x++) {
-			for (int y = drawAtY; (y < other.height) && (y < height); y++) {
-				data[y][x] = other.data[y][x];
+		for (int x = 0; (x < other.width) && (x + drawAtX < width); x++) {
+			for (int y = 0; (y < other.height) && (y + drawAtY < height); y++) {
+				data[y + drawAtY][x + drawAtX] = other.data[y][x];
 			}
 		}
 	}
