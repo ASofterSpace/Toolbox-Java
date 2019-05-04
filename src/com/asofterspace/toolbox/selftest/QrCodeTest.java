@@ -192,7 +192,7 @@ public class QrCodeTest implements Test {
 
 		Image generatedQrImg = QrCodeFactory.createImageFromString("The mask pattern here is chosen automagically!");
 
-		PpmFile imgFile = new PpmFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_large_automask.ppm");
+		DefaultImageFile imgFile = new DefaultImageFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_large_automask.png");
 		Image loadedQrImg = imgFile.getImage();
 
 		if (generatedQrImg.equals(loadedQrImg)) {
