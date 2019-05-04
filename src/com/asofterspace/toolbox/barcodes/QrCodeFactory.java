@@ -17,14 +17,64 @@ public class QrCodeFactory {
 
 	/**
 	 * creates a QR Code based on a text that you want to encode
-	 * (right now, it will encode the text in the same way always,
-	 * and use the same quality setting always, etc. - maybe create
-	 * a larger consutructor at some point that allows the caller
-	 * to modify all of that stuff ^^)
 	 */
-	public static QrCode constructFromString(String data) {
+	public static QrCode createFromString(String data) {
 
-		return new QrCode(data);
+		QrCodeQualityLevel edcLevel = QrCodeQualityLevel.LOW_QUALITY;
+
+		// we iterate over versions (but skipping some) to find the correct one, ...
+		int version = 1;
+
+		boolean[] datastream;
+
+		while (true) {
+
+			// ... always trying to encode with the version that was found last...
+			int tryVersion = version;
+
+			// ... knowing that the datastream for a larger version is always the same or larger, never smaller...
+			datastream = QrCodeUtils.encodeData(data, tryVersion);
+
+			// ... and checking which one gets now found for the resulting stream...
+			version = QrCodeUtils.getVersionBasedOnDataStreamLength(datastream, edcLevel);
+
+			// ... and if it is the same, we are done!
+			if (tryVersion == version) {
+				break;
+			}
+		}
+
+		// actually generate the QR Code object
+		QrCode result = new QrCode(version);
+
+		result.setEdcLevel(edcLevel);
+
+		result.writeInaccessibleFields();
+
+		// expand the datastream to also have space for the padding and the error correction codes
+		boolean[] fullDatastream = new boolean[result.getWidth() * result.getHeight()];
+
+		// add actual data to the new fullDatastream
+		System.arraycopy(datastream, 0, fullDatastream, 0, datastream.length);
+
+		// add padding between data and error correction codes to the fullDatastream
+		result.writePaddingData(fullDatastream, datastream.length);
+
+		// add error correction codes to the fullDatastream
+		result.writeErrorCorrectionCode(fullDatastream);
+
+		// TODO IMPORTANT :: actually decide upon the pattern based on what we want to encode!
+		result.setMaskPattern(QrCodeMaskPattern.PATTERN_0);
+
+		// actually write the data (data + padding + error correction) into the QR code
+		result.writeData(fullDatastream);
+
+		// now write the format string, consisting of edc level, mask pattern and their own error correction
+		result.writeEdcLevel();
+		result.writeMaskPattern();
+		result.writeFormatStringErrorCorrection();
+
+		return result;
 	}
 
 	/**
@@ -32,9 +82,9 @@ public class QrCodeFactory {
 	 */
 	public static Image createImageFromString(String data) {
 
-		QrCode code = new QrCode(data);
+		QrCode code = createFromString(data);
 
-		return code.getDatapointsAsImage();
+		return code.toImage();
 	}
 
 	/**
@@ -43,9 +93,7 @@ public class QrCodeFactory {
 	 */
 	public static Image createWhitespacedImageFromString(String data) {
 
-		QrCode code = new QrCode(data);
-
-		Image result = code.getDatapointsAsImage();
+		Image result = createImageFromString(data);
 
 		ColorRGB white = new ColorRGB(255, 255, 255);
 
@@ -56,27 +104,53 @@ public class QrCodeFactory {
 	}
 
 	/**
-	 * Reads a QR code from an as-arbitrary-as-possible image
+	 * attempts to read from the image with one image pixel being one qr code pixel
+	 */
+	public static QrCode readFromQrImage(Image img) {
+
+		int version = QrCodeUtils.widthToVersion(img.getWidth());
+
+		QrCode result = new QrCode(version);
+
+		result.assign(img);
+
+		return result;
+	}
+
+	/**
+	 * attempts to read from the image a certain qr code version, resizing the image
+	 */
+	public static QrCode readFromQrImage(Image img, int version) {
+
+		QrCode result = new QrCode(version);
+
+		result.assign(img);
+
+		return result;
+	}
+
+	/**
+	 * reads a QR code from an as-arbitrary-as-possible image
 	 * (that is, the QR Code might be hidden somewhere inside the image)
 	 *
-	 * This factory assures that if a QrCode is returned, it contains data.
-	 * If no QR code can be found in the image, null is returned.
+	 * this factory assures that if a QrCode is returned, it contains data;
+	 * if no QR code can be found in the image, null is returned
 	 */
-	public static QrCode readFromImage(Image img) {
+	public static QrCode readFromSomewhereInImage(Image img) {
 
-		QrCode result = new QrCode(img, 2);
-
-		if (result.getContent() != null) {
-			return result;
-		}
-
-		result = new QrCode(img, 3);
+		QrCode result = readFromQrImage(img, 2);
 
 		if (result.getContent() != null) {
 			return result;
 		}
 
-		result = new QrCode(img, 4);
+		result = readFromQrImage(img, 3);
+
+		if (result.getContent() != null) {
+			return result;
+		}
+
+		result = readFromQrImage(img, 4);
 
 		if (result.getContent() != null) {
 			return result;
@@ -124,7 +198,9 @@ public class QrCodeFactory {
 
 		int enlargeX = 0;
 		int enlargeY = 0;
+
 		result = new QrCode(3);
+
 		for (int x = 0; x < result.getWidth(); x++) {
 			if (offsetX + x + enlargeX >= img.getWidth()) {
 				continue;
@@ -133,7 +209,9 @@ public class QrCodeFactory {
 				if (offsetY + y + enlargeY >= img.getHeight()) {
 					continue;
 				}
+
 				result.setDatapoint(x, y, img.getPixel(offsetX + x + enlargeX, offsetY + y + enlargeY).isDark());
+
 				if (y % 4 != 3) {
 					enlargeY++;
 				}
