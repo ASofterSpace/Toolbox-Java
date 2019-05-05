@@ -291,6 +291,45 @@ public class QrCodeFactory {
 			return result;
 		}
 
+		// try again, this time searching for a nice 2x2 px per bit QR code...
+		enlargeX = 0;
+		enlargeY = 0;
+		result = new QrCode(3);
+
+		while ((img.getPixel(offsetX - 1, offsetY + 2).getGrayness() < 96) ||
+			   (img.getPixel(offsetX - 1, offsetY + 4).getGrayness() < 96) ||
+			   (img.getPixel(offsetX - 1, offsetY + 6).getGrayness() < 96) ||
+			   (img.getPixel(offsetX - 1, offsetY + 8).getGrayness() < 96)) {
+			offsetX -= 1;
+		}
+
+		while ((img.getPixel(offsetX + 2, offsetY - 1).getGrayness() < 96) ||
+			   (img.getPixel(offsetX + 4, offsetY - 1).getGrayness() < 96) ||
+			   (img.getPixel(offsetX + 6, offsetY - 1).getGrayness() < 96) ||
+			   (img.getPixel(offsetX + 8, offsetY - 1).getGrayness() < 96)) {
+			offsetY -= 1;
+		}
+
+		for (int x = 0; x < result.getWidth(); x++) {
+			if (offsetX + x + enlargeX >= img.getWidth()) {
+				continue;
+			}
+			for (int y = 0; y < result.getHeight(); y++) {
+				if (offsetY + y + enlargeY >= img.getHeight()) {
+					continue;
+				}
+
+				result.setDatapoint(x, y, img.getPixel(offsetX + x + enlargeX, offsetY + y + enlargeY).isDark());
+				enlargeY++;
+			}
+			enlargeX++;
+			enlargeY = 0;
+		}
+
+		if (result.getContent() != null) {
+			return result;
+		}
+
 		return null;
 	}
 

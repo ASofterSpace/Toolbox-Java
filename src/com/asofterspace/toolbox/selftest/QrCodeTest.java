@@ -36,6 +36,8 @@ public class QrCodeTest implements Test {
 		writeQrCodeWithWhitespaceTest();
 
 		writeSlightlyLargerQrCodeTest();
+
+		readFromSomewhereInImageTest();
 	}
 
 	public void getBitsFromImageTest() {
@@ -203,5 +205,31 @@ public class QrCodeTest implements Test {
 		TestUtils.fail("We tried creating a QR code with an automatically chosen mask pattern, but we did not get the correct result!");
 	}
 
+	public void readFromSomewhereInImageTest() {
+
+		TestUtils.start("Reading a QR Code from somewhere in an Image");
+
+		Image generatedQrImg = QrCodeFactory.createWhitespacedImageFromString("This is the secret message, encoded in a QR code");
+		generatedQrImg.resizeBy(2.0, 2.0);
+		generatedQrImg.rotateLeft();
+		generatedQrImg.rotateLeft();
+
+		Image canvas = new Image(1000, 500);
+		canvas.draw(generatedQrImg, 600, -4);
+
+		QrCode foundCode = QrCodeFactory.readFromSomewhereInImage(canvas);
+
+		if (foundCode == null) {
+			TestUtils.fail("No QR Code could be found anywhere in the image!");
+			return;
+		}
+
+		if (!foundCode.getContent().equals("This is the secret message, encoded in a QR code")) {
+			TestUtils.fail("The QR Code found somewhere in the image does not contain the correct data!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
 
 }
