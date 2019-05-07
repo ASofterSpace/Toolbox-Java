@@ -51,22 +51,9 @@ public class DefaultImageFile extends RasterImageFile {
 
 			ColorRGB[][] uncompressedData = new ColorRGB[height][width];
 
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					int rgb = javaImg.getRGB(x, y);
-					int a = (rgb >> 24) & 0xFF;
-					int r = (rgb >> 16) & 0xFF;
-					int g = (rgb >> 8) & 0xFF;
-					int b = (rgb) & 0xFF;
-					r = ((a * r) / 255) + 255 - a;
-					g = ((a * g) / 255) + 255 - a;
-					b = ((a * b) / 255) + 255 - a;
-
-					uncompressedData[y][x] = new ColorRGB(r, g, b);
-				}
-			}
-
 			img = new Image(uncompressedData);
+
+			img.drawBufferedImage(javaImg, 0, 0);
 
 		} catch (IOException e) {
 			System.err.println("[ERROR] Trying to load the default image file " + filename + ", but there was an exception - inconceivable!\n" + e);

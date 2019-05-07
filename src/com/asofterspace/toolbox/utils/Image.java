@@ -4,6 +4,13 @@
  */
 package com.asofterspace.toolbox.utils;
 
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 
 /**
  * A simple image containing many, many RGB triplets
@@ -150,6 +157,97 @@ public class Image {
 	}
 
 	/**
+	 * Specify one of left and right, and one of top and bottom - the other one will be chosen automatically
+	 */
+	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left) {
+
+		drawText(text, top, right, bottom, left, null, null, null);
+	}
+
+	/**
+	 * Specify one of left and right, and one of top and bottom - the other one will be chosen automatically
+	 */
+	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing) {
+
+		// prepare font settings for drawing the text
+		if (fontName == null) {
+			fontName = "Arial";
+		}
+
+		if (fontSize == null) {
+			fontSize = 15;
+		}
+
+		if (useAntiAliasing == null) {
+			useAntiAliasing = true;
+		}
+
+		if (useAntiAliasing) {
+			fontSize *= 2;
+		}
+
+		Font font = new Font(fontName, Font.PLAIN, fontSize);
+
+		Canvas c = new Canvas();
+		FontMetrics metrics = c.getFontMetrics(font);
+
+		// draw text onto buffered image
+		int textWidth = metrics.stringWidth(text);
+		int textHeight = metrics.getMaxAscent();
+
+		BufferedImage bufImg = new BufferedImage(textWidth, textHeight, BufferedImage.TYPE_INT_ARGB);
+
+		Graphics2D graphics = bufImg.createGraphics();
+		graphics.setFont(font);
+		graphics.setColor(Color.black);
+		graphics.drawString(text, 0, textHeight);
+		graphics.dispose();
+
+		// copy image of drawn text from buffered image onto our image
+		if (useAntiAliasing) {
+			Image intermediate = new Image(textWidth, textHeight);
+			intermediate.drawBufferedImage(bufImg, 0, 0);
+			intermediate.resampleTo((textWidth / 2) + (textWidth % 2), (textHeight / 2) + (textHeight % 2));
+			if (left == null) {
+				left = right - intermediate.getWidth();
+			}
+			if (top == null) {
+				top = bottom - intermediate.getHeight();
+			}
+			draw(intermediate, left, top);
+		} else {
+			if (left == null) {
+				left = right - textWidth;
+			}
+			if (top == null) {
+				top = bottom - textHeight;
+			}
+			drawBufferedImage(bufImg, left, top);
+		}
+	}
+
+	public void drawBufferedImage(BufferedImage javaImg, int left, int top) {
+
+		int bufWidth = javaImg.getWidth();
+		int bufHeight = javaImg.getHeight();
+
+		for (int y = 0; (y < bufHeight) && (y + top < height); y++) {
+			for (int x = 0; (x < bufWidth) && (x + left < width); x++) {
+				int rgb = javaImg.getRGB(x, y);
+				int a = (rgb >> 24) & 0xFF;
+				int r = (rgb >> 16) & 0xFF;
+				int g = (rgb >> 8) & 0xFF;
+				int b = (rgb) & 0xFF;
+				r = ((a * r) / 255) + 255 - a;
+				g = ((a * g) / 255) + 255 - a;
+				b = ((a * b) / 255) + 255 - a;
+
+				data[y+top][x+left] = new ColorRGB(r, g, b);
+			}
+		}
+	}
+
+	/**
 	 * Resample the image to some new size,
 	 * applying some nice filters to obtain a smooth result
 	 */
@@ -167,8 +265,12 @@ public class Image {
 				double newX = (x * width) / ((double) newWidth);
 				int loX = (int) Math.floor(newX);
 				int hiX = (int) Math.ceil(newX);
-				double loAmount = newX - loX;
-				horzData[y][x] = ColorRGB.intermix(data[y][loX], data[y][hiX], loAmount);
+				double hiAmount = newX - loX;
+				if (hiX < width) {
+					horzData[y][x] = ColorRGB.intermix(data[y][loX], data[y][hiX], 1 - hiAmount);
+				} else {
+					horzData[y][x] = data[y][loX];
+				}
 			}
 		}
 
@@ -179,8 +281,12 @@ public class Image {
 				double newY = (y * height) / ((double) newHeight);
 				int loY = (int) Math.floor(newY);
 				int hiY = (int) Math.ceil(newY);
-				double loAmount = newY - loY;
-				fullData[y][x] = ColorRGB.intermix(horzData[loY][x], horzData[hiY][x], loAmount);
+				double hiAmount = newY - loY;
+				if (hiY < height) {
+					fullData[y][x] = ColorRGB.intermix(horzData[loY][x], horzData[hiY][x], 1 - hiAmount);
+				} else {
+					fullData[y][x] = horzData[loY][x];
+				}
 			}
 		}
 
@@ -273,6 +379,8 @@ public class Image {
 		}
 
 		this.data = rotatedData;
+		this.width = newWidth;
+		this.height = newHeight;
 	}
 
 	public void rotateRight() {
@@ -289,6 +397,8 @@ public class Image {
 		}
 
 		this.data = rotatedData;
+		this.width = newWidth;
+		this.height = newHeight;
 	}
 
 	/**
