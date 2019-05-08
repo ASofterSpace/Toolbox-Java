@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 public class UuidEncoderDecoder {
 
-    public final static char[] ECORE_UUID_LETTERS = new char[] {
+	public final static char[] ECORE_UUID_LETTERS = new char[] {
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -57,7 +57,7 @@ public class UuidEncoderDecoder {
 
 		// check for Ecore UUID - it should be 22 characters long, plus an underscore at the beginning
 		// if we lower our requirements a bit, then the underscore in the beginning is optional,
-		// and some equals signs could come in the end (it at all, then usually two)
+		// and some equals signs could come in the end (if at all, then usually two)
 		String ecoreUUID = uuid.replaceAll("=", "");
 		if (ecoreUUID.length() == 22) {
 			return UuidKind.ECORE;
@@ -103,10 +103,10 @@ public class UuidEncoderDecoder {
 		// transform from XXXXXXXXXXXXX...XXXXX
 		// to XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 		return result.substring(0, 8) + "-" +
-		       result.substring(8, 12) + "-" +
-		       result.substring(12, 16) + "-" +
-		       result.substring(16, 20) + "-" +
-		       result.substring(20, 32);
+			   result.substring(8, 12) + "-" +
+			   result.substring(12, 16) + "-" +
+			   result.substring(16, 20) + "-" +
+			   result.substring(20, 32);
 	}
 
 	public static String prettifyEcoreUUID(String uuid) {
@@ -159,7 +159,7 @@ public class UuidEncoderDecoder {
 	}
 
 	public static String convertEcoreUUIDtoJava(String sourceUUID) {
-	
+
 		if (sourceUUID == null) {
 			return null;
 		}

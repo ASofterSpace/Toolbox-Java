@@ -4,20 +4,33 @@
  */
 package com.asofterspace.toolbox;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 41;
+	public final static int TOOLBOX_VERSION_NUMBER = 42;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
 	public static String PROGRAM_TITLE;
 	public static String VERSION_NUMBER;
 	public static String VERSION_DATE;
+
+	// we use Latin-1 for binaries, as that allows us to load the entire byte range of 0..255 of ASCII files,
+	// meaning that we can read any nonsensical streams and don't have to worry about incompatibilities
+	// (if we just read and save we have no problem with Unicode characters either; if we actually set
+	// Unicode text for some reason, then we will have to think a bit harder and maybe manually convert
+	// the Unicode letters that we are aware of into their same-byte counterparts or whatever... ^^)
+	public static final Charset BINARY_CHARSET = StandardCharsets.ISO_8859_1;
+
+	private static Random randGen = null;
+
 
 
 	public static void setProgramTitle(String programTitle) {
@@ -50,6 +63,50 @@ public class Utils {
 
 	public static String getFullProgramIdentifierWithDate() {
 		return getFullProgramIdentifier() + " (" + getVersionDate() + ")";
+	}
+
+	/**
+	 * Returns a randomly chosen char representing an ascii lower case or upper case letter,
+	 * or an ascii digit
+	 * This is NOT crypo-secure, but just intended for quick and dirty randomness :)
+	 */
+	public static char getRandomChar() {
+
+		if (randGen == null) {
+			randGen = new Random();
+		}
+
+		int charKind = randGen.nextInt(3);
+
+		switch (charKind) {
+
+			// a digit
+			case 0:
+				return (char) (48 + randGen.nextInt(10));
+
+			// a lower-case letter
+			case 1:
+				return (char) (97 + randGen.nextInt(26));
+
+			// an upper-case letter
+			case 2:
+				return (char) (65 + randGen.nextInt(26));
+		}
+
+		// chosen by fair dice roll
+		// guaranteed to be random
+		return '4';
+	}
+
+	public static String getRandomString(int length) {
+
+		StringBuilder result = new StringBuilder();
+
+		for (int i = 0; i < length; i++) {
+			result.append(getRandomChar());
+		}
+
+		return result.toString();
 	}
 
 	public static String strListToString(List<String> stringList) {

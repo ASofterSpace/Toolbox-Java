@@ -4,11 +4,12 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.Utils;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,7 +28,7 @@ public class BinaryFile extends File {
 	// (if we just read and save we have no problem with Unicode characters either; if we actually set
 	// Unicode text for some reason, then we will have to think a bit harder and maybe manually convert
 	// the Unicode letters that we are aware of into their same-byte counterparts or whatever... ^^)
-	public static final Charset BINARY_CHARSET = StandardCharsets.ISO_8859_1;
+	public static final Charset BINARY_CHARSET = Utils.BINARY_CHARSET;
 
 
 	/**
@@ -71,12 +72,13 @@ public class BinaryFile extends File {
 
 	public String loadContentStr() {
 
-		return new String(loadContent(), BINARY_CHARSET);
+		return new String(loadContent(), Utils.BINARY_CHARSET);
 	}
 
 	public void saveContent(byte[] content) {
 
 		// fill file with data
+		// TODO :: maybe buffer the output?
 		try (FileOutputStream stream = new FileOutputStream(initSave())) {
 
 			stream.write(content);
@@ -88,7 +90,7 @@ public class BinaryFile extends File {
 
 	public void saveContentStr(String content) {
 
-		saveContentStr(content, BINARY_CHARSET);
+		saveContentStr(content, Utils.BINARY_CHARSET);
 	}
 
 	/**
@@ -103,6 +105,7 @@ public class BinaryFile extends File {
 	public void saveContentStr(String content, Charset charset) {
 
 		// fill file with data
+		// TODO :: maybe buffer the output?
 		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(initSave()), charset)) {
 
 			writer.write(content);

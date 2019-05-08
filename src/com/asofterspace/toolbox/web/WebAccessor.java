@@ -6,8 +6,14 @@ package com.asofterspace.toolbox.web;
 
 import com.asofterspace.toolbox.coders.UrlDecoder;
 import com.asofterspace.toolbox.coders.UrlEncoder;
+import com.asofterspace.toolbox.io.BinaryFile;
+import com.asofterspace.toolbox.io.Directory;
+import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.utils.ByteBuffer;
+import com.asofterspace.toolbox.Utils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -23,6 +29,9 @@ import java.util.Map;
  * @author Moya (a softer space, 2017)
  */
 public class WebAccessor {
+
+	private static Directory cache = new Directory("cache");
+
 
 	/**
 	 * Get a web resource asynchronously
@@ -51,7 +60,15 @@ public class WebAccessor {
 	 * @param url  The url of the web resource
 	 */
 	public static String get(String url) {
-		return getPutPost(url, "", "GET", null);
+		return getPutPost(url, "", "GET", null).toString();
+	}
+
+	/**
+	 * Get a web resource in bytes synchronously
+	 * @param url  The url of the web resource
+	 */
+	public static byte[] getBytes(String url) {
+		return getPutPost(url, "", "GET", null).toArray();
 	}
 
 	/**
@@ -60,7 +77,7 @@ public class WebAccessor {
 	 * @param parameters  The parameters that should be appended to the url
 	 */
 	public static String get(String url, Map<String, String> parameters) {
-		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", null);
+		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", null).toString();
 	}
 
 	/**
@@ -70,7 +87,7 @@ public class WebAccessor {
 	 * @param extraHeaders  Extra header fields (and their values) that should be sent with the request
 	 */
 	public static String get(String url, Map<String, String> parameters, Map<String, String> extraHeaders) {
-		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders);
+		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders).toString();
 	}
 
 	/**
@@ -79,7 +96,7 @@ public class WebAccessor {
 	 * @param messageBody The message body to be sent
 	 */
 	public static String put(String url, String messageBody) {
-		return getPutPost(url, messageBody, "PUT", null);
+		return getPutPost(url, messageBody, "PUT", null).toString();
 	}
 
 	/**
@@ -88,7 +105,7 @@ public class WebAccessor {
 	 * @param parameters The parameters to be sent as message body
 	 */
 	public static String put(String url, Map<String, String> parameters) {
-		return getPutPost(url, mapToMessageBody(parameters), "PUT", null);
+		return getPutPost(url, mapToMessageBody(parameters), "PUT", null).toString();
 	}
 
 	/**
@@ -97,7 +114,7 @@ public class WebAccessor {
 	 * @param messageBody The message body to be sent
 	 */
 	public static String post(String url, String messageBody) {
-		return getPutPost(url, messageBody, "POST", null);
+		return getPutPost(url, messageBody, "POST", null).toString();
 	}
 
 	/**
@@ -106,7 +123,7 @@ public class WebAccessor {
 	 * @param parameters The parameters to be sent as message body
 	 */
 	public static String post(String url, Map<String, String> parameters) {
-		return getPutPost(url, mapToMessageBody(parameters), "POST", null);
+		return getPutPost(url, mapToMessageBody(parameters), "POST", null).toString();
 	}
 
 	private static String mapToUrlSuffix(Map<String, String> parameters) {
@@ -141,7 +158,7 @@ public class WebAccessor {
 		return result.toString();
 	}
 
-	private static String getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders) {
+	private static ByteBuffer getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders) {
 
 		try {
 			URL urlAsURL = new URL(url);
@@ -161,8 +178,8 @@ public class WebAccessor {
 				}
 			}
 
-			if ("GET".equals(requestKind)) {
-			} else {
+			if (!("GET".equals(requestKind) || "HEAD".equals(requestKind))) {
+
 				connection.setDoOutput(true);
 				/*
 				String postData = URLEncoder.encode(messageBody, "UTF-8");
@@ -176,27 +193,90 @@ public class WebAccessor {
 				out.write(messageBody);
 				out.close();
 			}
+
 			connection.connect();
 
-			InputStreamReader ireader = new InputStreamReader(connection.getInputStream());
-			BufferedReader reader = new BufferedReader(ireader);
+			BufferedInputStream reader = new BufferedInputStream(connection.getInputStream());
 
-			String nextLine = reader.readLine();
-			StringBuilder data = new StringBuilder();
+			// we could here do readLine() on an actual BufferedReader, and read for each line
+			// in that case we would need to manually append line endings such as \n or \r\n though
+			// sadly, the buffered reader does not discrimiate, so we cannot reconstruct whether
+			// a particular line ended in \n or in \r\n (and YES, there are files which must contain
+			// most in different locations, such as JPEG image files!)
+			ByteBuffer buffer = new ByteBuffer();
 
-			while (nextLine != null) {
-				data.append(nextLine);
-				nextLine = reader.readLine();
+			while (reader.available() > 0) {
+				int ap = reader.read();
+				buffer.append((byte) ap);
 			}
 
 			reader.close();
 
-			return data.toString();
+			return buffer;
 
 		} catch (IOException e) {
 			System.out.println("There was an IOException in get for " + url + "\n" + e);
-			return "";
+			return new ByteBuffer();
 		}
+	}
+
+	/**
+	 * Clears the cache that can be built up e.g. through calling getFile()
+	 */
+	public static void clearCache() {
+
+		cache.delete();
+	}
+
+	/**
+	 * Get a web resource directly as File object
+	 * (this is a virtual file only though - its name will not resolve to a path on the disk,
+	 * and saving it will do nothing, but you can read its contents and convert it to a
+	 * different one if need be)
+	 * @param url  The URL that hopefully returns a file
+	 * @return The file that has been found on the web
+	 */
+	public static File getFile(String url) {
+
+		String resultName = url;
+
+		if (resultName.contains("&")) {
+			resultName = resultName.substring(0, resultName.indexOf("&"));
+		}
+
+		if (resultName.contains("/")) {
+			resultName = resultName.substring(resultName.lastIndexOf("/") + 1);
+		}
+
+		String resultExt = "";
+
+		if (resultName.contains(".")) {
+			resultExt = resultName.substring(resultName.lastIndexOf(".") + 1);
+			resultName = resultName.substring(0, resultName.lastIndexOf("."));
+		}
+
+		resultName += "_" + Utils.getRandomString(8);
+		resultName += "." + resultExt;
+
+		BinaryFile result = new BinaryFile(cache, resultName);
+
+		result.saveContent(getBytes(url));
+
+		return result;
+	}
+
+	/**
+	 * Get a local or web resource directly as File object
+	 * @param pathOrUrl  The path or URL that hopefully returns a file
+	 * @return The file that has been found on the web
+	 */
+	public static File getLocalOrWebFile(String pathOrUrl) {
+
+		if (pathOrUrl.contains("://") || pathOrUrl.startsWith("localhost:") || pathOrUrl.startsWith("localhost/")) {
+			return getFile(pathOrUrl);
+		}
+
+		return new File(pathOrUrl);
 	}
 
 	/**
