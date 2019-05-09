@@ -208,6 +208,15 @@ public class WebAccessor {
 			while (reader.available() > 0) {
 				int ap = reader.read();
 				buffer.append((byte) ap);
+				if (reader.available() <= 0) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						break;
+					}
+				}
+				ap = reader.read();
+				buffer.append((byte) ap);
 			}
 
 			reader.close();
