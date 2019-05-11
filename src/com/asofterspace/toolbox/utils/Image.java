@@ -247,6 +247,51 @@ public class Image {
 		}
 	}
 
+	private void preExpandAspectRatioKeepingly(int newWidth, int newHeight) {
+
+		if (height < 1) {
+			return;
+		}
+		if (width < 1) {
+			return;
+		}
+
+		int widthRatio = newWidth * height;
+		int heightRatio = newHeight * width;
+
+		if (widthRatio == heightRatio) {
+			// perfect, we need to do nothing!
+			return;
+		}
+
+		if (widthRatio > heightRatio) {
+			// cut off top and bottom
+			double cutOffAmount = (((newWidth * height) / newHeight) - width) / 2;
+			// System.out.println("A width: " + width + ", height: " + height + ", newWidth: " + newWidth + ", newHeight: " + newHeight + ", cutOff: " + cutOffAmount);
+			expandBy(- (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), 0, ColorRGB.WHITE);
+		} else {
+			// cut off left and right
+			double cutOffAmount = (((newHeight * width) / newWidth) - height) / 2;
+			// System.out.println("B width: " + width + ", height: " + height + ", newWidth: " + newWidth + ", newHeight: " + newHeight + ", cutOff: " + cutOffAmount);
+			expandBy(0, - (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), ColorRGB.WHITE);
+		}
+	}
+
+	/**
+	 * Resample the image to some new size,
+	 * applying some nice filters to obtain a smooth result,
+	 * optionally keeping the current aspect ratio
+	 * (so discarding what is left over)
+	 */
+	public void resampleTo(int newWidth, int newHeight, Boolean keepAspectRatio) {
+
+		if (keepAspectRatio) {
+			preExpandAspectRatioKeepingly(newWidth, newHeight);
+		}
+
+		resampleTo(newWidth, newHeight);
+	}
+
 	/**
 	 * Resample the image to some new size,
 	 * applying some nice filters to obtain a smooth result
@@ -406,7 +451,7 @@ public class Image {
 	 * filling the new space with the fillWith color
 	 * (negative values are allowed, in that case the image will shrink)
 	 */
-	public void expand(int top, int right, int bottom, int left, ColorRGB fillWith) {
+	public void expandBy(int top, int right, int bottom, int left, ColorRGB fillWith) {
 
 		int newwidth = width + right + left;
 
@@ -446,20 +491,20 @@ public class Image {
 		this.data = newdata;
 	}
 
-	public void expandTop(int howMuch, ColorRGB fillWith) {
-		expand(howMuch, 0, 0, 0, fillWith);
+	public void expandTopBy(int howMuch, ColorRGB fillWith) {
+		expandBy(howMuch, 0, 0, 0, fillWith);
 	}
 
-	public void expandRight(int howMuch, ColorRGB fillWith) {
-		expand(0, howMuch, 0, 0, fillWith);
+	public void expandRightBy(int howMuch, ColorRGB fillWith) {
+		expandBy(0, howMuch, 0, 0, fillWith);
 	}
 
-	public void expandBottom(int howMuch, ColorRGB fillWith) {
-		expand(0, 0, howMuch, 0, fillWith);
+	public void expandBottomBy(int howMuch, ColorRGB fillWith) {
+		expandBy(0, 0, howMuch, 0, fillWith);
 	}
 
-	public void expandLeft(int howMuch, ColorRGB fillWith) {
-		expand(0, 0, 0, howMuch, fillWith);
+	public void expandLeftBy(int howMuch, ColorRGB fillWith) {
+		expandBy(0, 0, 0, howMuch, fillWith);
 	}
 
 	@Override

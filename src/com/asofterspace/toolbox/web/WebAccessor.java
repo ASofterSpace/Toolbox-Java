@@ -181,6 +181,8 @@ public class WebAccessor {
 			if (!("GET".equals(requestKind) || "HEAD".equals(requestKind))) {
 
 				connection.setDoOutput(true);
+				// when did we comment out the following things?
+				// was it correct to do so - what about the encoding, what about the content length? xD
 				/*
 				String postData = URLEncoder.encode(messageBody, "UTF-8");
 				byte[] postDataBytes = postData.toString().getBytes("UTF-8");
@@ -188,8 +190,7 @@ public class WebAccessor {
 				connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 				connection.getOutputStream().write(postDataBytes);
 				*/
-				OutputStreamWriter out = new OutputStreamWriter(
-						connection.getOutputStream());
+				OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
 				out.write(messageBody);
 				out.close();
 			}

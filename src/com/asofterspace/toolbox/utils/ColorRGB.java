@@ -19,6 +19,9 @@ public class ColorRGB {
 	private final byte g;
 	private final byte b;
 
+	public final static ColorRGB WHITE = new ColorRGB(255, 255, 255);
+	public final static ColorRGB BLACK = new ColorRGB(  0,   0,   0);
+
 
 	// by default, just a white pixel
 	public ColorRGB() {

@@ -160,10 +160,8 @@ public class QrCodeFactory {
 
 		Image result = createImageFromString(data, edcLevel, maskPattern);
 
-		ColorRGB white = new ColorRGB(255, 255, 255);
-
 		// surround the QR code by three white modules
-		result.expand(3, 3, 3, 3, white);
+		result.expandBy(3, 3, 3, 3, ColorRGB.WHITE);
 
 		return result;
 	}
