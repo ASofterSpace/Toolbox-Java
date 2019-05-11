@@ -247,6 +247,12 @@ public class Image {
 		}
 	}
 
+	/**
+	 * We pre-cut (via the expand function) the image such that
+	 * width / height = newWidth / newHeight,
+	 * meaning the old aspect ratio is the same as the new one
+	 * (and we cannot change the new one, so we crop the old one)
+	 */
 	private void preExpandAspectRatioKeepingly(int newWidth, int newHeight) {
 
 		if (height < 1) {
@@ -256,6 +262,7 @@ public class Image {
 			return;
 		}
 
+		// we want to achieve widthRatio == heightRatio
 		int widthRatio = newWidth * height;
 		int heightRatio = newHeight * width;
 
@@ -265,13 +272,24 @@ public class Image {
 		}
 
 		if (widthRatio > heightRatio) {
-			// cut off top and bottom
-			double cutOffAmount = (((newWidth * height) / newHeight) - width) / 2;
+
+			// widthRatio is above heightRatio; inside widthRatio, we can only change height,
+			// not newWidth, and under the assumption that we change things so that
+			// widthRatio == heightRatio
+			// we get
+			// newWidth * height = newHeight * width
+			// so
+			// height = (newHeight * width) / newWidth
+			// where the height is the height that we want to produce now...
+			double cutOffHeight = (newHeight * width) / newWidth;
+			// ... by cutting something off :)
+			double cutOffAmount = (height - cutOffHeight) / 2;
 			// System.out.println("A width: " + width + ", height: " + height + ", newWidth: " + newWidth + ", newHeight: " + newHeight + ", cutOff: " + cutOffAmount);
 			expandBy(- (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), 0, ColorRGB.WHITE);
 		} else {
 			// cut off left and right
-			double cutOffAmount = (((newHeight * width) / newWidth) - height) / 2;
+			double cutOffWidth = (newWidth * height) / newHeight;
+			double cutOffAmount = (width - cutOffWidth) / 2;
 			// System.out.println("B width: " + width + ", height: " + height + ", newWidth: " + newWidth + ", newHeight: " + newHeight + ", cutOff: " + cutOffAmount);
 			expandBy(0, - (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), ColorRGB.WHITE);
 		}
