@@ -202,6 +202,46 @@ public class WebServerRequestHandler implements Runnable {
 	// (and return null otherwise)
 	protected String receiveJsonContent() throws IOException {
 
+		WebRequestContent content = receiveArbitraryContent();
+
+		if (content.hasType("application/json")) {
+			return content.getContentAsString();
+		}
+
+		return null;
+	}
+
+	protected WebRequestFormData receiveFormDataContent() throws IOException {
+
+		WebRequestContent content = receiveArbitraryContent();
+
+		if (content.hasType("multipart/form-data")) {
+			String strContent = content.getContentAsString();
+
+			String boundary = content.getBoundary();
+
+			String[] blocks = strContent.split(boundary);
+
+			WebRequestFormData result = new WebRequestFormData();
+
+			for (String block : blocks) {
+				// we have blocks such as empty ones, and blocks containing just the string -- etc...
+				// ignore those!
+				if (block.length() > 4) {
+					result.addBlock(block);
+				}
+			}
+
+			return result;
+		}
+
+		return null;
+	}
+
+	protected WebRequestContent receiveArbitraryContent() throws IOException {
+
+		WebRequestContent result = new WebRequestContent();
+
 		int length = 0;
 
 		String contentType = null;
@@ -216,27 +256,35 @@ public class WebServerRequestHandler implements Runnable {
 
 			if (line.toLowerCase().startsWith("content-length: ")) {
 				try {
-					length = Integer.parseInt(line.substring(16));
+					result.setContentLength(Integer.parseInt(line.substring(16)));
 				} catch (NumberFormatException e) {
 				}
 			}
 
 			if (line.toLowerCase().startsWith("content-type: ")) {
-				contentType = line.substring(14);
+				result.setContentType(line.substring(14));
 			}
 
 			if ("".equals(line)) {
-				if ((length > 0) && "application/json".equals(contentType)) {
+				if (result.getContentLength() > 0) {
 					StringBuilder readData = new StringBuilder();
-					for (int i = 0; i < length; i++) {
-						// TODO :: maybe actually wait a bit here and retry instead of just abandoning the reading
-						if (input.ready()) {
-							readData.append((char) input.read());
-						} else {
-							break;
+					for (int i = 0; i < result.getContentLength(); i++) {
+						if (!input.ready()) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								break;
+							}
+							if (!input.ready()) {
+								break;
+							}
 						}
+
+						// TODO :: this seems to have problem with non-ASCII nonsense currently...
+						readData.append((char) input.read());
 					}
-					return readData.toString();
+					result.setContent(readData);
+					return result;
 				}
 				break;
 			}
@@ -259,6 +307,9 @@ public class WebServerRequestHandler implements Runnable {
 		send("HTTP/1.1 " + status);
 
 		send("Server: A Softer Space Java Server version " + Utils.TOOLBOX_VERSION_NUMBER);
+
+		send("Access-Control-Allow-Origin: *");
+		send("Access-Control-Allow-Methods: \"POST, GET\"");
 
 		if (answer == null) {
 
@@ -376,6 +427,11 @@ public class WebServerRequestHandler implements Runnable {
 	 * arguments is ["foo=bar", "thoom=floom"]
 	 */
 	protected File getFileFromLocation(String location, String[] arguments) {
+
+		// if no root is specified, then we are just not serving any files at all
+		if (webRoot == null) {
+			return null;
+		}
 
 		List<String> whitelist = server.getFileLocationWhitelist();
 
