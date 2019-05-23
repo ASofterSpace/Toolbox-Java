@@ -31,5 +31,6 @@ bin
 src/sourcefiles.list
 
 # test files
+cache
 config
 test
