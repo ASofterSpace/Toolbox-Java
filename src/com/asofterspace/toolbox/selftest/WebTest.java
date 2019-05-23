@@ -10,6 +10,7 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
+import com.asofterspace.toolbox.utils.Image;
 import com.asofterspace.toolbox.web.WebAccessor;
 import com.asofterspace.toolbox.web.WebServer;
 
@@ -115,13 +116,17 @@ public class WebTest implements Test {
 
 		TestUtils.start("Get File from Server");
 
-		DefaultImageFile origImage = new DefaultImageFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_large_automask.png");
+		DefaultImageFile origImageFile = new DefaultImageFile(AllTests.IMAGE_TEST_DATA_PATH + "/qrtest_large_automask.png");
+
+		Image origImage = origImageFile.getImage();
 
 		server.addToWhitelist("images/qrtest_large_automask.png");
 
 		File gotFile = WebAccessor.getFile("http://localhost:8081/images/qrtest_large_automask.png");
 
-		DefaultImageFile gotImage = new DefaultImageFile(gotFile);
+		DefaultImageFile gotImageFile = new DefaultImageFile(gotFile);
+
+		Image gotImage = gotImageFile.getImage();
 
 		if (!origImage.equals(gotImage)) {
 			TestUtils.fail("We tried to request an image file from our own server... and did not get it!");

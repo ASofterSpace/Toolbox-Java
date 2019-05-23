@@ -177,7 +177,7 @@ public class ColorRGB {
 	}
 
 	public String toString() {
-		return "RGB(" + r + ", " + g + ", " + b + ")";
+		return "RGB(" + (((int) r) & 0xFF) + ", " + (((int) g) & 0xFF) + ", " + (((int) b) & 0xFF) + ")";
 	}
 
 }
