@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 42;
+	public final static int TOOLBOX_VERSION_NUMBER = 43;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -271,6 +271,22 @@ public class Utils {
 
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
 		System.out.println(format.format(new Date()) + " [heap " + heapStr + "]: " + logline);
+	}
+
+	/**
+	 * A quick utility function to just sleep (if allowed) - and not do anything special
+	 * if we are being interrupted (just return a bit earlier)
+	 */
+	public static void sleep(int milliseconds) {
+
+		try {
+
+			Thread.sleep(milliseconds);
+
+		} catch (InterruptedException e) {
+			// we were interrupted, hooray!
+			// ... let's just return then :)
+		}
 	}
 
 }

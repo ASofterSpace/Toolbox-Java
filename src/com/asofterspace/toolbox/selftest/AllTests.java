@@ -12,13 +12,15 @@ public class AllTests {
 
 	static final String TEST_PATH = "test";
 
-	static final String IMAGE_TEST_DATA_PATH = "testdata/images";
+	static final String TEST_DATA_PATH = "testdata/";
 
-	static final String CDM_TEST_DATA_PATH = "testdata/cdm";
+	static final String IMAGE_TEST_DATA_PATH = TEST_DATA_PATH + "images";
 
-	static final String XML_TEST_DATA_PATH = "testdata/xml";
+	static final String CDM_TEST_DATA_PATH = TEST_DATA_PATH + "cdm";
 
-	static final String JSON_TEST_DATA_PATH = "testdata/json";
+	static final String XML_TEST_DATA_PATH = TEST_DATA_PATH + "xml";
+
+	static final String JSON_TEST_DATA_PATH = TEST_DATA_PATH + "json";
 
 
 	public static void main(String[] args) {
@@ -50,6 +52,8 @@ public class AllTests {
 		TestUtils.run(new UuidTest());
 
 		TestUtils.run(new CdmTest());
+
+		TestUtils.run(new WebTest());
 
 		TestUtils.endSuite();
 

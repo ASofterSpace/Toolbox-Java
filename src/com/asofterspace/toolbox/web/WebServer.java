@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Moya (a softer space, 2019)
  */
-public class WebServer {
+public class WebServer implements Runnable {
 
 	private boolean serverRunning;
 
@@ -28,10 +28,28 @@ public class WebServer {
 
 	private List<String> fileLocationWhitelist;
 
+	private Thread currentHandlerThread;
+
+
+	public WebServer() {
+		init(null, null);
+	}
 
 	public WebServer(Directory webRoot) {
+		init(webRoot, null);
+	}
 
-		port = 8080;
+	public WebServer(Directory webRoot, Integer port) {
+		init(webRoot, port);
+	}
+
+	private void init(Directory webRoot, Integer port) {
+
+		if (port == null) {
+			this.port = 8080;
+		} else {
+			this.port = port;
+		}
 
 		serverRunning = false;
 
@@ -40,6 +58,10 @@ public class WebServer {
 		fileLocationWhitelist = new ArrayList<>();
 	}
 
+	/**
+	 * Serve data with this server synchronously
+	 * (by starting one handler after another)
+	 */
 	public void serve() {
 
 		serverRunning = true;
@@ -55,8 +77,9 @@ public class WebServer {
 
 				// ... and handle it expertly through one of our handlers :)
 				WebServerRequestHandler handler = getHandler(request);
-				Thread handlerThread = new Thread(handler);
-				handlerThread.start();
+				currentHandlerThread = new Thread(handler);
+				currentHandlerThread.start();
+				currentHandlerThread = null;
 			}
 
 		} catch (IOException e) {
@@ -65,15 +88,50 @@ public class WebServer {
 		}
 	}
 
+	/**
+	 * Serve data with this server asynchronously
+	 * (by starting one handler after another - so we here start a thread which then starts other threads)
+	 */
+	public void serveAsync() {
+		Thread serverThread = new Thread(this);
+		serverThread.start();
+	}
+
+	@Override
+	public void run() {
+		serve();
+	}
+
 	protected WebServerRequestHandler getHandler(Socket request) {
 		return new WebServerRequestHandler(this, request, webRoot);
 	}
 
-	public void setFileLocationWhitelist(List<String> whitelist) {
+	/**
+	 * Add a file to the file location whitelist, with its path relative to the web root
+	 * (by default, NOTHING is served, and ONLY files on the whitelist are getting served!)
+	 */
+	public void addToWhitelist(String filename) {
+		this.fileLocationWhitelist.add(filename);
+	}
+
+	/**
+	 * Set the file location whitelist
+	 * (by default, NOTHING is served, and ONLY files on the whitelist are getting served!)
+	 */
+	public void setWhitelist(List<String> whitelist) {
 		this.fileLocationWhitelist = whitelist;
 	}
 
 	public List<String> getFileLocationWhitelist() {
 		return fileLocationWhitelist;
+	}
+
+	public void stop() {
+
+		serverRunning = false;
+
+		if (currentHandlerThread != null) {
+			currentHandlerThread.interrupt();
+		}
 	}
 }
