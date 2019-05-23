@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 
@@ -55,75 +56,79 @@ public class WebAccessor {
 		t.start();
 	}
 
+	private static String bytesToString(byte[] byteArr) {
+		return new String(byteArr, StandardCharsets.UTF_8);
+	}
+
 	/**
-	 * Get a web resource synchronously
+	 * Get a web resource synchronously, assuming that it is in UTF-8
 	 * @param url  The url of the web resource
 	 */
 	public static String get(String url) {
-		return getPutPost(url, "", "GET", null).toString();
+		return bytesToString(getBytes(url));
 	}
 
 	/**
-	 * Get a web resource in bytes synchronously
+	 * Get a web resource in bytes synchronously (not assuming any encoding therefore!)
 	 * @param url  The url of the web resource
 	 */
 	public static byte[] getBytes(String url) {
-		return getPutPost(url, "", "GET", null).toArray();
+		return getPutPost(url, "", "GET", null);
 	}
 
 	/**
-	 * Get a web resource synchronously
+	 * Get a web resource synchronously, assuming that it is in UTF-8
 	 * @param url  The base url of the web resource (without parameters)
 	 * @param parameters  The parameters that should be appended to the url
 	 */
 	public static String get(String url, Map<String, String> parameters) {
-		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", null).toString();
+		return bytesToString(getPutPost(url + mapToUrlSuffix(parameters), "", "GET", null));
 	}
 
 	/**
-	 * Get a web resource synchronously
+	 * Get a web resource synchronously, assuming that it is in UTF-8
 	 * @param url  The base url of the web resource (without parameters)
 	 * @param parameters  The parameters that should be appended to the url
 	 * @param extraHeaders  Extra header fields (and their values) that should be sent with the request
 	 */
 	public static String get(String url, Map<String, String> parameters, Map<String, String> extraHeaders) {
-		return getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders).toString();
+		return bytesToString(getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders));
 	}
 
 	/**
-	 * Put a web resource synchronously
+	 * Put a web resource synchronously, assuming that the result is in UTF-8
 	 * @param url  The url of the web resource
 	 * @param messageBody The message body to be sent
 	 */
 	public static String put(String url, String messageBody) {
-		return getPutPost(url, messageBody, "PUT", null).toString();
+		return bytesToString(getPutPost(url, messageBody, "PUT", null));
 	}
 
 	/**
-	 * Put a web resource synchronously
+	 * Put a web resource synchronously, assuming that the result is in UTF-8
 	 * @param url  The url of the web resource
 	 * @param parameters The parameters to be sent as message body
 	 */
 	public static String put(String url, Map<String, String> parameters) {
-		return getPutPost(url, mapToMessageBody(parameters), "PUT", null).toString();
+		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "PUT", null));
 	}
 
 	/**
-	 * Post a web resource synchronously
+	 * Post a web resource synchronously, assuming that the result is in UTF-8
 	 * @param url  The url of the web resource
 	 * @param messageBody The message body to be sent
 	 */
 	public static String post(String url, String messageBody) {
-		return getPutPost(url, messageBody, "POST", null).toString();
+		return bytesToString(getPutPost(url, messageBody, "POST", null));
 	}
 
 	/**
-	 * Post a web resource synchronously
+	 * Post a web resource synchronously, assuming that the result is in UTF-8
 	 * @param url  The url of the web resource
 	 * @param parameters The parameters to be sent as message body
 	 */
 	public static String post(String url, Map<String, String> parameters) {
-		return getPutPost(url, mapToMessageBody(parameters), "POST", null).toString();
+		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "POST", null));
 	}
 
 	private static String mapToUrlSuffix(Map<String, String> parameters) {
@@ -158,7 +163,7 @@ public class WebAccessor {
 		return result.toString();
 	}
 
-	private static ByteBuffer getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders) {
+	private static byte[] getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders) {
 
 		try {
 			URL urlAsURL = new URL(url);
@@ -222,12 +227,13 @@ public class WebAccessor {
 
 			reader.close();
 
-			return buffer;
+			return buffer.toArray();
 
 		} catch (IOException e) {
 			System.out.println("There was an IOException in get for " + url + "\n" + e);
-			return new ByteBuffer();
 		}
+
+		return new byte[0];
 	}
 
 	/**

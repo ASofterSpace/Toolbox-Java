@@ -93,8 +93,6 @@ public class WebTest implements Test {
 			return;
 		}
 
-		System.out.println(jsonContent.getString("leftout"));
-
 		if (!jsonContent.getString("leftout").equals("the Gänsefüßchen")) {
 			TestUtils.fail("We stored {leftout: 'the Gänsefüßchen'} in a JSON file, then read the file - and did not get the Gänsefüßchen when querying for leftout!");
 			return;
