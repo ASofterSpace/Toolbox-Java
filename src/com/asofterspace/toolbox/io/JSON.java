@@ -601,11 +601,11 @@ public class JSON {
 
 		JSON result = get(key);
 
-		if ((result == null) || (result.arrContents == null)) {
-			return new ArrayList<>();
-		}
-
 		List<String> resultList = new ArrayList<>();
+
+		if ((result == null) || (result.arrContents == null)) {
+			return resultList;
+		}
 
 		for (JSON entry : result.arrContents) {
 			if (entry != null) {

@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import java.util.List;
+
 
 public class JsonFile extends SimpleFile {
 
@@ -79,6 +81,20 @@ public class JsonFile extends SimpleFile {
 		ensureContent();
 
 		return jsonContent.getString(key);
+	}
+
+	/**
+	 * Gets a list of values stored with the given key,
+	 * so if the JSON is {"bla": ["1", "2", "3"]},
+	 * then getList("bla") gives a list containing "1", "2" and "3"
+	 * @param key
+	 * @return the list stored in the key, or an empty list if it cannot be found
+	 */
+	public List<String> getList(String key) {
+
+		ensureContent();
+
+		return jsonContent.getArrayAsStringList(key);
 	}
 
 	/**

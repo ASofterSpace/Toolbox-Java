@@ -198,6 +198,26 @@ public class Utils {
 		return i + "th";
 	}
 
+	/**
+	 * Takes a thing and an amount and returns, depending on the input,
+	 * no things
+	 * 1 thing
+	 * 2 things
+	 * ...
+	 */
+	public static String thingOrThings(int amount, String thing) {
+
+		if (amount == 0) {
+			return "no " + thing + "s";
+		}
+
+		if (amount == 1) {
+			return "1 " + thing;
+		}
+
+		return amount + " " + thing + "s";
+	}
+
 	public static String leftPadW(int origStr, int length) {
 		return leftPad(""+origStr, ' ', length);
 	}
