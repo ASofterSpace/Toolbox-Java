@@ -129,6 +129,13 @@ public class TestUtils {
 		System.out.println("------------------------------");
 	}
 
+	/**
+	 * Were all the tests that have been run (so far) successful?
+	 */
+	public static boolean allWereSuccessful() {
+		return testsSuccess == testsRun;
+	}
+
 	private static void finalizePreviousTest() {
 
 		testsRun++;

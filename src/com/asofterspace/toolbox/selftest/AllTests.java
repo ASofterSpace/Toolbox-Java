@@ -60,7 +60,11 @@ public class AllTests {
 		// code editor components keep one single highlighting thread running,
 		// and the JVM will not stop until all threads are stopped, so we just
 		// tell the JVM to stop :)
-		System.exit(0);
+		if (TestUtils.allWereSuccessful()) {
+			System.exit(0);
+		} else {
+			System.exit(1);
+		}
 	}
 
 	// ensure the test directory is clear
