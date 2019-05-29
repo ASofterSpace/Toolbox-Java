@@ -12,6 +12,8 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
@@ -58,6 +60,7 @@ public abstract class Code extends DefaultStyledDocument {
 	protected final JTextPane decoratedEditor;
 	private KeyAdapter keyListener;
 	private CaretListener caretListener;
+	private MouseAdapter mouseListener;
 
 	// the (optional) line memo to the left of the code editor, containing the line numbers
 	// (should most usually be a CodeEditorLineMemo - but in a pitch any JTextPane will do)
@@ -105,7 +108,7 @@ public abstract class Code extends DefaultStyledDocument {
 	private int preventRemove = 0;
 
 	// configuration
-	private boolean copyOnCtrlEnter = true;
+	// private boolean copyOnCtrlEnter = true;
 	private boolean tabEntireBlocks = true;
 
 	// search string - the string that is currently being searched for
@@ -193,11 +196,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 		keyListener = new KeyAdapter() {
 			public void keyPressed(KeyEvent event) {
+				/*
 				// on [Ctrl / Shift] + [Enter], duplicate current row
 				if (copyOnCtrlEnter) {
 					if ((event.getKeyCode() == KeyEvent.VK_ENTER) && (event.isControlDown() || event.isShiftDown())) {
 						int caretPos = decoratedEditor.getCaretPosition();
 						String content = decoratedEditor.getText();
+
 						int lineStart = getLineStartFromPosition(caretPos, content);
 						int lineEnd = getLineEndFromPosition(caretPos, content);
 
@@ -213,6 +218,7 @@ public abstract class Code extends DefaultStyledDocument {
 						}
 					}
 				}
+				*/
 
 				// on [Tab] during selection, indent whole block
 				// on [Ctrl / Shift] + [Tab] during selection, unindent whole block
@@ -342,6 +348,32 @@ public abstract class Code extends DefaultStyledDocument {
 		};
 
 		decoratedEditor.addCaretListener(caretListener);
+
+		MouseAdapter mouseListener = new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent event) {
+
+				if (event.isControlDown()) {
+					int caretPos = decoratedEditor.getCaretPosition();
+					String content = decoratedEditor.getText();
+
+					int wordStart = getWordStartFromPosition(caretPos, content);
+					int wordEnd = getWordEndFromPosition(caretPos, content);
+
+					String clickedWord = content.substring(wordStart, wordEnd);
+					// find clicked word and go there
+					int nextIndex = content.indexOf(clickedWord, wordEnd);
+					if (nextIndex < 0) {
+						nextIndex = content.indexOf(clickedWord);
+					}
+					decoratedEditor.setCaretPosition(nextIndex);
+					decoratedEditor.setSelectionStart(nextIndex);
+					decoratedEditor.setSelectionEnd(nextIndex);
+				}
+			}
+		};
+
+		decoratedEditor.addMouseListener(mouseListener);
 	}
 
 	// does this code editor support reporting function names in the code?
@@ -513,7 +545,7 @@ public abstract class Code extends DefaultStyledDocument {
 		return origText;
 	}
 
-	protected String getLineFromPosition(int pos, String content) {
+	public static String getLineFromPosition(int pos, String content) {
 
 		int start = getLineStartFromPosition(pos, content);
 		int end = getLineEndFromPosition(pos, content);
@@ -521,7 +553,7 @@ public abstract class Code extends DefaultStyledDocument {
 		return content.substring(start, end);
 	}
 
-	private int getLineStartFromPosition(int pos, String content) {
+	public static int getLineStartFromPosition(int pos, String content) {
 
 		int lineStart = 0;
 
@@ -536,11 +568,145 @@ public abstract class Code extends DefaultStyledDocument {
 		return lineStart;
 	}
 
-	private int getLineEndFromPosition(int pos, String content) {
+	public static int getLineEndFromPosition(int pos, String content) {
 
 		int lineEnd = content.indexOf("\n", pos);
 
 		if (lineEnd < 0) {
+			lineEnd = content.length();
+		}
+
+		return lineEnd;
+	}
+
+	public static int getWordStartFromPosition(int pos, String content) {
+
+		int lineStartSpace = content.lastIndexOf(" ", pos - 1) + 1;
+		int lineStartNewline = content.lastIndexOf("\n", pos - 1) + 1;
+		int lineStartTab = content.lastIndexOf("\t", pos - 1) + 1;
+		int lineStartLAngle = content.lastIndexOf("<", pos - 1) + 1;
+		int lineStartRAngle = content.lastIndexOf(">", pos - 1) + 1;
+		int lineStartLBracket = content.lastIndexOf("(", pos - 1) + 1;
+		int lineStartRBracket = content.lastIndexOf(")", pos - 1) + 1;
+		int lineStartLSqBracket = content.lastIndexOf("[", pos - 1) + 1;
+		int lineStartRSqBracket = content.lastIndexOf("]", pos - 1) + 1;
+		int lineStartLParens = content.lastIndexOf("{", pos - 1) + 1;
+		int lineStartRParens = content.lastIndexOf("}", pos - 1) + 1;
+		int lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
+		int lineStartSemi = content.lastIndexOf(";", pos - 1) + 1;
+		int lineStartComma = content.lastIndexOf(",", pos - 1) + 1;
+
+		int lineStart = 0;
+
+		if (lineStartSpace > lineStart) {
+			lineStart = lineStartSpace;
+		}
+		if (lineStartNewline > lineStart) {
+			lineStart = lineStartNewline;
+		}
+		if (lineStartTab > lineStart) {
+			lineStart = lineStartTab;
+		}
+		if (lineStartLAngle > lineStart) {
+			lineStart = lineStartLAngle;
+		}
+		if (lineStartRAngle > lineStart) {
+			lineStart = lineStartRAngle;
+		}
+		if (lineStartLBracket > lineStart) {
+			lineStart = lineStartLBracket;
+		}
+		if (lineStartRBracket > lineStart) {
+			lineStart = lineStartRBracket;
+		}
+		if (lineStartLSqBracket > lineStart) {
+			lineStart = lineStartLSqBracket;
+		}
+		if (lineStartRSqBracket > lineStart) {
+			lineStart = lineStartRSqBracket;
+		}
+		if (lineStartLParens > lineStart) {
+			lineStart = lineStartLParens;
+		}
+		if (lineStartRParens > lineStart) {
+			lineStart = lineStartRParens;
+		}
+		if (lineStartDot > lineStart) {
+			lineStart = lineStartDot;
+		}
+		if (lineStartSemi > lineStart) {
+			lineStart = lineStartSemi;
+		}
+		if (lineStartComma > lineStart) {
+			lineStart = lineStartComma;
+		}
+
+		return lineStart;
+	}
+
+	public static int getWordEndFromPosition(int pos, String content) {
+
+		int lineEndSpace = content.indexOf(" ", pos);
+		int lineEndNewline = content.indexOf("\n", pos);
+		int lineEndTab = content.indexOf("\t", pos);
+		int lineEndLAngle = content.indexOf("<", pos);
+		int lineEndRAngle = content.indexOf(">", pos);
+		int lineEndLBracket = content.indexOf("(", pos);
+		int lineEndRBracket = content.indexOf(")", pos);
+		int lineEndLSqBracket = content.indexOf("[", pos);
+		int lineEndRSqBracket = content.indexOf("]", pos);
+		int lineEndLParens = content.indexOf("{", pos);
+		int lineEndRParens = content.indexOf("}", pos);
+		int lineEndDot = content.indexOf(".", pos);
+		int lineEndSemi = content.indexOf(";", pos);
+		int lineEndComma = content.indexOf(",", pos);
+
+		int lineEnd = Integer.MAX_VALUE;
+
+		if ((lineEndSpace >= 0) && (lineEndSpace < lineEnd)) {
+			lineEnd = lineEndSpace;
+		}
+		if ((lineEndNewline >= 0) && (lineEndNewline < lineEnd)) {
+			lineEnd = lineEndNewline;
+		}
+		if ((lineEndTab >= 0) && (lineEndTab < lineEnd)) {
+			lineEnd = lineEndTab;
+		}
+		if ((lineEndLAngle >= 0) && (lineEndLAngle < lineEnd)) {
+			lineEnd = lineEndLAngle;
+		}
+		if ((lineEndRAngle >= 0) && (lineEndRAngle < lineEnd)) {
+			lineEnd = lineEndRAngle;
+		}
+		if ((lineEndLBracket >= 0) && (lineEndLBracket < lineEnd)) {
+			lineEnd = lineEndLBracket;
+		}
+		if ((lineEndRBracket >= 0) && (lineEndRBracket < lineEnd)) {
+			lineEnd = lineEndRBracket;
+		}
+		if ((lineEndLSqBracket >= 0) && (lineEndLSqBracket < lineEnd)) {
+			lineEnd = lineEndLSqBracket;
+		}
+		if ((lineEndRSqBracket >= 0) && (lineEndRSqBracket< lineEnd)) {
+			lineEnd = lineEndRSqBracket;
+		}
+		if ((lineEndLParens >= 0) && (lineEndLParens < lineEnd)) {
+			lineEnd = lineEndLParens;
+		}
+		if ((lineEndRParens >= 0) && (lineEndRParens < lineEnd)) {
+			lineEnd = lineEndRParens;
+		}
+		if ((lineEndDot >= 0) && (lineEndDot < lineEnd)) {
+			lineEnd = lineEndDot;
+		}
+		if ((lineEndSemi >= 0) && (lineEndSemi < lineEnd)) {
+			lineEnd = lineEndSemi;
+		}
+		if ((lineEndComma >= 0) && (lineEndComma < lineEnd)) {
+			lineEnd = lineEndComma;
+		}
+
+		if (lineEnd == Integer.MAX_VALUE) {
 			lineEnd = content.length();
 		}
 
@@ -578,9 +744,11 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	/*
 	public void setCopyOnCtrlEnter(boolean value) {
 		copyOnCtrlEnter = value;
 	}
+	*/
 
 	public void setTabEntireBlocks(boolean value) {
 		tabEntireBlocks = value;
@@ -890,8 +1058,7 @@ public abstract class Code extends DefaultStyledDocument {
 		// on enter, step forward as far as there was whitespace in the current line...
 		if ("\n".equals(insertedString)) {
 
-			// ... unless [Ctrl] is being held, as we want to use [Ctrl]+[Enter] = copy the current line
-			// TODO - this (and add it as option? but then again, this would need to be configurable, meh...)
+			// (unless [Ctrl] is being held, as we want to use [Ctrl]+[Enter] = copy the current line)
 
 			try {
 				String content = this.getText(0, offset);
@@ -940,6 +1107,12 @@ public abstract class Code extends DefaultStyledDocument {
 				insertedString += curLineWhitespace.toString();
 				overrideCaretPos += curLineWhitespace.length();
 
+				// in case of e.g. } following the {, add another curLineWhitespace (but without the
+				// last append) after the caret pos, such that {} with an [ENTER] pressed in between leads to
+				//	 {
+				//		 |
+				//	 }
+
 				if (content.endsWith("{") ||
 					content.endsWith("[") ||
 					content.endsWith("(") ||
@@ -957,12 +1130,6 @@ public abstract class Code extends DefaultStyledDocument {
 						}
 					}
 				}
-
-				// TODO :: in case of e.g. } following the {, add another curLineWhitespace (but without the
-				// last append) after the caret pos, such that {} with an [ENTER] pressed in between leads to
-				//	 {
-				//		 |
-				//	 }
 
 			} catch (BadLocationException e) {
 				// oops!
@@ -1186,6 +1353,9 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 			if (caretListener != null) {
 				decoratedEditor.removeCaretListener(caretListener);
+			}
+			if (mouseListener != null) {
+				decoratedEditor.removeMouseListener(mouseListener);
 			}
 		}
 
