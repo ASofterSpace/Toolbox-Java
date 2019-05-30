@@ -61,14 +61,14 @@ public class File {
 	}
 
 	/**
-	 * Create a new file instance based on a Directory and the name of
-	 * the file inside the directory
-	 * @param directory The directory in which the file is located
+	 * Create a new file instance based on a parent Directory and the name of
+	 * the file inside the parent directory
+	 * @param parentDirectory The directory in which the file is located
 	 * @param filename The (local) name of the actual file
 	 */
-	public File(Directory directory, String filename) {
+	public File(Directory parentDirectory, String filename) {
 
-		this.filename = directory.getJavaPath().resolve(filename).toAbsolutePath().toString();
+		this.filename = parentDirectory.getJavaPath().resolve(filename).toAbsolutePath().toString();
 	}
 
 	/**

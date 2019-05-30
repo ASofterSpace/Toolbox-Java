@@ -55,6 +55,17 @@ public class WebTemplateEngine {
 
 			currentFile = files.getString(i);
 
+			// in case we have an entry such as /foo/bar/*,
+			// just copy everything inside the  bar  folder without applying any conversions to it
+			// (this is supposed to be used for basically folders consisting of lots of files
+			// without any templating)
+			if (currentFile.endsWith("/*")) {
+				String dirName = currentFile.substring(0, currentFile.length() - 2);
+				Directory parentDir = new Directory(origDir, dirName);
+				parentDir.copyToDisk(new Directory(targetDir, dirName));
+				continue;
+			}
+
 			SimpleFile indexIn = new SimpleFile(origDir, currentFile);
 
 			if (isWebTextFile(indexIn)) {
