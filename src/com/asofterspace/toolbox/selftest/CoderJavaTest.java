@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.selftest;
 
+import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.codeeditor.JavaCode;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;

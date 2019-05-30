@@ -558,11 +558,7 @@ public abstract class Code extends DefaultStyledDocument {
 		int lineStart = 0;
 
 		if (pos > 0) {
-			lineStart = content.lastIndexOf("\n", pos - 1);
-		}
-
-		if (lineStart < 0) {
-			lineStart = 0;
+			lineStart = content.lastIndexOf("\n", pos - 1) + 1;
 		}
 
 		return lineStart;
@@ -577,6 +573,14 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		return lineEnd;
+	}
+
+	public static String getWordFromPosition(int pos, String content) {
+
+		int start = getWordStartFromPosition(pos, content);
+		int end = getWordEndFromPosition(pos, content);
+
+		return content.substring(start, end);
 	}
 
 	public static int getWordStartFromPosition(int pos, String content) {
