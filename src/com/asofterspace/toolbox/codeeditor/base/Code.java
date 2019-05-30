@@ -368,7 +368,7 @@ public abstract class Code extends DefaultStyledDocument {
 					}
 					decoratedEditor.setCaretPosition(nextIndex);
 					decoratedEditor.setSelectionStart(nextIndex);
-					decoratedEditor.setSelectionEnd(nextIndex);
+					decoratedEditor.setSelectionEnd(nextIndex + clickedWord.length());
 				}
 			}
 		};
