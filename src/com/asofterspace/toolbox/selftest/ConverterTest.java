@@ -8,6 +8,8 @@ import com.asofterspace.toolbox.coders.Base64Decoder;
 import com.asofterspace.toolbox.coders.Base64Encoder;
 import com.asofterspace.toolbox.coders.HexDecoder;
 import com.asofterspace.toolbox.coders.HexEncoder;
+import com.asofterspace.toolbox.coders.MorseDecoder;
+import com.asofterspace.toolbox.coders.MorseEncoder;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 
@@ -27,6 +29,12 @@ public class ConverterTest implements Test {
 		hexStrDecoderTest();
 
 		hexNumberDecoderTest();
+
+		morseEncoderTest();
+
+		morseDecoderTest();
+
+		morseEncoderDecoderTest();
 	}
 
 	public void base64HexCrossTest(int testnum) {
@@ -83,6 +91,62 @@ public class ConverterTest implements Test {
 
 		if (intOutput != 27398) {
 			TestUtils.fail("We tried to decode a well-known hex number but got " + output + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void morseEncoderTest() {
+
+		TestUtils.start("Morse Encoder");
+
+		String input = "This is the 1. A Softer Space Morse test text.";
+
+		String output = MorseEncoder.translateToMorseCode(input);
+
+		output = MorseEncoder.simplifyMorseCode(output);
+
+		if (!output.equals("- .... .. ...     .. ...     - .... .     .---- .-.-.-     .-     " +
+							"... --- ..-. - . .-.     ... .--. .- -.-. .     -- --- .-. ... .     " +
+							"- . ... -     - . -..- - .-.-.-")) {
+			TestUtils.fail("We tried to encode a well-known string but got " + output + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void morseDecoderTest() {
+
+		TestUtils.start("Morse Decoder");
+
+		String input = ".- .- .- -. -..     - .... .. ...     .. ...     - .... .     ..--- .-.-.-     " +
+						".-     ... --- ..-. - . .-.     ... .--. .- -.-. .     -- --- .-. ... .     " +
+						"- . ... -     - . -..- - .-.-.-";
+
+		String output = MorseDecoder.translateFromMorseCode(input);
+
+		if (!output.equals("Aaand this is the 2. A Softer Space Morse test text.".toUpperCase())) {
+			TestUtils.fail("We tried to decode a well-known string but got " + output + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void morseEncoderDecoderTest() {
+
+		TestUtils.start("Morse Encoder/Decoder");
+
+		String input = "Finally, this is the 3. A Softer Space Morse test text!";
+
+		String middleput = MorseEncoder.translateToMorseCode(input);
+
+		String output = MorseDecoder.translateFromMorseCode(middleput);
+
+		if (!output.equals(input.toUpperCase())) {
+			TestUtils.fail("We tried to encode and decode a well-known string but got " + output + "!");
 			return;
 		}
 
