@@ -115,7 +115,7 @@ public class HexDecoder {
 
 		for (int i = len - 1; i >= 0; i--) {
 			byte[] bytes = new byte[] {hexCharToByte(hexStr.charAt(i))};
-			result.add(factor.multiply(new BigInteger(bytes)));
+			result = result.add(factor.multiply(new BigInteger(bytes)));
 			factor = factor.multiply(SIXTEEN);
 		}
 
