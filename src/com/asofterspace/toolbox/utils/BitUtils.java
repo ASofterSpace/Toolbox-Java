@@ -18,6 +18,33 @@ package com.asofterspace.toolbox.utils;
  */
 public class BitUtils {
 
+	public static boolean equals(boolean[] left, boolean[] right) {
+
+		if ((left == null) && (right == null)) {
+			return true;
+		}
+
+		if (left == null) {
+			return false;
+		}
+
+		if (right == null) {
+			return false;
+		}
+
+		if (left.length != right.length) {
+			return false;
+		}
+
+		for (int i = 0; i < left.length; i++) {
+			if (left[i] != right[i]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	public static boolean[] byteToBits(byte b) {
 
 		boolean[] result = new boolean[8];
@@ -190,6 +217,17 @@ public class BitUtils {
 		bitArr[offset+5] = b3;
 		bitArr[offset+6] = b2;
 		bitArr[offset+7] = b1;
+	}
+
+	public static String toString(boolean[] bitArr) {
+
+		StringBuilder result = new StringBuilder();
+
+		for (int i = 0; i < bitArr.length; i++) {
+			result.append(bitArr[i] ? '1' : '0');
+		}
+
+		return result.toString();
 	}
 
 }
