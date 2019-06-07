@@ -226,7 +226,7 @@ public class QrCode {
 		}
 	}
 
-	void setDatapoint(int x, int y, boolean value) {
+	public void setDatapoint(int x, int y, boolean value) {
 		data[x][y] = value;
 	}
 
