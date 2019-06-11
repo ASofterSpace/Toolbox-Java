@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.web;
 import com.asofterspace.toolbox.io.Directory;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ public class WebServer implements Runnable {
 	private boolean serverRunning;
 
 	private int port;
+
+	private String address;
 
 	protected Directory webRoot;
 
@@ -46,16 +49,18 @@ public class WebServer implements Runnable {
 	private void init(Directory webRoot, Integer port) {
 
 		if (port == null) {
-			this.port = 8080;
-		} else {
-			this.port = port;
+			port = 8080;
 		}
+		this.port = port;
 
 		serverRunning = false;
 
 		this.webRoot = webRoot;
 
 		fileLocationWhitelist = new ArrayList<>();
+
+		// seems like a good default assumption ;)
+		address = "localhost";
 	}
 
 	/**
@@ -66,8 +71,10 @@ public class WebServer implements Runnable {
 
 		serverRunning = true;
 
+		ServerSocket socket = null;
+
 		try {
-			ServerSocket socket = new ServerSocket(port);
+			socket = new ServerSocket(port);
 
 			// while we keep serving...
 			while (serverRunning) {
@@ -85,6 +92,15 @@ public class WebServer implements Runnable {
 		} catch (IOException e) {
 			System.err.println("Something unexpected happened to the server!");
 			System.err.println(e);
+		} finally {
+			try {
+				if (socket != null) {
+					socket.close();
+				}
+			} catch (IOException e2) {
+				System.err.println("Something unexpected happened while closing the server!");
+				System.err.println(e2);
+			}
 		}
 	}
 
@@ -124,6 +140,14 @@ public class WebServer implements Runnable {
 
 	public List<String> getFileLocationWhitelist() {
 		return fileLocationWhitelist;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public String getAddress() {
+		return address;
 	}
 
 	public void stop() {
