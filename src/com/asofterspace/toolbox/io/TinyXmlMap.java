@@ -43,7 +43,7 @@ public class TinyXmlMap extends TinyMap {
 			result.append(" ");
 			result.append(heap[i*2]);
 			result.append("=\"");
-			result.append(XmlElement.xmlEscape(heap[(i*2)+1]));
+			result.append(XML.escapeXMLstr(heap[(i*2)+1]));
 			result.append("\"");
 		}
 		return result.toString();

@@ -64,6 +64,38 @@ public class XmlElement {
 		construct(name, attributes);
 	}
 
+	public XmlElement(Record other) {
+
+		if (other instanceof XML) {
+			XML otherXML = (XML) other;
+			construct(otherXML.getName(), otherXML.getAttributes());
+		} else {
+			construct(null, new TinyXmlMap());
+		}
+
+		switch (other.getKind()) {
+
+			case ARRAY:
+				List<Record> values = other.getValues();
+				for (Record val : values) {
+					this.xmlChildren.add(new XmlElement(val));
+				}
+				break;
+
+			case OBJECT:
+				Map<String, Record> valueMap = other.getValueMap();
+				for (Map.Entry<String, Record> entry : valueMap.entrySet()) {
+					XmlElement xmlElement = new XmlElement(entry.getValue());
+					xmlElement.name = entry.getKey();
+					this.xmlChildren.add(xmlElement);
+				}
+				break;
+
+			default:
+				innerText = other.asString();
+		}
+	}
+
 	private void construct(String name, TinyXmlMap attributes) {
 
 		// internalize the node names
@@ -136,6 +168,10 @@ public class XmlElement {
 			child.xmlParent = this;
 		}
 		otherParent.xmlChildren.clear();
+	}
+
+	public void addChildrenOf(Record otherParentRecord) {
+		addChildrenOf(new XmlElement(otherParentRecord));
 	}
 
 	public XmlElement createChild(String tagName) {
@@ -362,7 +398,7 @@ public class XmlElement {
 			if ((innerText == null) || (innerText.length() < 1)) {
 				writer.write("/>\n");
 			} else {
-				writer.write(">" + xmlEscape(innerText) + "</" + name + ">\n");
+				writer.write(">" + XML.escapeXMLstr(innerText) + "</" + name + ">\n");
 			}
 		} else {
 			writer.write(">\n");
@@ -379,7 +415,7 @@ public class XmlElement {
 			if ((innerText == null) || (innerText.length() < 1)) {
 				result.append("/>\n");
 			} else {
-				result.append(">" + xmlEscape(innerText) + "</" + name + ">\n");
+				result.append(">" + XML.escapeXMLstr(innerText) + "</" + name + ">\n");
 			}
 		} else {
 			result.append(">\n");
@@ -401,36 +437,6 @@ public class XmlElement {
 	}
 
 	/**
-	 * Converts the XML element <json><foo>bar</foo><blubb>blobb</blubb></json>
-	 * to a JSON object such as {"foo": "bar", "blubb": "blobb"}
-	 * If onlyIncludeFields is left empty, everything is converted; if there is
-	 * at least one field given, then ONLY the given fields are converted!
-	 */
-	public JSON toJson(String... onlyIncludeFields) {
-
-		JSON result = new JSON();
-
-		if (onlyIncludeFields.length == 0) {
-			for (XmlElement child : xmlChildren) {
-				// TODO :: if that child has subchildren,
-				// handle them correctly and assign as object inside JSON :)
-				result.setString(child.getTagName(), child.getInnerText());
-			}
-		} else {
-			for (String field : onlyIncludeFields) {
-				XmlElement child = getChild(field);
-				if (child != null) {
-					// TODO :: if that child has subchildren,
-					// handle them correctly and assign as object inside JSON :)
-					result.setString(child.getTagName(), child.getInnerText());
-				}
-			}
-		}
-
-		return result;
-	}
-
-	/**
 	 * Removes this element, unless it is the root (the root cannot be removed, as it has no parent that it could be removed from...)
 	 */
 	public void remove() {
@@ -439,49 +445,4 @@ public class XmlElement {
 		}
 	}
 
-	public static String xmlEscape(String text) {
-
-		StringBuilder result = new StringBuilder();
-
-		for (int i = 0; i < text.length(); i++) {
-
-			char c = text.charAt(i);
-
-			switch (c) {
-				case '<':
-					result.append("&lt;");
-					break;
-				case '>':
-					result.append("&gt;");
-					break;
-				case '\n':
-					result.append("&#10;");
-					break;
-				case '\r':
-					break;
-				case '\t':
-					result.append("&#9;");
-					break;
-				case '&':
-					result.append("&amp;");
-					break;
-				case '\'':
-					result.append("&apos;");
-					break;
-				case '\"':
-					result.append("&quot;");
-					break;
-			default:
-				if (c > 0x7e) {
-					result.append("&#");
-					result.append((int) c);
-					result.append(";");
-				} else {
-					result.append(c);
-				}
-			}
-		}
-
-		return result.toString();
-	}
 }

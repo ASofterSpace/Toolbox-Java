@@ -189,7 +189,11 @@ public class JsonFile extends SimpleFile {
 
 		ensureContent();
 
-		jsonContent.set(key, new JSON(value));
+		Record recordVal = new Record(value);
+
+		JSON jsonVal = new JSON(recordVal);
+
+		jsonContent.set(key, jsonVal);
 	}
 
 	/**
@@ -201,7 +205,11 @@ public class JsonFile extends SimpleFile {
 
 		ensureContent();
 
-		jsonContent.set(key, new JSON(value));
+		Record recordVal = new Record(value);
+
+		JSON jsonVal = new JSON(recordVal);
+
+		jsonContent.set(key, jsonVal);
 	}
 
 	/**

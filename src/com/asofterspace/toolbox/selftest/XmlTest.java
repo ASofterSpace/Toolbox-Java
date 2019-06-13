@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.XML;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
 import com.asofterspace.toolbox.test.Test;
@@ -73,9 +74,17 @@ public class XmlTest implements Test {
 		orig.createChild("foo").setInnerText("bar");
 		orig.createChild("foo2").setInnerText("twobar");
 
-		JSON json = orig.toJson();
+		XML xml = new XML(orig);
 
-		XmlElement target = json.toXml();
+		JSON json = new JSON(xml);
+
+		String jsonStr = json.toString();
+
+		JSON jsonDecoded = new JSON(jsonStr);
+
+		XmlElement target = new XmlElement(jsonDecoded);
+
+		// TODO :: also convert XML to string and back to XML object before checking the output
 
 		if (!target.getChild("foo").getInnerText().equals("bar")) {
 			TestUtils.fail("We transferred XML to JSON and back and did not get foo: bar!");
@@ -101,9 +110,17 @@ public class XmlTest implements Test {
 		orig.createChild("textWithQuote").setInnerText("This is text with a \" sign!");
 		orig.createChild("xmlEntity").setInnerText("</xmlEntity>");
 
-		JSON json = orig.toJson();
+		XML xml = new XML(orig);
 
-		XmlElement target = json.toXml();
+		JSON json = new JSON(xml);
+
+		String jsonStr = json.toString();
+
+		JSON jsonDecoded = new JSON(jsonStr);
+
+		XmlElement target = new XmlElement(jsonDecoded);
+
+		// TODO :: also convert XML to string and back to XML object before checking the output
 
 		if (!target.getChild("foo").getInnerText().equals("bar")) {
 			TestUtils.fail("We transferred XML to JSON and back and did not get foo: bar!");
@@ -137,32 +154,42 @@ public class XmlTest implements Test {
 
 		TestUtils.start("Restricted XML to JSON and Back");
 
-		XmlElement orig = new XmlElement("test");
-		orig.createChild("one").setInnerText("1");
-		orig.createChild("two").setInnerText("2");
-		orig.createChild("three").setInnerText("3");
-		orig.createChild("four").setInnerText("4");
+		XML xml = new XML();
+		xml.setString("one", "1");
+		xml.setString("two", "2");
+		xml.setString("three", "3");
+		xml.setString("four", "4");
 
-		JSON json = orig.toJson("one", "two", "three");
+		JSON json = new JSON(xml);
 
-		XmlElement target = json.toXml("one", "two", "four");
+		json.removeAllKeysExcept("one", "two", "three");
 
-		if (!target.getChild("one").getInnerText().equals("1")) {
+		String jsonStr = json.toString();
+
+		JSON jsonDecoded = new JSON(jsonStr);
+
+		XML target = new XML(jsonDecoded);
+
+		target.removeAllKeysExcept("one", "two", "four");
+
+		// TODO :: also convert XML to string and back to XML object before checking the output
+
+		if (!target.getString("one").equals("1")) {
 			TestUtils.fail("We transferred XML to JSON and back and did not get one: 1!");
 			return;
 		}
 
-		if (!target.getChild("two").getInnerText().equals("2")) {
+		if (!target.getString("two").equals("2")) {
 			TestUtils.fail("We transferred XML to JSON and back and did not get two: 2!");
 			return;
 		}
 
-		if (target.getChild("three") != null) {
+		if (target.getString("three") != null) {
 			TestUtils.fail("We transferred XML to JSON and back and did get three - which should have been filtered out!");
 			return;
 		}
 
-		if (target.getChild("four") != null) {
+		if (target.getString("four") != null) {
 			TestUtils.fail("We transferred XML to JSON and back and did get four - which should have been filtered out!");
 			return;
 		}

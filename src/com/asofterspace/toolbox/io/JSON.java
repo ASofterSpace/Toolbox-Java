@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.io.JSONkind;
+import com.asofterspace.toolbox.io.RecordKind;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.ArrayList;
@@ -14,23 +14,22 @@ import java.util.Set;
 import java.util.TreeMap;
 
 
-public class JSON {
-
-	private JSONkind kind;
-
-	private Map<String, JSON> objContents;
-	private List<JSON> arrContents;
-	private Object simpleContents;
-
+public class JSON extends Record {
 
 	/**
 	 * Create an empty JSON object
 	 */
 	public JSON() {
 
-		kind = JSONkind.OBJECT;
+		super();
+	}
 
-		objContents = new TreeMap<String, JSON>();
+	/**
+	 * Create a JSON object based on another generic record
+	 */
+	public JSON(Record other) {
+
+		super(other);
 	}
 
 	/**
@@ -42,46 +41,6 @@ public class JSON {
 	}
 
 	/**
-	* Create a JSON object based on an integer value
-	*/
-	public JSON(Integer intValue) {
-
-		kind = JSONkind.NUMBER;
-
-		simpleContents = intValue;
-	}
-
-	/**
-	* Create a JSON object based on a long value
-	*/
-	public JSON(Long longValue) {
-
-		kind = JSONkind.NUMBER;
-
-		simpleContents = longValue;
-	}
-
-	/**
-	* Create a JSON object based on a double value
-	*/
-	public JSON(Double doubleValue) {
-
-		kind = JSONkind.NUMBER;
-
-		simpleContents = doubleValue;
-	}
-
-	/**
-	* Create a JSON object based on a boolean value
-	*/
-	public JSON(Boolean boolValue) {
-
-		kind = JSONkind.NUMBER;
-
-		simpleContents = boolValue;
-	}
-
-	/**
 	 * Create a JSON object based on a given list of strings representing
 	 * JSON file contents
 	 */
@@ -90,29 +49,6 @@ public class JSON {
 		String jsonContent = Utils.strListToString(jsonStrings);
 
 		init(jsonContent);
-	}
-
-	/**
-	 * Tells us whether this JSON object is empty or not
-	 */
-	public boolean isEmpty() {
-
-		switch (kind) {
-
-			case STRING:
-			case BOOLEAN:
-			case NUMBER:
-				return "".equals(simpleContents.toString());
-
-			case ARRAY:
-				return arrContents.size() < 1;
-
-			case OBJECT:
-				return objContents.size() < 1;
-
-			default:
-				return true;
-		}
 	}
 
 	/**
@@ -138,7 +74,7 @@ public class JSON {
 
 		if (jsonString.equals("")) {
 
-			kind = JSONkind.NULL;
+			kind = RecordKind.NULL;
 
 			simpleContents = null;
 
@@ -147,9 +83,9 @@ public class JSON {
 
 		if (jsonString.startsWith("{")) {
 
-			objContents = new TreeMap<String, JSON>();
+			objContents = new TreeMap<String, Record>();
 
-			kind = JSONkind.OBJECT;
+			kind = RecordKind.OBJECT;
 
 			jsonString = jsonString.substring(1);
 
@@ -201,9 +137,9 @@ public class JSON {
 
 		if (jsonString.startsWith("[")) {
 
-			kind = JSONkind.ARRAY;
+			kind = RecordKind.ARRAY;
 
-			arrContents = new ArrayList<JSON>();
+			arrContents = new ArrayList<Record>();
 
 			jsonString = jsonString.substring(1).trim();
 
@@ -240,7 +176,7 @@ public class JSON {
 
 		if (doStringWith != null) {
 
-			kind = JSONkind.STRING;
+			kind = RecordKind.STRING;
 
 			jsonString = jsonString.substring(1);
 
@@ -301,7 +237,7 @@ public class JSON {
 		}
 
 		if (jsonString.startsWith("true")) {
-			kind = JSONkind.BOOLEAN;
+			kind = RecordKind.BOOLEAN;
 
 			simpleContents = true;
 
@@ -309,7 +245,7 @@ public class JSON {
 		}
 
 		if (jsonString.startsWith("false")) {
-			kind = JSONkind.BOOLEAN;
+			kind = RecordKind.BOOLEAN;
 
 			simpleContents = false;
 
@@ -317,14 +253,14 @@ public class JSON {
 		}
 
 		if (jsonString.startsWith("null")) {
-			kind = JSONkind.NULL;
+			kind = RecordKind.NULL;
 
 			simpleContents = null;
 
 			return jsonString.substring(4);
 		}
 
-		kind = JSONkind.NUMBER;
+		kind = RecordKind.NUMBER;
 
 		String numStr = "";
 
@@ -374,36 +310,16 @@ public class JSON {
 	}
 
 	@Override
-	public String toString() {
+	protected String toString(Record item, boolean compressed, String linePrefix) {
 
-		return toString(null);
-	}
-
-	/**
-	 * Stores this JSON object in a string
-	 * @param compressed  whether to store this object compressed (true, default) or
-	 *					uncompressed (false) - in which case it will be easier to
-	 *					read by humans, but take up more space
-	 */
-	public String toString(Boolean compressed) {
-
-		if (compressed == null) {
-			compressed = true;
-		}
-
-		return toString(compressed, "");
-	}
-
-	private String toString(boolean compressed, String linePrefix) {
-
-		switch (kind) {
+		switch (item.kind) {
 
 			case STRING:
-				return "\"" + escapeJSONstr(simpleContents.toString()) + "\"";
+				return "\"" + escapeJSONstr(item.simpleContents.toString()) + "\"";
 
 			case BOOLEAN:
 			case NUMBER:
-				return simpleContents.toString();
+				return item.simpleContents.toString();
 
 			case ARRAY:
 				StringBuilder arrResult = new StringBuilder();
@@ -416,7 +332,7 @@ public class JSON {
 
 				boolean arrFirstEntry = true;
 
-				for (JSON item : arrContents) {
+				for (Record arrItem : item.arrContents) {
 
 					if (arrFirstEntry) {
 						arrFirstEntry = false;
@@ -427,7 +343,7 @@ public class JSON {
 						}
 					}
 
-					arrResult.append(item.toString(compressed, linePrefix + "\t"));
+					arrResult.append(toString(arrItem, compressed, linePrefix + "\t"));
 				}
 
 				if (!compressed) {
@@ -448,7 +364,7 @@ public class JSON {
 
 				boolean objFirstEntry = true;
 
-				for (Map.Entry<String, JSON> entry : objContents.entrySet()) {
+				for (Map.Entry<String, Record> entry : item.objContents.entrySet()) {
 
 					if (objFirstEntry) {
 						objFirstEntry = false;
@@ -461,12 +377,12 @@ public class JSON {
 					}
 
 					String key = entry.getKey();
-					JSON content = entry.getValue();
+					Record content = entry.getValue();
 
 					objResult.append("\"");
 					objResult.append(key);
 					objResult.append("\": ");
-					objResult.append(content.toString(compressed, linePrefix + "\t"));
+					objResult.append(toString(content, compressed, linePrefix + "\t"));
 				}
 
 				if (!compressed) {
@@ -479,335 +395,6 @@ public class JSON {
 			default:
 				return "null";
 		}
-	}
-
-	/**
-	 * Converts the JSON object {"foo": "bar", "blubb": "blobb"} to an XmlElement
-	 * such as <json><foo>bar</foo><blubb>blobb</blubb></json>
-	 * If onlyIncludeFields is left empty, everything is converted; if there is
-	 * at least one field given, then ONLY the given fields are converted!
-	 */
-	public XmlElement toXml(String... onlyIncludeFields) {
-
-		XmlElement result = new XmlElement("json");
-
-		if (objContents == null) {
-			return result;
-		}
-
-		if (onlyIncludeFields.length == 0) {
-			for (String field : objContents.keySet()) {
-				// TODO :: if that child has subchildren,
-				// handle them correctly and assign as object inside XML :)
-				result.createChild(field).setInnerText(getString(field));
-			}
-		} else {
-			for (String field : onlyIncludeFields) {
-				// TODO :: if that child has subchildren,
-				// handle them correctly and assign as object inside XML :)
-				String fieldData = getString(field);
-				if (fieldData != null) {
-					result.createChild(field).setInnerText(fieldData);
-				}
-			}
-		}
-
-		return result;
-	}
-
-	/**
-	 * Returns the value of this JSON object as string, without any surrounding " or somesuch;
-	 * meant to be used when you know that your JSON object is of the simple type String, and
-	 * you want to get that String
-	 */
-	public String asString() {
-
-		if (simpleContents == null) {
-			return null;
-		}
-
-		return simpleContents.toString();
-	}
-
-	/**
-	 * Get the kind of JSON object this is
-	 * @return the kind
-	 */
-	public JSONkind getKind() {
-		return kind;
-	}
-
-	/**
-	 * Get the set of all defined keys in this JSON object
-	 * @return the set of defined keys
-	 */
-	public Set<String> getKeys() {
-		return objContents.keySet();
-	}
-
-	/**
-	 * Get the JSON-value corresponding to a specific key
-	 * in a JSON object or to a specific index in a JSON
-	 * array
-	 * @param key the key to search for
-	 * @return the JSON object
-	 */
-	public JSON get(Object key) {
-
-		if ((key instanceof Integer) && (arrContents != null)) {
-			return arrContents.get((Integer) key);
-		}
-
-		if (objContents == null) {
-			return null;
-		}
-		return objContents.get(key.toString());
-	}
-
-	/**
-	 * Get the length of the array represented by this JSON
-	 * array
-	 * @return the length of the JSON array
-	 */
-	public int getLength() {
-		return arrContents.size();
-	}
-
-	/**
-	 * Get a list of JSON values corresponding to a JSON array
-	 * stored in a particular key of a JSON object
-	 * @param key the key to search for
-	 * @return the JSON array stored in the key
-	 */
-	public List<JSON> getArray(Object key) {
-
-		JSON result = get(key);
-
-		if ((result == null) || (result.arrContents == null)) {
-			return new ArrayList<>();
-		}
-
-		return result.arrContents;
-	}
-
-	/**
-	 * Get a list of strings corresponding to a JSON array
-	 * filled with strings stored in a particular key of a
-	 * JSON object (entries that are not strings will be ignored!)
-	 * @param key the key to search for
-	 * @return the list of strings stored in the array at the key
-	 */
-	public List<String> getArrayAsStringList(Object key) {
-
-		JSON result = get(key);
-
-		List<String> resultList = new ArrayList<>();
-
-		if ((result == null) || (result.arrContents == null)) {
-			return resultList;
-		}
-
-		for (JSON entry : result.arrContents) {
-			if (entry != null) {
-				if (entry.kind == JSONkind.STRING) {
-					resultList.add(entry.simpleContents.toString());
-				}
-			}
-		}
-
-		return resultList;
-	}
-
-	/**
-	 * Gets a string value stored in a key (which will
-	 * just return a string as string if the value is
-	 * already a string, but if the value is a complex
-	 * JSON object, then it will be coaxed into a string,
-	 * which does not necessarily mean that it is a string
-	 * that makes much sense - beware!)
-	 * @param key the key to search for
-	 * @return the JSON object - hopefully a plain string - as string
-	 */
-	public String getString(Object key) {
-		JSON result = get(key);
-
-		if (result == null) {
-			return null;
-		}
-
-		// in case of a string, return the contained string WITHOUT
-		// enclosing ""-signs
-		if (result.kind == JSONkind.STRING) {
-			return result.simpleContents.toString();
-		}
-
-		// if something else than a string is contained, return whatever
-		// it is that is contained
-		return result.toString();
-	}
-
-	/**
-	 * Gets a boolean value stored in a key of a JSON object
-	 * @param key  the key to be searched for
-	 * @return the boolean value stored in the key
-	 */
-	public Boolean getBoolean(Object key) {
-
-		JSON result = get(key);
-
-		if (result == null) {
-			return null;
-		}
-
-		if (result.kind == JSONkind.BOOLEAN) {
-			return (Boolean) result.simpleContents;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Gets an int value stored in a key of a JSON object
-	 * @param key  the key to be searched for
-	 * @return the integer value stored in the key
-	 */
-	public Integer getInteger(Object key) {
-
-		JSON result = get(key);
-
-		if (result == null) {
-			return null;
-		}
-
-		if (result.kind == JSONkind.NUMBER) {
-			if (result.simpleContents instanceof Long) {
-				return (Integer) (int) (long) ((Long) result.simpleContents);
-			}
-			if (result.simpleContents instanceof Integer) {
-				return (Integer) result.simpleContents;
-			}
-			if (result.simpleContents instanceof Double) {
-				return (Integer) (int) Math.round((Double) result.simpleContents);
-			}
-		}
-
-		if (result.kind == JSONkind.BOOLEAN) {
-			if ((Boolean) result.simpleContents) {
-				return 1;
-			} else {
-				return 0;
-			}
-		}
-
-		if (result.kind == JSONkind.NULL) {
-			return null;
-		}
-
-		return 0;
-	}
-
-	/**
-	 * Gets an long value stored in a key of a JSON object
-	 * @param key  the key to be searched for
-	 * @return the integer value stored in the key
-	 */
-	public Long getLong(Object key) {
-
-		JSON result = get(key);
-
-		if (result == null) {
-			return null;
-		}
-
-		if (result.kind == JSONkind.NUMBER) {
-			if (result.simpleContents instanceof Long) {
-				return (Long) result.simpleContents;
-			}
-			if (result.simpleContents instanceof Integer) {
-				return (Long) (long) (int) (Integer) result.simpleContents;
-			}
-			if (result.simpleContents instanceof Double) {
-				return (Long) Math.round((Double) result.simpleContents);
-			}
-		}
-
-		if (result.kind == JSONkind.BOOLEAN) {
-			if ((Boolean) result.simpleContents) {
-				return 1L;
-			} else {
-				return 0L;
-			}
-		}
-
-		if (result.kind == JSONkind.NULL) {
-			return null;
-		}
-
-		return 0L;
-	}
-
-	/**
-	 * Gets an double value stored in a key of a JSON object
-	 * @param key  the key to be searched for
-	 * @return the integer value stored in the key
-	 */
-	public Double getDouble(Object key) {
-
-		JSON result = get(key);
-
-		if (result == null) {
-			return null;
-		}
-
-		if (result.kind == JSONkind.NUMBER) {
-			if (result.simpleContents instanceof Long) {
-				return (Double) (double) (long) (Long) result.simpleContents;
-			}
-			if (result.simpleContents instanceof Integer) {
-				return (Double) (double) (int) (Integer) result.simpleContents;
-			}
-			if (result.simpleContents instanceof Double) {
-				return (Double) result.simpleContents;
-			}
-		}
-
-		if (result.kind == JSONkind.BOOLEAN) {
-			if ((Boolean) result.simpleContents) {
-				return 1.0;
-			} else {
-				return 0.0;
-			}
-		}
-
-		if (result.kind == JSONkind.NULL) {
-			return null;
-		}
-
-		return 0.0;
-	}
-	/**
-	 * Sets a key of the JSON object to the JSON value
-	 * @param key
-	 * @param value
-	 */
-	public void set(String key, JSON value) {
-		kind = JSONkind.OBJECT;
-		if (objContents == null) {
-			objContents = new TreeMap<String, JSON>();
-		}
-		objContents.put(key.toString(), value);
-	}
-
-	/**
-	 * Sets a key to the string value
-	 * @param key
-	 * @param value
-	 */
-	public void setString(String key, String value) {
-
-		JSON jsonValue = new JSON("\"" + escapeJSONstr(value) + "\"");
-
-		set(key, jsonValue);
 	}
 
 	/**
@@ -835,31 +422,6 @@ public class JSON {
 		str = str.replace("\f", "\\f");
 
 		return str;
-	}
-
-	/**
-	 * Sets an index of the JSON array to the JSON value
-	 * @param index
-	 * @param value
-	 */
-	public void set(Integer index, JSON value) {
-		kind = JSONkind.ARRAY;
-		if (arrContents == null) {
-			arrContents = new ArrayList<JSON>();
-		}
-		arrContents.set(index, value);
-	}
-
-	/**
-	 * Appends a JSON value to the JSON array
-	 * @param value
-	 */
-	public void append(JSON value) {
-		kind = JSONkind.ARRAY;
-		if (arrContents == null) {
-			arrContents = new ArrayList<JSON>();
-		}
-		arrContents.add(value);
 	}
 
 }

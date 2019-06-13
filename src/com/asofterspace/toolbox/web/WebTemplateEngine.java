@@ -6,7 +6,7 @@ package com.asofterspace.toolbox.web;
 
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.Record;
 import com.asofterspace.toolbox.io.SimpleFile;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class WebTemplateEngine {
 
 	private Directory origDir;
 
-	private JSON config;
+	private Record config;
 
 	private Random randGen;
 
@@ -34,7 +34,7 @@ public class WebTemplateEngine {
 	private String currentFile;
 
 
-	public WebTemplateEngine(Directory origDir, JSON config) {
+	public WebTemplateEngine(Directory origDir, Record config) {
 
 		this.origDir = origDir;
 
@@ -47,7 +47,7 @@ public class WebTemplateEngine {
 
 	public void compileTo(Directory targetDir, String contentkind, boolean convertPhpToHtm) {
 
-		JSON files = config.get("files");
+		Record files = config.get("files");
 
 		int fileAmount = files.getLength();
 
@@ -296,7 +296,7 @@ public class WebTemplateEngine {
 	 */
 	private String insertContentText(String content, String contentkind) {
 
-		JSON contentConfig = config.get("content" + contentkind);
+		Record contentConfig = config.get("content" + contentkind);
 
 		while (content.contains("@content(")) {
 
