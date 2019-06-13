@@ -8,6 +8,7 @@ import com.asofterspace.toolbox.io.RecordKind;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -247,6 +248,17 @@ public class Record {
 	}
 
 	/**
+	 * Returns true if the given key exists in this record object,
+	 * and false otherwise (as well as when this record is no object)
+	 */
+	public boolean contains(String key) {
+		if (objContents == null) {
+			return false;
+		}
+		return objContents.containsKey(key);
+	}
+
+	/**
 	 * Get the kind of Record object this is
 	 * @return the kind
 	 */
@@ -259,6 +271,9 @@ public class Record {
 	 * @return the set of defined keys
 	 */
 	public Set<String> getKeys() {
+		if (objContents == null) {
+			return new HashSet<>();
+		}
 		return objContents.keySet();
 	}
 

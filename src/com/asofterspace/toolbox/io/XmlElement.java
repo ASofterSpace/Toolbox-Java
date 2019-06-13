@@ -163,15 +163,53 @@ public class XmlElement {
 	 * other parent!)
 	 */
 	public void addChildrenOf(XmlElement otherParent) {
-		this.xmlChildren.addAll(otherParent.xmlChildren);
+
 		for (XmlElement child : otherParent.xmlChildren) {
 			child.xmlParent = this;
 		}
+
+		this.xmlChildren.addAll(otherParent.xmlChildren);
+
 		otherParent.xmlChildren.clear();
 	}
 
 	public void addChildrenOf(Record otherParentRecord) {
 		addChildrenOf(new XmlElement(otherParentRecord));
+	}
+
+	/**
+	 * Does the same as addChildrenOf, but if a child with the same
+	 * tag name already exists, its content is updated instead of
+	 * a second one with the same tag name being added
+	 */
+	public void addOrUpdateChildrenOf(XmlElement otherParent) {
+
+		for (XmlElement child : otherParent.xmlChildren) {
+			child.xmlParent = this;
+		}
+
+		for (XmlElement child : otherParent.xmlChildren) {
+
+			boolean added = false;
+
+			for (XmlElement ourChild : this.xmlChildren) {
+				if (child.name.equals(ourChild.name)) {
+					child.copyTo(ourChild);
+					added = true;
+					break;
+				}
+			}
+
+			if (!added) {
+				this.xmlChildren.add(child);
+			}
+		}
+
+		otherParent.xmlChildren.clear();
+	}
+
+	public void addOrUpdateChildrenOf(Record otherParentRecord) {
+		addOrUpdateChildrenOf(new XmlElement(otherParentRecord));
 	}
 
 	public XmlElement createChild(String tagName) {
@@ -208,6 +246,40 @@ public class XmlElement {
 		for (XmlElement child : xmlChildren) {
 			if (tagName.equals(child.name)) {
 				return child;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get one direct child with the given tag name and attribute key / value pair,
+	 * if any such child exists
+	 */
+	public XmlElement getChild(String tagName, String attrKey, String attrValue) {
+		for (XmlElement child : xmlChildren) {
+			if (tagName.equals(child.name)) {
+				if (attrValue.equals(child.getAttribute(attrKey))) {
+					return child;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get one direct child with the given tag name that itself has a child with
+	 * the given tag name and inner text, if any such child exists
+	 */
+	public XmlElement getChildWithChild(String tagName, String childChildTagName, String childChildInnerText) {
+		for (XmlElement child : xmlChildren) {
+			if (tagName.equals(child.name)) {
+				for (XmlElement childchild : child.xmlChildren) {
+					if (childChildTagName.equals(childchild.name)) {
+						if (childChildInnerText.equals(childchild.innerText)) {
+							return child;
+						}
+					}
+				}
 			}
 		}
 		return null;
