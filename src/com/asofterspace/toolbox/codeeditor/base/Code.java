@@ -1378,7 +1378,13 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = 0;
 		}
 
-		decoratedEditor.setText(textVersions.get(currentTextVersion));
+		String setTextTo = textVersions.get(currentTextVersion);
+
+		decoratedEditor.setText(setTextTo);
+
+		if (origCaretPos > setTextTo.length()) {
+			origCaretPos = setTextTo.length();
+		}
 
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
@@ -1393,7 +1399,13 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = textVersions.size() - 1;
 		}
 
-		decoratedEditor.setText(textVersions.get(currentTextVersion));
+		String setTextTo = textVersions.get(currentTextVersion);
+
+		decoratedEditor.setText(setTextTo);
+
+		if (origCaretPos > setTextTo.length()) {
+			origCaretPos = setTextTo.length();
+		}
 
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
