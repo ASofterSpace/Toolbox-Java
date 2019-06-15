@@ -553,6 +553,49 @@ public abstract class Code extends DefaultStyledDocument {
 		return content.substring(start, end);
 	}
 
+	public static int getLineNumberFromPosition(int pos, String content) {
+
+		int result = 0;
+		int until = pos;
+		if (content.length() < until) {
+			until = content.length();
+		}
+		for (int i = 0; i < until; i++) {
+			char c = content.charAt(i);
+			if (c == '\n') {
+				result++;
+			}
+		}
+		return result;
+	}
+
+	public static String getLineFromNumber(int number, String content) {
+
+		int count = 0;
+		int lineStart = 0;
+		int lineEnd = 0;
+
+		for (int i = 0; i < content.length(); i++) {
+			char c = content.charAt(i);
+			if (c == '\n') {
+				count++;
+
+				if (count == number) {
+					lineStart = i + 1;
+				} else if (count == number + 1) {
+					lineEnd = i;
+					break;
+				}
+			}
+		}
+
+		if (lineEnd < lineStart) {
+			return "";
+		}
+
+		return content.substring(lineStart, lineEnd);
+	}
+
 	public static int getLineStartFromPosition(int pos, String content) {
 
 		int lineStart = 0;
@@ -1378,13 +1421,7 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = 0;
 		}
 
-		String setTextTo = textVersions.get(currentTextVersion);
-
-		decoratedEditor.setText(setTextTo);
-
-		if (origCaretPos > setTextTo.length()) {
-			origCaretPos = setTextTo.length();
-		}
+		decoratedEditor.setText(textVersions.get(currentTextVersion));
 
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
@@ -1399,13 +1436,7 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = textVersions.size() - 1;
 		}
 
-		String setTextTo = textVersions.get(currentTextVersion);
-
-		decoratedEditor.setText(setTextTo);
-
-		if (origCaretPos > setTextTo.length()) {
-			origCaretPos = setTextTo.length();
-		}
+		decoratedEditor.setText(textVersions.get(currentTextVersion));
 
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
