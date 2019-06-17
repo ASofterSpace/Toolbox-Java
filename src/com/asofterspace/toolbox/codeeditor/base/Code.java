@@ -228,6 +228,11 @@ public abstract class Code extends DefaultStyledDocument {
 						int lineStart = getLineStartFromPosition(selStart, content);
 						int lineEnd = getLineEndFromPosition(selEnd, content);
 
+						// actually step one left - as we want to include the "leading" \n sign of the first line too
+						if (lineStart > 0) {
+							lineStart--;
+						}
+
 						String contentStart = content.substring(0, lineStart);
 						String contentMiddle = content.substring(lineStart, lineEnd);
 						String contentEnd = content.substring(lineEnd, content.length());
@@ -279,10 +284,21 @@ public abstract class Code extends DefaultStyledDocument {
 							selStartOffset++;
 						}
 
-						final int newSelEnd = selEnd + replaceAmount;
-						final int newSelStart = selStart + selStartOffset;
-
 						content = contentStart + contentMiddle + contentEnd;
+
+						int possibleSelStart = selStart + selStartOffset;
+						int possibleSelEnd = selEnd + replaceAmount;
+
+						if (possibleSelStart > content.length()) {
+							possibleSelStart = content.length();
+						}
+
+						if (possibleSelEnd > content.length()) {
+							possibleSelEnd = content.length();
+						}
+
+						final int newSelStart = possibleSelStart;
+						final int newSelEnd = possibleSelEnd;
 
 						// set the text (this should go through...)
 						decoratedEditor.setText(content);
