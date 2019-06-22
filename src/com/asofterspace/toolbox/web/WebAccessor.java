@@ -125,10 +125,20 @@ public class WebAccessor {
 	/**
 	 * Post a web resource synchronously, assuming that the result is in UTF-8
 	 * @param url  The url of the web resource
-	 * @param parameters The parameters to be sent as message body
+	 * @param parameters  The parameters to be sent as message body
 	 */
 	public static String post(String url, Map<String, String> parameters) {
 		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "POST", null));
+	}
+
+	/**
+	 * Post a web resource synchronously, assuming that the result is in UTF-8
+	 * @param url  The url of the web resource
+	 * @param messageBody  The message body to be sent
+	 * @param extraHeaders  Further headers and their data to be sent
+	 */
+	public static String post(String url, String messageBody, Map<String, String> extraHeaders) {
+		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders));
 	}
 
 	private static String mapToUrlSuffix(Map<String, String> parameters) {
@@ -255,6 +265,10 @@ public class WebAccessor {
 	public static File getFile(String url) {
 
 		String resultName = url;
+
+		if (resultName.contains("?")) {
+			resultName = resultName.substring(0, resultName.indexOf("?"));
+		}
 
 		if (resultName.contains("&")) {
 			resultName = resultName.substring(0, resultName.indexOf("&"));

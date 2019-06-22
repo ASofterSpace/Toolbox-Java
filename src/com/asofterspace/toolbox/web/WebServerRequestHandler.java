@@ -41,6 +41,10 @@ public class WebServerRequestHandler implements Runnable {
 
 	private static int globalSocketNum = 0;
 
+	private Thread ourThread;
+
+	private List<Thread> threadList;
+
 
 	public WebServerRequestHandler(WebServer server, Socket request, Directory webRoot) {
 
@@ -78,58 +82,87 @@ public class WebServerRequestHandler implements Runnable {
 
 			// well if there is no request...
 			if (line == null) {
+
 				// ... then it is pretty clearly bad xD
 				respond(400);
-				return;
-			}
 
-			String[] lines = line.split(" ");
+			} else {
 
-			if (lines.length == 3) {
+				String[] lines = line.split(" ");
 
-				String requestKind = lines[0];
-				String fileLocation = lines[1];
-				String httpVersion = lines[2];
+				if (lines.length == 3) {
 
-				if (httpVersion.startsWith("HTTP/1.1")) {
+					String requestKind = lines[0];
+					String fileLocation = lines[1];
+					String httpVersion = lines[2];
 
-					switch (requestKind) {
+					if (httpVersion.startsWith("HTTP/1.1")) {
 
-						// a HEAD request is the same as a GET request, but it ONLY gives
-						// the header and no content :)
-						case "HEAD":
-							doNotSendBody = true;
-							// fall into GET... brilliant! :D
+						switch (requestKind) {
 
-						case "GET":
-							handleGet(fileLocation);
-							break;
+							// a HEAD request is the same as a GET request, but it ONLY gives
+							// the header and no content :)
+							case "HEAD":
+								doNotSendBody = true;
+								// fall into GET... brilliant! :D
 
-						case "PUT":
-							handlePut(fileLocation);
-							break;
+							case "GET":
+								handleGet(fileLocation);
+								break;
 
-						case "POST":
-							handlePost(fileLocation);
-							break;
+							case "PUT":
+								handlePut(fileLocation);
+								break;
 
-						case "DELETE":
-							handleDelete(fileLocation);
-							break;
+							case "POST":
+								handlePost(fileLocation);
+								break;
 
-						default:
-							respond(501);
+							case "DELETE":
+								handleDelete(fileLocation);
+								break;
+
+							default:
+								respond(501);
+						}
+					} else {
+						respond(505);
 					}
 				} else {
-					respond(505);
+					respond(400);
 				}
-			} else {
-				respond(400);
 			}
 
 		} catch (IOException e) {
 			System.err.println("Something unexpected happened to the connection request handler!");
 			System.err.println(e);
+		}
+
+		cleanup();
+	}
+
+	public void setThreadInfo(Thread thisThread, List<Thread> listContainingThisThread) {
+
+		this.ourThread = thisThread;
+
+		this.threadList = listContainingThisThread;
+	}
+
+	/**
+	 * Clean up this worker
+	 */
+	protected void cleanup() {
+
+		if (threadList == null) {
+			return;
+		}
+
+		if (ourThread == null) {
+			return;
+		}
+
+		synchronized(threadList) {
+			threadList.remove(ourThread);
 		}
 	}
 

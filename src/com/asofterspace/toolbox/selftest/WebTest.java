@@ -122,7 +122,8 @@ public class WebTest implements Test {
 
 		server.addToWhitelist("images/qrtest_large_automask.png");
 
-		File gotFile = WebAccessor.getFile("http://localhost:8081/images/qrtest_large_automask.png");
+		// ensure that extra nonsense is stripped when the file is retrieved
+		File gotFile = WebAccessor.getFile("http://localhost:8081/images/qrtest_large_automask.png?bla=foo&bar=blobb");
 
 		DefaultImageFile gotImageFile = new DefaultImageFile(gotFile);
 

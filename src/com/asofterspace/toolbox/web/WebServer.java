@@ -31,7 +31,12 @@ public class WebServer implements Runnable {
 
 	private List<String> fileLocationWhitelist;
 
-	private Thread currentHandlerThread;
+	// a separate thread for the server in case it is started asynchronously
+	// (otherwise it just runs on the main thread)
+	private Thread serverThread;
+
+	// a list of all handler threads that have been strated so far for handling requests
+	private List<Thread> currentHandlerThreads;
 
 
 	public WebServer() {
@@ -61,6 +66,8 @@ public class WebServer implements Runnable {
 
 		// seems like a good default assumption ;)
 		address = "localhost";
+
+		currentHandlerThreads = new ArrayList<>();
 	}
 
 	/**
@@ -83,10 +90,13 @@ public class WebServer implements Runnable {
 				Socket request = socket.accept();
 
 				// ... and handle it expertly through one of our handlers :)
-				WebServerRequestHandler handler = getHandler(request);
-				currentHandlerThread = new Thread(handler);
-				currentHandlerThread.start();
-				currentHandlerThread = null;
+				synchronized(currentHandlerThreads) {
+					WebServerRequestHandler handler = getHandler(request);
+					Thread currentHandlerThread = new Thread(handler);
+					currentHandlerThread.start();
+					currentHandlerThreads.add(currentHandlerThread);
+					handler.setThreadInfo(currentHandlerThread, currentHandlerThreads);
+				}
 			}
 
 		} catch (IOException e) {
@@ -109,8 +119,19 @@ public class WebServer implements Runnable {
 	 * (by starting one handler after another - so we here start a thread which then starts other threads)
 	 */
 	public void serveAsync() {
-		Thread serverThread = new Thread(this);
+		serverThread = new Thread(this);
 		serverThread.start();
+	}
+
+	/**
+	 * Serve data, either synchronously or asynchronously
+	 */
+	public void serve(boolean async) {
+		if (async) {
+			serveAsync();
+		} else {
+			serve();
+		}
 	}
 
 	@Override
@@ -154,8 +175,18 @@ public class WebServer implements Runnable {
 
 		serverRunning = false;
 
-		if (currentHandlerThread != null) {
-			currentHandlerThread.interrupt();
+		synchronized(currentHandlerThreads) {
+			for (Thread currentHandlerThread : currentHandlerThreads) {
+				try {
+					currentHandlerThread.interrupt();
+				} catch (Exception e) {
+					System.err.println("We tried stopping a web server handler thread, but got an exception: " + e);
+				}
+			}
+		}
+
+		if (serverThread != null) {
+			serverThread.interrupt();
 		}
 	}
 }
