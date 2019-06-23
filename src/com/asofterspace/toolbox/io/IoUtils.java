@@ -76,10 +76,29 @@ public class IoUtils {
 				curline = reader.readLine();
 			}
 		} catch (IOException e) {
-			// oops!
+			System.err.println("There was an I/O Exception while executing an external command: " + e);
 		}
 
 		return result;
+	}
+
+	/**
+	 * Just execute a simple command
+	 */
+	public static void execute(String command) {
+		try {
+			Runtime.getRuntime().exec(command);
+		} catch (IOException e) {
+			System.err.println("There was an I/O Exception while executing an external command: " + e);
+		}
+	}
+
+	public static void shutdownOS() {
+		execute("shutdown -s");
+	}
+
+	public static void restartOS() {
+		execute("shutdown -r");
 	}
 
 }

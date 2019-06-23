@@ -122,6 +122,16 @@ public class Directory {
 	}
 
 	/**
+	 * Get the absolute dirname associated with this directory object
+	 */
+	public String getAbsoluteDirname() {
+
+		Path basePath = getJavaPath();
+
+		return basePath.toAbsolutePath().toString();
+	}
+
+	/**
 	 * Get a Java File object representing this directory
 	 */
 	public java.io.File getJavaFile() {
