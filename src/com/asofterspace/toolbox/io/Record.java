@@ -110,9 +110,27 @@ public class Record {
 	*/
 	public Record(Boolean boolValue) {
 
-		kind = RecordKind.NUMBER;
+		kind = RecordKind.BOOLEAN;
 
 		simpleContents = boolValue;
+	}
+
+	public void convertTo(RecordKind newKind) {
+
+		// TODO :: add more cases
+		switch (kind) {
+			case STRING:
+				switch (newKind) {
+					case BOOLEAN:
+						if ("true".equals(simpleContents)) {
+							simpleContents = true;
+						} else {
+							simpleContents = false;
+						}
+				}
+		}
+
+		kind = newKind;
 	}
 
 	/**
