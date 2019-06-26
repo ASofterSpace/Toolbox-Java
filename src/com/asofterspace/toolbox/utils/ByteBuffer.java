@@ -6,6 +6,8 @@ package com.asofterspace.toolbox.utils;
 
 import com.asofterspace.toolbox.Utils;
 
+import java.nio.charset.Charset;
+
 
 /**
  * A simple and easy to use buffer of bytes
@@ -66,9 +68,30 @@ public class ByteBuffer {
 		return result;
 	}
 
+	public String showBytes() {
+
+		StringBuilder result = new StringBuilder();
+		String sep = "";
+
+		byte[] data = toArray();
+
+		for (byte d : data) {
+			result.append(sep);
+			sep = ", ";
+			result.append(d);
+		}
+
+		return result.toString();
+	}
+
 	public String toString() {
 
 		return new String(toArray(), Utils.BINARY_CHARSET);
+	}
+
+	public String toString(Charset charset) {
+
+		return new String(toArray(), charset);
 	}
 
 }

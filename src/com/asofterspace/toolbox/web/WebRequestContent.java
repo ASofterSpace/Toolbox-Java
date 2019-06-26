@@ -24,6 +24,10 @@ public class WebRequestContent {
 		contentLength = 0;
 	}
 
+	public void setContent(String content) {
+		contentString = content;
+	}
+
 	public void setContent(StringBuilder content) {
 		contentString = content.toString();
 	}

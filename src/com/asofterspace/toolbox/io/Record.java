@@ -8,6 +8,7 @@ import com.asofterspace.toolbox.io.RecordKind;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -639,6 +640,12 @@ public class Record {
 
 		if (arrContents == null) {
 			arrContents = new ArrayList<Record>();
+		}
+	}
+
+	public void reverse() {
+		if (arrContents != null) {
+			Collections.reverse(arrContents);
 		}
 	}
 

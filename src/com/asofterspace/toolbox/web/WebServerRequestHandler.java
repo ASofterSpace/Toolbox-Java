@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.web;
 import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.utils.ByteBuffer;
 import com.asofterspace.toolbox.Utils;
 
 import java.io.BufferedOutputStream;
@@ -300,7 +301,9 @@ public class WebServerRequestHandler implements Runnable {
 
 			if ("".equals(line)) {
 				if (result.getContentLength() > 0) {
-					StringBuilder readData = new StringBuilder();
+					ByteBuffer readData = new ByteBuffer();
+					// StringBuilder readData = new StringBuilder();
+					// StringBuilder output = new StringBuilder();
 					for (int i = 0; i < result.getContentLength(); i++) {
 						if (!input.ready()) {
 							try {
@@ -313,10 +316,64 @@ public class WebServerRequestHandler implements Runnable {
 							}
 						}
 
-						// TODO :: this seems to have problem with non-ASCII nonsense currently...
-						readData.append((char) input.read());
+						// ORIGINAL TODO :: this seems to have problem with non-ASCII nonsense currently...
+						// readData.append((char) input.read());
+
+						// TODO :: now with the current approach, basic UTF-8 is working
+						// (everything with one and two bytes, as long as the second byte
+						// is not too high or something like that), but more is not working,
+						// and we cannot get it work either... e.g. take the word "россияне",
+						// this comes in with some letters (e.g. the last two) fine,
+						// while some others like the с which are JUST too high in unicode
+						// come out mangled...
+						// this particular example SHOULD look like:
+						// р             о         с             с             и         я             н         е
+						// -47,    -128, -48, -66, -47,   -127,  -47,   -127,  -48, -72, -47,   -113,  -48, -67, -48, -75  bytes actually expected
+						// but instead, we get:
+						// -47, 32, -84, -48, -66, -47, -1, -3,  -47, -1, -3,  -48, -72, -47, -1, -3,  -48, -67, -48, -75  bytes after conversion
+						// 209, 32,172,  208, 190, 209, 255,253, 209, 255,253, 208, 184, 209, 255,253, 208, 189, 208, 181  ints after splitting above 255
+						// 209,    8364, 208, 190, 209,   65533, 209,   65533, 208, 184, 209,   65533, 208, 189, 208, 181  ints incoming
+						// as the ints incoming for с and я are exactly the same, we believe that there is already a problem
+						// with the data coming into this function...
+						int iread = input.read();
+
+						if (iread > 255) {
+							readData.append((byte) (iread / 256));
+							readData.append((byte) (iread % 256));
+							/*
+							output.append(iread / 256);
+							output.append(",");
+							output.append(iread % 256);
+							output.append(", ");
+							*/
+						} else {
+
+							readData.append((byte) iread);
+							/*
+							output.append(iread);
+							output.append(", ");
+							*/
+						}
+
+
 					}
-					result.setContent(readData);
+
+					/*
+					System.out.println("raw: " + output.toString());
+					System.out.println("bytes: " + readData.showBytes());
+
+					String specialChar = "россияне";
+					byte[] tmp = specialChar.getBytes("UTF-8");
+					String s = new String(tmp, "UTF-8");
+					for (byte tb : tmp) {
+						System.out.println(tb);
+					}
+					*/
+
+					String strContent = readData.toString(StandardCharsets.UTF_8);
+					// String strContent = StandardCharsets.UTF_8.encode(buffer.toByteArray());
+					result.setContent(strContent);
+					// result.setContent(readData);
 					return result;
 				}
 				break;

@@ -9,6 +9,8 @@ import com.asofterspace.toolbox.Utils;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -478,6 +480,25 @@ public class XmlElement {
 				child.writeToFile(writer);
 			}
 			writer.write("</" + name + ">\n");
+		}
+	}
+
+	/**
+	 * Sort the children of this XmlElement (and their children and so on,
+	 * if recursive is true) alphabetically by their names
+	 */
+	public void sortChildren(Boolean recursive) {
+
+		Collections.sort(xmlChildren, new Comparator<XmlElement>() {
+			public int compare(XmlElement leftChild, XmlElement rightChild) {
+				return leftChild.name.compareTo(rightChild.name);
+			}
+		});
+
+		if (recursive) {
+			for (XmlElement child : xmlChildren) {
+				child.sortChildren(true);
+			}
 		}
 	}
 
