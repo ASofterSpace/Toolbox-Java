@@ -28,6 +28,11 @@ public class MathUtilsTest implements Test {
 
 		int[] simpleResult = MathUtils.findMinima(simpleData, 1);
 
+		if (simpleData[0] != 10) {
+			TestUtils.fail("The data got modified!");
+			return;
+		}
+
 		if (simpleResult.length != 1) {
 			TestUtils.fail("We got a wrong length for the simplest case!");
 			return;
@@ -76,6 +81,11 @@ public class MathUtilsTest implements Test {
 			11, 12, 13, 14, 13, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
 		int[] result = MathUtils.findMaxima(data, 1);
+
+		if (data[0] != 16) {
+			TestUtils.fail("The data got modified!");
+			return;
+		}
 
 		if (result.length != 1) {
 			TestUtils.fail("We got a wrong length!");

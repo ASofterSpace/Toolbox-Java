@@ -14,13 +14,15 @@ public class MathUtils {
 
 	public static int[] findMaxima(double[] data, int amount) {
 
+		double[] invertedData = new double[data.length];
+
 		// finding maxima is like finding minima...
 		for (int i = 0; i < data.length; i++) {
 			// ... just the other way around!
-			data[i] = - data[i];
+			invertedData[i] = - data[i];
 		}
 
-		return findMinima(data, amount);
+		return findMinima(invertedData, amount);
 	}
 
 	public static int[] findMinima(double[] data, int amount) {
