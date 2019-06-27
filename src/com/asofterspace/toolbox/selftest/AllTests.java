@@ -31,6 +31,8 @@ public class AllTests {
 
 		TestUtils.run(new BitUtilsTest());
 
+		TestUtils.run(new MathUtilsTest());
+
 		TestUtils.run(new ConfigFileTest());
 
 		TestUtils.run(new CoderTest());

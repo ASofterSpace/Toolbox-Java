@@ -23,7 +23,7 @@ public class BitUtilsTest implements Test {
 
 	public void toStringTest() {
 
-		TestUtils.start("Boolean[] Equals");
+		TestUtils.start("BitUtils toString");
 
 		boolean[] one1 = {true, true, false, false};
 		boolean[] two1 = {false, true, false};
@@ -49,7 +49,7 @@ public class BitUtilsTest implements Test {
 
 	public void boolArrEqualsTest() {
 
-		TestUtils.start("Boolean[] Equals");
+		TestUtils.start("BitUtils Boolean[] Equals");
 
 		boolean[] one1 = {true, true, false, false};
 		boolean[] one2 = {true, true, false, false};
@@ -107,7 +107,7 @@ public class BitUtilsTest implements Test {
 
 	public void byteToBitsTest() {
 
-		TestUtils.start("Byte to Bits");
+		TestUtils.start("BitUtils Byte to Bits");
 
 		byte byte1 = 1;
 		boolean[] arr1 = {false, false, false, false, false, false, false, true};
