@@ -61,15 +61,27 @@ public class MathUtils {
 				// check if this distance is better (larger) than the ones previously recorded
 				for (int a = 0; a < amount; a++) {
 					if ((result[a] == -1) || (resultDistances[a] < distance)) {
+
 						// our result is better than the one at position a!
 						// so move the others...
 						for (int b = amount-1; b > a; b--) {
 							result[b] = result[b-1];
 							resultDistances[b] = resultDistances[b-1];
 						}
-						// and insert this one...
+
+						// ... and insert this one...
 						result[a] = i;
 						resultDistances[a] = distance;
+
+						// ... and, finally, step further right as we want to ignore
+						// additional minima at the same height as the one we already
+						// found around the neighbourhood (there can be none that is
+						// even lower, as otherwise we would not have had a local
+						// minimum, but there can possibly be one at the exact same
+						// height which might then be reported as second hit, although
+						// it is basically the same minimum)
+						i += NEIGHBOURHOOD_SIZE;
+
 						break;
 					}
 				}

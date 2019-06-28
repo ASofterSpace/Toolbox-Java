@@ -78,7 +78,8 @@ public class MathUtilsTest implements Test {
 		TestUtils.start("Find Maxima");
 
 		double[] data = {16, 15, 13, 13.5, 13, 12, 14, 13.2, 13, 12, 11, 10, 10, 9, 8, 9, 10, 9.9, 10, 10.5,
-			11, 12, 13, 14, 13, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+			11, 12, 13, 14, 13, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 3, 2, 3, 2, 3, 2,
+			3, 3, 4, 5, 4, 3, 2, 1, 2, 1, 2, 1, 0, 0, 1, 0, 1, 0, 0, 1};
 
 		int[] result = MathUtils.findMaxima(data, 1);
 
@@ -95,6 +96,22 @@ public class MathUtilsTest implements Test {
 		// both of these are acceptable, as they have the same height
 		if ((result[0] != 23) && (result[0] != 25)) {
 			TestUtils.fail("We got a wrong result! The result that we got: " + result[0]);
+			return;
+		}
+
+		result = MathUtils.findMaxima(data, 2);
+
+		if (result.length != 2) {
+			TestUtils.fail("We got a wrong length for the second result!");
+			return;
+		}
+
+		// both of these are acceptable, as they have the same height - however,
+		// only one of them should be given back (!); the same maximum should not
+		// be reported twice! - therefore the much less impressive maximum on the
+		// right should be reported instead as second hit!
+		if (((result[0] != 23) && (result[0] != 25)) || (result[1] != 52)) {
+			TestUtils.fail("We got a wrong second result! The result that we got: " + result[0] + ", " + result[1]);
 			return;
 		}
 
