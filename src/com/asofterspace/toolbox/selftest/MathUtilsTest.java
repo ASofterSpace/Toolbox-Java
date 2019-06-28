@@ -115,6 +115,23 @@ public class MathUtilsTest implements Test {
 			return;
 		}
 
+		double[] largeData = {16, 15, 13, 13.5, 13, 12, 14, 13.2, 13, 12, 11, 10, 10, 9, 8, 9, 10, 9.9, 10, 10.5,
+			11, 12, 13, 14.1, 13, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 3, 2, 3, 2, 3, 2,
+			3, 3, 4, 5, 4, 3, 2, 1, 2, 1, 2, 1, 0, 0, 1, 0, 1, 0, 0, 1, 2, 4, 6, 7, 9, 8, 9, 10, 9.9, 10, 10.5,
+			11, 12, 15, 17, 14.5, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, };
+
+		result = MathUtils.findMaxima(largeData, 3);
+
+		if (result.length != 3) {
+			TestUtils.fail("We got a wrong length for the third result!");
+		}
+
+		if ((result[0] != 83) || (result[1] != 23) || (result[2] != 52)) {
+			TestUtils.fail("We got a wrong third result! The result that we got: " + result[0] + ", " +
+				result[1] + ", " + result[2]);
+			return;
+		}
+
 		TestUtils.succeed();
 	}
 
