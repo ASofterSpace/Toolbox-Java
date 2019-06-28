@@ -25,6 +25,16 @@ public class MathUtils {
 		return findMinima(invertedData, amount);
 	}
 
+	/**
+	 * This finds a given amount of minima in a real-life dataset,
+	 * returning the indices of the minimal values.
+	 * Here, areas of white noise are ignored even if they are lower
+	 * than the minima that we are trying to find - so we are not
+	 * trying to find the overall absolute minimal values of the data
+	 * (for that we could just report to lowest values in the array,
+	 * and be done) - but instead we are reporting which values, to
+	 * a human, look like they are minima somewhere within the graph
+	 */
 	public static int[] findMinima(double[] data, int amount) {
 
 		// how large of a neighbourhood are we looking at, surrounding a minimum / maximum?
