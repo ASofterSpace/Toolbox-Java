@@ -199,23 +199,34 @@ public class Utils {
 	}
 
 	/**
-	 * Takes a thing and an amount and returns, depending on the input,
+	 * Takes an amount and a thing and returns, depending on the input,
 	 * no things
 	 * 1 thing
 	 * 2 things
 	 * ...
 	 */
 	public static String thingOrThings(int amount, String thing) {
+		return thingOrThings(amount, thing, thing + "s");
+	}
+
+	/**
+	 * Takes an amount, a thing, and the plural of that thing and returns, depending on the input,
+	 * no things
+	 * 1 thing
+	 * 2 things
+	 * ...
+	 */
+	public static String thingOrThings(int amount, String thing, String things) {
 
 		if (amount == 0) {
-			return "no " + thing + "s";
+			return "no " + things;
 		}
 
 		if (amount == 1) {
 			return "1 " + thing;
 		}
 
-		return amount + " " + thing + "s";
+		return amount + " " + things;
 	}
 
 	public static String leftPadW(int origStr, int length) {
