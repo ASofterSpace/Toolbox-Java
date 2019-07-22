@@ -57,7 +57,14 @@ public class File {
 	 */
 	public File(java.io.File javaFile) {
 
-		this.filename = javaFile.getAbsolutePath();
+		// we try to actually use the canoncial path, if possible - as this prevents
+		// weirdness when getting very long paths in Windows (in which case absolute
+		// paths might still contain SIXLET~1 directory names in between etc.)
+		try {
+			this.filename = javaFile.getCanonicalPath();
+		} catch (IOException e) {
+			this.filename = javaFile.getAbsolutePath();
+		}
 	}
 
 	/**
