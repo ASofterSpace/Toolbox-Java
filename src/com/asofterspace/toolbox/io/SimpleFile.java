@@ -27,6 +27,8 @@ public class SimpleFile extends File {
 
 	protected boolean usingUtf8Bom = false;
 
+	protected Charset usingCharset = StandardCharsets.UTF_8;
+
 
 	/**
 	 * Please do not construct a file without a name ;)
@@ -89,6 +91,15 @@ public class SimpleFile extends File {
 	}
 
 	/**
+	 * Determines which charset should be used both for reading
+	 * the file and for writing it, but does NOT immediately write
+	 * the file!
+	 */
+	public void useCharset(Charset charset) {
+		usingCharset = charset;
+	}
+
+	/**
 	 * Creates this file on the disk, which entails:
 	 * - creating the parent directory
 	 * - assigning an empty file content, if there is not already content
@@ -126,7 +137,7 @@ public class SimpleFile extends File {
 				}
 			}
 
-			String newContent = new String(binaryContent, StandardCharsets.UTF_8);
+			String newContent = new String(binaryContent, usingCharset);
 
 			if (usingUtf8Bom) {
 				newContent = newContent.substring(1);
@@ -315,7 +326,7 @@ public class SimpleFile extends File {
 		boolean append = usingUtf8Bom;
 
 		// fill file with the actual data
-		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, append), StandardCharsets.UTF_8)) {
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, append), usingCharset)) {
 
 			for (String line : filecontents) {
 				writer.write(line);
