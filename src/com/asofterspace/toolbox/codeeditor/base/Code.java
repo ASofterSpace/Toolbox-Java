@@ -223,124 +223,20 @@ public abstract class Code extends DefaultStyledDocument {
 				// on [Tab] during selection, indent whole block
 				// on [Ctrl / Shift] + [Tab] during selection, unindent whole block
 				if (tabEntireBlocks) {
-					if ((event.getKeyChar() == KeyEvent.VK_TAB) && (selLength > 0)) {
-						String content = decoratedEditor.getText();
-						int lineStart = getLineStartFromPosition(selStart, content);
-						int lineEnd = getLineEndFromPosition(selEnd, content);
-
-						// actually step one left - as we want to include the "leading" \n sign of the first line too
-						if (lineStart > 0) {
-							lineStart--;
+					if ((event.getKeyChar() == KeyEvent.VK_TAB)) {
+						if (selLength < 1) {
+							return;
 						}
-
-						String contentStart = content.substring(0, lineStart);
-						String contentMiddle = content.substring(lineStart, lineEnd);
-						String contentEnd = content.substring(lineEnd, content.length());
-
-						// calculate this now, before we set the text, as afterwards
-						// selStart, selEnd etc. change again! ;)
-						int replaceAmount = 0;
-						int selStartOffset = 0;
 
 						if (event.isControlDown() || event.isShiftDown()) {
-							// un-indent
-							replaceAmount = - Utils.countStringInString("\n\t", contentMiddle);
-
-							// the very first line (only) does not start with \n!
-							if (lineStart == 0) {
-								if (contentMiddle.startsWith("\t")) {
-									replaceAmount--;
-									selStartOffset--;
-									contentMiddle = contentMiddle.substring(1);
-								}
-
-							}
-
-							if (contentMiddle.startsWith("\n\t")) {
-								selStartOffset--;
-							}
-
-							// TODO :: replacing "\n " (four times) is just done as an
-							// afterthought, but is not done properly - e.g. the caret
-							// pos will behave wonkily...
-							contentMiddle = contentMiddle.replace("\n ", "\n");
-							contentMiddle = contentMiddle.replace("\n ", "\n");
-							contentMiddle = contentMiddle.replace("\n ", "\n");
-							contentMiddle = contentMiddle.replace("\n ", "\n");
-
-							contentMiddle = contentMiddle.replace("\n\t", "\n");
+							unindentSelection(1, false);
 						} else {
-							// indent
-							replaceAmount = Utils.countCharInString('\n', contentMiddle);
-
-							contentMiddle = contentMiddle.replace("\n", "\n\t");
-
-							// the very first line (only) does not start with \n!
-							if (lineStart == 0) {
-								replaceAmount++;
-								contentMiddle = "\t" + contentMiddle;
-							}
-
-							selStartOffset++;
+							indentSelection("\t");
 						}
-
-						content = contentStart + contentMiddle + contentEnd;
-
-						int possibleSelStart = selStart + selStartOffset;
-						int possibleSelEnd = selEnd + replaceAmount;
-
-						if (possibleSelStart > content.length()) {
-							possibleSelStart = content.length();
-						}
-
-						if (possibleSelEnd > content.length()) {
-							possibleSelEnd = content.length();
-						}
-
-						final int newSelStart = possibleSelStart;
-						final int newSelEnd = possibleSelEnd;
-
-						// set the text (this should go through...)
-						decoratedEditor.setText(content);
 
 						// ... and prevent the next text change (coming from the \t key)
-						if (event.isControlDown() || event.isShiftDown()) {
-							preventInsert += 1;
-							preventRemove += 1;
-						} else {
-							preventInsert += 1;
-							preventRemove += 1;
-						}
-
-						decoratedEditor.setCaretPosition(newSelEnd);
-
-						// later (!) also restore the selection - but not now, as it would
-						// all be replaced... ^^
-						Thread selThread = new Thread(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									Thread.sleep(50);
-								} catch(InterruptedException e) {
-									// Ooops...
-								}
-
-								decoratedEditor.setSelectionStart(newSelStart);
-								decoratedEditor.setSelectionEnd(newSelEnd);
-
-								selStart = newSelStart;
-								selEnd = newSelEnd;
-								selLength = selEnd - selStart;
-
-								preventInsert = 0;
-								preventRemove = 0;
-							}
-						});
-						selThread.start();
-
-						selStart = newSelStart;
-						selEnd = newSelEnd;
-						selLength = selEnd - selStart;
+						preventInsert += 1;
+						preventRemove += 1;
 					}
 				}
 			}
@@ -390,6 +286,133 @@ public abstract class Code extends DefaultStyledDocument {
 		};
 
 		decoratedEditor.addMouseListener(mouseListener);
+	}
+
+	public void indentSelection(String indentWithWhat) {
+
+		indentOrUnindent(true, indentWithWhat, 0, false);
+	}
+
+	public void unindentSelection(int levelAmount, boolean forceUnindent) {
+
+		indentOrUnindent(false, "", levelAmount, forceUnindent);
+	}
+
+	private void indentOrUnindent(boolean doIndent, String indentWithWhat, int levelAmount, boolean forceUnindent) {
+
+		String content = decoratedEditor.getText();
+		int lineStart = getLineStartFromPosition(selStart, content);
+		int lineEnd = getLineEndFromPosition(selEnd, content);
+
+		String contentStart = content.substring(0, lineStart);
+		String contentMiddle = content.substring(lineStart, lineEnd);
+		String contentEnd = content.substring(lineEnd, content.length());
+
+		// calculate this now, before we set the text, as afterwards
+		// selStart, selEnd etc. change again! ;)
+		int replaceAmount = 0;
+		int selStartOffset = 0;
+
+		if (doIndent) {
+
+			contentMiddle = "\n" + contentMiddle;
+
+			replaceAmount = Utils.countCharInString('\n', contentMiddle);
+
+			contentMiddle = contentMiddle.replace("\n", "\n" + indentWithWhat);
+
+			contentMiddle = contentMiddle.substring(1);
+
+			selStartOffset++;
+
+		} else {
+
+			// use -1 argument such that trailing \n do not get ignored... see the javadoc, it is confusing! .-.
+			String[] middleLines = contentMiddle.split("\n", -1);
+
+			for (int level = 0; level < levelAmount; level++) {
+				for (int curLine = 0; curLine < middleLines.length; curLine++) {
+					String line = middleLines[curLine];
+
+					if (forceUnindent || line.startsWith("\t")) {
+						// line might be empty in case of forceUnindent,
+						// so we have to check...
+						if (line.length() > 0) {
+							line = line.substring(1);
+							replaceAmount--;
+							if (curLine == 0) {
+								selStartOffset--;
+							}
+						}
+					} else if (line.startsWith("    ")) {
+						line = line.substring(4);
+						replaceAmount -= 4;
+					} else if (line.startsWith("   ")) {
+						line = line.substring(3);
+						replaceAmount -= 3;
+					} else if (line.startsWith("  ")) {
+						line = line.substring(2);
+						replaceAmount -= 2;
+					} else if (line.startsWith(" ")) {
+						line = line.substring(1);
+						replaceAmount -= 1;
+					}
+
+					middleLines[curLine] = line;
+				}
+			}
+
+			contentMiddle = String.join("\n", middleLines);
+		}
+
+		content = contentStart + contentMiddle + contentEnd;
+
+		int possibleSelStart = selStart + selStartOffset;
+		int possibleSelEnd = selEnd + replaceAmount;
+
+		if (possibleSelStart > content.length()) {
+			possibleSelStart = content.length();
+		}
+
+		if (possibleSelEnd > content.length()) {
+			possibleSelEnd = content.length();
+		}
+
+		final int newSelStart = possibleSelStart;
+		final int newSelEnd = possibleSelEnd;
+
+		// set the text (this should go through...)
+		decoratedEditor.setText(content);
+
+		decoratedEditor.setCaretPosition(newSelEnd);
+
+		// later (!) also restore the selection - but not now, as it would
+		// all be replaced... ^^
+		Thread selThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(50);
+				} catch(InterruptedException e) {
+					// Ooops...
+				}
+
+				decoratedEditor.setSelectionStart(newSelStart);
+				decoratedEditor.setSelectionEnd(newSelEnd);
+
+				selStart = newSelStart;
+				selEnd = newSelEnd;
+				selLength = selEnd - selStart;
+
+				preventInsert = 0;
+				preventRemove = 0;
+			}
+		});
+		selThread.start();
+
+		selStart = newSelStart;
+		selEnd = newSelEnd;
+		selLength = selEnd - selStart;
 	}
 
 	// does this code editor support reporting function names in the code?
