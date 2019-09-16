@@ -77,6 +77,11 @@ public class CSharpCode extends FunctionSupplyingCode {
 	}
 
 	@Override
+	public String reorganizeImports(String origText) {
+		return reorganizeImportsJavalike("using", origText);
+	}
+
+	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
 		int overrideCaretPos = insertedString.length();

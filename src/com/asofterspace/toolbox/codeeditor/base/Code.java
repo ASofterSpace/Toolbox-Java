@@ -20,6 +20,7 @@ import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -582,6 +583,101 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// just do nothing :)
 		return origText;
+	}
+
+	/**
+	 * This function can be called by extending classes if they want to use
+	 * Java-style import organization, but possibly with a different keyword
+	 * (such as "using" in C#)
+	 */
+	protected String reorganizeImportsJavalike(String importKeyword, String origText) {
+
+		StringBuilder output = new StringBuilder();
+		List<String> imports = new ArrayList<>();
+		StringBuilder secondOutput = new StringBuilder();
+
+		String[] lines = origText.split("\n");
+
+		int curLine = 0;
+
+		for (; curLine < lines.length; curLine++) {
+			String line = lines[curLine];
+			if (line.startsWith(importKeyword)) {
+				break;
+			} else {
+				output.append(line);
+				output.append("\n");
+			}
+		}
+
+		for (; curLine < lines.length; curLine++) {
+			String line = lines[curLine];
+			if (line.equals("")) {
+				continue;
+			}
+			if (line.startsWith(importKeyword)) {
+				imports.add(line);
+			} else {
+				break;
+			}
+		}
+
+		for (; curLine < lines.length; curLine++) {
+			secondOutput.append("\n");
+			String line = lines[curLine];
+			secondOutput.append(line);
+		}
+
+
+		// sort imports alphabetically
+		Collections.sort(imports, new Comparator<String>() {
+			public int compare(String a, String b) {
+				return a.toLowerCase().compareTo(b.toLowerCase());
+			}
+		});
+
+
+		String lastImport = "";
+		String lastImportStart = "";
+
+		int i = 0;
+
+		for (String importLine : imports) {
+
+			// remove duplicates
+			if (lastImport.equals(importLine)) {
+				continue;
+			}
+
+			// add an empty line between imports in different namespaces
+			String thisImportStart = importLine;
+			if (importLine.indexOf(".") >= 0) {
+				thisImportStart = importLine.substring(0, importLine.indexOf("."));
+			} else {
+				if (importLine.indexOf(";") >= 0) {
+					thisImportStart = importLine.substring(0, importLine.indexOf(";"));
+				}
+			}
+			if (!lastImportStart.equals(thisImportStart)) {
+				if (i > 0) {
+					output.append("\n");
+				}
+			}
+
+			// actually add the import
+			output.append(importLine);
+			output.append("\n");
+			lastImport = importLine;
+			lastImportStart = thisImportStart;
+			i++;
+		}
+
+		// actually have two empty lines between the import end and the class start
+		if (i > 0) {
+			output.append("\n");
+		}
+
+		return output.toString() + secondOutput.toString();
 	}
 
 	public static String getLineFromPosition(int pos, String content) {
