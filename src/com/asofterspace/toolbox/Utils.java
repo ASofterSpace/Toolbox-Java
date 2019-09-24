@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 47;
+	public final static int TOOLBOX_VERSION_NUMBER = 48;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards

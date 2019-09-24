@@ -7,8 +7,8 @@ package com.asofterspace.toolbox.gui;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Window;
 
 import javax.swing.JComponent;
@@ -17,6 +17,10 @@ import javax.swing.SwingUtilities;
 
 
 public class GuiUtils {
+
+	// on the left hand side, we add this string to indicate that the file has changed
+	public final static String CHANGE_INDICATOR = " *";
+
 
 	/**
 	 * Maximize the window
