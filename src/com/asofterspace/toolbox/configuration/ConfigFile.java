@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.configuration;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
+import com.asofterspace.toolbox.io.Record;
 
 
 public class ConfigFile extends JsonFile {
@@ -79,7 +80,7 @@ public class ConfigFile extends JsonFile {
 
 	// setting works exactly like in JSON files - but we are making it a bit simpler:
 	// we are also saving, and also ensuring the parent folder exists
-	public void setAllContents(JSON newContent) {
+	public void setAllContents(Record newContent) {
 		super.setAllContents(newContent);
 		create();
 	}

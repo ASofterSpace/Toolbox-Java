@@ -163,9 +163,13 @@ public class JsonFile extends SimpleFile {
 	 * Sets all the contents based on a JSON container
 	 * @param newContent
 	 */
-	public void setAllContents(JSON newContent) {
+	public void setAllContents(Record newContent) {
 
-		this.jsonContent = newContent;
+		if (newContent instanceof JSON) {
+			this.jsonContent = (JSON) newContent;
+		} else {
+			this.jsonContent = new JSON(newContent);
+		}
 	}
 
 	/**
