@@ -6,6 +6,7 @@ package com.asofterspace.toolbox;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Random;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 48;
+	public final static int TOOLBOX_VERSION_NUMBER = 49;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -30,6 +31,9 @@ public class Utils {
 	public static final Charset BINARY_CHARSET = StandardCharsets.ISO_8859_1;
 
 	private static Random randGen = null;
+
+	private static SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	private static SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
 
 
 
@@ -288,7 +292,29 @@ public class Utils {
 	public static String longToHumanReadableByteAmount(long byteAmount) {
 
 		return longToHumanReadableByteAmountLocal(byteAmount).replace(",", ".");
+	}
 
+	public static Date parseDateTime(String dateTimeStr) {
+
+		if (dateTimeStr == null) {
+			return new Date();
+		}
+
+		try {
+			return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
+		} catch (ParseException ex) {
+			System.err.println("Could not parse the date time " + dateTimeStr + " - using current time instead!");
+			return new Date();
+		}
+	}
+
+	public static String serializeDateTime(Date dateTime) {
+
+		if (dateTime == null) {
+			dateTime = new Date();
+		}
+
+		return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
 	}
 
 	/**
@@ -300,8 +326,7 @@ public class Utils {
 
 		String heapStr = longToHumanReadableByteAmount(curHeap);
 
-		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
-		System.out.println(format.format(new Date()) + " [heap " + heapStr + "]: " + logline);
+		System.out.println(DEFAULT_TIME_FORMAT.format(new Date()) + " [heap " + heapStr + "]: " + logline);
 	}
 
 	/**

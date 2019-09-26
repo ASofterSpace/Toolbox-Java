@@ -315,10 +315,16 @@ public class JSON extends Record {
 		switch (item.kind) {
 
 			case STRING:
+				if (item.simpleContents == null) {
+					return "null";
+				}
 				return "\"" + escapeJSONstr(item.simpleContents.toString()) + "\"";
 
 			case BOOLEAN:
 			case NUMBER:
+				if (item.simpleContents == null) {
+					return "null";
+				}
 				return item.simpleContents.toString();
 
 			case ARRAY:

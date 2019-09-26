@@ -132,6 +132,23 @@ public class Directory {
 	}
 
 	/**
+	 * Get the canonical filename associated with this file object,
+	 * or if it is unavailable, at lest the absolute filename
+	 */
+	public String getCanonicalDirname() {
+
+		Path basePath = getJavaPath();
+
+		try {
+			return basePath.toRealPath().toString();
+
+		} catch (IOException | SecurityException e) {
+
+			return basePath.toAbsolutePath().toString();
+		}
+	}
+
+	/**
 	 * Get a Java File object representing this directory
 	 */
 	public java.io.File getJavaFile() {
