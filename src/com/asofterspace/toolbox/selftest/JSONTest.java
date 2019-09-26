@@ -87,7 +87,7 @@ public class JSONTest implements Test {
 		}
 
 		if (!testFile.getAllContents().getString("bar").equals("\"")) {
-			TestUtils.fail("We stored {\"bar\": \"\\\"\"} in a JSON file, then read the file - and did not get \" when querying for bar!");
+			TestUtils.fail("We stored {\"bar\": \"\\\"\"} in a JSON file, then read the file - and did not get \" when querying for bar, but instead " + testFile.getAllContents().getString("bar") + "!");
 			return;
 		}
 

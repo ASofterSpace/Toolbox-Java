@@ -68,109 +68,108 @@ public class JSON extends Record {
 	 *
 	 * @param jsonString
 	 */
-	private String init(String jsonString) {
+	private void init(String jsonString) {
+		init(jsonString, 0);
+	}
 
-		jsonString = jsonString.trim();
+	private int init(String jsonString, int pos) {
 
-		if (jsonString.equals("")) {
+		pos = jumpOverWhitespaces(jsonString, pos);
+
+		if (pos >= jsonString.length()) {
 
 			kind = RecordKind.NULL;
 
 			simpleContents = null;
 
-			return "";
+			return pos;
 		}
 
-		if (jsonString.startsWith("{")) {
+		if (jsonString.charAt(pos) == '{') {
 
 			objContents = new TreeMap<String, Record>();
 
 			kind = RecordKind.OBJECT;
 
-			jsonString = jsonString.substring(1);
+			pos++;
 
 			while (true) {
-				jsonString = jsonString.trim();
+				pos = jumpOverWhitespaces(jsonString, pos);
 
-				if (jsonString.startsWith("}")) {
-					jsonString = jsonString.substring(1).trim();
+				if (pos >= jsonString.length()) {
+					break;
+				}
+
+				if (jsonString.charAt(pos) == '}') {
+					pos++;
 					break;
 				}
 
 				// this is "foo": "bar" (here being in the "foo" part)
 				// this should be the case - keys should be inside quote marks
-				if (jsonString.startsWith("\"")) {
-					jsonString = jsonString.substring(1).trim();
-					int endIndex = jsonString.indexOf("\"");
-					String key = jsonString.substring(0, endIndex);
-					jsonString = jsonString.substring(endIndex);
-					jsonString = jsonString.substring(jsonString.indexOf(":") + 1);
+				if (jsonString.charAt(pos) == '"') {
+					int endIndex = jsonString.indexOf("\"", pos+1);
+					String key = jsonString.substring(pos+1, endIndex).trim();
+					pos = jsonString.indexOf(":", endIndex+1) + 1;
 					JSON value = new JSON();
-					jsonString = value.init(jsonString).trim();
+					pos = value.init(jsonString, pos);
 					objContents.put(key, value);
-					if (jsonString.startsWith(",")) {
-						jsonString = jsonString.substring(1);
-					}
+					pos = jumpOverWhitespacesAndCommas(jsonString, pos);
 					continue;
 				}
 
 				// this is foo: "bar", or 'foo': "bar"
 				// this should NOT be the case - the key is not in a quote mark!
 				// but we will grudgingly accept it anyway, as we are nice people...
-				int endIndex = jsonString.indexOf(":");
-				String key = jsonString.substring(0, endIndex).trim();
+				int endIndex = jsonString.indexOf(":", pos);
+				String key = jsonString.substring(pos, endIndex).trim();
 				// in case someone did escape the key, but with ' instead of ", also handle that gracefully...
-				if ((key.length() > 2) && key.startsWith("'") && key.endsWith("'")) {
+				if ((key.length() > 2) && (key.charAt(0) == '\'') && (key.charAt(key.length()-1) == '\'')) {
 					key = key.substring(1, key.length() - 1);
 				}
-				jsonString = jsonString.substring(endIndex + 1).trim();
 				JSON value = new JSON();
-				jsonString = value.init(jsonString).trim();
+				pos = value.init(jsonString, endIndex + 1);
 				objContents.put(key, value);
-				if (jsonString.startsWith(",")) {
-					jsonString = jsonString.substring(1);
-				}
+				pos = jumpOverWhitespacesAndCommas(jsonString, pos);
 			}
 
-			return jsonString;
+			return pos;
 		}
 
-		if (jsonString.startsWith("[")) {
+		if (jsonString.charAt(pos) == '[') {
 
 			kind = RecordKind.ARRAY;
 
 			arrContents = new ArrayList<Record>();
 
-			jsonString = jsonString.substring(1).trim();
+			pos++;
 
-			while (jsonString.length() > 0) {
+			pos = jumpOverWhitespaces(jsonString, pos);
 
-				if (jsonString.startsWith("]")) {
-					return jsonString.substring(1);
+			while (pos < jsonString.length()) {
+
+				if (jsonString.charAt(pos) == ']') {
+					return pos + 1;
 				}
 
 				JSON newJSONelement = new JSON();
-				jsonString = newJSONelement.init(jsonString).trim();
+				pos = newJSONelement.init(jsonString, pos);
 				arrContents.add(newJSONelement);
-
-				while (jsonString.startsWith(",")) {
-					jsonString = jsonString.substring(1).trim();
-				}
-
+				pos = jumpOverWhitespacesAndCommas(jsonString, pos);
 			}
 
-			return jsonString;
+			return pos;
 		}
 
 		String doStringWith = null;
 
 		// this is "foo": "bar" (here being in the "bar" part)
-		if (jsonString.startsWith("\"")) {
+		if (jsonString.charAt(pos) == '"') {
 			doStringWith = "\"";
 		}
 
 		// this is "foo": 'bar', which is WRONG, but we want to be so generous as to still accept it...
-		if (jsonString.startsWith("'")) {
+		if (jsonString.charAt(pos) == '\'') {
 			doStringWith = "'";
 		}
 
@@ -178,30 +177,31 @@ public class JSON extends Record {
 
 			kind = RecordKind.STRING;
 
-			jsonString = jsonString.substring(1);
+			pos++;
 
-			String simpleContentsStr = jsonString.substring(0, jsonString.indexOf(doStringWith));
-			jsonString = jsonString.substring(jsonString.indexOf(doStringWith) + 1);
-
+			int endIndex = jsonString.indexOf(doStringWith, pos);
+			String simpleContentsStr = jsonString.substring(pos, endIndex);
 			// also allow escaping " (basically, by checking here is simpleContentsStr
 			// ends with \ - in which case we add the " instead and carry on searching forward)
-			while (simpleContentsStr.endsWith("\\")) {
-				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length()-1) + doStringWith;
-				simpleContentsStr += jsonString.substring(0, jsonString.indexOf(doStringWith));
-				jsonString = jsonString.substring(jsonString.indexOf(doStringWith) + 1);
+			while (jsonString.charAt(endIndex - 1) == '\\') {
+				int newEndIndex = jsonString.indexOf(doStringWith, endIndex + 1);
+				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length() - 1) +
+									jsonString.substring(endIndex, newEndIndex);
+				endIndex = newEndIndex;
 			}
+			pos = endIndex + 1;
 
 			// escape front to back - if we find, e.g., \\, this is a slash, but if we find \n, this is a newline
 			StringBuilder simpleContentBuilder = new StringBuilder();
-			int pos = 0;
-			int nextPos = simpleContentsStr.indexOf("\\", pos);
+			int curPos = 0;
+			int nextPos = simpleContentsStr.indexOf("\\", curPos);
 			while (nextPos > -1) {
-				simpleContentBuilder.append(simpleContentsStr.substring(pos, nextPos));
-				pos = nextPos + 1;
+				simpleContentBuilder.append(simpleContentsStr.substring(curPos, nextPos));
+				curPos = nextPos + 1;
 				if (nextPos+1 >= simpleContentsStr.length()) {
 					break;
 				}
-				pos++;
+				curPos++;
 				switch (simpleContentsStr.charAt(nextPos+1)) {
 					case 'n':
 						simpleContentBuilder.append('\n');
@@ -225,46 +225,51 @@ public class JSON extends Record {
 						// append the backslash, but do not increase the pos as far as we otherwise would,
 						// as we did not actually do anything with the previous character!
 						simpleContentBuilder.append('\\');
-						pos--;
+						curPos--;
 				}
-				nextPos = simpleContentsStr.indexOf("\\", pos);
+				nextPos = simpleContentsStr.indexOf("\\", curPos);
 			}
-			simpleContentBuilder.append(simpleContentsStr.substring(pos, simpleContentsStr.length()));
+			simpleContentBuilder.append(simpleContentsStr.substring(curPos, simpleContentsStr.length()));
 
 			simpleContents = simpleContentBuilder.toString();
 
-			return jsonString;
+			return pos;
 		}
 
-		if (jsonString.startsWith("true")) {
-			kind = RecordKind.BOOLEAN;
+		if (pos + 3 < jsonString.length()) {
 
-			simpleContents = true;
+			String subStr = jsonString.substring(pos, pos + 4);
 
-			return jsonString.substring(4);
-		}
+			if (subStr.equals("null")) {
+				kind = RecordKind.NULL;
 
-		if (jsonString.startsWith("false")) {
-			kind = RecordKind.BOOLEAN;
+				simpleContents = null;
 
-			simpleContents = false;
+				return pos + 4;
+			}
 
-			return jsonString.substring(5);
-		}
+			if (subStr.equals("true")) {
+				kind = RecordKind.BOOLEAN;
 
-		if (jsonString.startsWith("null")) {
-			kind = RecordKind.NULL;
+				simpleContents = true;
 
-			simpleContents = null;
+				return pos + 4;
+			}
 
-			return jsonString.substring(4);
+			if (pos + 4 < jsonString.length()) {
+				if (jsonString.substring(pos, pos + 5).equals("false")) {
+					kind = RecordKind.BOOLEAN;
+
+					simpleContents = false;
+
+					return pos + 5;
+				}
+			}
 		}
 
 		kind = RecordKind.NUMBER;
 
-		String numStr = "";
-
-		int charPos = 0;
+		int charPos = pos;
 
 		while (charPos < jsonString.length()) {
 
@@ -274,18 +279,18 @@ public class JSON extends Record {
 				curChar.equals('.') || curChar.equals('-') ||
 				curChar.equals('e') || curChar.equals('E')) {
 
-				numStr += curChar;
+				charPos++;
 
 			} else {
 
 				// we are not reading any further numerical digits - escape!
 				break;
 			}
-
-			charPos++;
 		}
 
-		jsonString = jsonString.substring(charPos);
+		String numStr = jsonString.substring(pos, charPos);
+
+		pos = charPos;
 
 		numStr = numStr.replace(",", "");
 
@@ -306,7 +311,31 @@ public class JSON extends Record {
 			}
 		}
 
-		return jsonString;
+		return pos;
+	}
+
+	private int jumpOverWhitespaces(String jsonString, int pos) {
+		while (pos < jsonString.length()) {
+			char c = jsonString.charAt(pos);
+			if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+				pos++;
+			} else {
+				break;
+			}
+		}
+		return pos;
+	}
+
+	private int jumpOverWhitespacesAndCommas(String jsonString, int pos) {
+		while (pos < jsonString.length()) {
+			char c = jsonString.charAt(pos);
+			if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',') {
+				pos++;
+			} else {
+				break;
+			}
+		}
+		return pos;
 	}
 
 	@Override
