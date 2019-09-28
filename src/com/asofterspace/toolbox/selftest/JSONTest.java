@@ -159,14 +159,19 @@ public class JSONTest implements Test {
 
 		TestUtils.start("JSON from String");
 
-		JSON testObject = new JSON("{\"foo\":\"bar\"}");
+		JSON testObject = new JSON("{\"foo\":\"bar\",\n\r\"nullkey\": null , \t}");
 
-		if (testObject.getString("foo").toString().equals("bar")) {
-			TestUtils.succeed();
+		if (!testObject.getString("foo").equals("bar")) {
+			TestUtils.fail("We stored foo:bar in a JSON object, then read the key foo - and did not get bar!");
 			return;
 		}
 
-		TestUtils.fail("We stored foo:bar in a JSON object, then read the key foo - and did not get bar!");
+		if (testObject.getString("nullkey") != null) {
+			TestUtils.fail("We stored \"nullkey\": null in a JSON object, then read the key nullkey - and did not get null, but instead \"" + testObject.getString("nullkey") + "\"!");
+			return;
+		}
+
+		TestUtils.succeed();
 	}
 
 	public void fromNumberStringTest() {

@@ -423,15 +423,22 @@ public class Record {
 			return null;
 		}
 
-		// in case of a string, return the contained string WITHOUT
-		// enclosing ""-signs
-		if (result.kind == RecordKind.STRING) {
-			return result.simpleContents.toString();
-		}
+		switch (result.kind) {
 
-		// if something else than a string is contained, return whatever
-		// it is that is contained
-		return result.toString();
+			case NULL:
+				return null;
+
+			// in case of a string, return the contained string WITHOUT
+			// enclosing ""-signs
+			case STRING:
+			case BOOLEAN:
+			case NUMBER:
+				return result.simpleContents.toString();
+
+			// in case of an array or object or whatever, return the default serialization
+			default:
+				return result.toString();
+		}
 	}
 
 	/**
