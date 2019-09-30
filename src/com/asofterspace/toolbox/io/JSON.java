@@ -185,6 +185,12 @@ public class JSON extends Record {
 			// ends with \ - in which case we add the " instead and carry on searching forward)
 			while (jsonString.charAt(endIndex - 1) == '\\') {
 				int newEndIndex = jsonString.indexOf(doStringWith, endIndex + 1);
+				if (newEndIndex < 0) {
+					simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length() - 1) +
+										jsonString.substring(endIndex);
+					endIndex = jsonString.length();
+					break;
+				}
 				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length() - 1) +
 									jsonString.substring(endIndex, newEndIndex);
 				endIndex = newEndIndex;
