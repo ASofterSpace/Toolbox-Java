@@ -40,12 +40,12 @@ public class CSharpCode extends FunctionSupplyingCode {
 
 	// all keywords of the C# language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "final", "finally", "for", "foreach", "goto", "if", "implements", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "using", "while", "volatile"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "finally", "for", "foreach", "goto", "if", "implements", "in", "instanceof", "interface", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "using", "while", "volatile"}
 	));
 
 	// all primitive types of the C# language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"bool", "char", "class", "double", "float", "enum", "int", "long", "false", "null", "super", "this", "true", "var", "void"}
+		new String[] {"bool", "char", "class", "double", "float", "enum", "int", "long", "false", "null", "string", "super", "this", "true", "var", "void"}
 	));
 
 	// all string delimiters of the C# language
