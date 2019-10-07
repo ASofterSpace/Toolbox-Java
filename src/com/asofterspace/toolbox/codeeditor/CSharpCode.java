@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
-import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
 
@@ -34,13 +34,13 @@ import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
 
-public class CSharpCode extends FunctionSupplyingCode {
+public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
 	// all keywords of the C# language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "finally", "for", "foreach", "goto", "if", "implements", "in", "instanceof", "interface", "new", "override", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "using", "while", "virtual", "volatile"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "finally", "for", "foreach", "goto", "if", "implements", "in", "instanceof", "interface", "new", "out", "override", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "using", "while", "virtual", "volatile"}
 	));
 
 	// all primitive types of the C# language and other stuff that looks that way
@@ -69,6 +69,10 @@ public class CSharpCode extends FunctionSupplyingCode {
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
+
+	private int curLineStartingWhitespace = 0;
+
+	private boolean startingWhitespace = false;
 
 
 	public CSharpCode(JTextPane editor) {
@@ -144,7 +148,28 @@ public class CSharpCode extends FunctionSupplyingCode {
 
 				// while we have a delimiter...
 				char curChar = content.charAt(start);
+
+				startingWhitespace = false;
+
 				while (isDelimiter(curChar)) {
+
+					// prevent stuff like blubb = foo() from ending up in the function overview list
+					if (curChar == '=') {
+						lastCouldBeKeyword = "";
+					}
+
+					if (curChar == '\n') {
+						curLineStartingWhitespace = 0;
+						startingWhitespace = true;
+					} else {
+						if (startingWhitespace) {
+							if (curChar == '\t') {
+								curLineStartingWhitespace += 4;
+							} else {
+								curLineStartingWhitespace++;
+							}
+						}
+					}
 
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
@@ -169,6 +194,7 @@ public class CSharpCode extends FunctionSupplyingCode {
 						start++;
 
 					} else {
+						updateFunctionList();
 						return;
 					}
 
@@ -182,6 +208,8 @@ public class CSharpCode extends FunctionSupplyingCode {
 		} catch (BadLocationException e) {
 			// oops!
 		}
+
+		updateFunctionList();
 	}
 
 	private boolean isCommentStart(String content, int start, int end) {
@@ -275,9 +303,6 @@ public class CSharpCode extends FunctionSupplyingCode {
 		int couldBeKeywordEnd = start + 1;
 
 		while (couldBeKeywordEnd <= end) {
-			if (content.charAt(couldBeKeywordEnd) == '=') {
-				lastCouldBeKeyword = "";
-			}
 			if (isDelimiter(content.charAt(couldBeKeywordEnd))) {
 				break;
 			}
@@ -292,18 +317,19 @@ public class CSharpCode extends FunctionSupplyingCode {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
 		} else if (isAdvancedType(couldBeKeyword)) {
 			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
-		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
-		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
-			if (!"new".equals(lastCouldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
-				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					if (!"".equals(lastCouldBeKeyword)) {
-						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-						functions.add(new CodeLocation(functionName, start));
-					}
+		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(') &&
+					!"new".equals(lastCouldBeKeyword)) {
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+			if ((start > 0) && (content.charAt(start-1) == ' ')) {
+				// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
+				if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
+					// now get the entire line that we found!
+					String functionName = getLineFromPosition(start, content);
+					functions.add(new CodeLocation(functionName, start));
 				}
 			}
+		} else if (isAnnotation(couldBeKeyword)) {
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
 		}
 
 		lastCouldBeKeyword = couldBeKeyword;
