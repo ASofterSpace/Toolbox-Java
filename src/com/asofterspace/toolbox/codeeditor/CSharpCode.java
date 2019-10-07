@@ -45,7 +45,7 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 
 	// all primitive types of the C# language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"bool", "char", "class", "double", "float", "enum", "int", "long", "false", "null", "string", "super", "this", "true", "var", "void"}
+		new String[] {"base", "bool", "char", "class", "double", "float", "enum", "int", "long", "false", "null", "string", "this", "true", "var", "void"}
 	));
 
 	// all string delimiters of the C# language
