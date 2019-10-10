@@ -19,6 +19,8 @@ public class BitUtilsTest implements Test {
 		boolArrEqualsTest();
 
 		byteToBitsTest();
+
+		longToHumanReadableByteAmountTest();
 	}
 
 	public void toStringTest() {
@@ -184,6 +186,43 @@ public class BitUtilsTest implements Test {
 
 		if (!BitUtils.equals(arr4, res4)) {
 			TestUtils.fail("The call unsignedByteToBits(byte4) did not give us the correct result, but gave instead " + BitUtils.toString(res4) + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void longToHumanReadableByteAmountTest() {
+
+		TestUtils.start("Long to Human Readable Byte Amount");
+
+		if (!"0 B".equals(BitUtils.longToHumanReadableByteAmount(0))) {
+			TestUtils.fail("We tried to convert 0 B, but we got " + BitUtils.longToHumanReadableByteAmount(0) + "!");
+			return;
+		}
+
+		if (!"1 B".equals(BitUtils.longToHumanReadableByteAmount(1))) {
+			TestUtils.fail("We tried to convert 1 B, but we got " + BitUtils.longToHumanReadableByteAmount(1) + "!");
+			return;
+		}
+
+		if (!"100.00 KB".equals(BitUtils.longToHumanReadableByteAmount(100*1024))) {
+			TestUtils.fail("We tried to convert 100.00 KB, but we got " + BitUtils.longToHumanReadableByteAmount(100*1024) + "!");
+			return;
+		}
+
+		if (!"26.76 KB".equals(BitUtils.longToHumanReadableByteAmount(27398))) {
+			TestUtils.fail("We tried to convert 26.76 KB, but we got " + BitUtils.longToHumanReadableByteAmount(27398) + "!");
+			return;
+		}
+
+		if (!"200.00 MB".equals(BitUtils.longToHumanReadableByteAmount(200*1024*1024l))) {
+			TestUtils.fail("We tried to convert 200.00 MB, but we got " + BitUtils.longToHumanReadableByteAmount(200*1024*1024l) + "!");
+			return;
+		}
+
+		if (!"300.00 GB".equals(BitUtils.longToHumanReadableByteAmount(300*1024*1024*1024l))) {
+			TestUtils.fail("We tried to convert 300.00 GB, but we got " + BitUtils.longToHumanReadableByteAmount(300*1024*1024*1024l) + "!");
 			return;
 		}
 

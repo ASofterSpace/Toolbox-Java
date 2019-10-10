@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class BinaryFile extends File {
 	// (if we just read and save we have no problem with Unicode characters either; if we actually set
 	// Unicode text for some reason, then we will have to think a bit harder and maybe manually convert
 	// the Unicode letters that we are aware of into their same-byte counterparts or whatever... ^^)
-	public static final Charset BINARY_CHARSET = Utils.BINARY_CHARSET;
+	public static final Charset BINARY_CHARSET = StrUtils.BINARY_CHARSET;
 
 
 	/**
@@ -72,7 +72,7 @@ public class BinaryFile extends File {
 
 	public String loadContentStr() {
 
-		return new String(loadContent(), Utils.BINARY_CHARSET);
+		return new String(loadContent(), BINARY_CHARSET);
 	}
 
 	public void saveContent(byte[] content) {
@@ -90,7 +90,7 @@ public class BinaryFile extends File {
 
 	public void saveContentStr(String content) {
 
-		saveContentStr(content, Utils.BINARY_CHARSET);
+		saveContentStr(content, BINARY_CHARSET);
 	}
 
 	/**

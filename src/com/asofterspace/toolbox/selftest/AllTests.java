@@ -29,6 +29,8 @@ public class AllTests {
 
 		TestUtils.run(new UtilTest());
 
+		TestUtils.run(new StrUtilsTest());
+
 		TestUtils.run(new BitUtilsTest());
 
 		TestUtils.run(new MathUtilsTest());

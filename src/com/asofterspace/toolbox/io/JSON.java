@@ -5,7 +5,7 @@
 package com.asofterspace.toolbox.io;
 
 import com.asofterspace.toolbox.io.RecordKind;
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class JSON extends Record {
 	 */
 	public JSON(List<String> jsonStrings) throws JsonParseException {
 
-		String jsonContent = Utils.strListToString(jsonStrings);
+		String jsonContent = StrUtils.strListToString(jsonStrings);
 
 		init(jsonContent);
 	}
@@ -242,19 +242,19 @@ public class JSON extends Record {
 			return pos;
 		}
 
-		if (Utils.hasAt(jsonString, "null", pos)) {
+		if (StrUtils.hasAt(jsonString, "null", pos)) {
 			kind = RecordKind.NULL;
 			simpleContents = null;
 			return pos + 4;
 		}
 
-		if (Utils.hasAt(jsonString, "true", pos)) {
+		if (StrUtils.hasAt(jsonString, "true", pos)) {
 			kind = RecordKind.BOOLEAN;
 			simpleContents = true;
 			return pos + 4;
 		}
 
-		if (Utils.hasAt(jsonString, "false", pos)) {
+		if (StrUtils.hasAt(jsonString, "false", pos)) {
 			kind = RecordKind.BOOLEAN;
 			simpleContents = false;
 			return pos + 5;

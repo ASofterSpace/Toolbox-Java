@@ -6,7 +6,7 @@ package com.asofterspace.toolbox.codeeditor.base;
 
 import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
 import com.asofterspace.toolbox.utils.Callback;
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -318,7 +318,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 			contentMiddle = "\n" + contentMiddle;
 
-			replaceAmount = Utils.countCharInString('\n', contentMiddle);
+			replaceAmount = StrUtils.countCharInString('\n', contentMiddle);
 
 			contentMiddle = contentMiddle.replace("\n", "\n" + indentWithWhat);
 
@@ -1502,7 +1502,7 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	private void refreshLineNumbering() {
 
-		int lineAmount = Utils.countCharInString('\n', decoratedEditor.getText());
+		int lineAmount = StrUtils.countCharInString('\n', decoratedEditor.getText());
 
 		if (lineAmount != lastLineAmount) {
 			lastLineAmount = lineAmount;

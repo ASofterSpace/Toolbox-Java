@@ -219,6 +219,28 @@ public class BitUtils {
 		bitArr[offset+7] = b1;
 	}
 
+	public static String longToHumanReadableByteAmountLocal(long byteAmount) {
+
+		if (byteAmount > 5 * 1024 * 1024 * 1024) {
+			return String.format("%.2f", byteAmount / (1024.0 * 1024.0 * 1024.0)) + " GB";
+		}
+
+		if (byteAmount > 5 * 1024 * 1024) {
+			return String.format("%.2f", byteAmount / (1024.0 * 1024.0)) + " MB";
+		}
+
+		if (byteAmount > 5 * 1024) {
+			return String.format("%.2f", byteAmount / 1024.0) + " KB";
+		}
+
+		return byteAmount + " B";
+	}
+
+	public static String longToHumanReadableByteAmount(long byteAmount) {
+
+		return longToHumanReadableByteAmountLocal(byteAmount).replace(",", ".");
+	}
+
 	public static String toString(boolean[] bitArr) {
 
 		StringBuilder result = new StringBuilder();

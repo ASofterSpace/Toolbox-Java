@@ -7,7 +7,7 @@ package com.asofterspace.toolbox.codeeditor.utils;
 import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.utils.Pair;
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -194,7 +194,7 @@ public class LineNumbering extends Code {
 
 	private Pair<Integer, Integer> highlightOnSelDotMark(int pos, AttributeSet attr, String content) {
 
-		int line = Utils.countCharInString('\n', content, pos);
+		int line = StrUtils.countCharInString('\n', content, pos);
 
 		int start = 0;
 

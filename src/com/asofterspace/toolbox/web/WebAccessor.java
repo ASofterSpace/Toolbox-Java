@@ -12,7 +12,7 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.utils.ByteBuffer;
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -286,7 +286,7 @@ public class WebAccessor {
 			resultName = resultName.substring(0, resultName.lastIndexOf("."));
 		}
 
-		resultName += "_" + Utils.getRandomString(8);
+		resultName += "_" + StrUtils.getRandomString(8);
 		resultName += "." + resultExt;
 
 		BinaryFile result = new BinaryFile(cache, resultName);
