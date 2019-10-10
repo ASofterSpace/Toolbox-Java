@@ -32,6 +32,22 @@ public class Record {
 	/**
 	 * Create an empty Record object
 	 */
+	public static Record emptyObject() {
+		return new Record();
+	}
+
+	/**
+	 * Create an empty Record array
+	 */
+	public static Record emptyArray() {
+		Record result = new Record();
+		result.makeArray();
+		return result;
+	}
+
+	/**
+	 * Create an empty Record object
+	 */
 	public Record() {
 
 		kind = RecordKind.OBJECT;

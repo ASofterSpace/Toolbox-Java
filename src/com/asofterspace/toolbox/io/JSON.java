@@ -35,7 +35,7 @@ public class JSON extends Record {
 	/**
 	 * Create a JSON object based on a given JSON string
 	 */
-	public JSON(String jsonString) {
+	public JSON(String jsonString) throws JsonParseException {
 
 		init(jsonString);
 	}
@@ -44,7 +44,7 @@ public class JSON extends Record {
 	 * Create a JSON object based on a given list of strings representing
 	 * JSON file contents
 	 */
-	public JSON(List<String> jsonStrings) {
+	public JSON(List<String> jsonStrings) throws JsonParseException {
 
 		String jsonContent = Utils.strListToString(jsonStrings);
 
@@ -68,11 +68,11 @@ public class JSON extends Record {
 	 *
 	 * @param jsonString
 	 */
-	private void init(String jsonString) {
+	private void init(String jsonString) throws JsonParseException {
 		init(jsonString, 0);
 	}
 
-	private int init(String jsonString, int pos) {
+	private int init(String jsonString, int pos) throws JsonParseException {
 
 		pos = jumpOverWhitespaces(jsonString, pos);
 
@@ -242,35 +242,22 @@ public class JSON extends Record {
 			return pos;
 		}
 
-		if (pos + 3 < jsonString.length()) {
+		if (Utils.hasAt(jsonString, "null", pos)) {
+			kind = RecordKind.NULL;
+			simpleContents = null;
+			return pos + 4;
+		}
 
-			String subStr = jsonString.substring(pos, pos + 4);
+		if (Utils.hasAt(jsonString, "true", pos)) {
+			kind = RecordKind.BOOLEAN;
+			simpleContents = true;
+			return pos + 4;
+		}
 
-			if (subStr.equals("null")) {
-				kind = RecordKind.NULL;
-
-				simpleContents = null;
-
-				return pos + 4;
-			}
-
-			if (subStr.equals("true")) {
-				kind = RecordKind.BOOLEAN;
-
-				simpleContents = true;
-
-				return pos + 4;
-			}
-
-			if (pos + 4 < jsonString.length()) {
-				if (jsonString.substring(pos, pos + 5).equals("false")) {
-					kind = RecordKind.BOOLEAN;
-
-					simpleContents = false;
-
-					return pos + 5;
-				}
-			}
+		if (Utils.hasAt(jsonString, "false", pos)) {
+			kind = RecordKind.BOOLEAN;
+			simpleContents = false;
+			return pos + 5;
 		}
 
 		kind = RecordKind.NUMBER;
@@ -295,6 +282,17 @@ public class JSON extends Record {
 		}
 
 		String numStr = jsonString.substring(pos, charPos);
+
+		// if we did not advance - so we are not starting with a digit - then we
+		// are starting with something VERY unexpected, and cannot parse this...
+		// in which case we should fail, and NOT silently, but very very loudly!
+		if (charPos == pos) {
+			int until = pos + 100;
+			if (until >= jsonString.length()) {
+				until = jsonString.length() - 1;
+			}
+			throw new JsonParseException("Invalid JSON found around: " + jsonString.substring(pos, until));
+		}
 
 		pos = charPos;
 

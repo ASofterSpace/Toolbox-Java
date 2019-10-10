@@ -126,6 +126,35 @@ public class Utils {
 		return sb.toString();
 	}
 
+	/**
+	 * The methods haystack.startsWith(needle) and haystack.endsWith(needle)
+	 * exist; this here is a more generic form which can for any position
+	 * check - with minimal overhead! - if the needle is at exactly that
+	 * location in the haystack
+	 */
+	public static boolean hasAt(String haystack, String needle, int pos) {
+
+		// well, we cannot contain this at this position if it is out of range - duh!
+		if (pos + needle.length() > haystack.length()) {
+			return false;
+		}
+		if (pos < 0) {
+			return false;
+		}
+
+		// if, by going over the whole needle...
+		for (int i = 0; i < needle.length(); i++) {
+			// ... we find a character that is different from the haystack at that location...
+			if (haystack.charAt(pos + i) != needle.charAt(i)) {
+				// ... then apparently the needle was not matching the haystack!
+				return false;
+			}
+		}
+
+		// if we found no discrepancy, then apparently the needle is matching the haystack!
+		return true;
+	}
+
 	public static int countCharInString(char find, String inHere) {
 
 		return countCharInString(find, inHere, inHere.length());

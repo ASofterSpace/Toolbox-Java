@@ -9,7 +9,7 @@ import java.util.List;
 
 public class JsonFile extends SimpleFile {
 
-	private JSON jsonContent = null;
+	protected JSON jsonContent = null;
 
 
 	/**
@@ -46,7 +46,7 @@ public class JsonFile extends SimpleFile {
 	}
 
 
-	protected void loadJsonContents() {
+	protected void loadJsonContents() throws JsonParseException {
 
 		jsonContent = new JSON(getContent(false));
 	}
@@ -55,7 +55,7 @@ public class JsonFile extends SimpleFile {
 	 * Gets all the contents as JSON container
 	 * @return all the contents
 	 */
-	public JSON getAllContents() {
+	public JSON getAllContents() throws JsonParseException {
 
 		if (jsonContent == null) {
 			loadJsonContents();
@@ -64,7 +64,7 @@ public class JsonFile extends SimpleFile {
 		return jsonContent;
 	}
 
-	private void ensureContent() {
+	protected void ensureContent() throws JsonParseException {
 
 		if (jsonContent == null) {
 			loadJsonContents();
@@ -76,7 +76,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
-	public String getValue(String key) {
+	public String getValue(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -90,7 +90,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @return the list stored in the key, or an empty list if it cannot be found
 	 */
-	public List<String> getList(String key) {
+	public List<String> getList(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -102,7 +102,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
-	public Integer getInteger(String key) {
+	public Integer getInteger(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -117,7 +117,7 @@ public class JsonFile extends SimpleFile {
 	 * @param defaultValue
 	 * @return the value stored in the key, or defaultValue if it cannot be found
 	 */
-	public int getInteger(String key, int defaultValue) {
+	public int getInteger(String key, int defaultValue) throws JsonParseException {
 
 		Integer result = getInteger(key);
 
@@ -133,7 +133,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
-	public Boolean getBoolean(String key) {
+	public Boolean getBoolean(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -148,7 +148,7 @@ public class JsonFile extends SimpleFile {
 	 * @param defaultValue
 	 * @return the value stored in the key, or defaultValue if it cannot be found
 	 */
-	public boolean getBoolean(String key, boolean defaultValue) {
+	public boolean getBoolean(String key, boolean defaultValue) throws JsonParseException {
 
 		Boolean result = getBoolean(key);
 
@@ -177,7 +177,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, String value) {
+	public void set(String key, String value) throws JsonParseException {
 
 		ensureContent();
 
@@ -189,7 +189,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, Integer value) {
+	public void set(String key, Integer value) throws JsonParseException {
 
 		ensureContent();
 
@@ -205,7 +205,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, Boolean value) {
+	public void set(String key, Boolean value) throws JsonParseException {
 
 		ensureContent();
 
@@ -221,7 +221,7 @@ public class JsonFile extends SimpleFile {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, JSON value) {
+	public void set(String key, JSON value) throws JsonParseException {
 
 		ensureContent();
 

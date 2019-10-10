@@ -10,6 +10,7 @@ import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.utils.ByteBuffer;
 import com.asofterspace.toolbox.Utils;
 
@@ -314,7 +315,7 @@ public class WebAccessor {
 	 * @param url  The URL that hopefully returns a JSON resource
 	 * @return The JSON resource that has been found on the web
 	 */
-	public static JSON getJSON(String url) {
+	public static JSON getJSON(String url) throws JsonParseException {
 		return new JSON(get(url));
 	}
 
