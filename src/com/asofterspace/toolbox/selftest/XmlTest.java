@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.XML;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
@@ -15,7 +16,7 @@ import com.asofterspace.toolbox.test.TestUtils;
 public class XmlTest implements Test {
 
 	@Override
-	public void runAll() {
+	public void runAll() throws JsonParseException {
 
 		fromFileTest();
 
@@ -66,7 +67,7 @@ public class XmlTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void toJsonAndBackTest() {
+	public void toJsonAndBackTest() throws JsonParseException {
 
 		TestUtils.start("XML to JSON and Back");
 
@@ -99,7 +100,7 @@ public class XmlTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void advancedToJsonAndBackTest() {
+	public void advancedToJsonAndBackTest() throws JsonParseException {
 
 		TestUtils.start("Advanced XML to JSON and Back");
 
@@ -150,7 +151,7 @@ public class XmlTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void restrictedToJsonAndBackTest() {
+	public void restrictedToJsonAndBackTest() throws JsonParseException {
 
 		TestUtils.start("Restricted XML to JSON and Back");
 

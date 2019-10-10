@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
+import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
@@ -14,7 +15,7 @@ import com.asofterspace.toolbox.test.TestUtils;
 public class JSONTest implements Test {
 
 	@Override
-	public void runAll() {
+	public void runAll() throws JsonParseException {
 
 		fromSimpleFileTest();
 
@@ -49,9 +50,11 @@ public class JSONTest implements Test {
 		largeToStringTest();
 
 		alphabeticalSortingTest();
+
+		throwsExceptionTest();
 	}
 
-	public void fromSimpleFileTest() {
+	public void fromSimpleFileTest() throws JsonParseException {
 
 		TestUtils.start("JSON from Simple File");
 
@@ -75,7 +78,7 @@ public class JSONTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void fromAdvancedFileTest() {
+	public void fromAdvancedFileTest() throws JsonParseException {
 
 		TestUtils.start("JSON from Advanced File");
 
@@ -121,7 +124,7 @@ public class JSONTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void toAdvancedFileTest() {
+	public void toAdvancedFileTest() throws JsonParseException {
 
 		TestUtils.start("JSON to Advanced File");
 
@@ -155,7 +158,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We loaded an advanced JSON file, then saved the file, loaded it again (as plain text file) - and did not get what we expected!");
 	}
 
-	public void fromStringTest() {
+	public void fromStringTest() throws JsonParseException {
 
 		TestUtils.start("JSON from String");
 
@@ -174,7 +177,7 @@ public class JSONTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void fromNumberStringTest() {
+	public void fromNumberStringTest() throws JsonParseException {
 
 		TestUtils.start("JSON from Number String");
 
@@ -188,7 +191,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:9 in a JSON object, then read the key foo - and did not get 9!");
 	}
 
-	public void malformedFromStringTest() {
+	public void malformedFromStringTest() throws JsonParseException {
 
 		TestUtils.start("Malformed JSON from String");
 
@@ -202,7 +205,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored a malformed JSON string in a JSON object and would expect it to cope with that - but it did not!\nOutput: " + testObject.toString());
 	}
 
-	public void doubleBackslashBeforeNewlineTest() {
+	public void doubleBackslashBeforeNewlineTest() throws JsonParseException {
 
 		TestUtils.start("Double Backslash before Newline");
 
@@ -216,7 +219,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We loaded a JSON string containing backslash backslash r - which should give backslash r, but instead got some worrisome newline or whatever!\nOutput: " + testObject.getString("key"));
 	}
 
-	public void toStringTest() {
+	public void toStringTest() throws JsonParseException {
 
 		TestUtils.start("JSON to String");
 
@@ -232,7 +235,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:bar in a JSON object, then converted the object back to JSON - and did not get our input back!");
 	}
 
-	public void fromStringTestEscapedQuotes() {
+	public void fromStringTestEscapedQuotes() throws JsonParseException {
 
 		TestUtils.start("JSON from String (with Escaped Quotes)");
 
@@ -246,7 +249,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:ba\"r in a JSON object, then read the key foo - and did not get ba\"r!");
 	}
 
-	public void toStringTestEscapedQuotes() {
+	public void toStringTestEscapedQuotes() throws JsonParseException {
 
 		TestUtils.start("JSON to String (with Escaped Quotes)");
 
@@ -262,7 +265,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:ba\"r in a JSON object, then converted the object back to JSON - and did not get our input back!");
 	}
 
-	public void fromStringTestEscapedChars() {
+	public void fromStringTestEscapedChars() throws JsonParseException {
 
 		TestUtils.start("JSON from String (with Escaped Characters)");
 
@@ -276,7 +279,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:ba\\n\\r in a JSON object, then read the key foo - and did not get ba\\n\\r!");
 	}
 
-	public void toStringTestEscapedChars() {
+	public void toStringTestEscapedChars() throws JsonParseException {
 
 		TestUtils.start("JSON to String (with Escaped Characters)");
 
@@ -292,7 +295,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:ba\\n\\r in a JSON object, then converted the object back to JSON - and did not get our input back!");
 	}
 
-	public void fromStringTestSpecialChars() {
+	public void fromStringTestSpecialChars() throws JsonParseException {
 
 		TestUtils.start("JSON from String (with Special Characters)");
 
@@ -306,7 +309,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:bär in a JSON object, then read the key foo - and did not get bär!");
 	}
 
-	public void toStringTestSpecialChars() {
+	public void toStringTestSpecialChars() throws JsonParseException {
 
 		TestUtils.start("JSON to String (with Special Characters)");
 
@@ -322,7 +325,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:bär in a JSON object, then converted the object back to JSON - and did not get our input back!");
 	}
 
-	public void largeFromStringTest() {
+	public void largeFromStringTest() throws JsonParseException {
 
 		TestUtils.start("JSON from String (large!)");
 
@@ -336,7 +339,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:bar (and some other stuff) in a JSON object, then read the key foo - and did not get bar!");
 	}
 
-	public void largeToStringTest() {
+	public void largeToStringTest() throws JsonParseException {
 
 		TestUtils.start("JSON to String (large!)");
 
@@ -352,7 +355,7 @@ public class JSONTest implements Test {
 		TestUtils.fail("We stored foo:bar (and some other stuff) in a JSON object, then converted the object back to JSON - and did not get our input back!");
 	}
 
-	public void alphabeticalSortingTest() {
+	public void alphabeticalSortingTest() throws JsonParseException {
 
 		TestUtils.start("JSON Alphabetically Sorted");
 
@@ -364,6 +367,22 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We stored some not-alphabetically sorted stuff in a JSON object, then converted the object back to JSON - and expected it to be alphabetically sorted, but oh no, it was not!");
+	}
+
+	public void throwsExceptionTest() {
+
+		TestUtils.start("JSON Throws Exception (when parsing is impossible)");
+
+		try {
+			// we are here missing the { in front of "foo2" - and we WANT to get an exception in this case!
+			JSON testJson = new JSON("[{\"foo\": \"bar\"}, \"foo2\": \"bar2\"}]");
+			TestUtils.fail("We tried to parse some VERY broken JSON (too broken for autofixing it), and would have expected an exception - but got none!");
+			return;
+		} catch (JsonParseException e) {
+			// yay, we got an exception! :)
+		}
+
+		TestUtils.succeed();
 	}
 
 }

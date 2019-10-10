@@ -8,6 +8,7 @@ import com.asofterspace.toolbox.io.DefaultImageFile;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 import com.asofterspace.toolbox.utils.Image;
@@ -72,40 +73,45 @@ public class WebTest implements Test {
 
 		String result = WebAccessor.get("http://localhost:8081/json/advanced.json");
 
-		JSON jsonContent = new JSON(result);
+		try {
+			JSON jsonContent = new JSON(result);
 
-		if (!jsonContent.getString("foo").equals("")) {
-			TestUtils.fail("We stored {\"foo\": \"\"} in an advanced JSON file, then read the file - and did not get an empty string when querying for foo!");
-			return;
-		}
+			if (!jsonContent.getString("foo").equals("")) {
+				TestUtils.fail("We stored {\"foo\": \"\"} in an advanced JSON file, then read the file - and did not get an empty string when querying for foo!");
+				return;
+			}
 
-		if (!jsonContent.getString("bar").equals("\"")) {
-			TestUtils.fail("We stored {\"bar\": \"\\\"\"} in a JSON file, then read the file - and did not get \" when querying for bar!");
-			return;
-		}
+			if (!jsonContent.getString("bar").equals("\"")) {
+				TestUtils.fail("We stored {\"bar\": \"\\\"\"} in a JSON file, then read the file - and did not get \" when querying for bar!");
+				return;
+			}
 
-		if (!jsonContent.get("blu").asString().equals("blubb")) {
-			TestUtils.fail("We stored {'blu': \"blubb\"} in a JSON file, then read the file - and did not get blubb when querying for blu!");
-			return;
-		}
+			if (!jsonContent.get("blu").asString().equals("blubb")) {
+				TestUtils.fail("We stored {'blu': \"blubb\"} in a JSON file, then read the file - and did not get blubb when querying for blu!");
+				return;
+			}
 
-		if (!jsonContent.getString("newline").equals("\n")) {
-			TestUtils.fail("We stored {\"newline\": \"\\n\"} in an advanced JSON file, then read the file - and did not get \\n when querying for newline!");
-			return;
-		}
+			if (!jsonContent.getString("newline").equals("\n")) {
+				TestUtils.fail("We stored {\"newline\": \"\\n\"} in an advanced JSON file, then read the file - and did not get \\n when querying for newline!");
+				return;
+			}
 
-		if (!jsonContent.getString("leftout").equals("the Gänsefüßchen")) {
-			TestUtils.fail("We stored {leftout: 'the Gänsefüßchen'} in a JSON file, then read the file - and did not get the Gänsefüßchen when querying for leftout!");
-			return;
-		}
+			if (!jsonContent.getString("leftout").equals("the Gänsefüßchen")) {
+				TestUtils.fail("We stored {leftout: 'the Gänsefüßchen'} in a JSON file, then read the file - and did not get the Gänsefüßchen when querying for leftout!");
+				return;
+			}
 
-		if (!jsonContent.getBoolean("otherbool").equals(false)) {
-			TestUtils.fail("We stored {\"otherbool\": false} in a JSON file, then read the file - and did not get false when querying for otherbool!");
-			return;
-		}
+			if (!jsonContent.getBoolean("otherbool").equals(false)) {
+				TestUtils.fail("We stored {\"otherbool\": false} in a JSON file, then read the file - and did not get false when querying for otherbool!");
+				return;
+			}
 
-		if (!jsonContent.getString("possible").equals("right?")) {
-			TestUtils.fail("We stored {\"possible\": \"right?\"} in an advanced JSON file, then read the file - and did not get right? when querying for possible!");
+			if (!jsonContent.getString("possible").equals("right?")) {
+				TestUtils.fail("We stored {\"possible\": \"right?\"} in an advanced JSON file, then read the file - and did not get right? when querying for possible!");
+				return;
+			}
+		} catch (JsonParseException e) {
+			TestUtils.fail("We stored stuff in a JSON file, then read it over the web, but it could not be parsed: " + e);
 			return;
 		}
 

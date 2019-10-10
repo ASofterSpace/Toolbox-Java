@@ -12,5 +12,5 @@ package com.asofterspace.toolbox.test;
  */
 public interface Test {
 
-	void runAll();
+	void runAll() throws Throwable;
 }

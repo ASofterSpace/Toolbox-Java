@@ -5,13 +5,15 @@
 package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.configuration.ConfigFile;
+import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
+
 
 public class ConfigFileTest implements Test {
 
 	@Override
-	public void runAll() {
+	public void runAll() throws JsonParseException {
 
 		persistenceTest();
 	}
@@ -21,7 +23,7 @@ public class ConfigFileTest implements Test {
 	 * information to the file system - and can retrieve
 	 * it again afterwards
 	 */
-	public void persistenceTest() {
+	public void persistenceTest() throws JsonParseException {
 
 		TestUtils.start("Config File Persistence");
 
