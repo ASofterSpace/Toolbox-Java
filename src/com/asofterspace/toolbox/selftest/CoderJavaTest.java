@@ -19,6 +19,8 @@ public class CoderJavaTest implements Test {
 
 		reorganizeImports();
 
+		removeUnusedImports();
+
 		functionListTest();
 	}
 
@@ -31,6 +33,8 @@ public class CoderJavaTest implements Test {
 		String origStr = "blubb\n" +
 				"meowino\n" +
 				"calacat\n" +
+				"\n" +
+				"\n" +
 				"\n" +
 				"import stargarr.fofarr.codd\n" +
 				"import foo.blubb.two;\n" +
@@ -73,6 +77,59 @@ public class CoderJavaTest implements Test {
 		}
 
 		TestUtils.fail("We attempted to reorganize the imports of a Java program - but failed! (Input: " + origStr + ", output: " + resultStr + ")");
+	}
+
+	public void removeUnusedImports() {
+
+		TestUtils.start("Remove Unused Imports in Java Code Editor");
+
+		JavaCode javaCoder = new JavaCode(null);
+
+		String origStr = "blubb\n" +
+				"meowino\n" +
+				"calacat\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"import stargarr.fofarr.codd\n" +
+				"import foo.blubb.Alodalo;\n" +
+				"import foo.bar.one;\n" +
+				"import foo.bar.one;\n" +
+				"\n" +
+				"import alcatar.blööö;\n" +
+				"import foo.bar.one;\n" +
+				"import stargarr.fofarr.Blebbel\n" +
+				"import foo.bar.one;\n" +
+				"\n" +
+				"private void blu (Blebbel bleb) {}\n" +
+				"blööö\n" +
+				"GenericDalo dalo = new Alodalo();";
+
+		String targetStr = "blubb\n" +
+				"meowino\n" +
+				"calacat\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"import foo.blubb.Alodalo;\n" +
+				"\n" +
+				"import alcatar.blööö;\n" +
+				"import stargarr.fofarr.Blebbel\n" +
+				"\n" +
+				"private void blu (Blebbel bleb) {}\n" +
+				"blööö\n" +
+				"GenericDalo dalo = new Alodalo();";
+
+		String resultStr = javaCoder.removeUnusedImports(origStr);
+
+		javaCoder.discard();
+
+		if (resultStr.equals(targetStr)) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We attempted to remove the unused imports of a Java program - but failed! (Input: " + origStr + ", output: " + resultStr + ")");
 	}
 
 	public void functionListTest() {

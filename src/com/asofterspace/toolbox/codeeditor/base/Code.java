@@ -617,9 +617,11 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 		}
 
+		String sep = "";
 		for (; curLine < lines.length; curLine++) {
-			outputAfterImports.append("\n");
+			outputAfterImports.append(sep);
 			outputAfterImports.append(lines[curLine]);
+			sep = "\n";
 		}
 	}
 
@@ -688,6 +690,7 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		// actually have two empty lines between the import end and the class start
+		output.append("\n");
 		if (i > 0) {
 			output.append("\n");
 		}
