@@ -4,8 +4,6 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.Utils;
-
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -586,15 +585,14 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	/**
-	 * This function can be called by extending classes if they want to use
-	 * Java-style import organization, but possibly with a different keyword
-	 * (such as "using" in C#)
+	 * Gets the imports, assuming that they are organized like with a java class
+	 * file, but possibly a different importKeyword, in the origText.
+	 * Out parameters: outputBeforeImports (the code before the imports start),
+	 * imports (a list of actual import lines), outputAfterImports (the code after
+	 * the import block ends)
 	 */
-	protected String reorganizeImportsJavalike(String importKeyword, String origText) {
-
-		StringBuilder output = new StringBuilder();
-		List<String> imports = new ArrayList<>();
-		StringBuilder secondOutput = new StringBuilder();
+	protected void getImportsJavalike(String importKeyword, String origText, StringBuilder outputBeforeImports,
+		List<String> imports, StringBuilder outputAfterImports) {
 
 		String[] lines = origText.split("\n");
 
@@ -605,17 +603,14 @@ public abstract class Code extends DefaultStyledDocument {
 			if (line.startsWith(importKeyword)) {
 				break;
 			} else {
-				output.append(line);
-				output.append("\n");
+				outputBeforeImports.append(line);
+				outputBeforeImports.append("\n");
 			}
 		}
 
 		for (; curLine < lines.length; curLine++) {
 			String line = lines[curLine];
-			if (line.equals("")) {
-				continue;
-			}
-			if (line.startsWith(importKeyword)) {
+			if (line.equals("") || line.startsWith(importKeyword)) {
 				imports.add(line);
 			} else {
 				break;
@@ -623,11 +618,31 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		for (; curLine < lines.length; curLine++) {
-			secondOutput.append("\n");
-			String line = lines[curLine];
-			secondOutput.append(line);
+			outputAfterImports.append("\n");
+			outputAfterImports.append(lines[curLine]);
 		}
+	}
 
+	/**
+	 * This function can be called by extending classes if they want to use
+	 * Java-style import organization, but possibly with a different keyword
+	 * (such as "using" in C#)
+	 */
+	protected String reorganizeImportsJavalike(String importKeyword, String origText) {
+
+		StringBuilder output = new StringBuilder();
+		List<String> imports = new ArrayList<>();
+		StringBuilder secondOutput = new StringBuilder();
+
+		getImportsJavalike(importKeyword, origText, output, imports, secondOutput);
+
+
+		// prepare the output: we want exactly one empty line after the first line (the package),
+		// sooo we first remove all newlines following it, then append two...
+		while ((output.length() > 0) && (output.charAt(output.length() - 1) == '\n')) {
+			output.setLength(output.length() - 1);
+		}
+		output.append("\n\n");
 
 		// sort imports alphabetically
 		Collections.sort(imports, new Comparator<String>() {
@@ -645,7 +660,7 @@ public abstract class Code extends DefaultStyledDocument {
 		for (String importLine : imports) {
 
 			// remove duplicates
-			if (lastImport.equals(importLine)) {
+			if ("".equals(importLine) || lastImport.equals(importLine)) {
 				continue;
 			}
 
@@ -674,6 +689,82 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// actually have two empty lines between the import end and the class start
 		if (i > 0) {
+			output.append("\n");
+		}
+
+		return output.toString() + secondOutput.toString();
+	}
+
+	public void removeUnusedImports() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origText = decoratedEditor.getText();
+
+		String newText = removeUnusedImports(origText);
+
+		decoratedEditor.setText(newText);
+		decoratedEditor.setCaretPosition(origCaretPos);
+	}
+
+	/**
+	 * This is the stuff that is actually done when unused imports are removed;
+	 * we need to have this string-in, string-out available both for testing
+	 * and for using this from the outside, with the plain reorganizeImports()
+	 * being more a convenience method around it, but this here is the main one!
+	 */
+	public String removeUnusedImports(String origText) {
+
+		// just do nothing :)
+		return origText;
+	}
+
+	/**
+	 * This function can be called by extending classes if they want to use
+	 * Java-style import organization, but possibly with a different keyword
+	 */
+	protected String removeUnusedImportsJavalike(String importKeyword, String origText) {
+
+		StringBuilder output = new StringBuilder();
+		List<String> imports = new ArrayList<>();
+		StringBuilder secondOutput = new StringBuilder();
+
+		getImportsJavalike(importKeyword, origText, output, imports, secondOutput);
+
+		String codeContent = secondOutput.toString();
+
+		for (String importLine : imports) {
+
+			// keep empty lines
+			if ("".equals(importLine)) {
+				output.append("\n");
+				continue;
+			}
+
+			// transform
+			//   import foo.bar.Meow;
+			// into
+			//   Meow
+			String importedClass = importLine.trim();
+			if (importedClass.startsWith(importKeyword)) {
+				importedClass = importedClass.substring(importKeyword.length()).trim();
+			}
+
+			if (importedClass.contains(".")) {
+				importedClass = importedClass.substring(importedClass.lastIndexOf(".") + 1);
+			}
+
+			if (importedClass.endsWith(";")) {
+				importedClass = importedClass.substring(0, importedClass.length() - 1).trim();
+			}
+
+			// if the code does not contain the class name
+			if (!codeContent.contains(importedClass)) {
+				// remove it!
+				continue;
+			}
+
+			// otherwise, keep it
+			output.append(importLine);
 			output.append("\n");
 		}
 

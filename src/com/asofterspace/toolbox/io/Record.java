@@ -5,7 +5,6 @@
 package com.asofterspace.toolbox.io;
 
 import com.asofterspace.toolbox.io.RecordKind;
-import com.asofterspace.toolbox.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
