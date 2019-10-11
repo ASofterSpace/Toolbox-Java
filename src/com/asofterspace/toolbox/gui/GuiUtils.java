@@ -21,6 +21,9 @@ public class GuiUtils {
 	// on the left hand side, we add this string to indicate that the file has changed
 	public final static String CHANGE_INDICATOR = " *";
 
+	public final static String LIGHT_SCHEME = "light";
+	public final static String DARK_SCHEME = "dark";
+
 
 	/**
 	 * Maximize the window
