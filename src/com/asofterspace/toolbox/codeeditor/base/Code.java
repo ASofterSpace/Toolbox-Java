@@ -183,6 +183,7 @@ public abstract class Code extends DefaultStyledDocument {
 		String origContent = decoratedEditor.getText();
 
 		textVersions.add(origContent);
+		// DEBUG: System.out.println("fullyStartupCodeHighlighter: " + origContent);
 
 		decoratedEditor.setDocument(this);
 		decoratedEditor.setText(origContent);
@@ -1520,6 +1521,7 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		textVersions.add(nextVersion);
+		// DEBUG: System.out.println("callOnChange: " + nextVersion);
 
 		currentTextVersion = textVersions.size() - 1;
 	}

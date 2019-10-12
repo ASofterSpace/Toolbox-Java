@@ -203,4 +203,10 @@ public class LineNumbering extends Code {
 
 		return new Pair<>(start, start+len);
 	}
+
+	@Override
+	protected void callOnChange() {
+		// We do not care about change events inside the line numbering memo :)
+	}
+
 }
