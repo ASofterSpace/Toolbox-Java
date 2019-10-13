@@ -115,7 +115,7 @@ public abstract class Code extends DefaultStyledDocument {
 	private String searchStr = null;
 
 	// all of the text versions we are aware of
-	private List<String> textVersions = new ArrayList<>();
+	private List<CodeLocation> textVersions = new ArrayList<>();
 
 	// the text version we are currently at (not necessarily the latest, through undo)
 	private int currentTextVersion = 0;
@@ -181,8 +181,9 @@ public abstract class Code extends DefaultStyledDocument {
 		// actually style the editor with... us
 		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origContent = decoratedEditor.getText();
+		CodeLocation orig = new CodeLocation(origContent, origCaretPos);
 
-		textVersions.add(origContent);
+		textVersions.add(orig);
 
 		decoratedEditor.setDocument(this);
 		decoratedEditor.setText(origContent);
@@ -1504,7 +1505,7 @@ public abstract class Code extends DefaultStyledDocument {
 		callOnChange(nextVersion);
 	}
 
-	protected void callOnChange(String nextVersion) {
+	protected void callOnChange(String nextVersionStr) {
 
 		// call the on change callback (if there is one)
 		if (onChangeCallback != null) {
@@ -1517,10 +1518,11 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		// add text version to the undo cache
-		String currentVersion = textVersions.get(currentTextVersion);
+		CodeLocation currentVersion = textVersions.get(currentTextVersion);
+		CodeLocation nextVersion = new CodeLocation(nextVersionStr, decoratedEditor.getCaretPosition());
 
 		// only do this if the new version is not empty!
-		if (nextVersion.equals("")) {
+		if (nextVersion.getCode().equals("")) {
 			return;
 		}
 
@@ -1660,29 +1662,21 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public void undo() {
 
-		int origCaretPos = decoratedEditor.getCaretPosition();
-
 		currentTextVersion--;
 
 		if (currentTextVersion < 0) {
 			currentTextVersion = 0;
 		}
 
-		String newText = textVersions.get(currentTextVersion);
-		int newTextLen = newText.length();
+		CodeLocation newText = textVersions.get(currentTextVersion);
+		int newTextLen = newText.getLength();
 
-		decoratedEditor.setText(newText);
+		decoratedEditor.setText(newText.getCode());
 
-		if (origCaretPos > newTextLen) {
-			origCaretPos = newTextLen;
-		}
-
-		decoratedEditor.setCaretPosition(origCaretPos);
+		decoratedEditor.setCaretPosition(newText.getCaretPos());
 	}
 
 	public void redo() {
-
-		int origCaretPos = decoratedEditor.getCaretPosition();
 
 		currentTextVersion++;
 
@@ -1690,16 +1684,12 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = textVersions.size() - 1;
 		}
 
-		String newText = textVersions.get(currentTextVersion);
-		int newTextLen = newText.length();
+		CodeLocation newText = textVersions.get(currentTextVersion);
+		int newTextLen = newText.getLength();
 
-		decoratedEditor.setText(newText);
+		decoratedEditor.setText(newText.getCode());
 
-		if (origCaretPos > newTextLen) {
-			origCaretPos = newTextLen;
-		}
-
-		decoratedEditor.setCaretPosition(origCaretPos);
+		decoratedEditor.setCaretPosition(newText.getCaretPos());
 	}
 
 }
