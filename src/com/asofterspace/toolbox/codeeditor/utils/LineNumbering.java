@@ -205,7 +205,7 @@ public class LineNumbering extends Code {
 	}
 
 	@Override
-	protected void callOnChange() {
+	protected void callOnChange(String nextVersion) {
 		// We do not care about change events inside the line numbering memo :)
 	}
 

@@ -183,7 +183,6 @@ public abstract class Code extends DefaultStyledDocument {
 		String origContent = decoratedEditor.getText();
 
 		textVersions.add(origContent);
-		// DEBUG: System.out.println("fullyStartupCodeHighlighter: " + origContent);
 
 		decoratedEditor.setDocument(this);
 		decoratedEditor.setText(origContent);
@@ -1427,7 +1426,7 @@ public abstract class Code extends DefaultStyledDocument {
 		*/
 
 		// the caret does not need to be set, if we are inserting exactly as long a string as we
-		// want to move it, that THAT move is already done internally automagically
+		// want to move it, as THAT move is already done internally automagically
 		if (overrideCaretPos != insertedString.length()) {
 			decoratedEditor.setCaretPosition(origCaretPos + overrideCaretPos);
 		}
@@ -1467,9 +1466,8 @@ public abstract class Code extends DefaultStyledDocument {
 		super.fireInsertUpdate(event);
 
 		// highlightText(event.getOffset(), event.getLength());
-		highlightAllText();
 
-		callOnChange();
+		highlightTextAndCallOnChange(event);
 	}
 
 	/**
@@ -1481,12 +1479,32 @@ public abstract class Code extends DefaultStyledDocument {
 		super.fireRemoveUpdate(event);
 
 		// highlightText(event.getOffset(), event.getLength());
-		highlightAllText();
 
-		callOnChange();
+		highlightTextAndCallOnChange(event);
 	}
 
-	protected void callOnChange() {
+	protected void highlightTextAndCallOnChange(DocumentEvent event) {
+
+		// we call highlightAllText no matter the length, as it does not
+		// cause any problem when being called too often - as it just notifies
+		// a thread to highlight at some point
+		highlightAllText();
+
+		// for some wonky reason, we are called in 4096-character-increments,
+		// and REALLY do not want to add these intermediate calls to the cache,
+		// or perform the highlighting again and again...
+		String nextVersion = decoratedEditor.getText();
+
+		// System.out.println("hTACOC len: " + nextVersion.length() + " offset: " + event.getOffset() + " length: " + event.getLength());
+
+		if (nextVersion.length() % 4096 == 0) {
+			return;
+		}
+
+		callOnChange(nextVersion);
+	}
+
+	protected void callOnChange(String nextVersion) {
 
 		// call the on change callback (if there is one)
 		if (onChangeCallback != null) {
@@ -1499,7 +1517,6 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		// add text version to the undo cache
-		String nextVersion = decoratedEditor.getText();
 		String currentVersion = textVersions.get(currentTextVersion);
 
 		// only do this if the new version is not empty!
@@ -1521,7 +1538,6 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		textVersions.add(nextVersion);
-		// DEBUG: System.out.println("callOnChange: " + nextVersion);
 
 		currentTextVersion = textVersions.size() - 1;
 	}
@@ -1652,7 +1668,14 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = 0;
 		}
 
-		decoratedEditor.setText(textVersions.get(currentTextVersion));
+		String newText = textVersions.get(currentTextVersion);
+		int newTextLen = newText.length();
+
+		decoratedEditor.setText(newText);
+
+		if (origCaretPos > newTextLen) {
+			origCaretPos = newTextLen;
+		}
 
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
@@ -1667,7 +1690,14 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = textVersions.size() - 1;
 		}
 
-		decoratedEditor.setText(textVersions.get(currentTextVersion));
+		String newText = textVersions.get(currentTextVersion);
+		int newTextLen = newText.length();
+
+		decoratedEditor.setText(newText);
+
+		if (origCaretPos > newTextLen) {
+			origCaretPos = newTextLen;
+		}
 
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
