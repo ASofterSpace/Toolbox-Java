@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.awt.Color;
+import javax.swing.event.DocumentEvent;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.util.List;
@@ -205,8 +206,15 @@ public class LineNumbering extends Code {
 	}
 
 	@Override
-	protected void callOnChange(String nextVersion) {
+	protected void onChange(DocumentEvent event) {
 		// We do not care about change events inside the line numbering memo :)
+		
+/*
+		// we call highlightAllText no matter the length, as it does not
+		// cause any problem when being called too often - as it just notifies
+		// a thread to highlight at some point
+		highlightAllText();
+*/
 	}
 
 }

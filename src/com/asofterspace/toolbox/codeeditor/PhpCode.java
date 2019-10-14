@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
-import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -280,7 +280,7 @@ public class PhpCode extends HtmlCode {
 						// now get the entire line that we found!
 						// String functionName = lastCouldBeKeywordPhp + " " + couldBeKeyword + "()";
 						String functionName = getLineFromPosition(start, content);
-						functions.add(new CodeLocation(functionName, start));
+						functions.add(new CodeSnippetWithLocation(functionName, start));
 					}
 				}
 			}

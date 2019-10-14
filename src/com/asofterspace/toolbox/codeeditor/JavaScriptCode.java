@@ -6,7 +6,7 @@ package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
-import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,7 +134,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 	}
 
 	// listenForScriptEnd .. true if we return upon finding </script>, false if not
-	public int highlightScript(String content, int start, int end, List<CodeLocation> functions, boolean listenForScriptEnd) {
+	public int highlightScript(String content, int start, int end, List<CodeSnippetWithLocation> functions, boolean listenForScriptEnd) {
 
 		while (start <= end) {
 
@@ -280,7 +280,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 	private String lastCouldBeKeyword = "";
 
-	private int highlightOther(String content, int start, int end, List<CodeLocation> functions) {
+	private int highlightOther(String content, int start, int end, List<CodeSnippetWithLocation> functions) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -306,7 +306,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 				getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
 					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-					functions.add(new CodeLocation(functionName, start));
+					functions.add(new CodeSnippetWithLocation(functionName, start));
 				}
 			}
 		}

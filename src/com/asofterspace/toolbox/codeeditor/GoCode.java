@@ -5,7 +5,7 @@
 package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
-import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -387,7 +387,7 @@ public class GoCode extends FunctionSupplyingCode {
 					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-						functions.add(new CodeLocation(functionName, start));
+						functions.add(new CodeSnippetWithLocation(functionName, start));
 					}
 				}
 			}

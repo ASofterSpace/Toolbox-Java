@@ -5,7 +5,7 @@
 package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
-import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -309,7 +309,7 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 				if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 					// now get the entire line that we found!
 					String functionName = getLineFromPosition(start, content);
-					functions.add(new CodeLocation(functionName, start));
+					functions.add(new CodeSnippetWithLocation(functionName, start));
 				}
 			}
 		} else if (isAnnotation(couldBeKeyword)) {

@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor.base;
 
-import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public abstract class FunctionSupplyingCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	protected List<CodeLocation> functions = new ArrayList<>();
+	protected List<CodeSnippetWithLocation> functions = new ArrayList<>();
 
 	protected JTextPane functionPane;
 
@@ -55,7 +55,7 @@ public abstract class FunctionSupplyingCode extends Code {
 		return true;
 	}
 
-	public List<CodeLocation> getFunctions() {
+	public List<CodeSnippetWithLocation> getFunctions() {
 		return functions;
 	}
 
@@ -104,7 +104,7 @@ public abstract class FunctionSupplyingCode extends Code {
 
 			int lengthBefore = 0;
 
-			for (CodeLocation func : functions) {
+			for (CodeSnippetWithLocation func : functions) {
 
 				String function = func.getCode();
 

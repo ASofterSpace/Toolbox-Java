@@ -4,7 +4,8 @@
  */
 package com.asofterspace.toolbox.codeeditor.base;
 
-import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeAtLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.utils.StrUtils;
 
@@ -115,7 +116,7 @@ public abstract class Code extends DefaultStyledDocument {
 	private String searchStr = null;
 
 	// all of the text versions we are aware of
-	private List<CodeLocation> textVersions = new ArrayList<>();
+	private List<CodeAtLocation> textVersions = new ArrayList<>();
 
 	// the text version we are currently at (not necessarily the latest, through undo)
 	private int currentTextVersion = 0;
@@ -181,7 +182,7 @@ public abstract class Code extends DefaultStyledDocument {
 		// actually style the editor with... us
 		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origContent = decoratedEditor.getText();
-		CodeLocation orig = new CodeLocation(origContent, origCaretPos);
+		CodeAtLocation orig = new CodeAtLocation(origContent, origCaretPos);
 
 		textVersions.add(orig);
 
@@ -424,7 +425,7 @@ public abstract class Code extends DefaultStyledDocument {
 	/**
 	 * Gets all the functions that have currently been identified
 	 */
-	public List<CodeLocation> getFunctions() {
+	public List<CodeSnippetWithLocation> getFunctions() {
 		// even though we do not support functions at all, still just return
 		// an empty list rather than the much nastier null!
 		return new ArrayList<>();
@@ -761,10 +762,13 @@ public abstract class Code extends DefaultStyledDocument {
 				importedClass = importedClass.substring(0, importedClass.length() - 1).trim();
 			}
 
-			// if the code does not contain the class name
-			if (!codeContent.contains(importedClass)) {
-				// remove it!
-				continue;
+			// if imported class is not just an asterisk...
+			if (!"*".equals(importedClass)) {
+				// ... and if the code does not contain the class name
+				if (!codeContent.contains(importedClass)) {
+					// remove it!
+					continue;
+				}
 			}
 
 			// otherwise, keep it
@@ -1468,7 +1472,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// highlightText(event.getOffset(), event.getLength());
 
-		highlightTextAndCallOnChange(event);
+		onChange(event);
 	}
 
 	/**
@@ -1481,19 +1485,24 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// highlightText(event.getOffset(), event.getLength());
 
-		highlightTextAndCallOnChange(event);
+		onChange(event);
 	}
 
-	protected void highlightTextAndCallOnChange(DocumentEvent event) {
+	protected void onChange(DocumentEvent event) {
 
 		// we call highlightAllText no matter the length, as it does not
 		// cause any problem when being called too often - as it just notifies
 		// a thread to highlight at some point
 		highlightAllText();
 
+		// call the on change callback (if there is one)
+		if (onChangeCallback != null) {
+			onChangeCallback.call();
+		}
+
 		// for some wonky reason, we are called in 4096-character-increments,
 		// and REALLY do not want to add these intermediate calls to the cache,
-		// or perform the highlighting again and again...
+		// so we try to somehow detect these occurrences...
 		String nextVersion = decoratedEditor.getText();
 
 		// System.out.println("hTACOC len: " + nextVersion.length() + " offset: " + event.getOffset() + " length: " + event.getLength());
@@ -1502,24 +1511,19 @@ public abstract class Code extends DefaultStyledDocument {
 			return;
 		}
 
-		callOnChange(nextVersion);
-	}
-
-	protected void callOnChange(String nextVersionStr) {
-
-		// call the on change callback (if there is one)
-		if (onChangeCallback != null) {
-			onChangeCallback.call();
-		}
-
 		// refresh the line numbering in the left memo (if there is one)
 		if (codeEditorLineMemo != null) {
 			refreshLineNumbering();
 		}
 
+		addToUndoCache(nextVersion);
+	}
+
+	protected void addToUndoCache(String nextVersionStr) {
+
 		// add text version to the undo cache
-		CodeLocation currentVersion = textVersions.get(currentTextVersion);
-		CodeLocation nextVersion = new CodeLocation(nextVersionStr, decoratedEditor.getCaretPosition());
+		CodeAtLocation currentVersion = textVersions.get(currentTextVersion);
+		CodeAtLocation nextVersion = new CodeAtLocation(nextVersionStr, decoratedEditor.getCaretPosition());
 
 		// only do this if the new version is not empty!
 		if (nextVersion.getCode().equals("")) {
@@ -1668,7 +1672,7 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = 0;
 		}
 
-		CodeLocation newText = textVersions.get(currentTextVersion);
+		CodeAtLocation newText = textVersions.get(currentTextVersion);
 		int newTextLen = newText.getLength();
 
 		decoratedEditor.setText(newText.getCode());
@@ -1684,7 +1688,7 @@ public abstract class Code extends DefaultStyledDocument {
 			currentTextVersion = textVersions.size() - 1;
 		}
 
-		CodeLocation newText = textVersions.get(currentTextVersion);
+		CodeAtLocation newText = textVersions.get(currentTextVersion);
 		int newTextLen = newText.getLength();
 
 		decoratedEditor.setText(newText.getCode());

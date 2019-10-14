@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor.base;
 
-import com.asofterspace.toolbox.codeeditor.utils.CodeLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,10 +24,10 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 		super(editor);
 	}
 
-	private void sortFunctions(List<CodeLocation> functions) {
+	private void sortFunctions(List<CodeSnippetWithLocation> functions) {
 
-		Collections.sort(functions, new Comparator<CodeLocation>() {
-			public int compare(CodeLocation a, CodeLocation b) {
+		Collections.sort(functions, new Comparator<CodeSnippetWithLocation>() {
+			public int compare(CodeSnippetWithLocation a, CodeSnippetWithLocation b) {
 				String funcNameA = getFuncName(a.getCode());
 				String funcNameB = getFuncName(b.getCode());
 				return funcNameA.toLowerCase().compareTo(funcNameB.toLowerCase());
@@ -35,38 +35,38 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 		});
 	}
 
-	private void appendFunctions(List<CodeLocation> target, List<CodeLocation> origin, String type) {
+	private void appendFunctions(List<CodeSnippetWithLocation> target, List<CodeSnippetWithLocation> origin, String type) {
 
 		if (origin.size() > 0) {
-			target.add(new CodeLocation(type + ":", 0));
-			for (CodeLocation func : origin) {
+			target.add(new CodeSnippetWithLocation(type + ":", 0));
+			for (CodeSnippetWithLocation func : origin) {
 				target.add(func);
 			}
-			target.add(new CodeLocation("", 0));
+			target.add(new CodeSnippetWithLocation("", 0));
 		}
 	}
 
 	@Override
 	protected void updateFunctionList() {
 
-		List<CodeLocation> publicFunctions = new ArrayList<>();
-		List<CodeLocation> protectedFunctions = new ArrayList<>();
-		List<CodeLocation> anyFunctions = new ArrayList<>();
-		List<CodeLocation> privateFunctions = new ArrayList<>();
+		List<CodeSnippetWithLocation> publicFunctions = new ArrayList<>();
+		List<CodeSnippetWithLocation> protectedFunctions = new ArrayList<>();
+		List<CodeSnippetWithLocation> anyFunctions = new ArrayList<>();
+		List<CodeSnippetWithLocation> privateFunctions = new ArrayList<>();
 
-		for (CodeLocation func : functions) {
+		for (CodeSnippetWithLocation func : functions) {
 			String line = func.getCode().trim();
 			if (line.endsWith("{")) {
 				line = line.substring(0, line.length() - 1).trim();
 			}
 			if (line.contains("public ")) {
-				publicFunctions.add(new CodeLocation(line.replace("public ", ""), func.getCaretPos()));
+				publicFunctions.add(new CodeSnippetWithLocation(line.replace("public ", ""), func.getCaretPos()));
 			} else if (line.contains("protected ")) {
-				protectedFunctions.add(new CodeLocation(line.replace("protected ", ""), func.getCaretPos()));
+				protectedFunctions.add(new CodeSnippetWithLocation(line.replace("protected ", ""), func.getCaretPos()));
 			} else if (line.contains("private ")) {
-				privateFunctions.add(new CodeLocation(line.replace("private ", ""), func.getCaretPos()));
+				privateFunctions.add(new CodeSnippetWithLocation(line.replace("private ", ""), func.getCaretPos()));
 			} else {
-				anyFunctions.add(new CodeLocation(line, func.getCaretPos()));
+				anyFunctions.add(new CodeSnippetWithLocation(line, func.getCaretPos()));
 			}
 		}
 

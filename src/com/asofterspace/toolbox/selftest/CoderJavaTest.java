@@ -95,6 +95,7 @@ public class CoderJavaTest implements Test {
 				"import foo.blubb.Alodalo;\n" +
 				"import foo.bar.one;\n" +
 				"import foo.bar.one;\n" +
+				"import foo.bar.schlebb.*;\n" +
 				"\n" +
 				"import alcatar.blööö;\n" +
 				"import foo.bar.one;\n" +
@@ -112,6 +113,7 @@ public class CoderJavaTest implements Test {
 				"\n" +
 				"\n" +
 				"import foo.blubb.Alodalo;\n" +
+				"import foo.bar.schlebb.*;\n" +
 				"\n" +
 				"import alcatar.blööö;\n" +
 				"import stargarr.fofarr.Blebbel\n" +
