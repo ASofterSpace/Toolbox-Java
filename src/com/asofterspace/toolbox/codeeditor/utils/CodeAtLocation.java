@@ -50,19 +50,19 @@ public class CodeAtLocation {
 		}
 		if (other instanceof CodeAtLocation) {
 			CodeAtLocation otherLocation = (CodeAtLocation) other;
-			if (otherLocation.caretPos == caretPos) {
+			// if (otherLocation.caretPos == caretPos) {
 				if (otherLocation.sourceCode == null) {
 					return sourceCode == null;
 				}
 				return otherLocation.sourceCode.equals(sourceCode);
-			}
+			// }
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return sourceCode.hashCode() + getCaretPos();
+		return sourceCode.hashCode(); // + getCaretPos();
 	}
 
 }
