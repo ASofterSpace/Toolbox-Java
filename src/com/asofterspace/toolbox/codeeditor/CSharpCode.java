@@ -24,7 +24,7 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 
 	// all keywords of the C# language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "finally", "for", "foreach", "goto", "if", "implements", "in", "instanceof", "interface", "new", "out", "override", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "using", "while", "virtual", "volatile"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "finally", "for", "foreach", "goto", "if", "implements", "in", "interface", "is", "new", "out", "override", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "using", "while", "virtual", "volatile"}
 	));
 
 	// all primitive types of the C# language and other stuff that looks that way
