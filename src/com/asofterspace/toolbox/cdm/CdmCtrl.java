@@ -17,7 +17,6 @@ import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.ProgressIndicator;
 import com.asofterspace.toolbox.Utils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +35,7 @@ public class CdmCtrl {
 	public static final String MCM_PATH_DELIMITER = ".";
 
 	private static final List<String> KNOWN_CDM_VERSIONS = Arrays.asList(
+		"1.14.1",
 		"1.14.0",
 		"1.14.0b",
 		"1.13",
@@ -46,6 +46,7 @@ public class CdmCtrl {
 	);
 
 	private static final List<String> KNOWN_CDM_PREFIXES = Arrays.asList(
+		"http://www.esa.int/egscc/", // 1.14.1
 		"http://www.esa.int/egscc/", // 1.14.0
 		"http://www.esa.int/dme/", // 1.14.0b
 		"http://www.esa.int/", // 1.13
@@ -54,9 +55,6 @@ public class CdmCtrl {
 		"http://www.scopeset.de/", // 1.12
 		"http://www.scopeset.de/" // 1.11.3
 	);
-
-	// a reasonable default CDM prefix to be used in case a user-supplied CDM version is not known
-	public static final String REASONABLE_DEFAULT_CDM_PREFIX = "http://www.esa.int/dme/";
 
 	private static final String TMPL_JUST_ROOT = "Just Root Element";
 	private static final String TMPL_JUST_ROOT_SHORT = "just_root";

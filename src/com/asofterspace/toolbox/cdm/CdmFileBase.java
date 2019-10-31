@@ -9,9 +9,7 @@ import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.EmfFile;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlElement;
-import com.asofterspace.toolbox.io.XmlFile;
 import com.asofterspace.toolbox.utils.TinyMap;
-import com.asofterspace.toolbox.Utils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -117,6 +115,11 @@ public abstract class CdmFileBase extends EmfFile {
 			root.setAttribute("xmlns:monitoringcontrolcommon", toPrefix + "/MonitoringControl/MonitoringControlCommon/" + toVersion);
 		}
 
+		String mcmchecks = root.getAttribute("xmlns:mcmchecks");
+		if (mcmchecks != null) {
+			root.setAttribute("xmlns:mcmchecks", toPrefix + "/MonitoringControl/MonitoringControlModel/MCMChecks/" + toVersion);
+		}
+
 		String checkandcondition = root.getAttribute("xmlns:checkandcondition");
 		if (checkandcondition != null) {
 			root.setAttribute("xmlns:checkandcondition", toPrefix + "/MonitoringControl/MonitoringControlCommon/CheckAndCondition/" + toVersion);
@@ -166,6 +169,7 @@ public abstract class CdmFileBase extends EmfFile {
 		// (and start keeping that in mind for validation, etc.)
 
 		// qudv examples that seem to be correct:
+		// for 1.14.1: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5" (note: NOT aligned with generic version prefix of 1.14.1!)
 		// for 1.14.0: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5" (note: NOT aligned with generic version prefix of 1.14.0!)
 		// for 1.14.0b: "http://www.esa.int/dme/core/qudv/conceptualmodel/1.5"
 		// for 1.13: unknown!
@@ -178,6 +182,7 @@ public abstract class CdmFileBase extends EmfFile {
 
 		switch (toVersion) {
 
+			case "1.14.1":
 			case "1.14.0":
 			case "1.14.0b":
 				qudvPrefix = "http://www.esa.int/dme/core/qudv/";
@@ -1301,6 +1306,24 @@ public abstract class CdmFileBase extends EmfFile {
 							String[] tags = {"value", "defaultValue", "expectedValue", "highLimit", "lowLimit", "highDeltaThreshold", "lowDeltaThreshold"};
 							domSetAttributeForElems(tags, "xsi:type", "monitoringcontrolmodel:ParameterSourceValue", "xsi:type", "monitoringcontrolmodel:ParameterRawValue");
 						}
+
+						break;
+
+					// up
+					case "1.14.1":
+
+							domRemoveAttributeFromElems("externalScheduleInformation", "time");
+
+						break;
+				}
+				break;
+
+			case "1.14.1":
+				switch (dest) {
+					// down
+					case "1.14.0":
+
+							domSetAttributeForElems("externalScheduleInformation", "time", "1970-01-01T01:00:00.000");
 
 						break;
 				}
