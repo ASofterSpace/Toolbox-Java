@@ -25,12 +25,12 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 	// all keywords of the Java language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "typeof", "var", "while"}
+		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "def", "default", "do", "else", "extends", "false", "finally", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "typeof", "undefined", "var", "while"}
 	));
 
 	// all primitive types of the Java language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "char", "class", "double", "enum", "int", "long", "abstract", "final", "package", "private", "protected", "public", "static", "void", "volatile", "synchronized"}
+		new String[] {"abstract", "boolean", "char", "class", "double", "enum", "final", "int", "long", "package", "private", "protected", "public", "static", "synchronized", "void", "volatile"}
 	));
 
 	// all string delimiters of the Java language
