@@ -27,6 +27,8 @@ import org.xml.sax.SAXException;
  */
 public class XmlFile extends File {
 
+	private static final String GENERIC_HEAD_LINE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+
 	protected XmlMode mode = XmlMode.NONE_LOADED;
 
 	protected XmlElement rootElement = null;
@@ -35,7 +37,7 @@ public class XmlFile extends File {
 
 
 	/**
-	 * You can construct a XmlFile instance by directly from a path name.
+	 * You can construct an XmlFile instance directly from a path name.
 	 */
 	public XmlFile(String fullyQualifiedFileName) {
 
@@ -488,7 +490,7 @@ public class XmlFile extends File {
 
 		try (OutputStreamWriter printout = new OutputStreamWriter(System.out)) {
 
-			printout.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+			printout.write(GENERIC_HEAD_LINE);
 
 			getRoot().writeToFile(printout);
 
@@ -524,7 +526,7 @@ public class XmlFile extends File {
 
 		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(javaFile), StandardCharsets.UTF_8)) {
 
-			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+			writer.write(GENERIC_HEAD_LINE);
 
 			if (root != null) {
 				root.writeToFile(writer);

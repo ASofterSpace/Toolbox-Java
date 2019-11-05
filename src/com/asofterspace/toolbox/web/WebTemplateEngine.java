@@ -9,9 +9,6 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.Record;
 import com.asofterspace.toolbox.io.SimpleFile;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -74,6 +71,7 @@ public class WebTemplateEngine {
 
 				boolean isHtml = currentFile.endsWith(".htm") || currentFile.endsWith(".html");
 				boolean isPhp = currentFile.endsWith(".php");
+				boolean isCss = currentFile.endsWith(".css");
 
 				// perform the PHP templating (both for regular HTML files and for PHP files)
 				if (isHtml || isPhp) {
@@ -87,6 +85,9 @@ public class WebTemplateEngine {
 					content = makeLinksRelative(content);
 
 					currentFile = currentFile.substring(0, currentFile.length() - 4) + ".htm";
+				}
+				if (isCss && convertPhpToHtm) {
+					content = makeCssLinksRelative(content);
 				}
 
 				SimpleFile indexOut = new SimpleFile(targetDir, currentFile);
@@ -197,13 +198,53 @@ public class WebTemplateEngine {
 	 */
 	private String makeLinksRelative(String content) {
 
-		// if we have href="/", we do not want to set href="",
-		// but instead href="index.htm"
-		content = content.replaceAll(" href=\"/\"", " href=\"index.htm\"");
-
-		content = content.replaceAll(" href=\"/", " href=\"");
+		// we could now do two simple replacealls for href= like this:
+		//   content = content.replaceAll(" href=\"/\"", " href=\"index.htm\"");
+		//   content = content.replaceAll(" href=\"/", " href=\"");
+		// ... but instead we step over all matches manually, such that
+		// we can add missing .htm extensions for the local preview if necessary
+		StringBuilder contentBuilder = new StringBuilder();
+		int curPos = 0;
+		int endPos = 0;
+		while (true) {
+			curPos = content.indexOf(" href=\"", curPos);
+			if (curPos < 0) {
+				contentBuilder.append(content.substring(endPos));
+				break;
+			}
+			curPos += 7;
+			contentBuilder.append(content.substring(endPos, curPos));
+			endPos = content.indexOf("\"", curPos);
+			if (endPos < curPos) {
+				endPos = curPos;
+			}
+			String midStr = content.substring(curPos, endPos);
+			if (midStr.startsWith("/")) {
+				midStr = midStr.substring(1);
+			}
+			// if we have href="/", we do not want to set href="",
+			// but instead href="index.htm"
+			if (midStr.equals("")) {
+				midStr = "index.htm";
+			}
+			if (!midStr.contains(".")) {
+				midStr += ".htm";
+			}
+			contentBuilder.append(midStr);
+		}
+		content = contentBuilder.toString();
 
 		content = content.replaceAll(" src=\"/", " src=\"");
+
+		// we ALSO make CSS links relative, as there could be embedded CSS here!
+		content = makeCssLinksRelative(content);
+
+		return content;
+	}
+
+	private String makeCssLinksRelative(String content) {
+
+		content = content.replaceAll(" url\\('/", " url\\('");
 
 		return content;
 	}
