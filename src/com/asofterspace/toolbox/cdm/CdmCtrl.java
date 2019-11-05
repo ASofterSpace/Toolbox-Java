@@ -547,7 +547,12 @@ public class CdmCtrl {
 				return NOT_A_RELEASE;
 			case "1.14.0":
 				if ("http://www.esa.int/egscc/".equals(prefix)) {
-					return "IR4";
+					return "IR4, IR4d0, IR4d0p1, IR4d0p2, IR4d0p3, IR4d0p4";
+				}
+				return NOT_A_RELEASE;
+			case "1.14.1":
+				if ("http://www.esa.int/egscc/".equals(prefix)) {
+					return "IR4d1";
 				}
 				return NOT_A_RELEASE;
 		}
@@ -576,6 +581,11 @@ public class CdmCtrl {
 			case "1.14.0":
 				if ("http://www.esa.int/egscc/".equals(prefix)) {
 					return "0.18.7";
+				}
+				break;
+			case "1.14.1":
+				if ("http://www.esa.int/egscc/".equals(prefix)) {
+					return "0.18.8";
 				}
 				break;
 		}
