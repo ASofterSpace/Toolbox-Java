@@ -646,6 +646,12 @@ public abstract class Code extends DefaultStyledDocument {
 		while ((output.length() > 0) && (output.charAt(output.length() - 1) == '\n')) {
 			output.setLength(output.length() - 1);
 		}
+
+		if (imports.size() < 1) {
+			output.append("\n");
+			return output.toString() + secondOutput.toString();
+		}
+
 		output.append("\n\n");
 
 		// sort imports alphabetically
@@ -654,6 +660,7 @@ public abstract class Code extends DefaultStyledDocument {
 				return a.toLowerCase().compareTo(b.toLowerCase());
 			}
 		});
+
 
 
 		String lastImport = "";

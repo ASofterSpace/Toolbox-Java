@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.TextEncoding;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -23,9 +25,7 @@ public class SimpleFile extends File {
 
 	protected List<String> filecontents;
 
-	protected boolean usingUtf8Bom = false;
-
-	protected Charset usingCharset = StandardCharsets.UTF_8;
+	protected TextEncoding usingEncoding = null;
 
 
 	/**
@@ -74,8 +74,33 @@ public class SimpleFile extends File {
 		super(directory, filename);
 	}
 
-	public boolean isUsingUTF8BOM() {
-		return usingUtf8Bom;
+	public TextEncoding getEncoding() {
+
+		if (usingEncoding == null) {
+			return TextEncoding.UTF8_WITHOUT_BOM;
+		}
+
+		return usingEncoding;
+	}
+
+	private Charset getCharset() {
+
+		if (usingEncoding == null) {
+			return StandardCharsets.UTF_8;
+		}
+
+		switch (usingEncoding) {
+
+			case UTF8_WITH_BOM:
+			case UTF8_WITHOUT_BOM:
+				return StandardCharsets.UTF_8;
+
+			case ISO_LATIN_1:
+				return StandardCharsets.ISO_8859_1;
+
+			default:
+				return StandardCharsets.UTF_8;
+		}
 	}
 
 	/**
@@ -84,17 +109,8 @@ public class SimpleFile extends File {
 	 * this, if you also want to change the file on the disk, call
 	 * save() afterwards!
 	 */
-	public void useUTF8BOM(boolean useItOrNot) {
-		usingUtf8Bom = useItOrNot;
-	}
-
-	/**
-	 * Determines which charset should be used both for reading
-	 * the file and for writing it, but does NOT immediately write
-	 * the file!
-	 */
-	public void useCharset(Charset charset) {
-		usingCharset = charset;
+	public void setEncoding(TextEncoding encoding) {
+		usingEncoding = encoding;
 	}
 
 	/**
@@ -125,19 +141,23 @@ public class SimpleFile extends File {
 		try {
 			byte[] binaryContent = Files.readAllBytes(this.getJavaPath());
 
-			usingUtf8Bom = false;
+			// autodetect encoding - read as UTF8...
+			if (usingEncoding == null) {
+				usingEncoding = TextEncoding.UTF8_WITHOUT_BOM;
 
-			if (binaryContent.length > 2) {
-				if ((binaryContent[0] == (byte) 239) &&
-					(binaryContent[1] == (byte) 187) &&
-					(binaryContent[2] == (byte) 191)) {
-					usingUtf8Bom = true;
+				// ... and detect presence of BOM
+				if (binaryContent.length > 2) {
+					if ((binaryContent[0] == (byte) 239) &&
+						(binaryContent[1] == (byte) 187) &&
+						(binaryContent[2] == (byte) 191)) {
+						usingEncoding = TextEncoding.UTF8_WITH_BOM;
+					}
 				}
 			}
 
-			String newContent = new String(binaryContent, usingCharset);
+			String newContent = new String(binaryContent, getCharset());
 
-			if (usingUtf8Bom) {
+			if (usingEncoding == TextEncoding.UTF8_WITH_BOM) {
 				newContent = newContent.substring(1);
 			}
 
@@ -302,9 +322,13 @@ public class SimpleFile extends File {
 
 	public void saveWithLineEndings(String lineEnding) {
 
+		// the following line works also if usingEncoding is null, in which case
+		// we want to default to UTF8_WITHOUT_BOM anyway
+		boolean usingBom = usingEncoding == TextEncoding.UTF8_WITH_BOM;
+
 		java.io.File targetFile = initSave();
 
-		if (usingUtf8Bom) {
+		if (usingBom) {
 			// initialize the file with the BOM
 			try (FileOutputStream stream = new FileOutputStream(targetFile, false)) {
 
@@ -318,13 +342,11 @@ public class SimpleFile extends File {
 			}
 		}
 
+		// fill file with the actual data
 		// if we are using a UTF8 BOM, append now (to the BOM we just wrote)
 		// if we are not using a UTF8 BOM, do not append (but just overwrite), as we have not yet written
 		// to the file (as we have not written any BOM or anything else)
-		boolean append = usingUtf8Bom;
-
-		// fill file with the actual data
-		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, append), usingCharset)) {
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, usingBom), getCharset())) {
 
 			for (String line : filecontents) {
 				writer.write(line);
