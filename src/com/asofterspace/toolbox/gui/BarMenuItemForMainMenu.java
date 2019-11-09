@@ -71,7 +71,11 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		setPreferredSize(new Dimension(max, getHeight()));
 	}
 
-	public void setBarPosition(int newPos) {
+	public void setBarPosition(Integer newPos) {
+		if (newPos == null) {
+			newPos = 0;
+		}
+
 		if (newPos > max) {
 			this.pos = max;
 		} else if (newPos < min) {
