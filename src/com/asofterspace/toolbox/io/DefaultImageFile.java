@@ -53,7 +53,7 @@ public class DefaultImageFile extends RasterImageFile {
 
 			img = new Image(uncompressedData);
 
-			img.drawBufferedImage(javaImg, 0, 0);
+			img.drawAwtImage(javaImg, 0, 0);
 
 		} catch (IOException e) {
 			System.err.println("[ERROR] Trying to load the default image file " + filename + ", but there was an exception - inconceivable!\n" + e);

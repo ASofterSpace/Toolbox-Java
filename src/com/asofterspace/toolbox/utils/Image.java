@@ -68,6 +68,15 @@ public class Image {
 		return data;
 	}
 
+	public BufferedImage getAwtImage() {
+
+		BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+		drawToAwtImage(result, 0, 0);
+
+		return result;
+	}
+
 	public ColorRGB getPixel(int x, int y) {
 		return data[y][x];
 	}
@@ -206,7 +215,7 @@ public class Image {
 		// copy image of drawn text from buffered image onto our image
 		if (useAntiAliasing) {
 			Image intermediate = new Image(textWidth, textHeight);
-			intermediate.drawBufferedImage(bufImg, 0, 0);
+			intermediate.drawAwtImage(bufImg, 0, 0);
 			intermediate.resampleTo((textWidth / 2) + (textWidth % 2), (textHeight / 2) + (textHeight % 2));
 			if (left == null) {
 				left = right - intermediate.getWidth();
@@ -222,11 +231,14 @@ public class Image {
 			if (top == null) {
 				top = bottom - textHeight;
 			}
-			drawBufferedImage(bufImg, left, top);
+			drawAwtImage(bufImg, left, top);
 		}
 	}
 
-	public void drawBufferedImage(BufferedImage javaImg, int left, int top) {
+	/**
+	 * Draws an AWT image on our image
+	 */
+	public void drawAwtImage(BufferedImage javaImg, int left, int top) {
 
 		int bufWidth = javaImg.getWidth();
 		int bufHeight = javaImg.getHeight();
@@ -238,11 +250,22 @@ public class Image {
 				int r = (rgb >> 16) & 0xFF;
 				int g = (rgb >> 8) & 0xFF;
 				int b = (rgb) & 0xFF;
-				r = ((a * r) / 255) + 255 - a;
-				g = ((a * g) / 255) + 255 - a;
-				b = ((a * b) / 255) + 255 - a;
+				data[y+top][x+left] = new ColorRGB(r, g, b, a);
+			}
+		}
+	}
 
-				data[y+top][x+left] = new ColorRGB(r, g, b);
+	/**
+	 * Draws our image on an AWT image
+	 */
+	public void drawToAwtImage(BufferedImage javaImg, int left, int top) {
+
+		int bufWidth = javaImg.getWidth();
+		int bufHeight = javaImg.getHeight();
+
+		for (int y = 0; (y < bufHeight) && (y + top < height); y++) {
+			for (int x = 0; (x < bufWidth) && (x + left < width); x++) {
+				javaImg.setRGB(x+left, y+top, data[y][x].getRGB());
 			}
 		}
 	}

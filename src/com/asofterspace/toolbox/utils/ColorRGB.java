@@ -18,23 +18,33 @@ public class ColorRGB {
 	private final byte r;
 	private final byte g;
 	private final byte b;
+	private final byte a;
 
-	public final static ColorRGB WHITE = new ColorRGB(255, 255, 255);
-	public final static ColorRGB BLACK = new ColorRGB(  0,   0,   0);
+	public final static ColorRGB WHITE = new ColorRGB(255, 255, 255, 255);
+	public final static ColorRGB BLACK = new ColorRGB(  0,   0,   0, 255);
 
 
 	// by default, just a white pixel
 	public ColorRGB() {
-		this(255, 255, 255);
+		this(255, 255, 255, 255);
 	}
 
 	public ColorRGB(byte r, byte g, byte b) {
+		this(r, g, b, (byte) 255);
+	}
+
+	public ColorRGB(byte r, byte g, byte b, byte a) {
 		this.r = r;
 		this.g = g;
 		this.b = b;
+		this.a = a;
 	}
 
 	public ColorRGB(int r, int g, int b) {
+		this(r, g, b, 255);
+	}
+
+	public ColorRGB(int r, int g, int b, int a) {
 
 		if (r > 255) {
 			r = 255;
@@ -57,9 +67,17 @@ public class ColorRGB {
 			b = 0;
 		}
 
+		if (a > 255) {
+			a = 255;
+		}
+		if (a < 0) {
+			a = 0;
+		}
+
 		this.r = (byte) r;
 		this.g = (byte) g;
 		this.b = (byte) b;
+		this.a = (byte) a;
 	}
 
 	public boolean isDark() {
@@ -88,6 +106,10 @@ public class ColorRGB {
 		return b & 0xFF;
 	}
 
+	public int getA() {
+		return a & 0xFF;
+	}
+
 	public byte getRByte() {
 		return r;
 	}
@@ -98,6 +120,14 @@ public class ColorRGB {
 
 	public byte getBByte() {
 		return b;
+	}
+
+	public byte getAByte() {
+		return a;
+	}
+
+	public int getRGB() {
+		return ((a & 0xFF) << 24) + ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
 	}
 
 	public int getGrayness() {
@@ -146,11 +176,15 @@ public class ColorRGB {
 			return false;
 		}
 
+		if (a != otherColor.getAByte()) {
+			return false;
+		}
+
 		return true;
 	}
 
 	public boolean fastEquals(ColorRGB other) {
-		return (this.r == other.r) && (this.g == other.g) && (this.b == other.b);
+		return (this.r == other.r) && (this.g == other.g) && (this.b == other.b) && (this.a == other.a);
 	}
 
 	/**
@@ -172,12 +206,13 @@ public class ColorRGB {
 		return new ColorRGB(
 			(int) (((((int) one.r) & 0xFF) * aO) + ((((int) two.r) & 0xFF) * aT)),
 			(int) (((((int) one.g) & 0xFF) * aO) + ((((int) two.g) & 0xFF) * aT)),
-			(int) (((((int) one.b) & 0xFF) * aO) + ((((int) two.b) & 0xFF) * aT))
+			(int) (((((int) one.b) & 0xFF) * aO) + ((((int) two.b) & 0xFF) * aT)),
+			(int) (((((int) one.a) & 0xFF) * aO) + ((((int) two.a) & 0xFF) * aT))
 		);
 	}
 
 	public String toString() {
-		return "RGB(" + (((int) r) & 0xFF) + ", " + (((int) g) & 0xFF) + ", " + (((int) b) & 0xFF) + ")";
+		return "RGB(" + (((int) r) & 0xFF) + ", " + (((int) g) & 0xFF) + ", " + (((int) b) & 0xFF) + ", " + (((int) a) & 0xFF) + ")";
 	}
 
 }
