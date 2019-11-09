@@ -357,6 +357,10 @@ public class Record {
 	 */
 	public Record get(Object key) {
 
+		if (key == null) {
+			return null;
+		}
+
 		if ((key instanceof Integer) && (arrContents != null)) {
 			return arrContents.get((Integer) key);
 		}
@@ -620,11 +624,13 @@ public class Record {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, Record value) {
+	public void set(Object key, Record value) {
 
 		makeObject();
 
-		objContents.put(key.toString(), value);
+		if (key != null) {
+			objContents.put(key.toString(), value);
+		}
 	}
 
 	/**
@@ -632,13 +638,28 @@ public class Record {
 	 * @param key
 	 * @param value
 	 */
-	public void setString(String key, Object value) {
+	public void setString(Object key, Object value) {
 
 		if (value == null) {
 			set(key, new Record(""));
 		} else {
 			set(key, new Record(value.toString()));
 		}
+	}
+
+	/**
+	 * Set a list of Record values corresponding to a Record array
+	 * stored in a particular key of a Record object
+	 * @param key the key to set
+	 * @param values the Record array to be stored in the key
+	 */
+	public void setArray(Object key, List<Record> values) {
+
+		Record valList = Record.emptyArray();
+
+		valList.arrContents = values;
+
+		set(key, valList);
 	}
 
 	/**
