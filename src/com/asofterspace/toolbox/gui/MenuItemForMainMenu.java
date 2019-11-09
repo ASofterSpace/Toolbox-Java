@@ -7,7 +7,6 @@ package com.asofterspace.toolbox.gui;
 import java.awt.Dimension;
 
 import javax.swing.JButton;
-import javax.swing.JMenuItem;
 
 
 /**
