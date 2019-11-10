@@ -7,6 +7,8 @@ package com.asofterspace.toolbox.io;
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
 
+import java.util.List;
+
 
 /**
  * Any image file needs to be able to offer us some functions, which are listed here...
@@ -62,6 +64,14 @@ public abstract class ImageFile extends BinaryFile {
 		if (imageFile.getFilename().toLowerCase().endsWith(".pbm")) {
 			PbmFile pbmFile = new PbmFile(imageFile);
 			return pbmFile.getImage();
+		}
+
+		if (imageFile.getFilename().toLowerCase().endsWith(".pdf")) {
+			PdfFile pdfFile = new PdfFile(imageFile);
+			List<Image> images = pdfFile.getPictures();
+			if (images.size() > 0) {
+				return images.get(0);
+			}
 		}
 
 		DefaultImageFile defaultImageFile = new DefaultImageFile(imageFile);

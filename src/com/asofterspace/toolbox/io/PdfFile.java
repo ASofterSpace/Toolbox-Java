@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.Image;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -442,6 +444,9 @@ public class PdfFile extends BinaryFile {
 		return null;
 	}
 
+	/**
+	 * Export embedded pictures as files
+	 */
 	public List<File> exportPictures(Directory targetDir) {
 
 		List<File> resultList = new ArrayList<>();
@@ -493,6 +498,24 @@ public class PdfFile extends BinaryFile {
 		}
 
 		return resultList;
+	}
+
+	/**
+	 * Get the embedded pictures as images
+	 */
+	public List<Image> getPictures() {
+
+		List<Image> result = new ArrayList<>();
+
+		// TODO :: actually directly get the images, without going via files and temp directories and all that!
+		Directory tempDir = new Directory("temp");
+		List<File> pictures = exportPictures(tempDir);
+		for (File picFile : pictures) {
+			result.add(ImageFile.readImageFromFile(picFile));
+		}
+		tempDir.delete();
+
+		return result;
 	}
 
 	public void save() {
