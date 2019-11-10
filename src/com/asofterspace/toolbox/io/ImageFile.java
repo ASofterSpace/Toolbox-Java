@@ -68,4 +68,28 @@ public abstract class ImageFile extends BinaryFile {
 		return defaultImageFile.getImage();
 	}
 
+	public static void saveImageToFile(Image image, File targetFile) {
+
+		ImageFile imageFile = null;
+
+		if (targetFile.getFilename().toLowerCase().endsWith(".ppm")) {
+			imageFile = new PpmFile(targetFile);
+		}
+
+		if (targetFile.getFilename().toLowerCase().endsWith(".pgm")) {
+			imageFile = new PgmFile(targetFile);
+		}
+
+		if (targetFile.getFilename().toLowerCase().endsWith(".pbm")) {
+			imageFile = new PbmFile(targetFile);
+		}
+
+		if (imageFile == null) {
+			imageFile = new DefaultImageFile(targetFile);
+		}
+
+		imageFile.assign(image);
+		imageFile.save();
+	}
+
 }
