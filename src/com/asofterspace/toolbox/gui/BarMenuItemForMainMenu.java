@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.gui;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +21,11 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 	public static final long serialVersionUID = 3458397457249723l;
 
-
 	private int min;
 	private int max;
 	private int pos;
+
+	private boolean mouseDown;
 
 	private List<BarListener> listeners;
 
@@ -36,6 +38,8 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		this.pos = 0;
 
 		this.listeners = new ArrayList<>();
+
+		mouseDown = false;
 
 		addMouseListener(new MouseListener() {
 
@@ -53,11 +57,31 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				setBarPosition(e.getX());
+				mouseDown = true;
+				displayBarAtPosition(e.getX());
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				mouseDown = false;
+				setBarPosition(e.getX());
+			}
+		});
+
+		addMouseMotionListener(new MouseMotionListener() {
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				if (mouseDown) {
+					displayBarAtPosition(e.getX());
+				}
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				if (mouseDown) {
+					displayBarAtPosition(e.getX());
+				}
 			}
 		});
 	}
@@ -68,10 +92,21 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 	public void setMaximum(int max) {
 		this.max = max;
-		setPreferredSize(new Dimension(max, getHeight()));
+		setSize(new Dimension(max, getHeight()));
+		setPreferredSize(new Dimension(max, (int) getPreferredSize().getHeight()));
+		setMinimumSize(new Dimension(max, (int) getMinimumSize().getHeight()));
+		setMaximumSize(new Dimension(max, (int) getMaximumSize().getHeight()));
 	}
 
 	public void setBarPosition(Integer newPos) {
+
+		displayBarAtPosition(newPos);
+
+		notifyBarListeners();
+	}
+
+	private void displayBarAtPosition(Integer newPos) {
+
 		if (newPos == null) {
 			newPos = 0;
 		}
@@ -84,11 +119,14 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			this.pos = newPos;
 		}
 
+		repaint();
+	}
+
+	private void notifyBarListeners() {
+
 		for (BarListener listener : listeners) {
 			listener.onBarMove(this.pos);
 		}
-
-		repaint();
 	}
 
 	public void addBarListener(BarListener listener) {
