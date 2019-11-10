@@ -183,7 +183,7 @@ public class File {
 	}
 
 	/**
-	 * Re-set the location of this particular CDM file (such that when we call save() later on, the new location is used,
+	 * Re-set the location of this particular file (such that when we call save() later on, the new location is used,
 	 * but until save() is called, nothing changes)
 	 */
 	public void setFilelocation(File newLocation) {
