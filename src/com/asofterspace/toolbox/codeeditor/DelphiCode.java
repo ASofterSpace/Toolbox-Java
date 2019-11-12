@@ -16,40 +16,51 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 
-public class ShellCode extends Code {
+public class DelphiCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the sh language
+	// all keywords of the Delphi language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"break", "case", "do", "done", "else", "esac", "fi", "for", "function", "if", "in", "then", "while"}
+		new String[] {"as", "assert", "begin", "break", "case", "catch", "const", "continue", "default", "do", "else", "end", "extends", "false", "finally", "for", "function", "function", "goto", "goto", "if", "implementation", "import", "in", "instanceof", "interface", "interface", "new", "nil", "procedure", "program", "result", "super", "switch", "then", "this", "throw", "throws", "trait", "true", "try", "type", "typeof", "undefined", "unit", "uses", "var", "while"}
 	));
 
-	// all primitive types of the sh language and other stuff that looks that way
+	// all primitive types of the Delphi language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"cd", "echo", "exit", "sleep"}
+		new String[] {"abstract", "boolean", "char", "class", "double", "enum", "final", "int", "label", "long", "package", "private", "protected", "public", "static", "synchronized", "void", "volatile"}
 	));
 
-	// all string delimiters of the sh language
+	// all string delimiters of the Delphi language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the sh language
+	// operand characters in the Delphi language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
-		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*', '#', '$'}
+		new Character[] {';', ':', '.', ',', '(', ')', '[', ']', '{', '}', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
 	));
 
-	// start of single line comments in the sh language
-	private static final String START_SINGLELINE_COMMENT = "#";
+	// start of single line comments in the Delphi language
+	private static final String START_SINGLELINE_COMMENT = "//";
+
+	// start of multiline comments in the Delphi language
+	private static final String START_MULTILINE_COMMENT = "{";
+
+	// end of multiline comments in the Delphi language
+	private static final String END_MULTILINE_COMMENT = "}";
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
 
-	public ShellCode(JTextPane editor) {
+	public DelphiCode(JTextPane editor) {
 
 		super(editor);
+	}
+
+	public DelphiCode(JTextPane editor, Code parentEditor) {
+
+		super(editor, parentEditor);
 	}
 
 	@Override
@@ -113,7 +124,6 @@ public class ShellCode extends Code {
 
 					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
-
 						start = highlightComment(content, start, end);
 
 					// ... and check for a quoted string
@@ -121,8 +131,8 @@ public class ShellCode extends Code {
 
 						// then let's get that string!
 						start = highlightString(content, start, end);
-					} else {
 
+					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
 							this.setCharacterAttributes(start, 1, attrReservedChar, false);
@@ -152,32 +162,45 @@ public class ShellCode extends Code {
 
 	private boolean isCommentStart(String content, int start, int end) {
 
-		// but $# is NOT a comment!
-		if (start > 0) {
-			if ("$".equals(content.substring(start - 1, start))) {
-				return false;
-			}
-		}
-
-		if (start > end) {
+		if (start + 1 > end) {
 			return false;
 		}
 
-		// everything after # is a comment
-		return START_SINGLELINE_COMMENT.equals(content.substring(start, start + 1));
+		return START_SINGLELINE_COMMENT.equals(content.substring(start, start + 2)) || START_MULTILINE_COMMENT.equals(content.substring(start, start + 1));
 	}
 
 	private int highlightComment(String content, int start, int end) {
 
-		int commentEnd = content.indexOf(EOL, start + 1) - 1;
+		String commentStart = content.substring(start, start + 2);
 
-		// this is the last line
-		if (commentEnd == -2) {
-			commentEnd = end;
+		if (START_SINGLELINE_COMMENT.equals(commentStart)) {
+
+			int commentEnd = content.indexOf(EOL, start + 2) - 1;
+
+			// this is the last line
+			if (commentEnd < 0) {
+				commentEnd = end;
+			}
+
+			// apply single line comment highlighting
+			getMe().setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+
+			return commentEnd;
 		}
 
-		// apply single line comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		// apply multiline comment highlighting
+		int commentEnd = content.indexOf(END_MULTILINE_COMMENT, start + 1);
+
+		// the multiline comment has not been closed - let's comment out the rest of the document!
+		if (commentEnd < 0) {
+			commentEnd = end;
+		} else {
+			// +1-1 because of the length of END_MULTILINE_COMMENT itself
+			commentEnd += 0;
+		}
+
+		// apply multiline comment highlighting
+		getMe().setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 
 		return commentEnd;
 	}
@@ -190,7 +213,7 @@ public class ShellCode extends Code {
 		// find the end of line - as we do not want to go further
 		int endOfLine = content.indexOf(EOL, start + 2);
 
-		if (endOfLine == -1) {
+		if (endOfLine < 0) {
 			endOfLine = end;
 		}
 
@@ -201,12 +224,12 @@ public class ShellCode extends Code {
 			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
 
 			// if the end of string is actually escaped... well, then it is not an end of string yet, continue searching!
-			if ((endOfString == -1) || (content.charAt(endOfString - 1) != '\\')) {
+			if ((endOfString < 0) || (content.charAt(endOfString - 1) != '\\')) {
 				break;
 			}
 		}
 
-		if (endOfString == -1) {
+		if (endOfString < 0) {
 			// the string is open-ended... go for end of line
 			endOfString = endOfLine;
 		} else {
@@ -214,10 +237,12 @@ public class ShellCode extends Code {
 			endOfString = Math.min(endOfString, endOfLine);
 		}
 
-		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
+		getMe().setCharacterAttributes(start, endOfString - start + 1, attrString, false);
 
 		return endOfString;
 	}
+
+	private String lastCouldBeKeyword = "";
 
 	private int highlightOther(String content, int start, int end) {
 
@@ -233,14 +258,20 @@ public class ShellCode extends Code {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
 		} else if (isAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
+			if (!"new".equals(lastCouldBeKeyword)) {
+				getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+			}
 		}
+
+		lastCouldBeKeyword = couldBeKeyword;
 
 		return couldBeKeywordEnd;
 	}

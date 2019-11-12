@@ -12,6 +12,7 @@ import javax.swing.JTextPane;
 public enum CodeLanguage {
 
 	ASSEMBLER("Assembler"),
+	BATCH("Batch Script"),
 	C("C"),
 	CPP("C++"),
 	CSHARP("C#"),
@@ -63,7 +64,7 @@ public enum CodeLanguage {
 			return CodeLanguage.MARKDOWN;
 		}
 
-		if (lowfilename.endsWith(".pas")) {
+		if (lowfilename.endsWith(".pas") || lowfilename.endsWith(".dpr")) {
 			return CodeLanguage.DELPHI;
 		}
 
@@ -89,6 +90,10 @@ public enum CodeLanguage {
 
 		if (lowfilename.endsWith(".css")) {
 			return CodeLanguage.CSS;
+		}
+
+		if (lowfilename.endsWith(".bat")) {
+			return CodeLanguage.BATCH;
 		}
 
 		if (lowfilename.endsWith(".sh")) {

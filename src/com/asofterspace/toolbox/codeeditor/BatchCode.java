@@ -16,38 +16,38 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 
-public class ShellCode extends Code {
+public class BatchCode extends Code {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the sh language
+	// all keywords of the batch language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"break", "case", "do", "done", "else", "esac", "fi", "for", "function", "if", "in", "then", "while"}
+		new String[] {"break", "case", "do", "done", "else", "for", "function", "if", "in", "then", "while"}
 	));
 
-	// all primitive types of the sh language and other stuff that looks that way
+	// all primitive types of the batch language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"cd", "echo", "exit", "sleep"}
+		new String[] {"cd", "echo", "exist", "exit", "not", "pause"}
 	));
 
-	// all string delimiters of the sh language
+	// all string delimiters of the batch language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the sh language
+	// operand characters in the batch language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
 		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*', '#', '$'}
 	));
 
-	// start of single line comments in the sh language
-	private static final String START_SINGLELINE_COMMENT = "#";
+	// start of single line comments in the batch language
+	private static final String START_SINGLELINE_COMMENT = "rem ";
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
 
 
-	public ShellCode(JTextPane editor) {
+	public BatchCode(JTextPane editor) {
 
 		super(editor);
 	}
@@ -111,13 +111,8 @@ public class ShellCode extends Code {
 				char curChar = content.charAt(start);
 				while (isDelimiter(curChar)) {
 
-					// ... check for a comment (which starts with a delimiter)
-					if (isCommentStart(content, start, end)) {
-
-						start = highlightComment(content, start, end);
-
-					// ... and check for a quoted string
-					} else if (isStringDelimiter(content.charAt(start))) {
+					// ... check for a quoted string
+					if (isStringDelimiter(content.charAt(start))) {
 
 						// then let's get that string!
 						start = highlightString(content, start, end);
@@ -141,8 +136,13 @@ public class ShellCode extends Code {
 					curChar = content.charAt(start);
 				}
 
-				// or any other token instead?
-				start = highlightOther(content, start, end);
+				// check for a comment (which does not start with a delimiter)
+				if (isCommentStart(content, start, end)) {
+					start = highlightComment(content, start, end);
+				} else {
+					// or any other token instead?
+					start = highlightOther(content, start, end);
+				}
 			}
 
 		} catch (BadLocationException e) {
@@ -152,19 +152,12 @@ public class ShellCode extends Code {
 
 	private boolean isCommentStart(String content, int start, int end) {
 
-		// but $# is NOT a comment!
-		if (start > 0) {
-			if ("$".equals(content.substring(start - 1, start))) {
-				return false;
-			}
-		}
-
-		if (start > end) {
+		if (start + START_SINGLELINE_COMMENT.length() >= end) {
 			return false;
 		}
 
-		// everything after # is a comment
-		return START_SINGLELINE_COMMENT.equals(content.substring(start, start + 1));
+		// everything after REM is a comment
+		return START_SINGLELINE_COMMENT.equals(content.substring(start, start + START_SINGLELINE_COMMENT.length()).toLowerCase());
 	}
 
 	private int highlightComment(String content, int start, int end) {
@@ -254,11 +247,11 @@ public class ShellCode extends Code {
 	}
 
 	private boolean isKeyword(String token) {
-		return KEYWORDS.contains(token);
+		return KEYWORDS.contains(token.toLowerCase());
 	}
 
 	private boolean isPrimitiveType(String token) {
-		return PRIMITIVE_TYPES.contains(token);
+		return PRIMITIVE_TYPES.contains(token.toLowerCase());
 	}
 
 	private boolean isAdvancedType(String token) {

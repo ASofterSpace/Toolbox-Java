@@ -5,8 +5,10 @@
 package com.asofterspace.toolbox.codeeditor.utils;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
+import com.asofterspace.toolbox.codeeditor.BatchCode;
 import com.asofterspace.toolbox.codeeditor.CSharpCode;
 import com.asofterspace.toolbox.codeeditor.CssCode;
+import com.asofterspace.toolbox.codeeditor.DelphiCode;
 import com.asofterspace.toolbox.codeeditor.GoCode;
 import com.asofterspace.toolbox.codeeditor.GroovyCode;
 import com.asofterspace.toolbox.codeeditor.HtmlCode;
@@ -61,6 +63,9 @@ public class CodeHighlighterFactory {
 			case JAVASCRIPT:
 				highlighter = new JavaScriptCode(editor);
 				break;
+			case DELPHI:
+				highlighter = new DelphiCode(editor);
+				break;
 			case JSON:
 				highlighter = new JsonCode(editor);
 				break;
@@ -72,6 +77,9 @@ public class CodeHighlighterFactory {
 				break;
 			case SHELL:
 				highlighter = new ShellCode(editor);
+				break;
+			case BATCH:
+				highlighter = new BatchCode(editor);
 				break;
 			default:
 				highlighter = new PlainText(editor);
