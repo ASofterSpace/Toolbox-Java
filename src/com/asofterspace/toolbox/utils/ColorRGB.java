@@ -211,6 +211,77 @@ public class ColorRGB {
 		);
 	}
 
+	public ColorRGB getEditedChannels(String baseForR, double modifierForR,
+									  String baseForG, double modifierForG,
+									  String baseForB, double modifierForB) {
+		return new ColorRGB(
+			getEditedChannel(baseForR, modifierForR),
+			getEditedChannel(baseForG, modifierForG),
+			getEditedChannel(baseForB, modifierForB)
+		);
+	}
+
+	private int getEditedChannel(String baseStr, double modifier) {
+		int base = 0;
+		if (baseStr != null) {
+			switch (baseStr.toUpperCase()) {
+				case "R":
+					base = getR();
+					break;
+				case "G":
+					base = getG();
+					break;
+				case "B":
+					base = getB();
+					break;
+				case "A":
+					base = getA();
+					break;
+				case "R+G":
+					base = getR()+getG();
+					break;
+				case "G+B":
+					base = getG()+getB();
+					break;
+				case "B+A":
+					base = getB()+getA();
+					break;
+				case "R+B":
+					base = getR()+getB();
+					break;
+				case "G+A":
+					base = getG()+getA();
+					break;
+				case "R+A":
+					base = getR()+getA();
+					break;
+				case "R+G+B":
+					base = getR()+getG()+getB();
+					break;
+				case "G+B+A":
+					base = getG()+getB()+getA();
+					break;
+				case "R+B+A":
+					base = getR()+getB()+getA();
+					break;
+				case "R+G+A":
+					base = getR()+getG()+getA();
+					break;
+				case "R+G+B+A":
+					base = getR()+getG()+getB()+getA();
+					break;
+				case "0":
+					base = 0;
+					break;
+				case "1":
+					base = 1;
+					break;
+			}
+		}
+
+		return (int) (base * modifier);
+	}
+
 	public String toString() {
 		return "RGB(" + (((int) r) & 0xFF) + ", " + (((int) g) & 0xFF) + ", " + (((int) b) & 0xFF) + ", " + (((int) a) & 0xFF) + ")";
 	}

@@ -56,6 +56,32 @@ public class Image {
 		}
 	}
 
+	/**
+	 * internal constructor; only called by copy()
+	 */
+	private Image() {
+	}
+
+	/**
+	 * Copy this image, giving back a new image that contains the same pixel values
+	 * but when modified does not modify this one
+	 */
+	public Image copy() {
+
+		Image result = new Image();
+
+		result.height = this.height;
+		result.width = this.width;
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				result.data[y][x] = this.data[y][x];
+			}
+		}
+
+		return result;
+	}
+
 	public int getWidth() {
 		return width;
 	}
@@ -451,42 +477,6 @@ public class Image {
 		resizeTo(newWidth, newHeight);
 	}
 
-	public void rotateLeft() {
-
-		int newHeight = width;
-		int newWidth = height;
-
-		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
-
-		for (int x = 0; x < newWidth; x++) {
-			for (int y = 0; y < newHeight; y++) {
-				rotatedData[y][x] = data[x][width - y - 1];
-			}
-		}
-
-		this.data = rotatedData;
-		this.width = newWidth;
-		this.height = newHeight;
-	}
-
-	public void rotateRight() {
-
-		int newHeight = width;
-		int newWidth = height;
-
-		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
-
-		for (int x = 0; x < newWidth; x++) {
-			for (int y = 0; y < newHeight; y++) {
-				rotatedData[y][x] = data[height - x - 1][y];
-			}
-		}
-
-		this.data = rotatedData;
-		this.width = newWidth;
-		this.height = newHeight;
-	}
-
 	/**
 	 * Add the amount of pixels to the top, right, bottom and left of the image,
 	 * filling the new space with the fillWith color
@@ -546,6 +536,54 @@ public class Image {
 
 	public void expandLeftBy(int howMuch, ColorRGB fillWith) {
 		expandBy(0, 0, 0, howMuch, fillWith);
+	}
+
+	public void rotateLeft() {
+
+		int newHeight = width;
+		int newWidth = height;
+
+		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				rotatedData[y][x] = data[x][width - y - 1];
+			}
+		}
+
+		this.data = rotatedData;
+		this.width = newWidth;
+		this.height = newHeight;
+	}
+
+	public void rotateRight() {
+
+		int newHeight = width;
+		int newWidth = height;
+
+		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
+
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				rotatedData[y][x] = data[height - x - 1][y];
+			}
+		}
+
+		this.data = rotatedData;
+		this.width = newWidth;
+		this.height = newHeight;
+	}
+
+	public void editChannels(String baseForR, double modifierForR,
+							 String baseForG, double modifierForG,
+							 String baseForB, double modifierForB) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getEditedChannels(baseForR, modifierForR, baseForG,
+														  modifierForG, baseForB, modifierForB);
+			}
+		}
 	}
 
 	@Override
