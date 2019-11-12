@@ -32,15 +32,7 @@ public class Image {
 
 		this.height = height;
 
-		this.data = new ColorRGB[height][width];
-
-		ColorRGB defaultCol = new ColorRGB();
-
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				this.data[y][x] = defaultCol;
-			}
-		}
+		clear();
 	}
 
 	public Image(ColorRGB[][] data) {
@@ -73,6 +65,8 @@ public class Image {
 		result.height = this.height;
 		result.width = this.width;
 
+		result.data = new ColorRGB[height][width];
+
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				result.data[y][x] = this.data[y][x];
@@ -80,6 +74,19 @@ public class Image {
 		}
 
 		return result;
+	}
+
+	public void clear() {
+
+		this.data = new ColorRGB[height][width];
+
+		ColorRGB defaultCol = new ColorRGB();
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				this.data[y][x] = defaultCol;
+			}
+		}
 	}
 
 	public int getWidth() {
