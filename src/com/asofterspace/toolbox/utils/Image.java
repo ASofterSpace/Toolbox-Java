@@ -593,6 +593,15 @@ public class Image {
 		}
 	}
 
+	public void dampen(float amount) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getDampened(amount);
+			}
+		}
+	}
+
 	@Override
 	public int hashCode() {
 

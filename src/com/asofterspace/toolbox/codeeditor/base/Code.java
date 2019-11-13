@@ -333,8 +333,13 @@ public abstract class Code extends DefaultStyledDocument {
 			String[] middleLines = contentMiddle.split("\n", -1);
 
 			for (int level = 0; level < levelAmount; level++) {
+
+				boolean didNotReplaceAny = true;
+
 				for (int curLine = 0; curLine < middleLines.length; curLine++) {
 					String line = middleLines[curLine];
+
+					boolean replacedSomeInThisLine = true;
 
 					if (forceUnindent || line.startsWith("\t")) {
 						// line might be empty in case of forceUnindent,
@@ -358,9 +363,19 @@ public abstract class Code extends DefaultStyledDocument {
 					} else if (line.startsWith(" ")) {
 						line = line.substring(1);
 						replaceAmount -= 1;
+					} else {
+						replacedSomeInThisLine = false;
+					}
+
+					if (replacedSomeInThisLine) {
+						didNotReplaceAny = false;
 					}
 
 					middleLines[curLine] = line;
+				}
+
+				if (didNotReplaceAny) {
+					break;
 				}
 			}
 

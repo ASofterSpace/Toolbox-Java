@@ -221,6 +221,15 @@ public class ColorRGB {
 		);
 	}
 
+	public ColorRGB getDampened(float amount) {
+
+		return new ColorRGB(
+			Math.max(255 - Math.round((255 - getR()) * amount), 0),
+			Math.max(255 - Math.round((255 - getG()) * amount), 0),
+			Math.max(255 - Math.round((255 - getB()) * amount), 0)
+		);
+	}
+
 	private int getEditedChannel(String baseStr, double modifier) {
 		int base = 0;
 		if (baseStr != null) {
