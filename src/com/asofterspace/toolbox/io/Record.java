@@ -36,6 +36,15 @@ public class Record {
 	}
 
 	/**
+	 * Create a null Record
+	 */
+	public static Record nullRecord() {
+		Record result = new Record();
+		result.kind = RecordKind.NULL;
+		return result;
+	}
+
+	/**
 	 * Create an empty Record array
 	 */
 	public static Record emptyArray() {
@@ -467,17 +476,28 @@ public class Record {
 	 */
 	public Boolean getBoolean(Object key) {
 
+		return getBoolean(key, null);
+	}
+
+	/**
+	 * Gets a boolean value stored in a key of a Record object
+	 * @param key  the key to be searched for
+	 * @param defaultValue  the default value to be returned if none is set
+	 * @return the boolean value stored in the key
+	 */
+	public Boolean getBoolean(Object key, Boolean defaultValue) {
+
 		Record result = get(key);
 
 		if (result == null) {
-			return null;
+			return defaultValue;
 		}
 
 		if (result.kind == RecordKind.BOOLEAN) {
 			return (Boolean) result.simpleContents;
 		}
 
-		return null;
+		return defaultValue;
 	}
 
 	/**
@@ -624,13 +644,49 @@ public class Record {
 	 * @param key
 	 * @param value
 	 */
-	public void set(Object key, Record value) {
+	public void set(Object key, Object value) {
+
+		if (key == null) {
+			return;
+		}
 
 		makeObject();
 
-		if (key != null) {
-			objContents.put(key.toString(), value);
+		if (value == null) {
+			objContents.put(key.toString(), Record.nullRecord());
 		}
+
+		if (value instanceof Record) {
+			objContents.put(key.toString(), (Record) value);
+			return;
+		}
+
+		if (value instanceof Boolean) {
+			objContents.put(key.toString(), new Record((Boolean) value));
+			return;
+		}
+
+		if (value instanceof String) {
+			objContents.put(key.toString(), new Record((String) value));
+			return;
+		}
+
+		if (value instanceof Integer) {
+			objContents.put(key.toString(), new Record((Integer) value));
+			return;
+		}
+
+		if (value instanceof Long) {
+			objContents.put(key.toString(), new Record((Long) value));
+			return;
+		}
+
+		if (value instanceof Double) {
+			objContents.put(key.toString(), new Record((Double) value));
+			return;
+		}
+
+		objContents.put(key.toString(), Record.nullRecord());
 	}
 
 	/**

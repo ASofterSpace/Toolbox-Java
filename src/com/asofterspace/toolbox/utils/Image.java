@@ -28,11 +28,17 @@ public class Image {
 
 	public Image(int width, int height) {
 
-		this.width = width;
-
-		this.height = height;
+		init(this, width, height);
 
 		clear();
+	}
+
+	private static void init(Image instance, int width, int height) {
+
+		instance.height = height;
+		instance.width = width;
+
+		instance.data = new ColorRGB[height][width];
 	}
 
 	public Image(ColorRGB[][] data) {
@@ -49,7 +55,7 @@ public class Image {
 	}
 
 	/**
-	 * internal constructor; only called by copy()
+	 * internal constructor; only called by copy() and static factory methods
 	 */
 	private Image() {
 	}
@@ -62,10 +68,7 @@ public class Image {
 
 		Image result = new Image();
 
-		result.height = this.height;
-		result.width = this.width;
-
-		result.data = new ColorRGB[height][width];
+		init(result, width, height);
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -77,8 +80,6 @@ public class Image {
 	}
 
 	public void clear() {
-
-		this.data = new ColorRGB[height][width];
 
 		ColorRGB defaultCol = new ColorRGB();
 
@@ -266,6 +267,17 @@ public class Image {
 			}
 			drawAwtImage(bufImg, left, top);
 		}
+	}
+
+	public static Image createFromAwtImage(BufferedImage javaImg) {
+
+		Image result = new Image();
+
+		init(result, javaImg.getWidth(), javaImg.getHeight());
+
+		result.drawAwtImage(javaImg, 0, 0);
+
+		return result;
 	}
 
 	/**
