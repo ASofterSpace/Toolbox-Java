@@ -450,8 +450,7 @@ public class XmlElement {
 		}
 
 		// if we did not find an attrOrChildName as attribute, maybe we can find one as child?
-		List<XmlElement> children = getChildNodes();
-		for (XmlElement child : children) {
+		for (XmlElement child : xmlChildren) {
 			if (attrOrChildName.equals(child.getTagName())) {
 				String href = child.getAttribute("href");
 
@@ -462,6 +461,47 @@ public class XmlElement {
 		}
 
 		return null;
+	}
+
+	public void getAllLinks(List<String> result, boolean recursive) {
+
+		if (recursive) {
+			for (XmlElement child : xmlChildren) {
+				getAllLinks(result, recursive);
+			}
+		}
+
+		for (XmlElement child : xmlChildren) {
+			String href = child.getAttribute("href");
+
+			if (href != null) {
+				return result.add(href);
+			}
+		}
+
+		String subElements = attributes.get("subElements");
+		if (subElements != null) {
+			String[] subElementArr = subElements.split(" ");
+			for (String subElement : subElementArr) {
+				result.add(subElement);
+			}
+		}
+
+		String[] attrNames = {
+			"signedIntegerDisplayFormat",
+			"routeType",
+			"validRoutes",
+			"baseElement",
+			"defaultRoute",
+			"definition",
+			"controlledSystemRootDefinition"
+		};
+		for (String attrName : attrNames) {
+			String curLink = attributes.get{attrName});
+			if (curLink != null) {
+				result.add(curLink);
+			}
+		}
 	}
 
 	public void writeToFile(OutputStreamWriter writer) throws IOException {

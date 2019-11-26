@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.cdm;
 
 import com.asofterspace.toolbox.cdm.exceptions.AttemptingEmfException;
 import com.asofterspace.toolbox.cdm.exceptions.CdmLoadingException;
+import com.asofterspace.toolbox.cdm.exceptions.CdmSavingException;
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
@@ -972,18 +973,18 @@ public class CdmCtrl {
 	 * Returns true if it all worked, or false otherwise.
 	 */
 	@SuppressWarnings("fallthrough")
-	public boolean createNewCdm(String cdmPath, String version, String versionPrefix, String template) throws AttemptingEmfException, CdmLoadingException {
+	public boolean createNewCdm(String cdmPath, String version, String versionPrefix, String template) throws AttemptingEmfException, CdmSavingException, CdmLoadingException {
 
 		if ("".equals(cdmPath)) {
-			throw new CdmLoadingException("Please enter a CDM path to create the new CDM files!");
+			throw new CdmSavingException("Please enter a CDM path to create the new CDM files!");
 		}
 
 		if ("".equals(version)) {
-			throw new CdmLoadingException("Please enter a CDM version to create the new CDM files!");
+			throw new CdmSavingException("Please enter a CDM version to create the new CDM files!");
 		}
 
 		if ("".equals(versionPrefix)) {
-			throw new CdmLoadingException("Please enter a CDM version prefix to create the new CDM files!");
+			throw new CdmSavingException("Please enter a CDM version prefix to create the new CDM files!");
 		}
 
 		Directory cdmDir = new Directory(cdmPath);
@@ -996,7 +997,7 @@ public class CdmCtrl {
 		// complain if the directory is not empty
 		Boolean isEmpty = cdmDir.isEmpty();
 		if ((isEmpty == null) || !isEmpty) {
-			throw new CdmLoadingException("The specified directory is not empty - please create the new CDM in an empty directory!");
+			throw new CdmSavingException("The specified directory is not empty - please create the new CDM in an empty directory!");
 		}
 
 		String newCiName;
@@ -1092,7 +1093,7 @@ public class CdmCtrl {
 				break;
 
 			default:
-				throw new CdmLoadingException("The template '" + template + "' that you selected does not seem to be available - oops!");
+				throw new CdmSavingException("The template '" + template + "' that you selected does not seem to be available - oops!");
 		}
 
 		// immediately open the newly created CDM using the CdmCtrl, just as if the open dialog had been called
@@ -1195,6 +1196,21 @@ public class CdmCtrl {
 
 		for (CdmFile cdmFile : fileList) {
 			cdmFile.findByUuid(ecoreUuid, result);
+		}
+
+		return result;
+	}
+
+	public List<CdmFile> findCdmFilesByUuid(String ecoreUuid) {
+
+		ecoreUuid = UuidEncoderDecoder.getIdFromEcoreLink(ecoreUuid);
+
+		List<CdmFile> result = new ArrayList<>();
+
+		for (CdmFile cdmFile : fileList) {
+			if (cdmFile.findByUuid(ecordeUuid, null)) {
+				result.add(cdmFile);
+			}
 		}
 
 		return result;
@@ -1362,6 +1378,61 @@ public class CdmCtrl {
 			for (CdmFile cdmFile : files) {
 				cdmFile.print();
 			}
+		}
+	}
+
+	public void extractFileTo(String filename, String toDestinationPath) throws CdmSavingException {
+
+		for (CdmFile file : fileList) {
+			if (filename.equals(file.getLocalFilename())) {
+				extractFileTo(file, toDestinationPath);
+				// TODO :: decide what to do in case of several files having the same name...
+				// (right now we are just grabbing the first one)
+				return;
+			}
+		}
+	}
+
+	private void extractFileTo(CdmFile file, String toDestinationPath) throws CdmSavingException {
+
+		Directory destinationDir = new Directory(toDestinationPath);
+
+		// if the new directory does not yet exist, then we have to create it...
+		if (!destinationDir.exists()) {
+			destinationDir.create();
+		}
+
+		// complain if the directory is not empty
+		Boolean isEmpty = destinationDir.isEmpty();
+		if ((isEmpty == null) || !isEmpty) {
+			throw new CdmSavingException("The specified directory is not empty - please extract the CDM file into an empty directory!");
+		}
+
+		// find all other files that this one depends on
+		Set<CdmFile> dependingOnFiles = new HashSet<>();
+		dependingOnFiles.add(file);
+
+		addFilesDependingOn(dependingOnFiles);
+
+		for (CdmFile dependingOnFile : dependingOnFiles) {
+			dependingOnFile.saveTo(lastLoadedDirectory.traverseFileTo(dependingOnFile, destinationDir));
+		}
+	}
+
+	private void addFilesDependingOn(Set<CdmFile> files) {
+		Set<CdmFile> previousFiles = new HashSet<>(files);
+		for (CdmFile previousFile : previousFiles) {
+			List<String> uuids = previousFile.getAllLinks();
+			for (String uuid : uuids) {
+				files.addAll(findCdmFilesByUuid(uuid));
+			}
+		}
+
+		// TODO :: optimize, if the call takes too long
+		// (to optimize, actually do the addAll manually, and add only dependencies from the new files, instead
+		// of what we are doing right now, in which we iterate over known files also again in every step)
+		if (files.size() > previousFiles.size()) {
+			addFilesDependingOn(files);
 		}
 	}
 

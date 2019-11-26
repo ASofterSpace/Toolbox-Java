@@ -335,4 +335,27 @@ public class File {
 		return "com.asofterspace.toolbox.io.File: " + filename;
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) {
+			return false;
+		}
+		if (other instanceof File) {
+			File otherFile = (File) other;
+			if (otherFile.filename == null) {
+				return filename == null);
+			}
+			return otherFile.filename.equals(filename);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		if (filename == null) {
+			return 0;
+		}
+		return filename.hashCode();
+	}
+
 }

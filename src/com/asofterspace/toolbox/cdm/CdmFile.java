@@ -7,10 +7,7 @@ package com.asofterspace.toolbox.cdm;
 import com.asofterspace.toolbox.coders.UuidEncoderDecoder;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlElement;
-import com.asofterspace.toolbox.io.XmlFile;
-import com.asofterspace.toolbox.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -151,33 +148,56 @@ public class CdmFile extends CdmFileBase {
 	}
 
 	/**
+	 * Get all the links contained in this CDM file
+	 */
+	public List<String> getAllLinks() {
+
+		List<String> result = new ArrayList<>();
+
+		getRoot().getAllLinks(result, true);
+
+		return result;
+	}
+
+	/**
 	 * In the interest of speed when calling this function, you have to ensure that the UUID
 	 * is also an Ecore one! No passing Java UUIDs to this function, you! :P
 	 */
-	public void findByUuid(String ecoreUuid, List<CdmNode> result) {
-		recursivelyFindByKey(getRoot(), "xmi:id", ecoreUuid, result);
+	public boolean findByUuid(String ecoreUuid, List<CdmNode> result) {
+		return recursivelyFindByKey(getRoot(), "xmi:id", ecoreUuid, result);
 	}
 
-	public void findByName(String name, List<CdmNode> result) {
-		recursivelyFindByKey(getRoot(), "name", name, result);
+	public boolean findByName(String name, List<CdmNode> result) {
+		return recursivelyFindByKey(getRoot(), "name", name, result);
 	}
 
-	public void findByType(String type, List<CdmNode> result) {
-		recursivelyFindByKey(getRoot(), "xsi:type", type, result);
+	public boolean findByType(String type, List<CdmNode> result) {
+		return recursivelyFindByKey(getRoot(), "xsi:type", type, result);
 	}
 
-	private void recursivelyFindByKey(XmlElement currentNode, String key, String value, List<CdmNode> result) {
+	private boolean recursivelyFindByKey(XmlElement currentNode, String key, String value, List<CdmNode> result) {
+
+		boolean foundit = false;
 
 		String resultStr = currentNode.getAttribute(key);
 
 		if (value.equals(resultStr)) {
-			result.add(cdmCtrl.getByXmlElement(this, currentNode));
+			if (result != null) {
+				result.add(cdmCtrl.getByXmlElement(this, currentNode));
+			}
+			foundit = true;
 		}
 
 		List<XmlElement> children = currentNode.getChildNodes();
 		for (XmlElement child : children) {
-			recursivelyFindByKey(child, key, value, result);
+			// do not just write foundit = foundit || recursivelyFindByKey as we do NOT want to short-circuit the call!
+			boolean foundItRecursive = recursivelyFindByKey(child, key, value, result);
+			if (foundItRecursive) {
+				foundit = true;
+			}
 		}
+
+		return foundit;
 	}
 
 	public void findByXmlTag(String xmlTag, List<CdmNode> result) {
