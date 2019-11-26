@@ -467,7 +467,7 @@ public class XmlElement {
 
 		if (recursive) {
 			for (XmlElement child : xmlChildren) {
-				getAllLinks(result, recursive);
+				child.getAllLinks(result, recursive);
 			}
 		}
 
@@ -494,7 +494,9 @@ public class XmlElement {
 			"baseElement",
 			"defaultRoute",
 			"definition",
-			"controlledSystemRootDefinition"
+			"controlledSystemRootDefinition",
+			"valueDefinition",
+			"unit"
 		};
 		for (String attrName : attrNames) {
 			String curLink = attributes.get(attrName);

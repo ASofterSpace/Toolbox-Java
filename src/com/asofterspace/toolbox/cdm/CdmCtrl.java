@@ -1420,19 +1420,68 @@ public class CdmCtrl {
 	}
 
 	private void addFilesDependingOn(Set<CdmFile> files) {
-		Set<CdmFile> previousFiles = new HashSet<>(files);
-		for (CdmFile previousFile : previousFiles) {
-			List<String> uuids = previousFile.getAllLinks();
-			for (String uuid : uuids) {
-				files.addAll(findCdmFilesByUuid(uuid));
-			}
-		}
 
-		// TODO :: optimize, if the call takes too long
-		// (to optimize, actually do the addAll manually, and add only dependencies from the new files, instead
-		// of what we are doing right now, in which we iterate over known files also again in every step)
-		if (files.size() > previousFiles.size()) {
-			addFilesDependingOn(files);
+		Set<CdmFile> previousFiles = new HashSet<>(files);
+
+		while (true) {
+			Set<CdmFile> filesNextRound = new HashSet<>();
+
+			for (CdmFile previousFile : previousFiles) {
+				List<String> uuids = previousFile.getAllLinks();
+				for (String uuid : uuids) {
+					// we know that internal links are just going into the file they came from,
+					// so we ignore them
+					if (uuid.contains("#")) {
+						String newFileName = uuid.substring(0, uuid.indexOf("#"));
+
+						String[] firstFilenameParts = newFileName.split("/");
+						String firstResult = firstFilenameParts[firstFilenameParts.length - 1];
+
+						String[] secondFilenameParts = newFileName.split("\\\\");
+						String secondResult = secondFilenameParts[secondFilenameParts.length - 1];
+
+						if (firstResult.length() > secondResult.length()) {
+							newFileName = secondResult;
+						} else {
+							newFileName = firstResult;
+						}
+
+						boolean foundone = false;
+						for (CdmFile file : files) {
+							if (file.getLocalFilename().equals(newFileName)) {
+								foundone = true;
+								break;
+							}
+						}
+						if (!foundone) {
+							for (CdmFile newFile : fileList) {
+								if (newFile.getLocalFilename().equals(newFileName)) {
+									files.add(newFile);
+									filesNextRound.add(newFile);
+									break;
+								}
+							}
+						}
+
+						/*
+						// this is slower, but a bit nicer, as it really searches for the UUIDs in the files...
+						List<CdmFile> newFiles = findCdmFilesByUuid(uuid);
+						for (CdmFile newFile : newFiles) {
+							if (!files.contains(newFile)) {
+								files.add(newFile);
+								filesNextRound.add(newFile);
+							}
+						}
+						*/
+					}
+				}
+			}
+
+			previousFiles = filesNextRound;
+
+			if (filesNextRound.size() < 1) {
+				break;
+			}
 		}
 	}
 
