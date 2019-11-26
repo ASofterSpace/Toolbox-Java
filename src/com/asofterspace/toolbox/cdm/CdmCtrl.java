@@ -1208,7 +1208,7 @@ public class CdmCtrl {
 		List<CdmFile> result = new ArrayList<>();
 
 		for (CdmFile cdmFile : fileList) {
-			if (cdmFile.findByUuid(ecordeUuid, null)) {
+			if (cdmFile.findByUuid(ecoreUuid, null)) {
 				result.add(cdmFile);
 			}
 		}

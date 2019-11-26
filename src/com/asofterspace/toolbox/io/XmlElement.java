@@ -475,7 +475,7 @@ public class XmlElement {
 			String href = child.getAttribute("href");
 
 			if (href != null) {
-				return result.add(href);
+				result.add(href);
 			}
 		}
 
@@ -497,7 +497,7 @@ public class XmlElement {
 			"controlledSystemRootDefinition"
 		};
 		for (String attrName : attrNames) {
-			String curLink = attributes.get{attrName});
+			String curLink = attributes.get(attrName);
 			if (curLink != null) {
 				result.add(curLink);
 			}

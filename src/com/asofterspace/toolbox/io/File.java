@@ -343,7 +343,7 @@ public class File {
 		if (other instanceof File) {
 			File otherFile = (File) other;
 			if (otherFile.filename == null) {
-				return filename == null);
+				return filename == null;
 			}
 			return otherFile.filename.equals(filename);
 		}
