@@ -21,6 +21,8 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 	public static final long serialVersionUID = 3458397457249723l;
 
+	private static int BORDER_WIDTH = 1;
+
 	private int min;
 	private int max;
 	private int pos;
@@ -92,10 +94,10 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 	public void setMaximum(int max) {
 		this.max = max;
-		setSize(new Dimension(max, getHeight()));
-		setPreferredSize(new Dimension(max, (int) getPreferredSize().getHeight()));
-		setMinimumSize(new Dimension(max, (int) getMinimumSize().getHeight()));
-		setMaximumSize(new Dimension(max, (int) getMaximumSize().getHeight()));
+		setSize(new Dimension(max + 2 * BORDER_WIDTH, getHeight()));
+		setPreferredSize(new Dimension(max + 2 * BORDER_WIDTH, (int) getPreferredSize().getHeight()));
+		setMinimumSize(new Dimension(max + 2 * BORDER_WIDTH, (int) getMinimumSize().getHeight()));
+		setMaximumSize(new Dimension(max + 2 * BORDER_WIDTH, (int) getMaximumSize().getHeight()));
 	}
 
 	public void setBarPosition(Integer newPos) {
@@ -137,10 +139,20 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		g.setColor(getBackground());
-		g.fillRect(0, 0, getWidth(), getHeight());
+		int outerWidth = getWidth();
+		int outerHeight = getHeight();
+		int innerWidth = outerWidth - 2 * BORDER_WIDTH;
+		int innerHeight = outerHeight - 2 * BORDER_WIDTH;
+
 		g.setColor(getForeground());
-		g.fillRect(0, 0, (getWidth() * pos) / max, getHeight());
+		g.drawLine(0, 0, outerWidth-1, 0);
+		g.drawLine(0, outerHeight-1, outerWidth-1, outerHeight-1);
+		g.drawLine(0, 0, 0, outerHeight-1);
+		g.drawLine(outerWidth-1, 0, outerWidth-1, outerHeight-1);
+		g.setColor(getBackground());
+		g.fillRect(BORDER_WIDTH, BORDER_WIDTH, innerWidth, innerHeight);
+		g.setColor(getForeground());
+		g.fillRect(BORDER_WIDTH, BORDER_WIDTH, (innerWidth * pos) / max, innerHeight);
 
 		// if we re-introduce a label text, then the label should be written here :)
 	}
