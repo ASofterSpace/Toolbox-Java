@@ -146,6 +146,22 @@ public class ColorRGB {
 		return (byte) (result / 3);
 	}
 
+	public int getPerceivedGrayness() {
+		int intR = r & 0xFF;
+		int intG = g & 0xFF;
+		int intB = b & 0xFF;
+		int result = (30 * intR) + (59 * intG) + (11 * intB);
+		return result / 100;
+	}
+
+	public byte getPerceivedGrayByte() {
+		int intR = r & 0xFF;
+		int intG = g & 0xFF;
+		int intB = b & 0xFF;
+		int result = (30 * intR) + (59 * intG) + (11 * intB);
+		return (byte) (result / 100);
+	}
+
 	@Override
 	public int hashCode() {
 		return (int) r + (int) g + (int) b;
@@ -228,6 +244,84 @@ public class ColorRGB {
 			Math.max(255 - Math.round((255 - getG()) * amount), 0),
 			Math.max(255 - Math.round((255 - getB()) * amount), 0)
 		);
+	}
+
+	public ColorRGB getRemovedColors() {
+
+		byte gray = getGrayByte();
+
+		return new ColorRGB(
+			gray,
+			gray,
+			gray
+		);
+	}
+
+	public ColorRGB getRemovedPerceivedColors() {
+
+		byte gray = getPerceivedGrayByte();
+
+		return new ColorRGB(
+			gray,
+			gray,
+			gray
+		);
+	}
+
+	public ColorRGB getInverted() {
+
+		return new ColorRGB(
+			255 - getR(),
+			255 - getG(),
+			255 - getB()
+		);
+	}
+
+	public ColorRGB getBrightnessInverted1() {
+
+		int targetGray = 255 - getPerceivedGrayness();
+
+		return new ColorRGB(
+			(getR() * targetGray) / 255,
+			(getG() * targetGray) / 255,
+			(getB() * targetGray) / 255,
+			255
+		);
+	}
+
+	public ColorRGB getBrightnessInverted2() {
+
+		// we want to get a pixel such that the color distribution is the same as before,
+		// but the perceived grayness is 255 - current perceived grayness
+
+		int targetGray = 255 - getPerceivedGrayness();
+
+		float factor = targetGray / 128f;
+		float factorMul = 0.5f;
+
+		int origR = getR();
+		int origG = getG();
+		int origB = getB();
+
+		ColorRGB result = null;
+
+		for (int steps = 0; steps < 25; steps++) {
+			result = new ColorRGB(
+				Math.round(origR * factor),
+				Math.round(origG * factor),
+				Math.round(origB * factor),
+				255
+			);
+
+			if (result.getPerceivedGrayness() > targetGray) {
+				factor -= factorMul;
+			} else {
+				factor += factorMul;
+			}
+			factorMul = factorMul * 0.8f;
+		}
+
+		return result;
 	}
 
 	private int getEditedChannel(String baseStr, double modifier) {

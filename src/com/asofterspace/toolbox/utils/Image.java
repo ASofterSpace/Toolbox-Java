@@ -614,6 +614,51 @@ public class Image {
 		}
 	}
 
+	public void invert() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getInverted();
+			}
+		}
+	}
+
+	public void invertBrightness1() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getBrightnessInverted1();
+			}
+		}
+	}
+
+	public void invertBrightness2() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getBrightnessInverted2();
+			}
+		}
+	}
+
+	public void removeColors() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getRemovedColors();
+			}
+		}
+	}
+
+	public void removePerceivedColors() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getRemovedPerceivedColors();
+			}
+		}
+	}
+
 	@Override
 	public int hashCode() {
 
