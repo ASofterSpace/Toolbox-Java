@@ -22,12 +22,12 @@ public class BatchCode extends Code {
 
 	// all keywords of the batch language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"break", "case", "do", "done", "else", "for", "function", "if", "in", "then", "while"}
+		new String[] {"break", "case", "do", "done", "else", "equ", "for", "function", "if", "in", "not", "then", "while"}
 	));
 
 	// all primitive types of the batch language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"cd", "echo", "exist", "exit", "not", "pause"}
+		new String[] {"call", "cd", "echo", "exist", "exit", "pause"}
 	));
 
 	// all string delimiters of the batch language
