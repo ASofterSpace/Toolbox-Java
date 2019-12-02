@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.cdm.CdmFile;
 import com.asofterspace.toolbox.cdm.CdmNode;
 import com.asofterspace.toolbox.cdm.exceptions.AttemptingEmfException;
 import com.asofterspace.toolbox.cdm.exceptions.CdmLoadingException;
+import com.asofterspace.toolbox.cdm.exceptions.CdmSavingException;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.test.Test;
@@ -70,7 +71,7 @@ public class CdmTest implements Test {
 				TestUtils.fail("We tried to create a new CDM, but when validating the created CDM it seemed invalid!");
 				return;
 			}
-		} catch (AttemptingEmfException | CdmLoadingException e) {
+		} catch (AttemptingEmfException | CdmLoadingException | CdmSavingException e) {
 			TestUtils.fail("We tried to create a new CDM, but got this exception: " + e.getMessage());
 			return;
 		}
