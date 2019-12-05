@@ -14,7 +14,6 @@ cd ..
 
 echo "Build executed successfully; press [Enter] to continue with the self-tests..."
 
-
 pause
 
 rd /s /q config

@@ -21,7 +21,11 @@ public class ImageTest implements Test {
 
 		testColorRGBDarknessDetection();
 
+		testImageClearing();
+
 		testImageComparison();
+
+		testImageRemoveColors();
 	}
 
 	public void testColorRGBComparison() {
@@ -119,6 +123,38 @@ public class ImageTest implements Test {
 		TestUtils.succeed();
 	}
 
+	public void testImageClearing() {
+
+		TestUtils.start("Image Clearing");
+
+		Image img = new Image(100, 100);
+		img.setPixel(10, 10, new ColorRGB(128, 0, 176));
+		ColorRGB gotPix = img.getPixel(10, 10);
+
+		if (gotPix.equals(new ColorRGB())) {
+			TestUtils.fail("A pixel that was set seems to have been cleared before calling clear()!");
+			return;
+		}
+
+		img.clear();
+
+		gotPix = img.getPixel(10, 10);
+
+		if (!gotPix.equals(new ColorRGB())) {
+			TestUtils.fail("Calling clear() on a pixel that was previously set does not seem to have worked!");
+			return;
+		}
+
+		gotPix = img.getPixel(8, 8);
+
+		if (!gotPix.equals(new ColorRGB())) {
+			TestUtils.fail("Calling clear() on a pixel that was not explicitly set does not seem to have worked!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
 	public void testImageComparison() {
 
 		TestUtils.start("Image Comparison");
@@ -145,6 +181,34 @@ public class ImageTest implements Test {
 
 		if (!plainAndDot2.equals(plainAndDot)) {
 			TestUtils.fail("Two images with the same contents are reported as different!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void testImageRemoveColors() {
+
+		TestUtils.start("Image Color Removal");
+
+		Image before = new Image(100, 100);
+		before.setPixel(6, 7, new ColorRGB(33, 0, 0));
+		before.setPixel(6, 8, new ColorRGB(0, 66, 0));
+		before.setPixel(6, 9, new ColorRGB(0, 0, 99));
+		before.setPixel(6, 10, new ColorRGB(255, 255, 255));
+		before.setPixel(6, 13, new ColorRGB(0, 0, 0));
+
+		Image after = new Image(100, 100);
+		after.setPixel(6, 7, new ColorRGB(11, 11, 11));
+		after.setPixel(6, 8, new ColorRGB(22, 22, 22));
+		after.setPixel(6, 9, new ColorRGB(33, 33, 33));
+		after.setPixel(6, 10, new ColorRGB(255, 255, 255));
+		after.setPixel(6, 13, new ColorRGB(0, 0, 0));
+
+		before.removeColors();
+
+		if (!after.equals(before)) {
+			TestUtils.fail("We attempted to remove the colors from an image, but it did not go as expected...");
 			return;
 		}
 
