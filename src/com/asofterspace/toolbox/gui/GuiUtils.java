@@ -4,15 +4,21 @@
  */
 package com.asofterspace.toolbox.gui;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.io.IOException;
 
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 
@@ -80,4 +86,24 @@ public class GuiUtils {
 		whatToMakeWide.setMaximumSize(makeWide);
 	}
 
+	/**
+	 * Set the color of a scroll pane's corners, with the argument  which  identifying which one's color to set, e.g.
+	 * JScrollPane.LOWER_RIGHT_CORNER or JScrollPane.UPPER_LEFT_CORNER
+	 */
+	public static void setCornerColor(JScrollPane scrollPane, String which, Color color) {
+		JPanel corner = new JPanel();
+		corner.setBackground(color);
+		scrollPane.setCorner(which, corner);
+	}
+
+	/**
+	 * Open a folder using the default folder-opening GUI of the OS
+	 */
+	public static void openFolder(String folderpath) {
+		try {
+			Desktop.getDesktop().open(new java.io.File(folderpath));
+		} catch (IOException ex) {
+			// do nothing
+		}
+	}
 }
