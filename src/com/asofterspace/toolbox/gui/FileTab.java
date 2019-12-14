@@ -14,4 +14,6 @@ public interface FileTab {
 	public boolean isMissing();
 
 	public boolean hasBeenChanged();
+
+	public boolean isHighlighted();
 }

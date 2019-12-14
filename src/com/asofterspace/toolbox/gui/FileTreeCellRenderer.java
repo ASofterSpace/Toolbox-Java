@@ -22,6 +22,8 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 			boolean sel, boolean exp, boolean leaf, int row, boolean hasFocus) {
 		super.getTreeCellRendererComponent(tree, node, sel, exp, leaf, row, hasFocus);
 
+		int font = 0;
+
 		FileTab tab = null;
 
 		Color foregroundColor = new Color(0, 0, 0);
@@ -29,6 +31,7 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 		Color backgroundColor = new Color(255, 255, 255);
 		Color focusColor = new Color(196, 128, 255);
 		Color selectedColor = new Color(212, 196, 255);
+		Color highlightedColor = new Color(64, 0, 128);
 
 		if (tree instanceof FileTree) {
 			FileTree fileTree = (FileTree) tree;
@@ -40,6 +43,7 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 					backgroundColor = new Color(0, 0, 0);
 					focusColor = new Color(178, 0, 242);
 					selectedColor = new Color(132, 0, 172);
+					highlightedColor = new Color(221, 196, 255);
 					break;
 			}
 		}
@@ -53,7 +57,12 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 		if ((tab != null) && tab.isMissing()) {
 			setForeground(missingColor);
 		} else {
-			setForeground(foregroundColor);
+			if ((tab != null) && tab.isHighlighted()) {
+				setForeground(highlightedColor);
+				font |= Font.ITALIC;
+			} else {
+				setForeground(foregroundColor);
+			}
 		}
 		setOpaque(true);
 		if (hasFocus) {
@@ -66,10 +75,9 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 
 		// if a file has been changed recently, show it in bold
 		if ((tab != null) && tab.hasBeenChanged()) {
-			setFont(getFont().deriveFont(Font.BOLD));
-		} else {
-			setFont(getFont().deriveFont(0));
+			font |= Font.BOLD;
 		}
+		setFont(getFont().deriveFont(font));
 
 		return this;
 	}
