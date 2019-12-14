@@ -280,6 +280,9 @@ public class PhpCode extends HtmlCode {
 						// now get the entire line that we found!
 						// String functionName = lastCouldBeKeywordPhp + " " + couldBeKeyword + "()";
 						String functionName = getLineFromPosition(start, content);
+						if (functionName.startsWith("function ")) {
+							functionName = functionName.substring(9);
+						}
 						functions.add(new CodeSnippetWithLocation(functionName, start));
 					}
 				}
