@@ -621,8 +621,32 @@ public class Record {
 	}
 
 	/**
+	 * Removes a key (and its value, duh) from this object
+	 * @param key .. the key to remove
+	 */
+	public void removeKey(Object key) {
+
+		makeObject();
+
+		if (key != null) {
+			objContents.remove(key.toString());
+		}
+	}
+
+	/**
+	 * Removes the index-th entry from this array
+	 * @param index .. the index of the entry which should be removed
+	 */
+	public void removeIndex(int index) {
+
+		makeArray();
+
+		arrContents.remove(index);
+	}
+
+	/**
 	 * Removes all keys from this object except the ones given as arguments
-	 * @param keys
+	 * @param keys .. the keys to keep
 	 */
 	public void removeAllKeysExcept(String... keys) {
 
