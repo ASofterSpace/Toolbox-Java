@@ -147,7 +147,10 @@ public class FileTreeModel implements TreeModel {
 
 	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
-		// TODO
+		for (TreeModelListener listener : listeners) {
+			TreeModelEvent ev = new TreeModelEvent(this, path);
+			listener.treeNodesChanged(ev);
+		}
 	}
 
 	public FileTreeFile getNode(FileTab tab) {

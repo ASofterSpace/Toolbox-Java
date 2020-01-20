@@ -8,6 +8,7 @@ import java.awt.Color;
 
 import javax.swing.JTree;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 
 public class FileTree extends JTree {
@@ -40,6 +41,11 @@ public class FileTree extends JTree {
 
 	public String getScheme() {
 		return scheme;
+	}
+
+	@Override
+	public boolean isPathEditable(TreePath path) {
+		return path.getLastPathComponent() instanceof FileTreeFile;
 	}
 
 }

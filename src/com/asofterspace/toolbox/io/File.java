@@ -50,7 +50,10 @@ public class File {
 	 * @param javaFile
 	 */
 	public File(java.io.File javaFile) {
+		initFromJavaFile(javaFile);
+	}
 
+	private void initFromJavaFile(java.io.File javaFile) {
 		// we try to actually use the canoncial path, if possible - as this prevents
 		// weirdness when getting very long paths in Windows (in which case absolute
 		// paths might still contain SIXLET~1 directory names in between etc.)
@@ -318,6 +321,19 @@ public class File {
 		}
 
 		return "text/plain";
+	}
+
+	/**
+	 * Renames this file by giving it a new name (but keeping it in the same path)
+	 */
+	public void rename(String newName) {
+		try {
+			Path newPath = getJavaPath().resolveSibling(newName);
+			Files.move(getJavaPath(), newPath, StandardCopyOption.REPLACE_EXISTING);
+			initFromJavaFile(newPath.toFile());
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to rename the file " + filename + " to " + newName + " - inconceivable!");
+		}
 	}
 
 	/**
