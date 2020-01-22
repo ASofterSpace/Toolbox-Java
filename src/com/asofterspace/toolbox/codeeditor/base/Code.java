@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.codeeditor.base;
 
 import com.asofterspace.toolbox.codeeditor.utils.CodeAtLocation;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
+import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.utils.StrUtils;
 
@@ -49,6 +50,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// the callback to be called when something changes
 	Callback onChangeCallback;
+	OpenFileCallback onOpenFileCallback;
 
 	// the end-of-line marker
 	protected static final String EOL = "\n";
@@ -266,28 +268,35 @@ public abstract class Code extends DefaultStyledDocument {
 		MouseAdapter mouseListener = new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent event) {
-
-				if (event.isControlDown()) {
-					int caretPos = decoratedEditor.getCaretPosition();
-					String content = decoratedEditor.getText();
-
-					int wordStart = getWordStartFromPosition(caretPos, content);
-					int wordEnd = getWordEndFromPosition(caretPos, content);
-
-					String clickedWord = content.substring(wordStart, wordEnd);
-					// find clicked word and go there
-					int nextIndex = content.indexOf(clickedWord, wordEnd);
-					if (nextIndex < 0) {
-						nextIndex = content.indexOf(clickedWord);
-					}
-					decoratedEditor.setCaretPosition(nextIndex);
-					decoratedEditor.setSelectionStart(nextIndex);
-					decoratedEditor.setSelectionEnd(nextIndex + clickedWord.length());
-				}
+				onMouseReleased(event);
 			}
 		};
 
 		decoratedEditor.addMouseListener(mouseListener);
+	}
+
+	/**
+	 * When a word is pressed while [Ctrl] is held,
+	 * jump to the next occurrence of the selected word
+	 */
+	protected void onMouseReleased(MouseEvent event) {
+		if (event.isControlDown()) {
+			int caretPos = decoratedEditor.getCaretPosition();
+			String content = decoratedEditor.getText();
+
+			int wordStart = getWordStartFromPosition(caretPos, content);
+			int wordEnd = getWordEndFromPosition(caretPos, content);
+
+			String clickedWord = content.substring(wordStart, wordEnd);
+			// find clicked word and go there
+			int nextIndex = content.indexOf(clickedWord, wordEnd);
+			if (nextIndex < 0) {
+				nextIndex = content.indexOf(clickedWord);
+			}
+			decoratedEditor.setCaretPosition(nextIndex);
+			decoratedEditor.setSelectionStart(nextIndex);
+			decoratedEditor.setSelectionEnd(nextIndex + clickedWord.length());
+		}
 	}
 
 	public void indentSelection(String indentWithWhat) {
@@ -806,7 +815,11 @@ public abstract class Code extends DefaultStyledDocument {
 		int start = getLineStartFromPosition(pos, content);
 		int end = getLineEndFromPosition(pos, content);
 
-		return content.substring(start, end);
+		if (end >= start) {
+			return content.substring(start, end);
+		}
+
+		return "";
 	}
 
 	public static int getLineNumberFromPosition(int pos, String content) {
@@ -1058,8 +1071,11 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	public void setOnChange(Callback callback) {
-
 		onChangeCallback = callback;
+	}
+
+	public void setOnOpenFile(OpenFileCallback callback) {
+		onOpenFileCallback = callback;
 	}
 
 	public void setCodeEditorLineMemo(JTextPane lineMemo) {
@@ -1716,6 +1732,12 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.setText(newText.getCode());
 
 		decoratedEditor.setCaretPosition(newText.getCaretPos());
+	}
+
+	protected void openFileRelativeToThis(String relativePath) {
+		if (onOpenFileCallback != null) {
+			onOpenFileCallback.openFileRelativeToThis(relativePath);
+		}
 	}
 
 }

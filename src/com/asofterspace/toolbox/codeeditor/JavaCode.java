@@ -6,7 +6,9 @@ package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
+import com.asofterspace.toolbox.utils.StrUtils;
 
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -363,5 +365,45 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 	private boolean isAnnotation(String token) {
 		return token.startsWith("@");
+	}
+
+	@Override
+	protected void onMouseReleased(MouseEvent event) {
+
+		// if the user [Ctrl]-clicks on an import line, try to jump to that file
+		if (event.isControlDown()) {
+			int caretPos = decoratedEditor.getCaretPosition();
+			String content = decoratedEditor.getText();
+			String line = getLineFromPosition(caretPos, content);
+
+			if ((line != null) && line.startsWith("import ") && line.trim().endsWith(";")) {
+				line = line.substring(7).trim();
+				line = line.substring(0, line.length() - 1).trim();
+
+				String openFilePath = line.replaceAll("\\.", "/") + ".java";
+
+				// get own package name
+				String[] lines = content.split("\n");
+				int packageAmount = 0;
+				for (String curLine : lines) {
+					if (curLine.startsWith("package ")) {
+						packageAmount = StrUtils.countCharInString('.', curLine);
+					}
+				}
+
+				// go up packageAmount+1 (so for package foo.bar.package;, go up three)
+				for (int i = 0; i < packageAmount+1; i++) {
+					openFilePath = "../" + openFilePath;
+				}
+
+				// now that the path has been resolved, attempt to open that file!
+				openFileRelativeToThis(openFilePath);
+			}
+
+			return;
+		}
+
+		// elsewise, do the regular thing (on [Ctrl]-click, jump to next occurrence of the word)
+		super.onMouseReleased(event);
 	}
 }

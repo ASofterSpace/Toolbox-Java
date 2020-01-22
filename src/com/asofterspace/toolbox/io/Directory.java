@@ -252,6 +252,32 @@ public class Directory {
 		return result;
 	}
 
+	public File findFile(String localFilename) {
+
+		return findFileInternally(new java.io.File(dirname), localFilename);
+	}
+
+	private File findFileInternally(java.io.File entryPoint, String localFilename) {
+
+		if (entryPoint.isDirectory()) {
+			java.io.File[] children = entryPoint.listFiles();
+			for (java.io.File curChild : children) {
+				if (curChild.isDirectory()) {
+					File result = findFileInternally(curChild, localFilename);
+					if (result != null) {
+						return result;
+					}
+				} else {
+					if (localFilename.equals(curChild.getName())) {
+						return new File(curChild);
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * Take an old file that is in this directory or a subdirectory, and return a new file pointing to the same
 	 * relative path underneath the new directory
