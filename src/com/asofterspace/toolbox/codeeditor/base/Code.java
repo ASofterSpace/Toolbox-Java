@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.codeeditor.base;
 
 import com.asofterspace.toolbox.codeeditor.utils.CodeAtLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeLanguage;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
 import com.asofterspace.toolbox.utils.Callback;
@@ -1734,9 +1735,9 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.setCaretPosition(newText.getCaretPos());
 	}
 
-	protected void openFileRelativeToThis(String relativePath) {
+	protected void openFileRelativeToThis(String relativePath, CodeLanguage language, String extraInfo) {
 		if (onOpenFileCallback != null) {
-			onOpenFileCallback.openFileRelativeToThis(relativePath);
+			onOpenFileCallback.openFileRelativeToThis(relativePath, null, null);
 		}
 	}
 

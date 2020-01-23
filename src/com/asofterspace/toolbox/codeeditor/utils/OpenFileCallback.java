@@ -6,5 +6,5 @@ package com.asofterspace.toolbox.codeeditor.utils;
 
 public interface OpenFileCallback {
 
-	void openFileRelativeToThis(String relativePath);
+	void openFileRelativeToThis(String relativePath, CodeLanguage language, String extraInfo);
 }

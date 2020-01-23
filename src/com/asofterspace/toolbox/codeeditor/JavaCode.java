@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.utils.CodeLanguage;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.utils.StrUtils;
 
@@ -397,10 +398,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				}
 
 				// now that the path has been resolved, attempt to open that file!
-				openFileRelativeToThis(openFilePath);
-			}
+				openFileRelativeToThis(openFilePath, CodeLanguage.JAVA, line);
 
-			return;
+				return;
+			}
 		}
 
 		// elsewise, do the regular thing (on [Ctrl]-click, jump to next occurrence of the word)
