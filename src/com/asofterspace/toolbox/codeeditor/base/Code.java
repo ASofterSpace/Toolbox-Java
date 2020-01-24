@@ -978,7 +978,7 @@ public abstract class Code extends DefaultStyledDocument {
 		int lineEndSemi = content.indexOf(";", pos);
 		int lineEndComma = content.indexOf(",", pos);
 
-		int lineEnd = Integer.MAX_VALUE;
+		int lineEnd = content.length();
 
 		if ((lineEndSpace >= 0) && (lineEndSpace < lineEnd)) {
 			lineEnd = lineEndSpace;
@@ -1021,10 +1021,6 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 		if ((lineEndComma >= 0) && (lineEndComma < lineEnd)) {
 			lineEnd = lineEndComma;
-		}
-
-		if (lineEnd == Integer.MAX_VALUE) {
-			lineEnd = content.length();
 		}
 
 		return lineEnd;
@@ -1735,10 +1731,11 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.setCaretPosition(newText.getCaretPos());
 	}
 
-	protected void openFileRelativeToThis(String relativePath, CodeLanguage language, String extraInfo) {
-		if (onOpenFileCallback != null) {
-			onOpenFileCallback.openFileRelativeToThis(relativePath, null, null);
+	protected boolean openFileRelativeToThis(String basePath, String relativePath, CodeLanguage language, String extraInfo) {
+		if (onOpenFileCallback == null) {
+			return false;
 		}
+		return onOpenFileCallback.openFileRelativeToThis(basePath, relativePath, language, extraInfo);
 	}
 
 }

@@ -375,16 +375,49 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		if (event.isControlDown()) {
 			int caretPos = decoratedEditor.getCaretPosition();
 			String content = decoratedEditor.getText();
-			String line = getLineFromPosition(caretPos, content);
+			String[] lines = content.split("\n");
+			String line = getLineFromPosition(caretPos, content).trim();
+			String importLine = null;
 
-			if ((line != null) && line.startsWith("import ") && line.trim().endsWith(";")) {
-				line = line.substring(7).trim();
-				line = line.substring(0, line.length() - 1).trim();
+			if ((line != null) && line.startsWith("import ") && line.endsWith(";")) {
+				// the user clicked on a line like import foo.bar.nonsense.Object;
+				importLine = line;
+			} else {
+				String curWord = getWordFromPosition(caretPos, content);
+				// perform the following only for words starting with upper-case characters (so, in Java, classnames),
+				// NOT for any words (as we e.g. want to jump around function names within the file - if we did not
+				// check this, then for every time we Ctrl+click on a function name here we would search half the
+				// disk for non-existant java files...)
+				if (Character.isUpperCase(curWord.charAt(0))) {
+					for (String curLine : lines) {
+						curLine = curLine.trim();
+						if (curLine.startsWith("import ") && curLine.endsWith("." + curWord + ";")) {
+							// the user clicked on Object somewhere in the code and we found a line like
+							// import foo.bar.nonsense.Object; at the top
+							importLine = curLine;
+							break;
+						}
+					}
 
-				String openFilePath = line.replaceAll("\\.", "/") + ".java";
+					// if there was no import line for the current word...
+					if (importLine == null) {
+						// ... then attempt to open the file directly in the same folder (as it might be a direct sibling)
+						if (openFileRelativeToThis("", curWord + ".java", CodeLanguage.JAVA, null)) {
+							return;
+						}
+					}
+				}
+			}
+
+			if (importLine != null) {
+
+				importLine = importLine.substring(7).trim();
+				importLine = importLine.substring(0, importLine.length() - 1).trim();
+
+				String openFilePath = importLine.replaceAll("\\.", "/") + ".java";
+				String basePath = "";
 
 				// get own package name
-				String[] lines = content.split("\n");
 				int packageAmount = 0;
 				for (String curLine : lines) {
 					if (curLine.startsWith("package ")) {
@@ -392,15 +425,15 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					}
 				}
 
-				// go up packageAmount+1 (so for package foo.bar.package;, go up three)
+				// go up packageAmount+1 (so for package foo.bar.nonsense;, go up three)
 				for (int i = 0; i < packageAmount+1; i++) {
-					openFilePath = "../" + openFilePath;
+					basePath = "../" + basePath;
 				}
 
 				// now that the path has been resolved, attempt to open that file!
-				openFileRelativeToThis(openFilePath, CodeLanguage.JAVA, line);
-
-				return;
+				if (openFileRelativeToThis(basePath, openFilePath, CodeLanguage.JAVA, importLine)) {
+					return;
+				}
 			}
 		}
 
