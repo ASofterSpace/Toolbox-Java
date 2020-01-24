@@ -38,7 +38,12 @@ public class CodeEditor extends JTextPane {
 	public Dimension getPreferredSize() {
 
 		// get the size that the text takes up...
-		Dimension result = getUI().getPreferredSize(this);
+		Dimension result = new Dimension(100, 100);
+		try {
+			result = getUI().getPreferredSize(this);
+		} catch (NullPointerException e) {
+			// occasionally, we get an NPE here that is directly thrown by swing - oops!
+		}
 
 		// ... and add a small margin to the right and at the bottom
 		result.width = result.width + 25;
