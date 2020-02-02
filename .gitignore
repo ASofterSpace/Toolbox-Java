@@ -37,3 +37,6 @@ src/sourcefiles.list
 cache
 config
 test
+
+# analysis output file
+analysis.json

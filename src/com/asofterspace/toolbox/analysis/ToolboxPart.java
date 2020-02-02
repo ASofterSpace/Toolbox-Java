@@ -67,6 +67,10 @@ public class ToolboxPart {
 		}
 	}
 
+	public List<ToolboxPart> getDependencies() {
+		return dependingOn;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 

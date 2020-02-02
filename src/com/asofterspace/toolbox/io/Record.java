@@ -54,6 +54,55 @@ public class Record {
 	}
 
 	/**
+	 * Create a record from basically anything,
+	 * but NOT making a deep copy (so in case you
+	 * hand this method a Record, it will simply
+	 * be returned)
+	 */
+	public static Record fromAnything(Object recordOrWhatever) {
+
+		if (recordOrWhatever == null) {
+			return Record.nullRecord();
+		}
+
+		if (recordOrWhatever instanceof Record) {
+			return (Record) recordOrWhatever;
+		}
+
+		if (recordOrWhatever instanceof Boolean) {
+			return new Record((Boolean) recordOrWhatever);
+		}
+
+		if (recordOrWhatever instanceof String) {
+			return new Record((String) recordOrWhatever);
+		}
+
+		if (recordOrWhatever instanceof Integer) {
+			return new Record((Integer) recordOrWhatever);
+		}
+
+		if (recordOrWhatever instanceof Long) {
+			return new Record((Long) recordOrWhatever);
+		}
+
+		if (recordOrWhatever instanceof Double) {
+			return new Record((Double) recordOrWhatever);
+		}
+
+		if (recordOrWhatever instanceof List) {
+			Record arrRecord = Record.emptyArray();
+			List<Record> valList = new ArrayList<>();
+			for (Object obj : (List) recordOrWhatever) {
+				valList.add(fromAnything(obj));
+			}
+			arrRecord.arrContents = valList;
+			return arrRecord;
+		}
+
+		return Record.nullRecord();
+	}
+
+	/**
 	 * Create an empty Record object
 	 */
 	public Record() {
@@ -674,43 +723,14 @@ public class Record {
 			return;
 		}
 
+		if (key instanceof Integer) {
+			set((int) key, value);
+			return;
+		}
+
 		makeObject();
 
-		if (value == null) {
-			objContents.put(key.toString(), Record.nullRecord());
-		}
-
-		if (value instanceof Record) {
-			objContents.put(key.toString(), (Record) value);
-			return;
-		}
-
-		if (value instanceof Boolean) {
-			objContents.put(key.toString(), new Record((Boolean) value));
-			return;
-		}
-
-		if (value instanceof String) {
-			objContents.put(key.toString(), new Record((String) value));
-			return;
-		}
-
-		if (value instanceof Integer) {
-			objContents.put(key.toString(), new Record((Integer) value));
-			return;
-		}
-
-		if (value instanceof Long) {
-			objContents.put(key.toString(), new Record((Long) value));
-			return;
-		}
-
-		if (value instanceof Double) {
-			objContents.put(key.toString(), new Record((Double) value));
-			return;
-		}
-
-		objContents.put(key.toString(), Record.nullRecord());
+		objContents.put(key.toString(), fromAnything(value));
 	}
 
 	/**
@@ -735,11 +755,15 @@ public class Record {
 	 */
 	public void setArray(Object key, List<Record> values) {
 
-		Record valList = Record.emptyArray();
+		// actually, our set function has become so powerful it can just do this :)
+		// set(key, values);
 
-		valList.arrContents = values;
+		// ... buuut for performance reasons we do not rely on it anyway ^^
+		Record arrRecord = Record.emptyArray();
 
-		set(key, valList);
+		arrRecord.arrContents = values;
+
+		set(key, arrRecord);
 	}
 
 	/**
@@ -773,26 +797,26 @@ public class Record {
 	}
 
 	/**
-	 * Sets an index of the Record array to the Record value
+	 * Sets an index of the Record array to the value
 	 * @param index
 	 * @param value
 	 */
-	public void set(Integer index, Record value) {
+	public void set(int index, Object value) {
 
 		makeArray();
 
-		arrContents.set(index, value);
+		arrContents.set(index, fromAnything(value));
 	}
 
 	/**
-	 * Appends a Record value to the Record array
+	 * Appends any value to the Record array
 	 * @param value
 	 */
-	public void append(Record value) {
+	public void append(Object value) {
 
 		makeArray();
 
-		arrContents.add(value);
+		arrContents.add(fromAnything(value));
 	}
 
 }

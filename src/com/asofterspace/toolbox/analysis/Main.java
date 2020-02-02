@@ -5,6 +5,8 @@
 package com.asofterspace.toolbox.analysis;
 
 import com.asofterspace.toolbox.io.Directory;
+import com.asofterspace.toolbox.io.JsonFile;
+import com.asofterspace.toolbox.io.Record;
 import com.asofterspace.toolbox.io.SimpleFile;
 
 import java.util.ArrayList;
@@ -77,7 +79,8 @@ public class Main {
 					if (line.startsWith(prefix) && line.endsWith(";")) {
 						String importedPart = line.substring(prefix.length());
 						if (importedPart.indexOf(".") >= 0) {
-							importedPart = importedPart.substring(0, importedPart.indexOf("."));
+							importedPart = BASE_PART + "." +
+								importedPart.substring(0, importedPart.indexOf("."));
 						} else {
 							importedPart = BASE_PART;
 						}
@@ -94,7 +97,27 @@ public class Main {
 			}
 		}
 
-		// TODO :: output the information in a nice output file
+		// output the information in a nice output file
+		JsonFile outputFile = new JsonFile("analysis.json");
+		Record output = Record.emptyObject();
+		Record outParts = Record.emptyArray();
+		output.set("parts", outParts);
+		for (ToolboxPart part : parts) {
+			Record outPart = Record.emptyObject();
+			outParts.append(outPart);
+			outPart.set("name", part.getName());
+			Record outDependsOn = Record.emptyArray();
+			outPart.set("dependsOn", outDependsOn);
+			for (ToolboxPart dep : part.getDependencies()) {
+				outDependsOn.append(dep.getName());
+			}
+		}
+		outputFile.setAllContents(output);
+		outputFile.save();
+
+		System.out.println("");
+		System.out.println("The results have been saved to:");
+		System.out.println(outputFile.getCanonicalFilename());
 
 		System.out.println("");
 		System.out.println("Analysis done, have a nice day :)");
