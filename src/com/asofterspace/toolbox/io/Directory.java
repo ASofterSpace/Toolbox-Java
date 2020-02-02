@@ -122,6 +122,15 @@ public class Directory {
 	}
 
 	/**
+	 * Get only the local part of the dirname associated with this directory,
+	 * so just the name itself instead of the full path
+	 */
+	public String getLocalDirname() {
+
+		return File.toLocalName(dirname);
+	}
+
+	/**
 	 * Get the absolute dirname associated with this directory object
 	 */
 	public String getAbsoluteDirname() {
@@ -245,6 +254,34 @@ public class Directory {
 					}
 				} else {
 					result.add(new File(curChild));
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Get all the directories contained in the directory (and, if recursively
+	 * is set to true, in its sub-directories)
+	 */
+	public List<Directory> getAllDirectories(boolean recursively) {
+
+		return getAllDirectoriesInternally(new java.io.File(dirname), recursively);
+	}
+
+	private List<Directory> getAllDirectoriesInternally(java.io.File entryPoint, boolean recursively) {
+
+		List<Directory> result = new ArrayList<>();
+
+		if (entryPoint.isDirectory()) {
+			java.io.File[] children = entryPoint.listFiles();
+			for (java.io.File curChild : children) {
+				if (curChild.isDirectory()) {
+					result.add(new Directory(curChild));
+					if (recursively) {
+						result.addAll(getAllDirectoriesInternally(curChild, true));
+					}
 				}
 			}
 		}

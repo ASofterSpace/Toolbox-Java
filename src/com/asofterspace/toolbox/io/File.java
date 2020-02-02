@@ -86,19 +86,25 @@ public class File {
 	/**
 	 * Get only the local part of the filename associated with this file object,
 	 * so just the name itself instead of the full path
-	 * TODO :: this here might have problems if the filename legitimately contains
-	 * slashes or backslashes! if that ever happens, be more clever! :)
 	 */
 	public String getLocalFilename() {
 
-		if (filename == null) {
+		return toLocalName(filename);
+	}
+
+	static String toLocalName(String path) {
+
+		// TODO :: this here might have problems if the filename legitimately contains
+		// slashes or backslashes! if that ever happens, be more clever! :)
+
+		if (path == null) {
 			return null;
 		}
 
-		String[] firstFilenameParts = filename.split("/");
+		String[] firstFilenameParts = path.split("/");
 		String firstResult = firstFilenameParts[firstFilenameParts.length - 1];
 
-		String[] secondFilenameParts = filename.split("\\\\");
+		String[] secondFilenameParts = path.split("\\\\");
 		String secondResult = secondFilenameParts[secondFilenameParts.length - 1];
 
 		if (firstResult.length() > secondResult.length()) {
