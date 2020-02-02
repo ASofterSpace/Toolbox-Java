@@ -14,6 +14,4 @@ cd ..
 
 read -p "Build executed successfully; press a key to continue with the self-tests..."
 
-rm -rf config
-
-java -classpath bin com.asofterspace.toolbox.selftest.AllTests
+./test.sh
