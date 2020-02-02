@@ -8,6 +8,8 @@ import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.SimpleFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -45,12 +47,25 @@ public class Main {
 			parts.add(part);
 		}
 
+		Collections.sort(parts, new Comparator<ToolboxPart>() {
+			public int compare(ToolboxPart a, ToolboxPart b) {
+				return a.getName().toLowerCase().compareTo(b.getName().toLowerCase());
+			}
+		});
+
 		// output what we have found so far
 		System.out.println("We loaded the following parts:");
+		System.out.println("");
 
+		int classAmount = 0;
 		for (ToolboxPart part : parts) {
-			System.out.println(part.getName() + " containing " + part.getClassAmount() + " classes");
+			int curClassAmount = part.getClassAmount();
+			System.out.println(part.getName() + " containing " + curClassAmount + " classes");
+			classAmount += curClassAmount;
 		}
+
+		System.out.println("");
+		System.out.println("All parts in total contain " + classAmount + " classes.");
 
 		// figure out which parts depend on which others
 		for (ToolboxPart part : parts) {
@@ -81,6 +96,7 @@ public class Main {
 
 		// TODO :: output the information in a nice output file
 
+		System.out.println("");
 		System.out.println("Analysis done, have a nice day :)");
 	}
 }
