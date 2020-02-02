@@ -2,9 +2,7 @@
  * Unlicensed code created by A Softer Space, 2019
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
-
-import com.asofterspace.toolbox.io.RecordKind;
+package com.asofterspace.toolbox.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

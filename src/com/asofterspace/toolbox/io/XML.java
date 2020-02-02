@@ -4,16 +4,21 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.io.RecordKind;
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.utils.Record;
+import com.asofterspace.toolbox.utils.RecordKind;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 
+/**
+ * This is a way of representing XML elements which conforms to the Record API;
+ * it can be used for convenience (to get all the power of Records also with XML),
+ * but is not as optimized for actually handling XMLs as XmlElement
+ * (However, you can just call new XmlElement(xml) to get that one instead)
+ */
 public class XML extends Record {
 
 	private String name;

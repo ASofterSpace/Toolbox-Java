@@ -4,7 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.io.RecordKind;
+import com.asofterspace.toolbox.utils.Record;
+import com.asofterspace.toolbox.utils.RecordKind;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.ArrayList;
@@ -345,20 +346,28 @@ public class JSON extends Record {
 	@Override
 	protected String toString(Record item, boolean compressed, String linePrefix) {
 
-		switch (item.kind) {
+		JSON jsonItem = null;
+
+		if (item instanceof JSON) {
+			jsonItem = (JSON) item;
+		} else {
+			jsonItem = new JSON(item);
+		}
+
+		switch (jsonItem.kind) {
 
 			case STRING:
-				if (item.simpleContents == null) {
+				if (jsonItem.simpleContents == null) {
 					return "null";
 				}
-				return "\"" + escapeJSONstr(item.simpleContents.toString()) + "\"";
+				return "\"" + escapeJSONstr(jsonItem.simpleContents.toString()) + "\"";
 
 			case BOOLEAN:
 			case NUMBER:
-				if (item.simpleContents == null) {
+				if (jsonItem.simpleContents == null) {
 					return "null";
 				}
-				return item.simpleContents.toString();
+				return jsonItem.simpleContents.toString();
 
 			case ARRAY:
 				StringBuilder arrResult = new StringBuilder();
@@ -371,7 +380,7 @@ public class JSON extends Record {
 
 				boolean arrFirstEntry = true;
 
-				for (Record arrItem : item.arrContents) {
+				for (Record arrItem : jsonItem.arrContents) {
 
 					if (arrFirstEntry) {
 						arrFirstEntry = false;
@@ -403,7 +412,7 @@ public class JSON extends Record {
 
 				boolean objFirstEntry = true;
 
-				for (Map.Entry<String, Record> entry : item.objContents.entrySet()) {
+				for (Map.Entry<String, Record> entry : jsonItem.objContents.entrySet()) {
 
 					if (objFirstEntry) {
 						objFirstEntry = false;

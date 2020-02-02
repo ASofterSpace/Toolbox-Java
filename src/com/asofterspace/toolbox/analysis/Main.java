@@ -6,8 +6,8 @@ package com.asofterspace.toolbox.analysis;
 
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.JsonFile;
-import com.asofterspace.toolbox.io.Record;
 import com.asofterspace.toolbox.io.SimpleFile;
+import com.asofterspace.toolbox.utils.Record;
 
 import java.util.ArrayList;
 import java.util.Collections;

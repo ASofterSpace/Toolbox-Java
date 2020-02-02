@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.Record;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -15,6 +17,11 @@ import java.util.Map;
 import org.xml.sax.Attributes;
 
 
+/**
+ * This is a way of representing XML elements which is more idiomatic for how XML
+ * is actually laid out internally, but does not conform to the Record API
+ * (However, you can simply call new XML(xmlElement) to make it into a Record)
+ */
 public class XmlElement {
 
 	private String name = null;
