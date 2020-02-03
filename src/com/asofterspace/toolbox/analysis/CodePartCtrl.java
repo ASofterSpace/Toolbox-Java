@@ -79,7 +79,7 @@ public class CodePartCtrl {
 			// every part depends on the base part (even if it does not import anything from it
 			// yet, it very well might do so in the future, and we do not want the dependency
 			// tree to change then)
-			part.addDependencyOn(basePart);
+			part.addDirectDependencyOn(basePart);
 
 			// now for each source code file in this part...
 			for (SimpleFile sourceCode : part.getSourceCodeFiles()) {
@@ -104,11 +104,20 @@ public class CodePartCtrl {
 						for (CodePart depPart : parts) {
 							if (importedPart.equals(depPart.getName())) {
 								// ... and add it as dependency to this one!
-								part.addDependencyOn(depPart);
+								part.addDirectDependencyOn(depPart);
 							}
 						}
 					}
 				}
+			}
+		}
+
+		// now iterate a second time to get all transitive dependencies, which we want to
+		// show as explicit entries as well
+		for (CodePart part : parts) {
+			List<CodePart> allDependencies = part.calculateAllDependenciesRecursively();
+			for (CodePart dep : allDependencies) {
+				part.addTransitiveDependencyOn(dep);
 			}
 		}
 	}

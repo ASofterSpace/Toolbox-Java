@@ -53,9 +53,19 @@ public class Main {
 			outParts.append(outPart);
 			outPart.set("name", part.getName());
 			Record outDependsOn = Record.emptyArray();
-			outPart.set("dependsOn", outDependsOn);
-			for (CodePart dep : part.getDependencies()) {
+			outPart.set("directlyDependsOn", outDependsOn);
+			for (CodePart dep : part.getDirectDependencies()) {
 				outDependsOn.append(dep.getName());
+			}
+			Record outDependsOnTrans = Record.emptyArray();
+			outPart.set("transitivelyDependsOn", outDependsOnTrans);
+			for (CodePart dep : part.getTransitiveDependencies()) {
+				outDependsOnTrans.append(dep.getName());
+			}
+			Record outAllDependencies = Record.emptyArray();
+			outPart.set("allDependencies", outAllDependencies);
+			for (CodePart dep : part.getAllDependencies()) {
+				outAllDependencies.append(dep.getName());
 			}
 		}
 		outputFile.setAllContents(output);

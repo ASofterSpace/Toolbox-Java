@@ -22,6 +22,8 @@ public class CodePart {
 
 	private List<CodePart> dependingOn;
 
+	private List<CodePart> transitivelyDependingOn;
+
 
 	public CodePart(String name) {
 
@@ -30,6 +32,8 @@ public class CodePart {
 		this.sourceCodeFiles = new ArrayList<>();
 
 		this.dependingOn = new ArrayList<>();
+
+		this.transitivelyDependingOn = new ArrayList<>();
 	}
 
 	public void addAllSourceCodeFiles(List<File> codeFiles) {
@@ -55,7 +59,7 @@ public class CodePart {
 		return sourceCodeFiles;
 	}
 
-	public void addDependencyOn(CodePart otherPart) {
+	public void addDirectDependencyOn(CodePart otherPart) {
 
 		if (otherPart == null) {
 			return;
@@ -66,13 +70,65 @@ public class CodePart {
 			return;
 		}
 
+		// if we add this as direct dependency, we no longer need it as transitive one
+		if (transitivelyDependingOn.contains(otherPart)) {
+			transitivelyDependingOn.remove(otherPart);
+		}
+
+		// add as direct dependency
 		if (!dependingOn.contains(otherPart)) {
 			dependingOn.add(otherPart);
 		}
 	}
 
-	public List<CodePart> getDependencies() {
+	public void addTransitiveDependencyOn(CodePart otherPart) {
+
+		if (otherPart == null) {
+			return;
+		}
+
+		// we don't depend on ourselves, duh!
+		if (this.equals(otherPart)) {
+			return;
+		}
+
+		// add as transitive dependency
+		if (!transitivelyDependingOn.contains(otherPart)) {
+			if (!dependingOn.contains(otherPart)) {
+				transitivelyDependingOn.add(otherPart);
+			}
+		}
+	}
+
+	public List<CodePart> getDirectDependencies() {
 		return dependingOn;
+	}
+
+	public List<CodePart> getTransitiveDependencies() {
+		return transitivelyDependingOn;
+	}
+
+	public List<CodePart> getAllDependencies() {
+		List<CodePart> result = new ArrayList<>();
+		result.addAll(dependingOn);
+		result.addAll(transitivelyDependingOn);
+		return result;
+	}
+
+	/**
+	 * This actually performs a recursive lookup whereas the other methods for
+	 * getting dependencies are really just getters for predefined fields
+	 */
+	public List<CodePart> calculateAllDependenciesRecursively() {
+
+		List<CodePart> result = getAllDependencies();
+		for (CodePart part : dependingOn) {
+			result.addAll(part.getAllDependencies());
+		}
+		for (CodePart part : transitivelyDependingOn) {
+			result.addAll(part.getAllDependencies());
+		}
+		return result;
 	}
 
 	@Override
