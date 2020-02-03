@@ -57,6 +57,10 @@ public class ToolboxPart {
 
 	public void addDependencyOn(ToolboxPart otherPart) {
 
+		if (otherPart == null) {
+			return;
+		}
+
 		// we don't depend on ourselves, duh!
 		if (this.equals(otherPart)) {
 			return;
