@@ -2,7 +2,7 @@
  * Unlicensed code created by A Softer Space, 2018
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.pdf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ public class PdfDictionary {
 	private List<String> ordering = new ArrayList<>();
 
 	private Map<String, String> dictStrings = new HashMap<>();
-	
+
 	private Map<String, PdfDictionary> dictInnerDicts = new HashMap<>();
 
 
@@ -67,11 +67,11 @@ public class PdfDictionary {
 
 			int nextIndex = spaceIndex;
 			String nextChar = " ";
-			
+
 			if (nextIndex < 0) {
 				nextIndex = content.length();
 			}
-			
+
 			if ((slashIndex > -1) && (slashIndex < nextIndex)) {
 				nextIndex = slashIndex;
 				nextChar = "/";
@@ -110,23 +110,23 @@ public class PdfDictionary {
 				set(key, innerDict);
 			} else {
 				int searchAfterIndex = 1;
-			
+
 				if (content.startsWith("(")) {
 					searchAfterIndex = content.indexOf(")") + 1;
 				}
-				
+
 				if (content.startsWith("[")) {
 					searchAfterIndex = content.indexOf("]") + 1;
 				}
-			
+
 				rAngleIndex = content.indexOf(">", searchAfterIndex);
 				nextIndex = content.indexOf("/", searchAfterIndex);
 				nextChar = "/";
-				
+
 				if (nextIndex < 0) {
 					nextIndex = content.length();
 				}
-				
+
 				if ((rAngleIndex > -1) && (rAngleIndex < nextIndex)) {
 					nextIndex = rAngleIndex;
 					nextChar = ">";
@@ -141,49 +141,49 @@ public class PdfDictionary {
 			startIndex = -1;
 		}
 	}
-	
+
 	public String getAsString(String key) {
-	
+
 		String retStr = dictStrings.get(key);
 		if (retStr != null) {
 			return retStr;
 		}
-		
+
 		PdfDictionary retDict = dictInnerDicts.get(key);
 		if (retDict != null) {
 			return retDict.toString();
 		}
-		
+
 		return "";
 	}
-	
+
 	public void set(String key, String value) {
 		if (!dictStrings.containsKey(key)) {
 			ordering.add(key);
 		}
 		dictStrings.put(key, value);
 	}
-	
+
 	public void set(String key, PdfDictionary value) {
 		if (!dictStrings.containsKey(key)) {
 			ordering.add(key);
 		}
 		dictInnerDicts.put(key, value);
 	}
-	
+
 	public void remove(String key) {
 		ordering.remove(key);
 		dictStrings.remove(key);
 		dictInnerDicts.remove(key);
 	}
-	
+
 	/**
 	 * Append the content of this PDF dictionary to a PDF file that is in the process of being created
 	 */
 	public void appendToPdfFile(StringBuilder result, String outputLineSeparator) {
-	
+
 		result.append("<<");
-		
+
 		for (String key : ordering) {
 
 			for (Map.Entry<String, String> entry : dictStrings.entrySet()) {
@@ -214,24 +214,24 @@ public class PdfDictionary {
 	 * Convert this PDF dictionary to a string for diagnostic output
 	 */
 	public String toString() {
-	
+
 		StringBuilder result = new StringBuilder();
-		
+
 		String sep = "";
-	
+
 		for (Map.Entry<String, String> entry : dictStrings.entrySet()) {
 			result.append(sep);
 			sep = "\n";
 			result.append(entry.getKey() + ": " + entry.getValue());
 		}
-		
+
 		for (Map.Entry<String, PdfDictionary> entry : dictInnerDicts.entrySet()) {
 			result.append(sep);
 			sep = "\n";
 			result.append(entry.getKey() + ": " + entry.getValue().toString().replace("\n", "\n    "));
 		}
-		
+
 		return result.toString();
 	}
-	
+
 }

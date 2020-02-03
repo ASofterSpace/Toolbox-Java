@@ -2,8 +2,12 @@
  * Unlicensed code created by A Softer Space, 2018
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.pdf;
 
+import com.asofterspace.toolbox.io.BinaryFile;
+import com.asofterspace.toolbox.io.Directory;
+import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.ImageFileCtrl;
 import com.asofterspace.toolbox.utils.Image;
 
 import java.io.IOException;
@@ -58,7 +62,7 @@ public class PdfFile extends BinaryFile {
 
 
 	/**
-	 * You can construct a PdfFile instance by directly from a path name.
+	 * You can construct a PdfFile instance directly from a path name.
 	 */
 	public PdfFile(String fullyQualifiedFileName) {
 
@@ -510,8 +514,10 @@ public class PdfFile extends BinaryFile {
 		// TODO :: actually directly get the images, without going via files and temp directories and all that!
 		Directory tempDir = new Directory("temp");
 		List<File> pictures = exportPictures(tempDir);
+		ImageFileCtrl imgFileCtrl = new ImageFileCtrl();
+		imgFileCtrl.addHandler(new PdfImageHandler());
 		for (File picFile : pictures) {
-			result.add(ImageFile.readImageFromFile(picFile));
+			result.add(imgFileCtrl.loadImageFromFile(picFile));
 		}
 		tempDir.delete();
 

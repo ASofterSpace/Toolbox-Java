@@ -2,15 +2,12 @@
  * Unlicensed code created by A Softer Space, 2018
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.xlsx;
 
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.XmlElement;
+import com.asofterspace.toolbox.io.XmlFile;
+
 import java.util.List;
 
 
@@ -35,32 +32,32 @@ public class XlsmFile extends XlsxFile {
 
 		super(regularFile);
 	}
-	
+
 	/**
 	 * This is a macro-enabled XLSX file, so let's actually add some macros. ;)
 	 */
 	public void addMacro(File macroBinFile) {
-	
+
 		// add macro to [Content_Types].xml
 		XmlFile contentTypes = getContentTypes();
-		
+
 		List<XmlElement> types = contentTypes.domGetElems("Types");
-		
+
 		if (types.size() > 0) {
 			XmlElement override = types.get(0).createChild("Override");
-			
+
 			override.setAttribute("PartName", "/xl/" + macroBinFile.getLocalFilename());
 			override.setAttribute("ContentType", "application/vnd.ms-office.vbaProject");
 		}
-		
+
 		// add macro to /xl/_rels/workbook.xml.rels
 		XmlFile workbookRels = getWorkbookRels();
-		
+
 		List<XmlElement> relationships = workbookRels.domGetElems("Relationships");
-		
+
 		if (relationships.size() > 0) {
 			int highestUnfoundId = 1;
-			
+
 			List<XmlElement> findIds = workbookRels.domGetElems("Relationship");
 			for (XmlElement findId : findIds) {
 				String foundIdFull = findId.getAttribute("Id");
@@ -77,7 +74,7 @@ public class XlsmFile extends XlsxFile {
 					// do not increase the unfound id in case of exceptions...
 				}
 			}
-		
+
 			XmlElement relationship = relationships.get(0).createChild("Relationship");
 			relationship.setAttribute("Id", "rId" + highestUnfoundId);
 			relationship.setAttribute("Type", "http://schemas.microsoft.com/office/2006/relationships/vbaProject");
@@ -87,7 +84,7 @@ public class XlsmFile extends XlsxFile {
 		// add actual macro itself
 		addZippedFile(macroBinFile, "xl/");
 	}
-	
+
 	/**
 	 * Gives back a string representation of the xlsm file object
 	 */

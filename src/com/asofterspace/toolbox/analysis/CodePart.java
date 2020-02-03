@@ -12,18 +12,18 @@ import java.util.List;
 
 
 /**
- * This represents a single part of our java toolbox
+ * This represents a single part of source code files, typically similar to a package
  */
-public class ToolboxPart {
+public class CodePart {
 
 	private String name;
 
 	private List<SimpleFile> sourceCodeFiles;
 
-	private List<ToolboxPart> dependingOn;
+	private List<CodePart> dependingOn;
 
 
-	public ToolboxPart(String name) {
+	public CodePart(String name) {
 
 		this.name = name;
 
@@ -55,7 +55,7 @@ public class ToolboxPart {
 		return sourceCodeFiles;
 	}
 
-	public void addDependencyOn(ToolboxPart otherPart) {
+	public void addDependencyOn(CodePart otherPart) {
 
 		if (otherPart == null) {
 			return;
@@ -71,7 +71,7 @@ public class ToolboxPart {
 		}
 	}
 
-	public List<ToolboxPart> getDependencies() {
+	public List<CodePart> getDependencies() {
 		return dependingOn;
 	}
 
@@ -82,9 +82,9 @@ public class ToolboxPart {
 			return false;
 		}
 
-		if (other instanceof ToolboxPart) {
+		if (other instanceof CodePart) {
 
-			ToolboxPart otherPart = (ToolboxPart) other;
+			CodePart otherPart = (CodePart) other;
 
 			if (name == null) {
 				return otherPart.name == null;

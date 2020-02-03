@@ -2,7 +2,7 @@
  * Unlicensed code created by A Softer Space, 2018
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.pdf;
 
 import com.asofterspace.toolbox.coders.HexDecoder;
 
