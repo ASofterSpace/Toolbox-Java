@@ -383,6 +383,18 @@ public class SimpleFile extends File {
 	}
 
 	/**
+	 * Sets the file contents of this instance and writes
+	 * them to the file system
+	 * @param content file content
+	 */
+	public void saveContent(StringBuilder content) {
+
+		setContent(content.toString());
+
+		save();
+	}
+
+	/**
 	 * Copy this file to another another file instance
 	 */
 	@Override

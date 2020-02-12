@@ -259,4 +259,20 @@ public class StrUtils {
 		return result.toString();
 	}
 
+	public static String join(List<?> strList, String separator) {
+		StringBuilder result = new StringBuilder();
+		boolean firstElem = true;
+		for (Object elem : strList) {
+			if (elem != null) {
+				if (firstElem) {
+					firstElem = false;
+				} else {
+					result.append(separator);
+				}
+				result.append(elem.toString());
+			}
+		}
+		return result.toString();
+	}
+
 }
