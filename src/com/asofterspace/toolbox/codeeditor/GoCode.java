@@ -387,7 +387,7 @@ public class GoCode extends FunctionSupplyingCode {
 					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 						String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-						functions.add(new CodeSnippetWithLocation(functionName, start));
+						functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
 					}
 				}
 			}

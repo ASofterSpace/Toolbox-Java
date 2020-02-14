@@ -283,7 +283,7 @@ public class PhpCode extends HtmlCode {
 						if (functionName.startsWith("function ")) {
 							functionName = functionName.substring(9);
 						}
-						functions.add(new CodeSnippetWithLocation(functionName, start));
+						functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
 					}
 				}
 			}

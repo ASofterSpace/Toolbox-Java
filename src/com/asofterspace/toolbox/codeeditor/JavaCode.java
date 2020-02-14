@@ -330,7 +330,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						// now get the entire line that we found!
 						// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
 						String functionName = getLineFromPosition(start, content);
-						functions.add(new CodeSnippetWithLocation(functionName, start));
+						functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
 					}
 				}
 			}

@@ -7,9 +7,11 @@ package com.asofterspace.toolbox.codeeditor.base;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 
 import java.awt.Color;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.event.CaretEvent;
 import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Style;
@@ -24,6 +26,10 @@ public abstract class FunctionSupplyingCode extends Code {
 	protected JTextPane functionPane;
 
 	private DefaultStyledDocument functionPaneStyle;
+
+	private List<CodePatch> boldPatches;
+
+	private int lastTextLength = 0;
 
 
 	public FunctionSupplyingCode(JTextPane editor) {
@@ -98,7 +104,7 @@ public abstract class FunctionSupplyingCode extends Code {
 
 		if (functionPane != null) {
 
-			List<CodePatch> boldPatches = new ArrayList<>();
+			boldPatches = new ArrayList<>();
 
 			StringBuilder functionText = new StringBuilder();
 
@@ -122,11 +128,20 @@ public abstract class FunctionSupplyingCode extends Code {
 
 			functionPane.setText(functionTextStr);
 
-			if (functionPaneStyle != null) {
-				// reset all...
-				functionPaneStyle.setCharacterAttributes(0, functionTextStr.length(), attrRegular, true);
+			lastTextLength = functionTextStr.length();
 
-				// ... and then set this one
+			resetStyle();
+		}
+	}
+
+	private void resetStyle() {
+
+		if (functionPaneStyle != null) {
+			// reset all...
+			functionPaneStyle.setCharacterAttributes(0, lastTextLength, attrRegular, true);
+
+			// ... and then set this one
+			if (boldPatches != null) {
 				for (CodePatch boldPatch : boldPatches) {
 					functionPaneStyle.setCharacterAttributes(boldPatch.getStart(), boldPatch.getLength(), attrBold, false);
 				}
@@ -158,6 +173,94 @@ public abstract class FunctionSupplyingCode extends Code {
 
 		functionPane.setBackground(schemeBackgroundColor);
 		functionPane.setCaretColor(schemeForegroundColor);
+	}
+
+	@Override
+	public CodeSnippetWithLocation getClickedFunction() {
+
+		List<CodeSnippetWithLocation> functions = getFunctions();
+
+		if ((functions == null) || (functions.size() < 1)) {
+			return null;
+		}
+
+		int pressedLine = -1;
+		int caretPos = functionPane.getCaretPosition();
+
+		for (CodeSnippetWithLocation codeLoc : functions) {
+			pressedLine++;
+			caretPos -= codeLoc.getCode().length() + 1;
+			if (caretPos < 0) {
+				break;
+			}
+		}
+
+		return functions.get(pressedLine);
+	}
+
+	@Override
+	protected void onCaretUpdate(CaretEvent event) {
+		super.onCaretUpdate(event);
+
+		highlightCurrentFunction();
+	}
+
+	@Override
+	protected void onMouseReleased(MouseEvent event) {
+		super.onMouseReleased(event);
+
+		highlightCurrentFunction();
+	}
+
+	@Override
+	public void startFunctionHighlighting() {
+		super.startFunctionHighlighting();
+
+		highlightCurrentFunction();
+	}
+
+	/**
+	 * When the user mouse-clicks somewhere or uses the arrow keys, highlight the function we are currently in...
+	 */
+	private void highlightCurrentFunction() {
+
+		if (doFunctionHighlighting && (functionPane != null) && (functionPaneStyle != null)) {
+
+			int curCaretPos = decoratedEditor.getCaretPosition();
+			int bestFuncCaretPos = 0;
+			CodeSnippetWithLocation bestFunc = null;
+
+			for (CodeSnippetWithLocation func : functions) {
+				if ((func.getCaretPos() <= curCaretPos) && (func.getCaretPos() > bestFuncCaretPos)) {
+					bestFuncCaretPos = func.getCaretPos();
+					bestFunc = func;
+				}
+			}
+
+			// reset all...
+			resetStyle();
+
+			String functionTextStr = functionPane.getText();
+
+			// ... and if we found a best function...
+			if (bestFunc != null) {
+
+				int funcLineNum = functions.indexOf(bestFunc);
+				int start = 0;
+
+				for (int i = 0; i < funcLineNum; i++) {
+					start = functionTextStr.indexOf("\n", start+1);
+				}
+
+				int end = functionTextStr.indexOf("\n", start+1);
+				if (end < start) {
+					end = functionTextStr.length();
+				}
+
+				// ... highlight that one!
+				functionPaneStyle.setCharacterAttributes(start, end - start, attrSearchSelected, true);
+			}
+		}
 	}
 
 

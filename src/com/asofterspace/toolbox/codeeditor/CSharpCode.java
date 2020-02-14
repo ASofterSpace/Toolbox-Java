@@ -309,7 +309,7 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 				if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 					// now get the entire line that we found!
 					String functionName = getLineFromPosition(start, content);
-					functions.add(new CodeSnippetWithLocation(functionName, start));
+					functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
 				}
 			}
 		} else if (isAnnotation(couldBeKeyword)) {

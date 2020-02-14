@@ -306,7 +306,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 				getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
 					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-					functions.add(new CodeSnippetWithLocation(functionName, start));
+					functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
 				}
 			}
 		}

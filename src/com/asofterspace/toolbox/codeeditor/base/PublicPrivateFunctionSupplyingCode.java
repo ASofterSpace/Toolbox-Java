@@ -60,30 +60,30 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 		List<CodeSnippetWithLocation> privateFunctions = new ArrayList<>();
 
 		for (CodeSnippetWithLocation func : functions) {
-			String line = func.getCode().trim();
-			if (line.endsWith("{")) {
-				line = line.substring(0, line.length() - 1).trim();
+			String trimmedLine = func.getCode().trim();
+			if (trimmedLine.endsWith("{")) {
+				trimmedLine = trimmedLine.substring(0, trimmedLine.length() - 1).trim();
 			}
-			if (line.contains("static ")) {
-				line = line.replace("static ", "");
-				if (line.contains("public ")) {
-					publicStaticFunctions.add(new CodeSnippetWithLocation(line.replace("public ", ""), func.getCaretPos()));
-				} else if (line.contains("protected ")) {
-					protectedStaticFunctions.add(new CodeSnippetWithLocation(line.replace("protected ", ""), func.getCaretPos()));
-				} else if (line.contains("private ")) {
-					privateStaticFunctions.add(new CodeSnippetWithLocation(line.replace("private ", ""), func.getCaretPos()));
+			if (trimmedLine.contains("static ")) {
+				trimmedLine = trimmedLine.replace("static ", "");
+				if (trimmedLine.contains("public ")) {
+					publicStaticFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("public ", ""), func.getCaretPos()));
+				} else if (trimmedLine.contains("protected ")) {
+					protectedStaticFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("protected ", ""), func.getCaretPos()));
+				} else if (trimmedLine.contains("private ")) {
+					privateStaticFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("private ", ""), func.getCaretPos()));
 				} else {
-					anyStaticFunctions.add(new CodeSnippetWithLocation(line, func.getCaretPos()));
+					anyStaticFunctions.add(new CodeSnippetWithLocation(trimmedLine, func.getCaretPos()));
 				}
 			} else {
-				if (line.contains("public ")) {
-					publicFunctions.add(new CodeSnippetWithLocation(line.replace("public ", ""), func.getCaretPos()));
-				} else if (line.contains("protected ")) {
-					protectedFunctions.add(new CodeSnippetWithLocation(line.replace("protected ", ""), func.getCaretPos()));
-				} else if (line.contains("private ")) {
-					privateFunctions.add(new CodeSnippetWithLocation(line.replace("private ", ""), func.getCaretPos()));
+				if (trimmedLine.contains("public ")) {
+					publicFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("public ", ""), func.getCaretPos()));
+				} else if (trimmedLine.contains("protected ")) {
+					protectedFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("protected ", ""), func.getCaretPos()));
+				} else if (trimmedLine.contains("private ")) {
+					privateFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("private ", ""), func.getCaretPos()));
 				} else {
-					anyFunctions.add(new CodeSnippetWithLocation(line, func.getCaretPos()));
+					anyFunctions.add(new CodeSnippetWithLocation(trimmedLine, func.getCaretPos()));
 				}
 			}
 		}

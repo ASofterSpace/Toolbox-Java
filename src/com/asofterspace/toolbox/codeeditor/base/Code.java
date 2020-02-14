@@ -102,6 +102,9 @@ public abstract class Code extends DefaultStyledDocument {
 	private static Thread highlightThread;
 	private volatile boolean pleaseHighlight = false;
 
+	// do we highlight functions which the user is currently in or not?
+	protected boolean doFunctionHighlighting = true;
+
 	// selection
 	private int selStart = 0;
 	private int selEnd = 0;
@@ -252,15 +255,8 @@ public abstract class Code extends DefaultStyledDocument {
 		// keep track of selection
 		caretListener = new CaretListener() {
 			@Override
-			public void caretUpdate(CaretEvent e) {
-				if (e.getDot() < e.getMark()) {
-					selStart = e.getDot();
-					selEnd = e.getMark();
-				} else {
-					selStart = e.getMark();
-					selEnd = e.getDot();
-				}
-				selLength = selEnd - selStart;
+			public void caretUpdate(CaretEvent event) {
+				onCaretUpdate(event);
 			}
 		};
 
@@ -274,6 +270,17 @@ public abstract class Code extends DefaultStyledDocument {
 		};
 
 		decoratedEditor.addMouseListener(mouseListener);
+	}
+
+	protected void onCaretUpdate(CaretEvent e) {
+		if (e.getDot() < e.getMark()) {
+			selStart = e.getDot();
+			selEnd = e.getMark();
+		} else {
+			selStart = e.getMark();
+			selEnd = e.getDot();
+		}
+		selLength = selEnd - selStart;
 	}
 
 	/**
@@ -454,6 +461,21 @@ public abstract class Code extends DefaultStyledDocument {
 		// even though we do not support functions at all, still just return
 		// an empty list rather than the much nastier null!
 		return new ArrayList<>();
+	}
+
+	/**
+	 * Gets the function that has last been clicked on
+	 */
+	public CodeSnippetWithLocation getClickedFunction() {
+		return null;
+	}
+
+	public void startFunctionHighlighting() {
+		this.doFunctionHighlighting = true;
+	}
+
+	public void stopFunctionHighlighting() {
+		this.doFunctionHighlighting = false;
 	}
 
 	/**
@@ -1153,10 +1175,12 @@ public abstract class Code extends DefaultStyledDocument {
 		attrSearch = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSearch, new Color(0, 0, 0));
 		StyleConstants.setBackground(attrSearch, new Color(0, 255, 255));
+		StyleConstants.setBold(attrSearch, true);
 
 		attrSearchSelected = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSearchSelected, new Color(0, 0, 0));
 		StyleConstants.setBackground(attrSearchSelected, new Color(255, 0, 255));
+		StyleConstants.setBold(attrSearchSelected, true);
 
 		attrAnnotation = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAnnotation, new Color(0, 128, 64));
@@ -1220,10 +1244,12 @@ public abstract class Code extends DefaultStyledDocument {
 		attrSearch = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSearch, new Color(255, 255, 255));
 		StyleConstants.setBackground(attrSearch, new Color(0, 128, 128));
+		StyleConstants.setBold(attrSearch, true);
 
 		attrSearchSelected = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSearchSelected, new Color(255, 255, 255));
 		StyleConstants.setBackground(attrSearchSelected, new Color(128, 0, 128));
+		StyleConstants.setBold(attrSearchSelected, true);
 
 		attrAnnotation = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrAnnotation, new Color(128, 255, 196));
