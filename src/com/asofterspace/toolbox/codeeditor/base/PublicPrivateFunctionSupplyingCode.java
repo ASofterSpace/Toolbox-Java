@@ -49,6 +49,11 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 	@Override
 	protected void updateFunctionList() {
 
+		List<CodeSnippetWithLocation> publicStaticFunctions = new ArrayList<>();
+		List<CodeSnippetWithLocation> protectedStaticFunctions = new ArrayList<>();
+		List<CodeSnippetWithLocation> anyStaticFunctions = new ArrayList<>();
+		List<CodeSnippetWithLocation> privateStaticFunctions = new ArrayList<>();
+
 		List<CodeSnippetWithLocation> publicFunctions = new ArrayList<>();
 		List<CodeSnippetWithLocation> protectedFunctions = new ArrayList<>();
 		List<CodeSnippetWithLocation> anyFunctions = new ArrayList<>();
@@ -59,28 +64,52 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 			if (line.endsWith("{")) {
 				line = line.substring(0, line.length() - 1).trim();
 			}
-			if (line.contains("public ")) {
-				publicFunctions.add(new CodeSnippetWithLocation(line.replace("public ", ""), func.getCaretPos()));
-			} else if (line.contains("protected ")) {
-				protectedFunctions.add(new CodeSnippetWithLocation(line.replace("protected ", ""), func.getCaretPos()));
-			} else if (line.contains("private ")) {
-				privateFunctions.add(new CodeSnippetWithLocation(line.replace("private ", ""), func.getCaretPos()));
+			if (line.contains("static ")) {
+				line = line.replace("static ", "");
+				if (line.contains("public ")) {
+					publicStaticFunctions.add(new CodeSnippetWithLocation(line.replace("public ", ""), func.getCaretPos()));
+				} else if (line.contains("protected ")) {
+					protectedStaticFunctions.add(new CodeSnippetWithLocation(line.replace("protected ", ""), func.getCaretPos()));
+				} else if (line.contains("private ")) {
+					privateStaticFunctions.add(new CodeSnippetWithLocation(line.replace("private ", ""), func.getCaretPos()));
+				} else {
+					anyStaticFunctions.add(new CodeSnippetWithLocation(line, func.getCaretPos()));
+				}
 			} else {
-				anyFunctions.add(new CodeSnippetWithLocation(line, func.getCaretPos()));
+				if (line.contains("public ")) {
+					publicFunctions.add(new CodeSnippetWithLocation(line.replace("public ", ""), func.getCaretPos()));
+				} else if (line.contains("protected ")) {
+					protectedFunctions.add(new CodeSnippetWithLocation(line.replace("protected ", ""), func.getCaretPos()));
+				} else if (line.contains("private ")) {
+					privateFunctions.add(new CodeSnippetWithLocation(line.replace("private ", ""), func.getCaretPos()));
+				} else {
+					anyFunctions.add(new CodeSnippetWithLocation(line, func.getCaretPos()));
+				}
 			}
 		}
 
 		sortFunctions(publicFunctions);
+		sortFunctions(publicStaticFunctions);
 		sortFunctions(protectedFunctions);
+		sortFunctions(protectedStaticFunctions);
 		sortFunctions(anyFunctions);
+		sortFunctions(anyStaticFunctions);
 		sortFunctions(privateFunctions);
+		sortFunctions(privateStaticFunctions);
 
 		functions = new ArrayList<>();
 
+		// TODO : currently, we here add a u205 (mid space) because the highlighting in FunctionSupplyingCode
+		// highlights rows based on the spaces inside and we want the entire row to be highlighted...
+		// do that less hackishly! ;)
 		appendFunctions(functions, publicFunctions, "public");
+		appendFunctions(functions, publicStaticFunctions, "public\u205Fstatic");
 		appendFunctions(functions, protectedFunctions, "protected");
+		appendFunctions(functions, protectedStaticFunctions, "protected\u205Fstatic");
 		appendFunctions(functions, anyFunctions, "package-private");
+		appendFunctions(functions, anyStaticFunctions, "package-private\u205Fstatic");
 		appendFunctions(functions, privateFunctions, "private");
+		appendFunctions(functions, privateStaticFunctions, "private\u205Fstatic");
 
 		super.updateFunctionList();
 	}
