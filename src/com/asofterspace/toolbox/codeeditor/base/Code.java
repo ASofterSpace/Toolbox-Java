@@ -1757,11 +1757,11 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.setCaretPosition(newText.getCaretPos());
 	}
 
-	protected boolean openFileRelativeToThis(String basePath, String relativePath, CodeLanguage language, String extraInfo) {
+	protected boolean openFileRelativeToThis(String basePath, List<String> relativePaths, CodeLanguage language, String extraInfo) {
 		if (onOpenFileCallback == null) {
 			return false;
 		}
-		return onOpenFileCallback.openFileRelativeToThis(basePath, relativePath, language, extraInfo);
+		return onOpenFileCallback.openFileRelativeToThis(basePath, relativePaths, language, extraInfo);
 	}
 
 }

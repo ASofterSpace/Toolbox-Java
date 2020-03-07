@@ -402,7 +402,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					// if there was no import line for the current word...
 					if (importLine == null) {
 						// ... then attempt to open the file directly in the same folder (as it might be a direct sibling)
-						if (openFileRelativeToThis("", curWord + ".java", CodeLanguage.JAVA, null)) {
+						List<String> filesToOpen = new ArrayList<>();
+						filesToOpen.add(curWord + ".java");
+						filesToOpen.add(curWord + ".groovy");
+						if (openFileRelativeToThis("", filesToOpen, CodeLanguage.JAVA, null)) {
 							return;
 						}
 					}
@@ -414,7 +417,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				importLine = importLine.substring(7).trim();
 				importLine = importLine.substring(0, importLine.length() - 1).trim();
 
-				String openFilePath = importLine.replaceAll("\\.", "/") + ".java";
+				List<String> openFilePaths = new ArrayList<>();
+				openFilePaths.add(importLine.replaceAll("\\.", "/") + ".java");
+				openFilePaths.add(importLine.replaceAll("\\.", "/") + ".groovy");
 				String basePath = "";
 
 				// get own package name
@@ -431,7 +436,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				}
 
 				// now that the path has been resolved, attempt to open that file!
-				if (openFileRelativeToThis(basePath, openFilePath, CodeLanguage.JAVA, importLine)) {
+				if (openFileRelativeToThis(basePath, openFilePaths, CodeLanguage.JAVA, importLine)) {
 					return;
 				}
 			}

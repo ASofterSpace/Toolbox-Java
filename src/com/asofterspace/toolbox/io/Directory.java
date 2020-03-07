@@ -289,9 +289,27 @@ public class Directory {
 		return result;
 	}
 
+	/**
+	 * Finds a file based on its local name
+	 */
 	public File findFile(String localFilename) {
 
 		return findFileInternally(new java.io.File(dirname), localFilename);
+	}
+
+	/**
+	 * Finds a file based on a possible list of local names
+	 */
+	public File findFileFromList(List<String> localFilenames) {
+
+		for (String localFilename : localFilenames) {
+			File result = findFileInternally(new java.io.File(dirname), localFilename);
+			if (result != null) {
+				return result;
+			}
+		}
+
+		return null;
 	}
 
 	private File findFileInternally(java.io.File entryPoint, String localFilename) {
