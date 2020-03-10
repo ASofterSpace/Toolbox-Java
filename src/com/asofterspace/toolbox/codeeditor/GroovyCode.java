@@ -4,6 +4,10 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.swing.JTextPane;
 
 

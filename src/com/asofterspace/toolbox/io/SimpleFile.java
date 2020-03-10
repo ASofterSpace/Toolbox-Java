@@ -305,7 +305,19 @@ public class SimpleFile extends File {
 	 */
 	public void appendContent(String line) {
 
+		ensureContents(true);
+
 		filecontents.add(line);
+	}
+
+	/**
+	 * Insert a single line into the contents (without saving)
+	 */
+	public void insertContent(String line, int lineNum) {
+
+		ensureContents(true);
+
+		filecontents.add(lineNum, line);
 	}
 
 	/**
