@@ -4,28 +4,17 @@
  */
 package com.asofterspace.toolbox.io;
 
-import com.asofterspace.toolbox.utils.TextEncoding;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * A simple file object describes a single line-oriented text file and enables simple access to
+ * A simple file object describes a single-line-oriented text file and enables simple access to
  * its contents.
  */
-public class SimpleFile extends File {
+public class SimpleFile extends TextFile {
 
 	protected List<String> filecontents;
-
-	protected TextEncoding usingEncoding = null;
 
 
 	/**
@@ -74,45 +63,6 @@ public class SimpleFile extends File {
 		super(directory, filename);
 	}
 
-	public TextEncoding getEncoding() {
-
-		if (usingEncoding == null) {
-			return TextEncoding.UTF8_WITHOUT_BOM;
-		}
-
-		return usingEncoding;
-	}
-
-	private Charset getCharset() {
-
-		if (usingEncoding == null) {
-			return StandardCharsets.UTF_8;
-		}
-
-		switch (usingEncoding) {
-
-			case UTF8_WITH_BOM:
-			case UTF8_WITHOUT_BOM:
-				return StandardCharsets.UTF_8;
-
-			case ISO_LATIN_1:
-				return StandardCharsets.ISO_8859_1;
-
-			default:
-				return StandardCharsets.UTF_8;
-		}
-	}
-
-	/**
-	 * Determines whether the UTF8 BOM should be written or not,
-	 * but does NOT immediately write the file - so after changing
-	 * this, if you also want to change the file on the disk, call
-	 * save() afterwards!
-	 */
-	public void setEncoding(TextEncoding encoding) {
-		usingEncoding = encoding;
-	}
-
 	/**
 	 * Creates this file on the disk, which entails:
 	 * - creating the parent directory
@@ -123,7 +73,7 @@ public class SimpleFile extends File {
 	 */
 	public void create() {
 
-		createParentDirectory();
+		super.create();
 
 		if (filecontents == null) {
 			filecontents = new ArrayList<>();
@@ -138,36 +88,8 @@ public class SimpleFile extends File {
 	 */
 	public List<String> loadContents(boolean complainIfMissing) {
 
-		try {
-			byte[] binaryContent = Files.readAllBytes(this.getJavaPath());
+		setContent(super.loadContent(complainIfMissing));
 
-			// autodetect encoding - read as UTF8...
-			if (usingEncoding == null) {
-				usingEncoding = TextEncoding.UTF8_WITHOUT_BOM;
-
-				// ... and detect presence of BOM
-				if (binaryContent.length > 2) {
-					if ((binaryContent[0] == (byte) 239) &&
-						(binaryContent[1] == (byte) 187) &&
-						(binaryContent[2] == (byte) 191)) {
-						usingEncoding = TextEncoding.UTF8_WITH_BOM;
-					}
-				}
-			}
-
-			String newContent = new String(binaryContent, getCharset());
-
-			if (usingEncoding == TextEncoding.UTF8_WITH_BOM) {
-				newContent = newContent.substring(1);
-			}
-
-			setContent(newContent);
-
-		} catch (IOException e) {
-			if (complainIfMissing) {
-				System.err.println("[ERROR] Trying to load the file " + filename + ", an I/O Exception occurred - inconceivable!");
-			}
-		}
 		return filecontents;
 	}
 
@@ -285,6 +207,11 @@ public class SimpleFile extends File {
 	 */
 	public void setContent(String content) {
 
+		if (content == null) {
+			filecontents = null;
+			return;
+		}
+
 		filecontents = new ArrayList<String>();
 
 		String[] lines = content.split("\n");
@@ -334,40 +261,16 @@ public class SimpleFile extends File {
 
 	public void saveWithLineEndings(String lineEnding) {
 
-		// the following line works also if usingEncoding is null, in which case
-		// we want to default to UTF8_WITHOUT_BOM anyway
-		boolean usingBom = usingEncoding == TextEncoding.UTF8_WITH_BOM;
+		StringBuilder contentBuilder = new StringBuilder();
 
-		java.io.File targetFile = initSave();
-
-		if (usingBom) {
-			// initialize the file with the BOM
-			try (FileOutputStream stream = new FileOutputStream(targetFile, false)) {
-
-				// 0xEF 0xBB 0xBF
-				byte[] utf8Bom = {(byte) 239, (byte) 187, (byte) 191};
-
-				stream.write(utf8Bom);
-
-			} catch (IOException e) {
-				System.err.println("[ERROR] An IOException occurred when trying to write the UTF8 BOM to the file " + filename + " - inconceivable!");
-			}
+		for (String line : filecontents) {
+			contentBuilder.append(line);
+			contentBuilder.append(lineEnding);
 		}
 
-		// fill file with the actual data
-		// if we are using a UTF8 BOM, append now (to the BOM we just wrote)
-		// if we are not using a UTF8 BOM, do not append (but just overwrite), as we have not yet written
-		// to the file (as we have not written any BOM or anything else)
-		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, usingBom), getCharset())) {
+		super.setContent(contentBuilder.toString());
 
-			for (String line : filecontents) {
-				writer.write(line);
-				writer.write(lineEnding);
-			}
-
-		} catch (IOException e) {
-			System.err.println("[ERROR] An IOException occurred when trying to write to the file " + filename + " - inconceivable!");
-		}
+		super.save();
 	}
 
 	/**
@@ -423,6 +326,12 @@ public class SimpleFile extends File {
 			} else {
 				simpleOther.filecontents = new ArrayList<>(this.filecontents);
 			}
+
+		} else if (other instanceof TextFile) {
+
+			TextFile textOther = (TextFile) other;
+
+			textOther.setContent(this.getContent());
 		}
 	}
 

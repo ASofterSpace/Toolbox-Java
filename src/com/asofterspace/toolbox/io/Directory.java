@@ -238,10 +238,20 @@ public class Directory {
 	 */
 	public List<File> getAllFiles(boolean recursively) {
 
-		return getAllFilesInternally(new java.io.File(dirname), recursively);
+		return getAllFilesInternally(new java.io.File(dirname), null, recursively);
 	}
 
-	private List<File> getAllFilesInternally(java.io.File entryPoint, boolean recursively) {
+	/**
+	 * Get all the files contained in the directory (and, if recursively
+	 * is set to true, in its sub-directories) whose names end with the
+	 * given string
+	 */
+	public List<File> getAllFilesEndingWith(String endStr, boolean recursively) {
+
+		return getAllFilesInternally(new java.io.File(dirname), endStr, recursively);
+	}
+
+	private List<File> getAllFilesInternally(java.io.File entryPoint, String endStr, boolean recursively) {
 
 		List<File> result = new ArrayList<>();
 
@@ -250,10 +260,12 @@ public class Directory {
 			for (java.io.File curChild : children) {
 				if (curChild.isDirectory()) {
 					if (recursively) {
-						result.addAll(getAllFilesInternally(curChild, true));
+						result.addAll(getAllFilesInternally(curChild, endStr, true));
 					}
 				} else {
-					result.add(new File(curChild));
+					if ((endStr == null) || curChild.getAbsolutePath().endsWith(endStr)) {
+						result.add(new File(curChild));
+					}
 				}
 			}
 		}
