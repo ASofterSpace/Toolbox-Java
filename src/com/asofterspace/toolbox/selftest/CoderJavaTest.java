@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.selftest;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
+import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.JavaCode;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
@@ -169,6 +170,9 @@ public class CoderJavaTest implements Test {
 				"	static public Fee schleddelwedd(Ber ber) {\n" +
 				"	}\n" +
 				"\n" +
+				"	public Fee schladdlwadd(Ber ber) {\n" +
+				"	}\n" +
+				"\n" +
 				"	private String blubb() {\n" +
 				"	}\n" +
 				"\n" +
@@ -184,8 +188,11 @@ public class CoderJavaTest implements Test {
 				"}";
 
 		String targetStr = "public:\n" +
-				"static Fee schleddelwedd(Ber ber)\n" +
-				"static Foo schluddelwudd(Bar bar)\n" +
+				"Fee schladdlwadd(Ber ber)\n" +
+				"\n" +
+				"public" + PublicPrivateFunctionSupplyingCode.SPACE + "static:\n" +
+				"Fee schleddelwedd(Ber ber)\n" +
+				"Foo schluddelwudd(Bar bar)\n" +
 				"\n" +
 				"protected:\n" +
 				"int blöbb()\n" +

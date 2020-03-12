@@ -16,6 +16,8 @@ import javax.swing.JTextPane;
 
 public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyingCode {
 
+	public static final String SPACE = "\u205F";
+
 	private static final long serialVersionUID = 1L;
 
 
@@ -103,13 +105,13 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 		// highlights rows based on the spaces inside and we want the entire row to be highlighted...
 		// do that less hackishly! ;)
 		appendFunctions(functions, publicFunctions, "public");
-		appendFunctions(functions, publicStaticFunctions, "public\u205Fstatic");
+		appendFunctions(functions, publicStaticFunctions, "public" + SPACE + "static");
 		appendFunctions(functions, protectedFunctions, "protected");
-		appendFunctions(functions, protectedStaticFunctions, "protected\u205Fstatic");
+		appendFunctions(functions, protectedStaticFunctions, "protected" + SPACE + "static");
 		appendFunctions(functions, anyFunctions, "package-private");
-		appendFunctions(functions, anyStaticFunctions, "package-private\u205Fstatic");
+		appendFunctions(functions, anyStaticFunctions, "package-private" + SPACE + "static");
 		appendFunctions(functions, privateFunctions, "private");
-		appendFunctions(functions, privateStaticFunctions, "private\u205Fstatic");
+		appendFunctions(functions, privateStaticFunctions, "private" + SPACE + "static");
 
 		super.updateFunctionList();
 	}
