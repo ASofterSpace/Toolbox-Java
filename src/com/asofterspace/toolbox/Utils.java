@@ -65,6 +65,10 @@ public class Utils {
 		System.out.println(DateUtils.DEFAULT_TIME_FORMAT.format(new Date()) + " [heap " + heapStr + "]: " + logline);
 	}
 
+	public static void sleep(double milliseconds) {
+		sleep((int) milliseconds);
+	}
+
 	/**
 	 * A quick utility function to just sleep (if allowed) - and not do anything special
 	 * if we are being interrupted (just return a bit earlier)

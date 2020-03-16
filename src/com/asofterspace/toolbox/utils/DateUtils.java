@@ -42,4 +42,8 @@ public class DateUtils {
 
 		return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
 	}
+
+	public static String dateTimeStampNow() {
+		return serializeDateTime(null);
+	}
 }
