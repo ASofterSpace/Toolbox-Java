@@ -73,7 +73,7 @@ public class SimpleFile extends TextFile {
 	 */
 	public void create() {
 
-		super.create();
+		super.prepareToCreate();
 
 		if (filecontents == null) {
 			filecontents = new ArrayList<>();

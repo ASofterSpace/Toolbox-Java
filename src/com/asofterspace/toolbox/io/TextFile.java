@@ -120,13 +120,18 @@ public class TextFile extends File {
 	 */
 	public void create() {
 
+		prepareToCreate();
+
+		save();
+	}
+
+	protected void prepareToCreate() {
+
 		createParentDirectory();
 
 		if (filecontent == null) {
 			filecontent = "";
 		}
-
-		save();
 	}
 
 	/**

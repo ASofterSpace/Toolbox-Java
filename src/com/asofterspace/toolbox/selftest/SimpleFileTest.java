@@ -15,7 +15,22 @@ public class SimpleFileTest implements Test {
 	@Override
 	public void runAll() {
 
+		createTest();
+
 		switchEncodingsTest();
+	}
+
+	public void createTest() {
+
+		TestUtils.start("Create Simple File");
+
+		String testFileName = AllTests.TEST_PATH + "/createTestFile.txt";
+
+		SimpleFile testFile = new SimpleFile(testFileName);
+
+		testFile.create();
+
+		TestUtils.succeed();
 	}
 
 	public void switchEncodingsTest() {
