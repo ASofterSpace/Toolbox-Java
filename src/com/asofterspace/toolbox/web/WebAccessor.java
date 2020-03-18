@@ -4,7 +4,6 @@
  */
 package com.asofterspace.toolbox.web;
 
-import com.asofterspace.toolbox.coders.UrlDecoder;
 import com.asofterspace.toolbox.coders.UrlEncoder;
 import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.Directory;
@@ -16,7 +15,6 @@ import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -219,20 +217,20 @@ public class WebAccessor {
 			// in that case we would need to manually append line endings such as \n or \r\n though
 			// sadly, the buffered reader does not discrimiate, so we cannot reconstruct whether
 			// a particular line ended in \n or in \r\n (and YES, there are files which must contain
-			// most in different locations, such as JPEG image files!)
+			// both in different locations, such as JPEG image files!)
 			ByteBuffer buffer = new ByteBuffer();
 
-			while (reader.available() > 0) {
+			while (true) {
+
+				// nextByte is an int between 0 and 255 usually,
+				// but will be set to -1 to indicate the stream
+				// being fully consumed
 				int ap = reader.read();
-				buffer.append((byte) ap);
-				if (reader.available() <= 0) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						break;
-					}
+
+				if (ap < 0) {
+					break;
 				}
-				ap = reader.read();
+
 				buffer.append((byte) ap);
 			}
 
