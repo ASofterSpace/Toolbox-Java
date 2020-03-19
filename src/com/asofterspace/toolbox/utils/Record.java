@@ -580,11 +580,19 @@ public class Record {
 			}
 		}
 
+		if (result.kind == RecordKind.STRING) {
+			try {
+				return Integer.valueOf((String) result.simpleContents);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
 		if (result.kind == RecordKind.NULL) {
 			return null;
 		}
 
-		return 0;
+		return null;
 	}
 
 	/**
