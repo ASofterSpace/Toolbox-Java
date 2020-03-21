@@ -16,6 +16,7 @@ import java.util.Date;
  */
 public class DateUtils {
 
+	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
 
@@ -32,6 +33,15 @@ public class DateUtils {
 			System.err.println("Could not parse the date time " + dateTimeStr + " - using current time instead!");
 			return new Date();
 		}
+	}
+
+	public static String serializeDate(Date date) {
+
+		if (date == null) {
+			date = new Date();
+		}
+
+		return DEFAULT_DATE_FORMAT.format(date);
 	}
 
 	public static String serializeDateTime(Date dateTime) {
