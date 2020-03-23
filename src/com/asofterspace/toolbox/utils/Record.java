@@ -25,6 +25,10 @@ public class Record {
 	protected List<Record> arrContents;
 	protected Object simpleContents;
 
+	// the parent information only gets initialized when .linkDoubly() is called on the root element explicitly
+	protected Record parent;
+	protected String parentPathComponent;
+
 
 	/**
 	 * Create an empty Record object
@@ -272,6 +276,114 @@ public class Record {
 
 		// ... and finally return it
 		return result;
+	}
+
+	/**
+	 * Return all the children (including recursive ones) of this Record which represent such
+	 * a key-value pair
+	 */
+	public List<Record> searchForKeyValue(String key, String value) {
+		List<Record> results = new ArrayList<>();
+		searchForKeyValueInternal(key, value, results);
+		return results;
+	}
+
+	private void searchForKeyValueInternal(String key, String value, List<Record> results) {
+
+		if (kind == RecordKind.ARRAY) {
+			if (arrContents != null) {
+				for (Record recChild : arrContents) {
+					if (recChild != null) {
+						recChild.searchForKeyValueInternal(key, value, results);
+					}
+				}
+			}
+		}
+
+		if (kind == RecordKind.OBJECT) {
+			if (objContents != null) {
+				for (Map.Entry<String, Record> entry : objContents.entrySet()) {
+					Record recChild = entry.getValue();
+					if (recChild != null) {
+						if (key.equals(entry.getKey())) {
+							if (recChild.kind == RecordKind.STRING) {
+								if (value.equals(recChild.simpleContents)) {
+									results.add(recChild);
+								}
+							}
+						}
+
+						recChild.searchForKeyValueInternal(key, value, results);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Call this on the root of a Record structure to back-link all children (and
+	 * recursive children, and so on) with links to their respective parents
+	 * Later updates to the Record structure will not be reflected in the back
+	 * links, so if you make changes, you have to call linkDoubly() again before
+	 * calling methods that require linkDoubly() to have been called!
+	 */
+	public void linkDoubly() {
+
+		// make this the root
+		parent = null;
+		parentPathComponent = "root";
+
+		// then make us the root of all our children
+		if (kind == RecordKind.ARRAY) {
+			if (arrContents != null) {
+				for (int i = 0; i < arrContents.size(); i++) {
+					Record recChild = arrContents.get(i);
+					if (recChild != null) {
+						recChild.linkDoubly();
+						recChild.parent = this;
+						recChild.parentPathComponent = "[" + i + "]";
+					}
+				}
+			}
+		}
+		if (kind == RecordKind.OBJECT) {
+			if (objContents != null) {
+				for (Map.Entry<String, Record> entry : objContents.entrySet()) {
+					Record recChild = entry.getValue();
+					if (recChild != null) {
+						recChild.linkDoubly();
+						recChild.parent = this;
+						recChild.parentPathComponent = "." + entry.getKey();
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Before calling getParent(), ensure that the Record structure you are looking at
+	 * is doubly linked - otherwise, no parent information will be available!
+	 * To ensure this, call .linkDoubly() on the root element of the structure you
+	 * want to work with.
+	 */
+	public Record getParent() {
+		return parent;
+	}
+
+	/**
+	 * Before calling getPath(), ensure that the Record structure you are looking at
+	 * is doubly linked - otherwise, no parent information will be available!
+	 * To ensure this, call .linkDoubly() on the root element of the structure you
+	 * want to work with.
+	 */
+	public String getPath() {
+		StringBuilder result = new StringBuilder();
+		Record curRec = this;
+		while (curRec != null) {
+			result.insert(0, curRec.parentPathComponent);
+			curRec = curRec.getParent();
+		}
+		return result.toString();
 	}
 
 	@Override
@@ -581,10 +693,22 @@ public class Record {
 		}
 
 		if (result.kind == RecordKind.STRING) {
+			if ("".equals((String) result.simpleContents)) {
+				return null;
+			}
 			try {
 				return Integer.valueOf((String) result.simpleContents);
 			} catch (NumberFormatException e) {
-				return null;
+				try {
+					return (Integer) (int) Math.round(Double.valueOf((String) result.simpleContents));
+				} catch (NumberFormatException e2) {
+					try {
+						return (Integer) (int) Math.round(Double.valueOf(((String) result.simpleContents).replaceAll(",", ".")));
+					} catch (NumberFormatException e3) {
+						System.err.println("Cannot convert " + result.simpleContents + " to integer...");
+						return null;
+					}
+				}
 			}
 		}
 
@@ -657,6 +781,22 @@ public class Record {
 			}
 			if (result.simpleContents instanceof Double) {
 				return (Double) result.simpleContents;
+			}
+		}
+
+		if (result.kind == RecordKind.STRING) {
+			if ("".equals((String) result.simpleContents)) {
+				return null;
+			}
+			try {
+				return Double.valueOf((String) result.simpleContents);
+			} catch (NumberFormatException e2) {
+				try {
+					return Double.valueOf(((String) result.simpleContents).replaceAll(",", "."));
+				} catch (NumberFormatException e3) {
+					System.err.println("Cannot convert " + result.simpleContents + " to double...");
+					return null;
+				}
 			}
 		}
 

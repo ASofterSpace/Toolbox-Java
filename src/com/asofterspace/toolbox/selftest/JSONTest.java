@@ -181,14 +181,44 @@ public class JSONTest implements Test {
 
 		TestUtils.start("JSON from Number String");
 
-		JSON testObject = new JSON("{\"foo\":9}");
+		JSON testObject = new JSON("{\"foo\":9, \"foo5\":\"5\", \"foo1\":1.0, \"foo2\":\"2.0\", \"foo3\":\"3,0\"}");
 
-		if (testObject.getString("foo").toString().equals("9")) {
-			TestUtils.succeed();
+		if (!testObject.getString("foo").toString().equals("9")) {
+			TestUtils.fail("We stored \"foo\":9 in a JSON object, then read the key foo as string - and did not get 9!");
 			return;
 		}
 
-		TestUtils.fail("We stored foo:9 in a JSON object, then read the key foo - and did not get 9!");
+		if (testObject.getInteger("foo") != 9) {
+			TestUtils.fail("We stored \"foo\":9 in a JSON object, then read the key foo as int - and did not get 9!");
+			return;
+		}
+
+		if (testObject.getInteger("foo11") != null) {
+			TestUtils.fail("We stored nothing for key foo11 in a JSON object, then read the key foo11 as int - and did not get null!");
+			return;
+		}
+
+		if (testObject.getInteger("foo5") != 5) {
+			TestUtils.fail("We stored \"foo5\":\"5\" in a JSON object, then read the key foo5 as int - and did not get 5!");
+			return;
+		}
+
+		if (testObject.getInteger("foo1") != 1) {
+			TestUtils.fail("We stored \"foo1\":1.0 in a JSON object, then read the key foo1 as int - and did not get 1!");
+			return;
+		}
+
+		if (testObject.getInteger("foo2") != 2) {
+			TestUtils.fail("We stored \"foo2\":\"2.0\" in a JSON object, then read the key foo2 as int - and did not get 2!");
+			return;
+		}
+
+		if (testObject.getInteger("foo3") != 3) {
+			TestUtils.fail("We stored \"foo3\":\"3,0\" in a JSON object, then read the key foo3 as int - and did not get 3!");
+			return;
+		}
+
+		TestUtils.succeed();
 	}
 
 	public void malformedFromStringTest() throws JsonParseException {
