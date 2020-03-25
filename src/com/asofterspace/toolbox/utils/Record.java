@@ -693,23 +693,7 @@ public class Record {
 		}
 
 		if (result.kind == RecordKind.STRING) {
-			if ("".equals((String) result.simpleContents)) {
-				return null;
-			}
-			try {
-				return Integer.valueOf((String) result.simpleContents);
-			} catch (NumberFormatException e) {
-				try {
-					return (Integer) (int) Math.round(Double.valueOf((String) result.simpleContents));
-				} catch (NumberFormatException e2) {
-					try {
-						return (Integer) (int) Math.round(Double.valueOf(((String) result.simpleContents).replaceAll(",", ".")));
-					} catch (NumberFormatException e3) {
-						System.err.println("Cannot convert " + result.simpleContents + " to integer...");
-						return null;
-					}
-				}
-			}
+			return strToInt((String) result.simpleContents);
 		}
 
 		if (result.kind == RecordKind.NULL) {
@@ -717,6 +701,32 @@ public class Record {
 		}
 
 		return null;
+	}
+
+	public static Integer strToInt(String value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		if ("".equals(value)) {
+			return null;
+		}
+
+		try {
+			return Integer.valueOf(value);
+		} catch (NumberFormatException e) {
+			try {
+				return (Integer) (int) Math.round(Double.valueOf(value));
+			} catch (NumberFormatException e2) {
+				try {
+					return (Integer) (int) Math.round(Double.valueOf((value).replaceAll(",", ".")));
+				} catch (NumberFormatException e3) {
+					System.err.println("Cannot convert " + value + " to integer...");
+					return null;
+				}
+			}
+		}
 	}
 
 	/**
