@@ -709,6 +709,12 @@ public class Record {
 			return null;
 		}
 
+		// remove regular whitespace characters
+		value = value.trim();
+
+		// also remove non-breaking space character
+		value = value.replaceAll("\u00a0", "");
+
 		if ("".equals(value)) {
 			return null;
 		}

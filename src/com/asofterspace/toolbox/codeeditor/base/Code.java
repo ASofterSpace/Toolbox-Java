@@ -1764,4 +1764,130 @@ public abstract class Code extends DefaultStyledDocument {
 		return onOpenFileCallback.openFileRelativeToThis(basePath, relativePaths, language, extraInfo);
 	}
 
+	/**
+	 * Add getters for selected fields
+	 */
+	public void addGetters() {
+
+		addGettersAndOrSetters(true, false);
+	}
+
+	/**
+	 * Add setters for selected fields
+	 */
+	public void addSetters() {
+
+		addGettersAndOrSetters(false, true);
+	}
+
+
+	/**
+	 * Add getters and setters for selected fields
+	 */
+	public void addGettersAndSetters() {
+
+		addGettersAndOrSetters(true, true);
+	}
+
+	protected void addGettersAndOrSetters(boolean addGetters, boolean addSetters) {
+
+		String content = decoratedEditor.getText();
+		int lineStart = getLineStartFromPosition(selStart, content);
+		int lineEnd = getLineEndFromPosition(selEnd, content);
+
+		String contentStart = content.substring(0, lineStart);
+		String contentMiddle = content.substring(lineStart, lineEnd);
+		String contentEnd = content.substring(lineEnd, content.length());
+
+		StringBuilder newCode = new StringBuilder();
+
+		// find all fields in contentMiddle
+		for (String line : contentMiddle.split("\n")) {
+			if ("".equals(line.trim())) {
+				continue;
+			}
+
+			// the line could look like:
+			// private String blubb;
+			// private Object foo = new AwesomeObject(blabliblubb);
+
+			line = line.trim();
+			if (line.endsWith(";")) {
+				line = line.substring(0, line.length() - 1);
+				line = line.trim();
+			}
+
+			// the line could look like:
+			// private String blubb
+			// private Object foo = new AwesomeObject(blabliblubb)
+
+			if (line.contains("=")) {
+				line = line.substring(0, line.indexOf("="));
+				line = line.trim();
+			}
+
+			// the line could look like:
+			// private String blubb
+			// private Object foo
+
+			String lineName = "unknown";
+			if (line.contains(" ")) {
+				lineName = line.substring(line.lastIndexOf(" ") + 1);
+				line = line.substring(0, line.lastIndexOf(" "));
+			}
+
+			// the lineName could look like:
+			// blubb
+			// foo
+
+			String lineType = "unknown";
+			if (line.contains(" ")) {
+				lineType = line.substring(line.lastIndexOf(" ") + 1);
+			}
+
+			// the lineType could look like:
+			// String
+			// Object
+
+			String lineUpcase = lineName.substring(0, 1).toUpperCase() + lineName.substring(1);
+
+			// the lineUpcase could look like:
+			// Blubb
+			// Foo
+
+			if (addGetters) {
+				newCode.append("\n\tpublic ");
+				newCode.append(lineType);
+				newCode.append(" get");
+				newCode.append(lineUpcase);
+				newCode.append("() {\n");
+				newCode.append("\t\treturn ");
+				newCode.append(lineName);
+				newCode.append(";\n");
+				newCode.append("\t}\n");
+			}
+
+			if (addSetters) {
+				newCode.append("\n\tpublic void set");
+				newCode.append(lineUpcase);
+				newCode.append("(");
+				newCode.append(lineType);
+				newCode.append(" ");
+				newCode.append(lineName);
+				newCode.append(") {\n");
+				newCode.append("\t\tthis.");
+				newCode.append(lineName);
+				newCode.append(" = ");
+				newCode.append(lineName);
+				newCode.append(";\n");
+				newCode.append("\t}\n");
+			}
+		}
+
+
+		content = contentStart + contentMiddle + newCode.toString() + contentEnd;
+
+		decoratedEditor.setText(content);
+	}
+
 }
