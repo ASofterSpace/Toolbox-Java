@@ -29,6 +29,8 @@ public class JSONTest implements Test {
 
 		malformedFromStringTest();
 
+		openEndedStringTest();
+
 		doubleBackslashBeforeNewlineTest();
 
 		toStringTest();
@@ -233,6 +235,18 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We stored a malformed JSON string in a JSON object and would expect it to cope with that - but it did not!\nOutput: " + testObject.toString());
+	}
+
+	public void openEndedStringTest() {
+
+		TestUtils.start("JSON with Open Ended String");
+
+		try {
+			JSON testObject = new JSON("{\"foo\":\"bar}");
+			TestUtils.fail("We tried to parse JSON containing an open-ended string, and it just parsed, without error!");
+		} catch (JsonParseException e) {
+			TestUtils.succeed();
+		}
 	}
 
 	public void doubleBackslashBeforeNewlineTest() throws JsonParseException {

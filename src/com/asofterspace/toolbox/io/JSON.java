@@ -181,6 +181,10 @@ public class JSON extends Record {
 			pos++;
 
 			int endIndex = jsonString.indexOf(doStringWith, pos);
+			if (endIndex < pos) {
+				throw new JsonParseException("Encountered an unclosed string while parsing JSON near: " +
+					jsonString.substring(pos, Math.min(jsonString.length(), pos + 100)));
+			}
 			String simpleContentsStr = jsonString.substring(pos, endIndex);
 			// also allow escaping " (basically, by checking here is simpleContentsStr
 			// ends with \ - in which case we add the " instead and carry on searching forward)
