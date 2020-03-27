@@ -74,6 +74,11 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return reorganizeImportsJavalike("import", origText);
 	}
 
+	@Override
+	public String reorganizeImportsCompatible(String origText) {
+		return reorganizeImportsCompatibleJavalike("import", origText);
+	}
+
 	public String removeUnusedImports(String origText) {
 		return removeUnusedImportsJavalike("import", origText);
 	}

@@ -621,6 +621,17 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
 
+	public void reorganizeImportsCompatible() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origText = decoratedEditor.getText();
+
+		String newText = reorganizeImportsCompatible(origText);
+
+		decoratedEditor.setText(newText);
+		decoratedEditor.setCaretPosition(origCaretPos);
+	}
+
 	/**
 	 * This is the stuff that is actually done when imports are reorganized;
 	 * we need to have this string-in, string-out available both for testing
@@ -628,6 +639,16 @@ public abstract class Code extends DefaultStyledDocument {
 	 * being more a convenience method around it, but this here is the main one!
 	 */
 	public String reorganizeImports(String origText) {
+
+		// just do nothing :)
+		return origText;
+	}
+
+	/**
+	 * This is the same as reorganizeImports, but generating imports organized
+	 * in a way that is compatible with wonky external IDEs ;)
+	 */
+	public String reorganizeImportsCompatible(String origText) {
 
 		// just do nothing :)
 		return origText;
@@ -742,6 +763,120 @@ public abstract class Code extends DefaultStyledDocument {
 			output.append("\n");
 			lastImport = importLine;
 			lastImportStart = thisImportStart;
+			i++;
+		}
+
+		// actually have two empty lines between the import end and the class start
+		output.append("\n");
+		if (i > 0) {
+			output.append("\n");
+		}
+
+		return output.toString() + secondOutput.toString();
+	}
+
+	/**
+	 * This function can be called by extending classes if they want to use
+	 * Java-style import organization, but possibly with a different keyword
+	 * (such as "using" in C#)
+	 */
+	protected String reorganizeImportsCompatibleJavalike(String importKeyword, String origText) {
+
+		StringBuilder output = new StringBuilder();
+		List<String> imports = new ArrayList<>();
+		StringBuilder secondOutput = new StringBuilder();
+
+		getImportsJavalike(importKeyword, origText, output, imports, secondOutput);
+
+
+		// prepare the output: we want exactly one empty line after the first line (the package),
+		// sooo we first remove all newlines following it, then append two...
+		while ((output.length() > 0) && (output.charAt(output.length() - 1) == '\n')) {
+			output.setLength(output.length() - 1);
+		}
+
+		if (imports.size() < 1) {
+			output.append("\n");
+			return output.toString() + secondOutput.toString();
+		}
+
+		output.append("\n\n");
+
+		// put imports into two different groups: one starting with java, one not doing so
+		List<String> javaImports = new ArrayList<>();
+		List<String> otherImports = new ArrayList<>();
+		for (String curImport : imports) {
+			if (curImport.startsWith(importKeyword + " java")) {
+				javaImports.add(curImport);
+			} else {
+				otherImports.add(curImport);
+			}
+		}
+
+		// sort imports mostly alphabetically, but not completely, so sort e.g.:
+		// import foo.bar.Bat;
+		// import foo.bar.adala.Cat;
+		// import foo.bar.adala.Dog;
+		// so a class is always sorted before a package name, even though Bat (b) comes after adala (a)
+		Comparator<String> wonkyComparator = new Comparator<>() {
+			public int compare(String a, String b) {
+				a = a.toLowerCase();
+				b = b.toLowerCase();
+				String aPackage = a;
+				if (a.contains(".")) {
+					aPackage = a.substring(0, a.lastIndexOf(".") + 1);
+				}
+				String bPackage = b;
+				if (b.contains(".")) {
+					bPackage = b.substring(0, b.lastIndexOf(".") + 1);
+				}
+				if (aPackage.startsWith(bPackage)) {
+					return 1;
+				}
+				if (bPackage.startsWith(aPackage)) {
+					return -1;
+				}
+				return a.compareTo(b);
+			}
+		};
+		Collections.sort(javaImports, wonkyComparator);
+		Collections.sort(otherImports, wonkyComparator);
+
+
+		int i = 0;
+
+		String lastImport = "";
+
+		for (String importLine : otherImports) {
+
+			// remove duplicates
+			if ("".equals(importLine) || lastImport.equals(importLine)) {
+				continue;
+			}
+
+			// actually add the import
+			output.append(importLine);
+			output.append("\n");
+			lastImport = importLine;
+			i++;
+		}
+
+		if (i > 0) {
+			output.append("\n");
+		}
+		i = 0;
+
+		for (String importLine : javaImports) {
+
+			// remove duplicates
+			if ("".equals(importLine) || lastImport.equals(importLine)) {
+				continue;
+			}
+
+			// actually add the import
+			output.append(importLine);
+			output.append("\n");
+			lastImport = importLine;
 			i++;
 		}
 
@@ -1884,10 +2019,17 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 		}
 
+		if (newCode.length() > 0) {
+			newCode.insert(0, "\n");
+		}
 
 		content = contentStart + contentMiddle + newCode.toString() + contentEnd;
 
 		decoratedEditor.setText(content);
+
+		int selPos = contentStart.length() + contentMiddle.length() + newCode.length();
+		decoratedEditor.setSelectionStart(selPos);
+		decoratedEditor.setSelectionEnd(selPos);
 	}
 
 }

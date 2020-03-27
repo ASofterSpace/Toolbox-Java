@@ -70,6 +70,11 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 	}
 
 	@Override
+	public String reorganizeImportsCompatible(String origText) {
+		return reorganizeImportsCompatibleJavalike("using", origText);
+	}
+
+	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 
 		int overrideCaretPos = insertedString.length();
