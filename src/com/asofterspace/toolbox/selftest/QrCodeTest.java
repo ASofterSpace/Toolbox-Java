@@ -9,11 +9,11 @@ import com.asofterspace.toolbox.barcodes.QrCodeFactory;
 import com.asofterspace.toolbox.barcodes.QrCodeMaskPattern;
 import com.asofterspace.toolbox.barcodes.QrCodeQualityLevel;
 import com.asofterspace.toolbox.barcodes.QrCodeUtils;
-import com.asofterspace.toolbox.io.DefaultImageFile;
-import com.asofterspace.toolbox.io.PpmFile;
+import com.asofterspace.toolbox.images.DefaultImageFile;
+import com.asofterspace.toolbox.images.Image;
+import com.asofterspace.toolbox.images.PpmFile;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
-import com.asofterspace.toolbox.utils.Image;
 
 
 public class QrCodeTest implements Test {

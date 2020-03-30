@@ -4,10 +4,10 @@
  */
 package com.asofterspace.toolbox.selftest;
 
+import com.asofterspace.toolbox.images.ColorRGB;
+import com.asofterspace.toolbox.images.Image;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
-import com.asofterspace.toolbox.utils.ColorRGB;
-import com.asofterspace.toolbox.utils.Image;
 
 
 public class ImageTest implements Test {

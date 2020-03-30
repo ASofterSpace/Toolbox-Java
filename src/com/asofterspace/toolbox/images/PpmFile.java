@@ -2,47 +2,41 @@
  * Unlicensed code created by A Softer Space, 2019
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.images;
 
-import com.asofterspace.toolbox.utils.ColorRGB;
-import com.asofterspace.toolbox.utils.Image;
-import com.asofterspace.toolbox.Utils;
+import com.asofterspace.toolbox.io.File;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
- * A PGM image file object describes an uncompressed grayscale image file,
- * often with .pgm extension, and starting with P5 as magic bytes
- * (or P2 for ASCII instead of raw format)
+ * A PPM image file object describes an uncompressed RGB image file,
+ * often with .ppm extension, and starting with P6 as magic bytes
+ * (or P3 for ASCII instead of raw format)
  *
  * TODO :: add ASCII variant
  * TODO :: allow comments inside the file
  *
  * @author Moya (a softer space), 2019
  */
-public class PgmFile extends RasterImageFile {
+public class PpmFile extends RasterImageFile {
 
 	/**
-	 * You can construct a PbmFile instance by directly from a path name.
+	 * You can construct a PpmFile instance by directly from a path name.
 	 */
-	public PgmFile(String fullyQualifiedFileName) {
+	public PpmFile(String fullyQualifiedFileName) {
 
 		super(fullyQualifiedFileName);
 	}
 
 	/**
-	 * You can construct a PbmFile instance by basing it on an existing file object.
+	 * You can construct a PpmFile instance by basing it on an existing file object.
 	 */
-	public PgmFile(File regularFile) {
+	public PpmFile(File regularFile) {
 
 		super(regularFile);
 	}
@@ -59,15 +53,15 @@ public class PgmFile extends RasterImageFile {
 			int len = binaryContent.length;
 
 			if (binaryContent[0] != 'P') {
-				System.err.println("[ERROR] Trying to load the PGM file " + filename + ", but its header is not that of a PGM file!");
+				System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but its header is not that of a PPM file!");
 			}
 
-			if (binaryContent[1] != '5') {
-				System.err.println("[ERROR] Trying to load the PGM file " + filename + ", but its header is not that of a raw PGM file!");
+			if (binaryContent[1] != '6') {
+				System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but its header is not that of a raw PPM file!");
 			}
 
 			if (!isWhitespace(binaryContent[2])) {
-				System.err.println("[ERROR] Trying to load the PGM file " + filename + ", but its header is weird!");
+				System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but its header is weird!");
 			}
 
 			int cur = 3;
@@ -146,18 +140,22 @@ public class PgmFile extends RasterImageFile {
 			if (maxColorValue == 255){
 				for (int y = 0; y < height; y++) {
 					for (int x = 0; x < width; x++) {
+						byte r = binaryContent[cur++];
 						byte g = binaryContent[cur++];
+						byte b = binaryContent[cur++];
 
-						uncompressedData[y][x] = new ColorRGB(g, g, g);
+						uncompressedData[y][x] = new ColorRGB(r, g, b);
 					}
 				}
 			} else {
 				// ah well, we have to scale the data...
 				for (int y = 0; y < height; y++) {
 					for (int x = 0; x < width; x++) {
+						byte r = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
 						byte g = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
+						byte b = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
 
-						uncompressedData[y][x] = new ColorRGB(g, g, g);
+						uncompressedData[y][x] = new ColorRGB(r, g, b);
 					}
 				}
 			}
@@ -165,7 +163,7 @@ public class PgmFile extends RasterImageFile {
 			img = new Image(uncompressedData);
 
 		} catch (ArrayIndexOutOfBoundsException | IOException e) {
-			System.err.println("[ERROR] Trying to load the PGM file " + filename + ", but there was an exception - inconceivable!\n" + e);
+			System.err.println("[ERROR] Trying to load the PPM file " + filename + ", but there was an exception - inconceivable!\n" + e);
 		}
 	}
 
@@ -182,7 +180,7 @@ public class PgmFile extends RasterImageFile {
 
 		StringBuilder out = new StringBuilder();
 
-		out.append("P5");
+		out.append("P6");
 		out.append("\n");
 		out.append(getWidth());
 		out.append("\n");
@@ -201,9 +199,9 @@ public class PgmFile extends RasterImageFile {
 			for (int y = 0; y < getHeight(); y++) {
 				for (int x = 0; x < getWidth(); x++) {
 					ColorRGB px = img.getPixel(x, y);
-					stream.write(px.getGrayByte());
-					stream.write(px.getGrayByte());
-					stream.write(px.getGrayByte());
+					stream.write(px.getRByte());
+					stream.write(px.getGByte());
+					stream.write(px.getBByte());
 				}
 			}
 
@@ -213,11 +211,11 @@ public class PgmFile extends RasterImageFile {
 	}
 
 	/**
-	 * Gives back a string representation of the pgm file object
+	 * Gives back a string representation of the ppm file object
 	 */
 	@Override
 	public String toString() {
-		return "com.asofterspace.toolbox.io.PgmFile: " + filename;
+		return "com.asofterspace.toolbox.io.PpmFile: " + filename;
 	}
 
 }

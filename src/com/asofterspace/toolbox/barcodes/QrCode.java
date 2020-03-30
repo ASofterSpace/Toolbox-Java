@@ -4,9 +4,9 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
+import com.asofterspace.toolbox.images.ColorRGB;
+import com.asofterspace.toolbox.images.Image;
 import com.asofterspace.toolbox.utils.BitUtils;
-import com.asofterspace.toolbox.utils.ColorRGB;
-import com.asofterspace.toolbox.utils.Image;
 
 
 /**

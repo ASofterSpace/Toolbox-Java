@@ -4,11 +4,11 @@
  */
 package com.asofterspace.toolbox.pdf;
 
+import com.asofterspace.toolbox.images.Image;
+import com.asofterspace.toolbox.images.ImageFileCtrl;
 import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.io.ImageFileCtrl;
-import com.asofterspace.toolbox.utils.Image;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

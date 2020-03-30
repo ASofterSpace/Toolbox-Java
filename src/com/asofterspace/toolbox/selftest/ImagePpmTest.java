@@ -4,8 +4,8 @@
  */
 package com.asofterspace.toolbox.selftest;
 
-import com.asofterspace.toolbox.io.DefaultImageFile;
-import com.asofterspace.toolbox.io.PpmFile;
+import com.asofterspace.toolbox.images.DefaultImageFile;
+import com.asofterspace.toolbox.images.PpmFile;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 

@@ -2,9 +2,9 @@
  * Unlicensed code created by A Softer Space, 2020
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.images;
 
-import com.asofterspace.toolbox.utils.Image;
+import com.asofterspace.toolbox.io.File;
 
 
 /**

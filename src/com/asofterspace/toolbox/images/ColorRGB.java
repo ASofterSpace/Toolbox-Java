@@ -2,7 +2,7 @@
  * Unlicensed code created by A Softer Space, 2019
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.utils;
+package com.asofterspace.toolbox.images;
 
 
 /**

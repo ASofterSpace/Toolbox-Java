@@ -4,10 +4,10 @@
  */
 package com.asofterspace.toolbox.pdf;
 
+import com.asofterspace.toolbox.images.Image;
+import com.asofterspace.toolbox.images.ImageFile;
+import com.asofterspace.toolbox.images.ImageFileHandler;
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.io.ImageFile;
-import com.asofterspace.toolbox.io.ImageFileHandler;
-import com.asofterspace.toolbox.utils.Image;
 
 import java.util.List;
 
