@@ -782,6 +782,8 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	protected String reorganizeImportsCompatibleJavalike(String importKeyword, String origText) {
 
+		String staticKeyword = "static";
+
 		StringBuilder output = new StringBuilder();
 		List<String> imports = new ArrayList<>();
 		StringBuilder secondOutput = new StringBuilder();
@@ -806,7 +808,8 @@ public abstract class Code extends DefaultStyledDocument {
 		List<String> javaImports = new ArrayList<>();
 		List<String> otherImports = new ArrayList<>();
 		for (String curImport : imports) {
-			if (curImport.startsWith(importKeyword + " java")) {
+			if (curImport.startsWith(importKeyword + " java") ||
+				curImport.startsWith(importKeyword + " " + staticKeyword + " java")) {
 				javaImports.add(curImport);
 			} else {
 				otherImports.add(curImport);
@@ -820,23 +823,23 @@ public abstract class Code extends DefaultStyledDocument {
 		// so a class is always sorted before a package name, even though Bat (b) comes after adala (a)
 		Comparator<String> wonkyComparator = new Comparator<>() {
 			public int compare(String a, String b) {
-				a = a.toLowerCase();
-				b = b.toLowerCase();
-				String aPackage = a;
-				if (a.contains(".")) {
-					aPackage = a.substring(0, a.lastIndexOf(".") + 1);
+				a = canonicizeJavalikeImport(a, importKeyword, staticKeyword);
+				b = canonicizeJavalikeImport(b, importKeyword, staticKeyword);
+				String aPackage = getPackageJavalike(a);
+				String bPackage = getPackageJavalike(b);
+				// in case of same packages, compare normally
+				if (aPackage.equals(bPackage)) {
+					return a.compareTo(b);
 				}
-				String bPackage = b;
-				if (b.contains(".")) {
-					bPackage = b.substring(0, b.lastIndexOf(".") + 1);
-				}
+				// in case of one package containing the other, sort them that way
 				if (aPackage.startsWith(bPackage)) {
 					return 1;
 				}
 				if (bPackage.startsWith(aPackage)) {
 					return -1;
 				}
-				return a.compareTo(b);
+				// in case of different packages, sort by package
+				return aPackage.compareTo(bPackage);
 			}
 		};
 		Collections.sort(javaImports, wonkyComparator);
@@ -887,6 +890,31 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		return output.toString() + secondOutput.toString();
+	}
+
+	private String canonicizeJavalikeImport(String val, String importKeyword, String staticKeyword) {
+		val = val.toLowerCase();
+		val = val.trim();
+		if (val.startsWith(importKeyword)) {
+			val = val.substring(importKeyword.length());
+			val = val.trim();
+		}
+		if (val.startsWith(staticKeyword)) {
+			val = val.substring(staticKeyword.length());
+			val = val.trim();
+		}
+		return val;
+	}
+
+	/**
+	 * Assumes that the input has already been canonicized
+	 * (It will not be canonicized again here)
+	 */
+	private String getPackageJavalike(String val) {
+		if (val.contains(".")) {
+			val = val.substring(0, val.lastIndexOf(".") + 1);
+		}
+		return val;
 	}
 
 	public void removeUnusedImports() {
