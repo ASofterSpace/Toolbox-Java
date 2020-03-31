@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.utils;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -259,7 +260,25 @@ public class StrUtils {
 		return result.toString();
 	}
 
-	public static String join(List<?> strList, String separator) {
+	/**
+	 * In Java 7, String.join did not yet exist, so we have this to fall back to
+	 */
+	public static String join(String separator, Collection<?> strList) {
+		StringBuilder result = new StringBuilder();
+		boolean firstElem = true;
+		for (Object elem : strList) {
+			if (elem != null) {
+				if (firstElem) {
+					firstElem = false;
+				} else {
+					result.append(separator);
+				}
+				result.append(elem.toString());
+			}
+		}
+		return result.toString();
+	}
+	public static String join(String separator, Object[] strList) {
 		StringBuilder result = new StringBuilder();
 		boolean firstElem = true;
 		for (Object elem : strList) {

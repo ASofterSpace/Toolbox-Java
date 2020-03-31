@@ -396,7 +396,7 @@ public abstract class Code extends DefaultStyledDocument {
 				}
 			}
 
-			contentMiddle = String.join("\n", middleLines);
+			contentMiddle = StrUtils.join("\n", middleLines);
 		}
 
 		content = contentStart + contentMiddle + contentEnd;
@@ -780,9 +780,9 @@ public abstract class Code extends DefaultStyledDocument {
 	 * Java-style import organization, but possibly with a different keyword
 	 * (such as "using" in C#)
 	 */
-	protected String reorganizeImportsCompatibleJavalike(String importKeyword, String origText) {
+	protected String reorganizeImportsCompatibleJavalike(final String importKeyword, String origText) {
 
-		String staticKeyword = "static";
+		final String staticKeyword = "static";
 
 		StringBuilder output = new StringBuilder();
 		List<String> imports = new ArrayList<>();
