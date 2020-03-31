@@ -821,7 +821,7 @@ public abstract class Code extends DefaultStyledDocument {
 		// import foo.bar.adala.Cat;
 		// import foo.bar.adala.Dog;
 		// so a class is always sorted before a package name, even though Bat (b) comes after adala (a)
-		Comparator<String> wonkyComparator = new Comparator<>() {
+		Comparator<String> wonkyComparator = new Comparator<String>() {
 			public int compare(String a, String b) {
 				a = canonicizeJavalikeImport(a, importKeyword, staticKeyword);
 				b = canonicizeJavalikeImport(b, importKeyword, staticKeyword);
