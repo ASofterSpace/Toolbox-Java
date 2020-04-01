@@ -16,15 +16,49 @@ import java.util.Date;
  */
 public class DateUtils {
 
-	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
+	private static final String DEFAULT_DATE_FORMAT_STR = "yyyy-MM-dd";
+	private static final String DEFAULT_DATE_TIME_FORMAT_STR = "yyyy-MM-dd HH:mm:ss.SSS";
+	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
+
+	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
 
 
+	/**
+	 * Parses just the date from either a date string or a date time string
+	 */
+	public static Date parseDate(String dateStr) {
+
+		if (dateStr == null) {
+			dateStr = serializeDate(new Date());
+		}
+
+		// handle date time string by omitting the timestamp such that we only get a date
+		if (dateStr.length() == DEFAULT_DATE_TIME_FORMAT_STR.length()) {
+			dateStr = dateStr.substring(0, DEFAULT_DATE_FORMAT_STR.length());
+		}
+
+		try {
+			return DEFAULT_DATE_FORMAT.parse(dateStr);
+		} catch (ParseException ex) {
+			System.err.println("Could not parse the date " + dateStr + " - using current date instead!");
+			return parseDate(null);
+		}
+	}
+
+	/**
+	 * Parses the date+time from either a date string or a date time string
+	 */
 	public static Date parseDateTime(String dateTimeStr) {
 
 		if (dateTimeStr == null) {
 			return new Date();
+		}
+
+		// handle date string by adding zeroes to get a date time stamp
+		if (dateTimeStr.length() == DEFAULT_DATE_FORMAT_STR.length()) {
+			dateTimeStr = dateTimeStr + " 00:00:00.000";
 		}
 
 		try {
