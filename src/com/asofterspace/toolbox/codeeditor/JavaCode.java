@@ -26,33 +26,33 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	private static final long serialVersionUID = 1L;
 
 	// all keywords of the Java language
-	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
+	protected static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
 		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "while", "volatile"}
 	));
 
 	// all primitive types of the Java language and other stuff that looks that way
-	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
+	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
 		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "int", "interface", "long", "null", "short", "super", "this", "true", "void"}
 	));
 
 	// all string delimiters of the Java language
-	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
+	protected static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
 	// operand characters in the Java language
-	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
+	protected static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
 		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '?', '&', '|', '^', '~', '*'}
 	));
 
 	// start of single line comments in the Java language
-	private static final String START_SINGLELINE_COMMENT = "//";
+	protected static final String START_SINGLELINE_COMMENT = "//";
 
 	// start of multiline comments in the Java language
-	private static final String START_MULTILINE_COMMENT = "/*";
+	protected static final String START_MULTILINE_COMMENT = "/*";
 
 	// end of multiline comments in the Java language
-	private static final String END_MULTILINE_COMMENT = "*/";
+	protected static final String END_MULTILINE_COMMENT = "*/";
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
@@ -261,7 +261,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return commentEnd;
 	}
 
-	private int highlightString(String content, int start, int end) {
+	protected int highlightString(String content, int start, int end) {
 
 		// get the string delimiter that was actually used to start this string (so " or ') to be able to find the matching one
 		String stringDelimiter = content.substring(start, start + 1);
@@ -354,7 +354,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return STRING_DELIMITERS.contains(character);
 	}
 
-	private boolean isKeyword(String token) {
+	protected boolean isKeyword(String token) {
 		return KEYWORDS.contains(token);
 	}
 
