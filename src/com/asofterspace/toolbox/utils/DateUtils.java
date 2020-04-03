@@ -18,10 +18,12 @@ public class DateUtils {
 
 	private static final String DEFAULT_DATE_FORMAT_STR = "yyyy-MM-dd";
 	private static final String DEFAULT_DATE_TIME_FORMAT_STR = "yyyy-MM-dd HH:mm:ss.SSS";
+	private static final String NUMERICAL_DATE_TIME_FORMAT_STR = "yyyyMMddHHmmssSSS";
 	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
 
 	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+	public static final SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
 
 
@@ -89,5 +91,9 @@ public class DateUtils {
 
 	public static String dateTimeStampNow() {
 		return serializeDateTime(null);
+	}
+
+	public static String numericalDateTimeStampNow() {
+		return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
 	}
 }
