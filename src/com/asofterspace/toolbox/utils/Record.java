@@ -101,6 +101,10 @@ public class Record {
 			return arrRecord;
 		}
 
+		if (recordOrWhatever instanceof Enum<?>) {
+			return new Record(recordOrWhatever.toString());
+		}
+
 		return Record.nullRecord();
 	}
 
