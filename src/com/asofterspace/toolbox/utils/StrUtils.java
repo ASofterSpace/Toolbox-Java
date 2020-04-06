@@ -72,7 +72,7 @@ public class StrUtils {
 		return result.toString();
 	}
 
-	public static String strListToString(List<String> stringList) {
+	public static String strListToString(Collection<String> stringList) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -83,6 +83,20 @@ public class StrUtils {
 		}
 
 		return sb.toString();
+	}
+
+	public static String[] strListToArray(Collection<String> stringList) {
+
+		String[] result = new String[stringList.size()];
+
+		int i = 0;
+
+		for (String str : stringList) {
+			result[i] = str;
+			i++;
+		}
+
+		return result;
 	}
 
 	/**
