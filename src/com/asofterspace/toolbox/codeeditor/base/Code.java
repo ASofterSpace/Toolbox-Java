@@ -610,6 +610,65 @@ public abstract class Code extends DefaultStyledDocument {
 		return newText.toString();
 	}
 
+	public void addMissingImports() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origText = decoratedEditor.getText();
+
+		String newText = addMissingImports(origText);
+
+		decoratedEditor.setText(newText);
+		decoratedEditor.setCaretPosition(origCaretPos);
+	}
+
+	public String addMissingImports(String origText) {
+		return origText;
+	}
+
+	public String addMissingImportsJavalike(String importKeyword, String origText) {
+
+		int insertAt = origText.indexOf("package");
+		if (insertAt < 0) {
+			insertAt = 0;
+		}
+		insertAt = origText.indexOf(";", insertAt) + 1;
+		if (insertAt < 0) {
+			insertAt = 0;
+		}
+		insertAt = origText.indexOf("\n", insertAt) + 1;
+		if (insertAt < 0) {
+			insertAt = 0;
+		}
+
+		String contentBefore = origText.substring(0, insertAt);
+		String contentAfter = origText.substring(insertAt);
+
+		StringBuilder contentMiddle = new StringBuilder();
+
+		addJavaUtilImport(origText, contentMiddle, "List", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "ArrayList", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "Set", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "HashSet", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "Map", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "HashMap", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "Collection", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "Comparator", importKeyword);
+		addJavaUtilImport(origText, contentMiddle, "Date", importKeyword);
+
+		return contentBefore + contentMiddle + contentAfter;
+	}
+
+	private void addJavaUtilImport(String origText, StringBuilder contentMiddle, String utility, String importKeyword) {
+
+		if (origText.contains(" " + utility + "<") || origText.contains("\t" + utility + "<") ||
+			origText.contains(" " + utility + " ") || origText.contains("\t" + utility + " ") ||
+			origText.contains(" " + utility + "(") || origText.contains("\t" + utility + "(")) {
+			if (!origText.contains(importKeyword + " java.util." + utility + ";")) {
+				contentMiddle.append(importKeyword + " java.util." + utility + ";");
+			}
+		}
+	}
+
 	public void reorganizeImports() {
 
 		int origCaretPos = decoratedEditor.getCaretPosition();
@@ -2056,6 +2115,97 @@ public abstract class Code extends DefaultStyledDocument {
 		decoratedEditor.setText(content);
 
 		int selPos = contentStart.length() + contentMiddle.length() + newCode.length();
+		decoratedEditor.setSelectionStart(selPos);
+		decoratedEditor.setSelectionEnd(selPos);
+	}
+
+	public String getClassName() {
+
+		String content = decoratedEditor.getText();
+		String[] lines = content.split("\n");
+
+		for (String line : lines) {
+			if (line.contains(" class ")) {
+				String result = line.substring(line.indexOf(" class ") + 7);
+				return result.substring(0, result.indexOf(" "));
+			}
+			if (line.startsWith("class ")) {
+				String result = line.substring(6);
+				return result.substring(0, result.indexOf(" "));
+			}
+		}
+
+		// if this file does not contain any class at all, maybe it contains an enum?
+		for (String line : lines) {
+			if (line.contains(" enum ")) {
+				String result = line.substring(line.indexOf(" enum ") + 6);
+				return result.substring(0, result.indexOf(" "));
+			}
+			if (line.startsWith("enum ")) {
+				String result = line.substring(5);
+				return result.substring(0, result.indexOf(" "));
+			}
+		}
+
+		return "";
+	}
+
+	/**
+	 * Add equals() method to the class
+	 */
+	public void addEquals() {
+
+		String content = decoratedEditor.getText();
+
+		int insertAt = content.lastIndexOf("}");
+		if (insertAt < 0) {
+			insertAt = 0;
+		}
+
+		String contentStart = content.substring(0, insertAt);
+		String contentEnd = content.substring(insertAt, content.length());
+
+		String ourClassName = getClassName();
+
+		StringBuilder newCode = new StringBuilder();
+
+		boolean extraLineNeeded = true;
+		if (insertAt > 1) {
+			if ((content.charAt(insertAt - 1) == '\n') && (content.charAt(insertAt - 2) == '\n')) {
+				extraLineNeeded = false;
+			}
+		}
+		if (extraLineNeeded) {
+			newCode.append("\n");
+		}
+		newCode.append("\t@Override\n");
+		newCode.append("\tpublic boolean equals(Object other) {\n");
+		newCode.append("\t\tif (other == null) {\n");
+		newCode.append("\t\t\treturn false;\n");
+		newCode.append("\t\t}\n");
+		newCode.append("\t\tif (other instanceof " + ourClassName + ") {\n");
+		newCode.append("\t\t\t" + ourClassName + " other" + ourClassName + " = (" + ourClassName + ") other;\n");
+		newCode.append("\t\t\t// TODO - actually compare other" + ourClassName + " to this\n");
+		newCode.append("\t\t\tif (this.? == " + ourClassName + ".?) {\n");
+		newCode.append("\t\t\t\t return true;\n");
+		newCode.append("\t\t\t}\n");
+		newCode.append("\t\t}\n");
+		newCode.append("\t\treturn false;\n");
+		newCode.append("\t}\n");
+
+		newCode.append("\n");
+		newCode.append("\t@Override\n");
+		newCode.append("\tpublic int hashCode() {\n");
+		newCode.append("\t\t// TODO - actually compute a useful hash\n");
+		newCode.append("\t\treturn this.?;\n");
+		newCode.append("\t}\n");
+		newCode.append("\n");
+
+		content = contentStart + newCode.toString() + contentEnd;
+
+		decoratedEditor.setText(content);
+
+		int selPos = contentStart.length() + newCode.length();
 		decoratedEditor.setSelectionStart(selPos);
 		decoratedEditor.setSelectionEnd(selPos);
 	}

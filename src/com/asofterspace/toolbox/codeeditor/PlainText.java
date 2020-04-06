@@ -15,7 +15,6 @@ public class PlainText extends Code {
 
 
 	public PlainText(JTextPane editor) {
-
 		super(editor);
 	}
 }

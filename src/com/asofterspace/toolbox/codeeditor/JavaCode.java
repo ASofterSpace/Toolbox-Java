@@ -70,6 +70,11 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	}
 
 	@Override
+	public String addMissingImports(String origText) {
+		return addMissingImportsJavalike("import", origText);
+	}
+
+	@Override
 	public String reorganizeImports(String origText) {
 		return reorganizeImportsJavalike("import", origText);
 	}
@@ -79,6 +84,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return reorganizeImportsCompatibleJavalike("import", origText);
 	}
 
+	@Override
 	public String removeUnusedImports(String origText) {
 		return removeUnusedImportsJavalike("import", origText);
 	}
