@@ -664,7 +664,7 @@ public abstract class Code extends DefaultStyledDocument {
 			origText.contains(" " + utility + " ") || origText.contains("\t" + utility + " ") ||
 			origText.contains(" " + utility + "(") || origText.contains("\t" + utility + "(")) {
 			if (!origText.contains(importKeyword + " java.util." + utility + ";")) {
-				contentMiddle.append(importKeyword + " java.util." + utility + ";");
+				contentMiddle.append(importKeyword + " java.util." + utility + ";\n");
 			}
 		}
 	}
