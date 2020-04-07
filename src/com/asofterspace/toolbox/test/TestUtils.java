@@ -37,26 +37,32 @@ public class TestUtils {
 	}
 
 	/**
-	 * Indicates that the last test was a success
+	 * Indicates that the last test was a success, unless fail or succeed
+	 * has already been called before
 	 */
 	public static void succeed() {
 
-		currentVerdict = 2;
+		if (currentVerdict == 0) {
+			currentVerdict = 2;
 
-		System.out.println("The " + currentTest + " Test succeeded! Whoop whoop!");
-		System.out.println("");
+			System.out.println("The " + currentTest + " Test succeeded! Whoop whoop!");
+			System.out.println("");
+		}
 	}
 
 	/**
-	 * Indicates that the last test was a failure
+	 * Indicates that the last test was a failure, unless fail or succeed
+	 * has already been called before
 	 */
 	public static void fail(String reason) {
 
-		currentVerdict = 1;
+		if (currentVerdict == 0) {
+			currentVerdict = 1;
 
-		System.out.println("The " + currentTest + " Test failed... oh no!");
-		System.out.println("Reason: " + reason);
-		System.out.println("");
+			System.out.println("The " + currentTest + " Test failed... oh no!");
+			System.out.println("Reason: " + reason);
+			System.out.println("");
+		}
 	}
 
 	/**
@@ -64,9 +70,10 @@ public class TestUtils {
 	 */
 	public static void startSuite() {
 
-		testsRun = -1;
+		testsRun = 0;
 		testsSuccess = 0;
 		testsFailed = 0;
+		currentVerdict = -1;
 
 		System.out.println("");
 		System.out.println("------------------------------");
@@ -138,7 +145,16 @@ public class TestUtils {
 
 	private static void finalizePreviousTest() {
 
+		// we already call finalizePreviousTest() as the start of the very first test... do nothing then!
+		if (currentVerdict < 0) {
+			return;
+		}
+
 		testsRun++;
+
+		if (currentVerdict == 0) {
+			fail("TestUtils.succeed() was not reached!");
+		}
 
 		if (currentVerdict == 1) {
 			testsFailed++;
@@ -147,5 +163,7 @@ public class TestUtils {
 		if (currentVerdict == 2) {
 			testsSuccess++;
 		}
+
+		currentVerdict = 0;
 	}
 }

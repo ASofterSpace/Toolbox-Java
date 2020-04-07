@@ -15,6 +15,8 @@ public class StrUtilsTest implements Test {
 	public void runAll() {
 
 		countStringInStringTest();
+
+		parseMoneyTest();
 	}
 
 	public void countStringInStringTest() {
@@ -42,6 +44,36 @@ public class StrUtilsTest implements Test {
 		}
 
 		TestUtils.succeed();
+	}
+
+	public void parseMoneyTest() {
+
+		TestUtils.start("Parse Money");
+
+		testMoneyParsing("1", 100);
+		testMoneyParsing("2,5", 250);
+		testMoneyParsing("3.50€", 350);
+		testMoneyParsing("1,004.50€", 100450);
+		testMoneyParsing("1.015,50 EUR", 101550);
+		testMoneyParsing(" 1.026.500USD", 102650);
+
+		TestUtils.succeed();
+	}
+
+	private void testMoneyParsing(String amountStr, Integer intendedResult) {
+
+		Integer actualResult = StrUtils.parseMoney(amountStr);
+
+		if ((actualResult == null) && (intendedResult == null)) {
+			return;
+		}
+
+		if (actualResult.equals(intendedResult)) {
+			return;
+		}
+
+		TestUtils.fail("We could not parse " + amountStr + " as amount of money! " +
+			"(Expected " + intendedResult + ", but got " + actualResult + ")");
 	}
 
 }

@@ -17,11 +17,13 @@ import java.util.Date;
 public class DateUtils {
 
 	private static final String DEFAULT_DATE_FORMAT_STR = "yyyy-MM-dd";
+	private static final String FALLBACK_DATE_FORMAT_STR = "dd.MM.yyyy";
 	private static final String DEFAULT_DATE_TIME_FORMAT_STR = "yyyy-MM-dd HH:mm:ss.SSS";
 	private static final String NUMERICAL_DATE_TIME_FORMAT_STR = "yyyyMMddHHmmssSSS";
 	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
 
 	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+	public static final SimpleDateFormat FALLBACK_DATE_FORMAT = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
@@ -44,8 +46,15 @@ public class DateUtils {
 		try {
 			return DEFAULT_DATE_FORMAT.parse(dateStr);
 		} catch (ParseException ex) {
-			System.err.println("Could not parse the date " + dateStr + " - using current date instead!");
-			return parseDate(null);
+
+			dateStr = dateStr.replaceAll(" ", "");
+
+			try {
+				return FALLBACK_DATE_FORMAT.parse(dateStr);
+			} catch (ParseException ex2) {
+				System.err.println("Could not parse the date " + dateStr + " - using current date instead!");
+				return parseDate(null);
+			}
 		}
 	}
 

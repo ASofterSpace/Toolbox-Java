@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.test.TestUtils;
 import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.Utils;
 
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -34,8 +35,18 @@ public class DateUtilsTest implements Test {
 
 		Date outputDate = DateUtils.parseDate(dateStr);
 
-		if (!inputDate.equals(outputDate)) {
-			TestUtils.fail("We serialized a date and parsed it again, and the resulting date is not the same as before!");
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(inputDate);
+		int yearNumIn = calendar.get(Calendar.YEAR);
+		int monthNumIn = calendar.get(Calendar.MONTH);
+		int dayNumIn = calendar.get(Calendar.DAY_OF_MONTH);
+		calendar.setTime(outputDate);
+		int yearNumOut = calendar.get(Calendar.YEAR);
+		int monthNumOut = calendar.get(Calendar.MONTH);
+		int dayNumOut = calendar.get(Calendar.DAY_OF_MONTH);
+
+		if ((yearNumIn != yearNumOut) || (monthNumIn != monthNumOut) || (dayNumIn != dayNumOut)) {
+			TestUtils.fail("We serialized a date " + DateUtils.serializeDateTime(inputDate) + " as " + dateStr + " and parsed it again, and the resulting date " + DateUtils.serializeDateTime(outputDate) + " is not the same as before!");
 		}
 
 		String dateOutStr = DateUtils.serializeDate(outputDate);
