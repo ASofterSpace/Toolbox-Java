@@ -67,6 +67,66 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	public JavaCode(JTextPane editor) {
 
 		super(editor);
+
+		automaticallyAddedImports.put("BorderLayout", "java.awt.BorderLayout");
+		automaticallyAddedImports.put("CardLayout", "java.awt.CardLayout");
+		automaticallyAddedImports.put("Color", "java.awt.Color");
+		automaticallyAddedImports.put("Desktop", "java.awt.Desktop");
+		automaticallyAddedImports.put("Dimension", "java.awt.Dimension");
+		automaticallyAddedImports.put("ActionEvent", "java.awt.event.ActionEvent");
+		automaticallyAddedImports.put("ActionListener", "java.awt.event.ActionListener");
+		automaticallyAddedImports.put("ComponentAdapter", "java.awt.event.ComponentAdapter");
+		automaticallyAddedImports.put("ComponentEvent", "java.awt.event.ComponentEvent");
+		automaticallyAddedImports.put("ItemEvent", "java.awt.event.ItemEvent");
+		automaticallyAddedImports.put("ItemListener", "java.awt.event.ItemListener");
+		automaticallyAddedImports.put("KeyEvent", "java.awt.event.KeyEvent");
+		automaticallyAddedImports.put("KeyListener", "java.awt.event.KeyListener");
+		automaticallyAddedImports.put("MouseAdapter", "java.awt.event.MouseAdapter");
+		automaticallyAddedImports.put("MouseEvent", "java.awt.event.MouseEvent");
+		automaticallyAddedImports.put("MouseListener", "java.awt.event.MouseListener");
+		automaticallyAddedImports.put("GridBagLayout", "java.awt.GridBagLayout");
+		automaticallyAddedImports.put("GridLayout", "java.awt.GridLayout");
+		automaticallyAddedImports.put("Point", "java.awt.Point");
+		automaticallyAddedImports.put("IOException", "java.io.IOException");
+		automaticallyAddedImports.put("ArrayList", "java.util.ArrayList");
+		automaticallyAddedImports.put("Collection", "java.util.Collection");
+		automaticallyAddedImports.put("Collections", "java.util.Collections");
+		automaticallyAddedImports.put("Comparator", "java.util.Comparator");
+		automaticallyAddedImports.put("Date", "java.util.Date");
+		automaticallyAddedImports.put("HashMap", "java.util.HashMap");
+		automaticallyAddedImports.put("HashSet", "java.util.HashSet");
+		automaticallyAddedImports.put("List", "java.util.List");
+		automaticallyAddedImports.put("Map", "java.util.Map");
+		automaticallyAddedImports.put("Set", "java.util.Set");
+		automaticallyAddedImports.put("AbstractButton", "javax.swing.AbstractButton");
+		automaticallyAddedImports.put("BorderFactory", "javax.swing.BorderFactory");
+		automaticallyAddedImports.put("ButtonGroup", "javax.swing.ButtonGroup");
+		automaticallyAddedImports.put("DefaultCellEditor", "javax.swing.DefaultCellEditor");
+		automaticallyAddedImports.put("DocumentEvent", "javax.swing.event.DocumentEvent");
+		automaticallyAddedImports.put("DocumentListener", "javax.swing.event.DocumentListener");
+		automaticallyAddedImports.put("TreeModelEvent", "javax.swing.event.TreeModelEvent");
+		automaticallyAddedImports.put("TreeModelListener", "javax.swing.event.TreeModelListener");
+		automaticallyAddedImports.put("JButton", "javax.swing.JButton");
+		automaticallyAddedImports.put("JCheckBoxMenuItem", "javax.swing.JCheckBoxMenuItem");
+		automaticallyAddedImports.put("JComboBox", "javax.swing.JComboBox");
+		automaticallyAddedImports.put("JDialog", "javax.swing.JDialog");
+		automaticallyAddedImports.put("JFileChooser", "javax.swing.JFileChooser");
+		automaticallyAddedImports.put("JFrame", "javax.swing.JFrame");
+		automaticallyAddedImports.put("JLabel", "javax.swing.JLabel");
+		automaticallyAddedImports.put("JList", "javax.swing.JList");
+		automaticallyAddedImports.put("JMenu", "javax.swing.JMenu");
+		automaticallyAddedImports.put("JMenuBar", "javax.swing.JMenuBar");
+		automaticallyAddedImports.put("JMenuItem", "javax.swing.JMenuItem");
+		automaticallyAddedImports.put("JOptionPane", "javax.swing.JOptionPane");
+		automaticallyAddedImports.put("JPanel", "javax.swing.JPanel");
+		automaticallyAddedImports.put("JPopupMenu", "javax.swing.JPopupMenu");
+		automaticallyAddedImports.put("JRadioButton", "javax.swing.JRadioButton");
+		automaticallyAddedImports.put("JScrollPane", "javax.swing.JScrollPane");
+		automaticallyAddedImports.put("JTextArea", "javax.swing.JTextArea");
+		automaticallyAddedImports.put("JTextField", "javax.swing.JTextField");
+		automaticallyAddedImports.put("KeyStroke", "javax.swing.KeyStroke");
+		automaticallyAddedImports.put("BasicScrollBarUI", "javax.swing.plaf.basic.BasicScrollBarUI");
+		automaticallyAddedImports.put("SwingUtilities", "javax.swing.SwingUtilities");
 	}
 
 	@Override

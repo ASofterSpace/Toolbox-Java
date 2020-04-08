@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.event.CaretEvent;
@@ -130,6 +132,9 @@ public abstract class Code extends DefaultStyledDocument {
 	// the parent editor, of which this here is a sub-editor
 	private Code parentEditor = null;
 
+	// a map of imported classes and their package names which should be automatically added if missing
+	protected Map<String, String> automaticallyAddedImports;
+
 
 	public Code(JTextPane editor) {
 
@@ -139,6 +144,8 @@ public abstract class Code extends DefaultStyledDocument {
 		this.decoratedEditor = editor;
 
 		this.parentEditor = this;
+
+		this.automaticallyAddedImports = new HashMap<>();
 
 		fullyStartupCodeHighlighter();
 	}
@@ -153,6 +160,8 @@ public abstract class Code extends DefaultStyledDocument {
 		this.decoratedEditor = editor;
 
 		this.parentEditor = parentEditor;
+
+		this.automaticallyAddedImports = new HashMap<>();
 
 		// initialize the font size, lastFont etc.
 		setFontSize(parentEditor.getFontSize());
@@ -645,26 +654,22 @@ public abstract class Code extends DefaultStyledDocument {
 
 		StringBuilder contentMiddle = new StringBuilder();
 
-		addJavaUtilImport(origText, contentMiddle, "List", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "ArrayList", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "Set", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "HashSet", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "Map", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "HashMap", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "Collection", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "Comparator", importKeyword);
-		addJavaUtilImport(origText, contentMiddle, "Date", importKeyword);
+		for (Map.Entry<String, String> entry : automaticallyAddedImports.entrySet()) {
+			addJavaUtilImport(origText, contentMiddle, entry.getKey(), entry.getValue(), importKeyword);
+		}
 
 		return contentBefore + contentMiddle + contentAfter;
 	}
 
-	private void addJavaUtilImport(String origText, StringBuilder contentMiddle, String utility, String importKeyword) {
+	private void addJavaUtilImport(String origText, StringBuilder contentMiddle, String utility, String fullUtility, String importKeyword) {
 
 		if (origText.contains(" " + utility + "<") || origText.contains("\t" + utility + "<") ||
 			origText.contains(" " + utility + " ") || origText.contains("\t" + utility + " ") ||
-			origText.contains(" " + utility + "(") || origText.contains("\t" + utility + "(")) {
-			if (!origText.contains(importKeyword + " java.util." + utility + ";")) {
-				contentMiddle.append(importKeyword + " java.util." + utility + ";\n");
+			origText.contains(" " + utility + "(") || origText.contains("\t" + utility + "(") ||
+			origText.contains(" " + utility + ".") || origText.contains("\t" + utility + ".") ||
+			origText.contains("(" + utility + " ") || origText.contains("(" + utility + ".")) {
+			if (!origText.contains(importKeyword + " " + fullUtility + ";")) {
+				contentMiddle.append(importKeyword + " " + fullUtility + ";\n");
 			}
 		}
 	}
