@@ -15,16 +15,21 @@ import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 
 
 /**
- * This (hopefully) simplifies access to the web
+ * This (hopefully) simplifies access to the web, providing regular REST methods
+ * such as GET, POST and PUT, as well as providing basic FTP methods such as
+ * ftpDownload
  *
  * @author Moya (a softer space, 2017)
  */
@@ -138,6 +143,34 @@ public class WebAccessor {
 	 */
 	public static String post(String url, String messageBody, Map<String, String> extraHeaders) {
 		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders));
+	}
+
+	/**
+	 * Download a file from a server with given URL and port, authenticating using a plaintext password,
+	 * from a given path on the server to a local target file (which will be overwritten if it already
+	 * exists before calling this method)
+	 *
+	 * Returns true if this succeeded, false otherwise
+	 */
+	public static boolean downloadFtp(String url, int port, String username, String password,
+		String pathOnServer, File localTarget) {
+
+		try {
+			String fullUrlForFtpTransaction =
+				"ftp://" + username + ":" + password + "@" + url + ":" + port + pathOnServer;
+
+			URL urlAsURL = new URL(fullUrlForFtpTransaction);
+
+			URLConnection connection = urlAsURL.openConnection();
+			InputStream inputStream = connection.getInputStream();
+			Files.copy(inputStream, localTarget.getJavaPath());
+			inputStream.close();
+
+			return localTarget.exists();
+
+		} catch (IOException e) {
+			return false;
+		}
 	}
 
 	private static String mapToUrlSuffix(Map<String, String> parameters) {
