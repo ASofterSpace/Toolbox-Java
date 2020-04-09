@@ -76,42 +76,7 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
-
-		int overrideCaretPos = insertedString.length();
-
-		// automagically close brackets that are being opened
-		switch (insertedString) {
-			case "{":
-				insertedString = "{}";
-				overrideCaretPos = 1;
-				break;
-			case "(":
-				insertedString = "()";
-				overrideCaretPos = 1;
-				break;
-			case "[":
-				insertedString = "[]";
-				overrideCaretPos = 1;
-				break;
-			case "<":
-				insertedString = "<>";
-				overrideCaretPos = 1;
-				break;
-			case "\"":
-				insertedString = "\"\"";
-				overrideCaretPos = 1;
-				break;
-			case "'":
-				// replace ' with '' in code - but not in comment mode!
-				if (attrComment.equals(attrs)) {
-					break;
-				}
-				insertedString = "''";
-				overrideCaretPos = 1;
-				break;
-		}
-
-		super.insertString(offset, insertedString, attrs, overrideCaretPos);
+		insertStringJavalike(offset, insertedString, attrs);
 	}
 
 	// this is the main function that... well... highlights our text :)

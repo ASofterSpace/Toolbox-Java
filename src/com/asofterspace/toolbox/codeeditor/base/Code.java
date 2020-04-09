@@ -1725,6 +1725,81 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	protected void insertStringJavalike(int offset, String insertedString, AttributeSet attrs) {
+
+		int overrideCaretPos = insertedString.length();
+
+		// automagically close brackets that are being opened
+		switch (insertedString) {
+			case "{":
+				insertedString = "{}";
+				overrideCaretPos = 1;
+				break;
+			case "(":
+				insertedString = "()";
+				overrideCaretPos = 1;
+				break;
+			case "[":
+				insertedString = "[]";
+				overrideCaretPos = 1;
+				break;
+			case "<":
+				insertedString = "<>";
+				overrideCaretPos = 1;
+				break;
+			case "\"":
+				insertedString = "\"\"";
+				overrideCaretPos = 1;
+				break;
+			case "'":
+				// replace ' with '' in code - but not in comment mode!
+				if (attrComment.equals(attrs)) {
+					break;
+				}
+				insertedString = "''";
+				overrideCaretPos = 1;
+				break;
+			case " ":
+				// in case of if (blubb) && <- that last space being entered,
+				// add a bracket after the if and close it after the cursor:
+				// if ((blubb) && )
+				if (offset > 5) {
+					String content = decoratedEditor.getText();
+					if (((content.charAt(offset - 1) == '&') && (content.charAt(offset - 2) == '&')) ||
+						((content.charAt(offset - 1) == '|') && (content.charAt(offset - 2) == '|'))) {
+
+						int lineStart = getLineStartFromPosition(offset, content);
+						int lineEnd = getLineEndFromPosition(offset, content);
+
+						String contentStart = content.substring(0, lineStart);
+						String line = content.substring(lineStart, lineEnd);
+						String contentEnd = content.substring(lineEnd, content.length());
+
+						int ifAt = line.indexOf("if (");
+
+						if ((ifAt >= 0) && (ifAt < offset)) {
+							if (line.indexOf("if ((") < 0) {
+								line = line.substring(0, ifAt + 4) + "(" + line.substring(ifAt + 4);
+								String newContent = contentStart + line + contentEnd;
+								newContent = newContent.substring(0, offset + 1) + " )" + newContent.substring(offset + 1);
+
+								int origCaretPos = decoratedEditor.getCaretPosition();
+								decoratedEditor.setText(newContent);
+								decoratedEditor.setCaretPosition(origCaretPos + 2);
+
+								// we do NOT bubble up the chain, as we already set the text explicitly!
+								return;
+							}
+						}
+					}
+				}
+
+				break;
+		}
+
+		Code.this.insertString(offset, insertedString, attrs, overrideCaretPos);
+	}
+
 	/**
 	 * The delete key or something like that has been pressed
 	 */
