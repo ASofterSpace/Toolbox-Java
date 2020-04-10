@@ -38,11 +38,17 @@ public class WebTemplateEngine {
 		this.config = config;
 	}
 
-	public void compileTo(Directory targetDir) {
-		compileTo(targetDir, "", true);
+	public boolean compileTo(Directory targetDir) {
+		return compileTo(targetDir, "", true);
 	}
 
-	public void compileTo(Directory targetDir, String contentkind, boolean convertPhpToHtm) {
+	/**
+	 * Return true if the compilation succeeded
+	 * TODO :: add more checks to ensure the compilation was actually successful!
+	 */
+	public boolean compileTo(Directory targetDir, String contentkind, boolean convertPhpToHtm) {
+
+		boolean result = true;
 
 		Record files = config.get("files");
 
@@ -64,6 +70,11 @@ public class WebTemplateEngine {
 			}
 
 			SimpleFile indexIn = new SimpleFile(origDir, currentFile);
+
+			if (!indexIn.exists()) {
+				System.err.println("Could not find " + indexIn.getAbsoluteFilename() + "!");
+				result = false;
+			}
 
 			if (isWebTextFile(indexIn)) {
 
@@ -98,8 +109,9 @@ public class WebTemplateEngine {
 
 				indexIn.copyToDisk(new File(targetDir, currentFile));
 			}
-
 		}
+
+		return result;
 	}
 
 	/**
