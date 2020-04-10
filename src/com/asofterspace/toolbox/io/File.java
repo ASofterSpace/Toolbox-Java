@@ -334,9 +334,30 @@ public class File {
 	 */
 	public void rename(String newName) {
 		try {
-			Path newPath = getJavaPath().resolveSibling(newName);
-			Files.move(getJavaPath(), newPath, StandardCopyOption.REPLACE_EXISTING);
-			initFromJavaFile(newPath.toFile());
+			if (newName.toLowerCase().equals(getLocalFilename().toLowerCase())) {
+				// if the new and old name are basically the same, and we are under
+				// Windows, then a straight renaming might be problematic... so just
+				// to be completely sure, we rename to something else, and then
+				// rename back!
+				String tempNewName = newName + ".tmp";
+				Directory dir = getParentDirectory();
+				while (true) {
+					File curTmpFile = dir.getFile(tempNewName);
+					if (!curTmpFile.exists()) {
+						break;
+					}
+					tempNewName += ".tmp";
+				}
+				Path tempNewPath = getJavaPath().resolveSibling(tempNewName);
+				Files.move(getJavaPath(), tempNewPath, StandardCopyOption.REPLACE_EXISTING);
+				Path newPath = tempNewPath.resolveSibling(newName);
+				Files.move(tempNewPath, newPath, StandardCopyOption.REPLACE_EXISTING);
+				initFromJavaFile(newPath.toFile());
+			} else {
+				Path newPath = getJavaPath().resolveSibling(newName);
+				Files.move(getJavaPath(), newPath, StandardCopyOption.REPLACE_EXISTING);
+				initFromJavaFile(newPath.toFile());
+			}
 		} catch (IOException e) {
 			System.err.println("[ERROR] An IOException occurred when trying to rename the file " + filename + " to " + newName + " - inconceivable!");
 		}
