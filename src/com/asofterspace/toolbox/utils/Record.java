@@ -91,6 +91,10 @@ public class Record {
 			return new Record((Double) recordOrWhatever);
 		}
 
+		if (recordOrWhatever instanceof Float) {
+			return new Record((Float) recordOrWhatever);
+		}
+
 		if (recordOrWhatever instanceof List) {
 			Record arrRecord = Record.emptyArray();
 			List<Record> valList = new ArrayList<>();
@@ -183,6 +187,16 @@ public class Record {
 		kind = RecordKind.NUMBER;
 
 		simpleContents = doubleValue;
+	}
+
+	/**
+	* Create a Record object based on a float value
+	*/
+	public Record(Float floatValue) {
+
+		kind = RecordKind.NUMBER;
+
+		simpleContents = floatValue;
 	}
 
 	/**
@@ -686,6 +700,9 @@ public class Record {
 			if (result.simpleContents instanceof Double) {
 				return (Integer) (int) Math.round((Double) result.simpleContents);
 			}
+			if (result.simpleContents instanceof Float) {
+				return (Integer) Math.round((Float) result.simpleContents);
+			}
 		}
 
 		if (result.kind == RecordKind.BOOLEAN) {
@@ -762,6 +779,9 @@ public class Record {
 			if (result.simpleContents instanceof Double) {
 				return (Long) Math.round((Double) result.simpleContents);
 			}
+			if (result.simpleContents instanceof Float) {
+				return (Long) (long) Math.round((Float) result.simpleContents);
+			}
 		}
 
 		if (result.kind == RecordKind.BOOLEAN) {
@@ -801,6 +821,9 @@ public class Record {
 			}
 			if (result.simpleContents instanceof Double) {
 				return (Double) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Float) {
+				return (Double) (double) (float) (Float) result.simpleContents;
 			}
 		}
 
