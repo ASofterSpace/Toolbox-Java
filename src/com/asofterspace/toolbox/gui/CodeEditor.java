@@ -115,7 +115,13 @@ public class CodeEditor extends JTextPane {
 		}
 
 		g.setColor(Color.DARK_GRAY);
-		g.drawLine(prevStartLinePos, 0, prevStartLinePos, getHeight());
+		int y = 0;
+		int height = getHeight();
+		while (y < height) {
+			g.drawLine(prevStartLinePos, y, prevStartLinePos, y+2);
+			y += 10;
+		}
+		// g.drawLine(prevStartLinePos, 0, prevStartLinePos, getHeight());
 	}
 
 	@Override
