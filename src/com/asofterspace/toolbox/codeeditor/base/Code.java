@@ -328,7 +328,8 @@ public abstract class Code extends DefaultStyledDocument {
 			(event.getClickCount() > 1) &&
 			(event.getClickCount() < 5)) {
 
-			int caretPos = decoratedEditor.viewToModel2D(event.getPoint());;
+			// in the future, viewToModel2D is used instead, but we want to be backwards compatible...
+			int caretPos = decoratedEditor.viewToModel(event.getPoint());;
 			String content = decoratedEditor.getText();
 
 			int start = 0;

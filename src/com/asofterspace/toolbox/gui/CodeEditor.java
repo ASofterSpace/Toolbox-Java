@@ -113,7 +113,8 @@ public class CodeEditor extends JTextPane {
 		}
 
 		try {
-			int x = ((int) modelToView2D(firstLetter).getX()) - 1;
+			// in the future, modelToView2D is used instead, but we want to be backwards compatible...
+			int x = ((int) modelToView(firstLetter).getX()) - 1;
 
 			if (prevStartLinePos != x) {
 				prevStartLinePos = x;
