@@ -322,6 +322,7 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void onMouseClicked(MouseEvent event) {
 
 		if (SwingUtilities.isLeftMouseButton(event) &&

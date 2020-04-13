@@ -75,6 +75,7 @@ public class CodeEditor extends JTextPane {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void paint(Graphics g) {
 
 		super.paint(g);
