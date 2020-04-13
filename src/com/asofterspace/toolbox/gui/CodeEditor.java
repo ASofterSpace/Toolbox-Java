@@ -4,12 +4,14 @@
  */
 package com.asofterspace.toolbox.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.RenderingHints;
 
 import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
 
 
 /**
@@ -23,7 +25,16 @@ public class CodeEditor extends JTextPane {
 
 	private final static long serialVersionUID = 1L;
 
+	private boolean showStartLine = false;
 
+	private int prevStartLinePos = 0;
+
+
+	public void enableStartLine(boolean doEnable) {
+		this.showStartLine = doEnable;
+	}
+
+	@Override
 	public boolean getScrollableTracksViewportWidth() {
 
 		// do NOT report something fancy...
@@ -35,6 +46,7 @@ public class CodeEditor extends JTextPane {
 		return false;
 	}
 
+	@Override
 	public Dimension getPreferredSize() {
 
 		// get the size that the text takes up...
@@ -52,6 +64,61 @@ public class CodeEditor extends JTextPane {
 		return result;
 	}
 
+	@Override
+	public void paint(Graphics g) {
+
+		super.paint(g);
+
+		if (!showStartLine) {
+			return;
+		}
+
+		String text = getText();
+		int pos = getSelectionStart();
+		int firstLetter = pos;
+		char chr = ' ';
+		while (pos < text.length()) {
+			chr = text.charAt(pos);
+			if ((chr != ' ') && (chr != '\t')) {
+				break;
+			}
+			pos++;
+		}
+		if (chr == '\n') {
+			pos--;
+		}
+		while (pos > 0) {
+			try {
+				chr = text.charAt(pos);
+			} catch (StringIndexOutOfBoundsException e) {
+				// whoops!
+			}
+			if (chr == '\n') {
+				break;
+			}
+			if ((chr != ' ') && (chr != '\t')) {
+				firstLetter = pos;
+			}
+			pos--;
+		}
+
+		try {
+			int x = ((int) modelToView2D(firstLetter).getX()) - 1;
+
+			if (prevStartLinePos != x) {
+				prevStartLinePos = x;
+				repaint();
+			}
+
+		} catch (BadLocationException e) {
+			// whoops!
+		}
+
+		g.setColor(Color.DARK_GRAY);
+		g.drawLine(prevStartLinePos, 0, prevStartLinePos, getHeight());
+	}
+
+	@Override
 	protected void paintComponent(Graphics g) {
 
 		if (g instanceof Graphics2D) {
