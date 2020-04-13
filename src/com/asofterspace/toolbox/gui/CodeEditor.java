@@ -29,9 +29,15 @@ public class CodeEditor extends JTextPane {
 
 	private int prevStartLinePos = 0;
 
+	private Color startLineColor = Color.DARK_GRAY;
+
 
 	public void enableStartLine(boolean doEnable) {
 		this.showStartLine = doEnable;
+	}
+
+	public void setStartLineColor(Color startLineColor) {
+		this.startLineColor = startLineColor;
 	}
 
 	@Override
@@ -74,10 +80,11 @@ public class CodeEditor extends JTextPane {
 		}
 
 		String text = getText();
+		int len = text.length();
 		int pos = getSelectionStart();
 		int firstLetter = pos;
 		char chr = ' ';
-		while (pos < text.length()) {
+		while (pos < len) {
 			chr = text.charAt(pos);
 			if ((chr != ' ') && (chr != '\t')) {
 				break;
@@ -87,12 +94,11 @@ public class CodeEditor extends JTextPane {
 		if (chr == '\n') {
 			pos--;
 		}
+		while (pos >= len) {
+			pos--;
+		}
 		while (pos > 0) {
-			try {
-				chr = text.charAt(pos);
-			} catch (StringIndexOutOfBoundsException e) {
-				// whoops!
-			}
+			chr = text.charAt(pos);
 			if (chr == '\n') {
 				break;
 			}
@@ -114,7 +120,7 @@ public class CodeEditor extends JTextPane {
 			// whoops!
 		}
 
-		g.setColor(Color.DARK_GRAY);
+		g.setColor(startLineColor);
 		int y = 0;
 		int height = getHeight();
 		while (y < height) {
