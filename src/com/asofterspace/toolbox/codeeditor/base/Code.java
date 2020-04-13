@@ -1219,7 +1219,7 @@ public abstract class Code extends DefaultStyledDocument {
 		return content.substring(start, end);
 	}
 
-	public static int getWordStartFromPosition(int pos, String content, boolean splitOnDot) {
+	public static int getWordStartFromPosition(int pos, String content, boolean splitWordClusters) {
 
 		int lineStartSpace = content.lastIndexOf(" ", pos - 1) + 1;
 		int lineStartNewline = content.lastIndexOf("\n", pos - 1) + 1;
@@ -1232,12 +1232,20 @@ public abstract class Code extends DefaultStyledDocument {
 		int lineStartRSqBracket = content.lastIndexOf("]", pos - 1) + 1;
 		int lineStartLParens = content.lastIndexOf("{", pos - 1) + 1;
 		int lineStartRParens = content.lastIndexOf("}", pos - 1) + 1;
-		int lineStartDot = 0;
-		if (splitOnDot) {
-			lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
-		}
 		int lineStartSemi = content.lastIndexOf(";", pos - 1) + 1;
 		int lineStartComma = content.lastIndexOf(",", pos - 1) + 1;
+		int lineStartDot = 0;
+		int lineStartEquals = 0;
+		int lineStartApo = 0;
+		int lineStartQuot = 0;
+		int lineStartSlash = 0;
+		if (splitWordClusters) {
+			lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
+			lineStartEquals = content.lastIndexOf("=", pos - 1) + 1;
+			lineStartApo = content.lastIndexOf("'", pos - 1) + 1;
+			lineStartQuot = content.lastIndexOf("\"", pos - 1) + 1;
+			lineStartSlash = content.lastIndexOf("/", pos - 1) + 1;
+		}
 
 		int lineStart = 0;
 
@@ -1274,9 +1282,6 @@ public abstract class Code extends DefaultStyledDocument {
 		if (lineStartRParens > lineStart) {
 			lineStart = lineStartRParens;
 		}
-		if (lineStartDot > lineStart) {
-			lineStart = lineStartDot;
-		}
 		if (lineStartSemi > lineStart) {
 			lineStart = lineStartSemi;
 		}
@@ -1284,10 +1289,26 @@ public abstract class Code extends DefaultStyledDocument {
 			lineStart = lineStartComma;
 		}
 
+		if (lineStartDot > lineStart) {
+			lineStart = lineStartDot;
+		}
+		if (lineStartEquals > lineStart) {
+			lineStart = lineStartEquals;
+		}
+		if (lineStartApo > lineStart) {
+			lineStart = lineStartApo;
+		}
+		if (lineStartQuot > lineStart) {
+			lineStart = lineStartQuot;
+		}
+		if (lineStartSlash > lineStart) {
+			lineStart = lineStartSlash;
+		}
+
 		return lineStart;
 	}
 
-	public static int getWordEndFromPosition(int pos, String content, boolean splitOnDot) {
+	public static int getWordEndFromPosition(int pos, String content, boolean splitWordClusters) {
 
 		int lineEndSpace = content.indexOf(" ", pos);
 		int lineEndNewline = content.indexOf("\n", pos);
@@ -1300,12 +1321,20 @@ public abstract class Code extends DefaultStyledDocument {
 		int lineEndRSqBracket = content.indexOf("]", pos);
 		int lineEndLParens = content.indexOf("{", pos);
 		int lineEndRParens = content.indexOf("}", pos);
-		int lineEndDot = -1;
-		if (splitOnDot) {
-			lineEndDot = content.indexOf(".", pos);
-		}
 		int lineEndSemi = content.indexOf(";", pos);
 		int lineEndComma = content.indexOf(",", pos);
+		int lineEndDot = -1;
+		int lineEndEquals = -1;
+		int lineEndApo = -1;
+		int lineEndQuot = -1;
+		int lineEndSlash = -1;
+		if (splitWordClusters) {
+			lineEndDot = content.indexOf(".", pos);
+			lineEndEquals = content.indexOf("=", pos);
+			lineEndApo = content.indexOf("'", pos);
+			lineEndQuot = content.indexOf("\"", pos);
+			lineEndSlash = content.indexOf("/", pos);
+		}
 
 		int lineEnd = content.length();
 
@@ -1342,14 +1371,27 @@ public abstract class Code extends DefaultStyledDocument {
 		if ((lineEndRParens >= 0) && (lineEndRParens < lineEnd)) {
 			lineEnd = lineEndRParens;
 		}
-		if ((lineEndDot >= 0) && (lineEndDot < lineEnd)) {
-			lineEnd = lineEndDot;
-		}
 		if ((lineEndSemi >= 0) && (lineEndSemi < lineEnd)) {
 			lineEnd = lineEndSemi;
 		}
 		if ((lineEndComma >= 0) && (lineEndComma < lineEnd)) {
 			lineEnd = lineEndComma;
+		}
+
+		if ((lineEndDot >= 0) && (lineEndDot < lineEnd)) {
+			lineEnd = lineEndDot;
+		}
+		if ((lineEndEquals >= 0) && (lineEndEquals < lineEnd)) {
+			lineEnd = lineEndEquals;
+		}
+		if ((lineEndApo >= 0) && (lineEndApo < lineEnd)) {
+			lineEnd = lineEndApo;
+		}
+		if ((lineEndQuot >= 0) && (lineEndQuot < lineEnd)) {
+			lineEnd = lineEndQuot;
+		}
+		if ((lineEndSlash >= 0) && (lineEndSlash < lineEnd)) {
+			lineEnd = lineEndSlash;
 		}
 
 		return lineEnd;
