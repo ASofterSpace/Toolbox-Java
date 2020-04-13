@@ -33,6 +33,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
@@ -276,6 +277,11 @@ public abstract class Code extends DefaultStyledDocument {
 			public void mouseReleased(MouseEvent event) {
 				onMouseReleased(event);
 			}
+
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				onMouseClicked(event);
+			}
 		};
 
 		decoratedEditor.addMouseListener(mouseListener);
@@ -313,6 +319,24 @@ public abstract class Code extends DefaultStyledDocument {
 			decoratedEditor.setCaretPosition(nextIndex);
 			decoratedEditor.setSelectionStart(nextIndex);
 			decoratedEditor.setSelectionEnd(nextIndex + clickedWord.length());
+		}
+	}
+
+	protected void onMouseClicked(MouseEvent event) {
+
+		// on double click...
+		if ((event.getClickCount() == 2) && SwingUtilities.isLeftMouseButton(event)) {
+
+			  // ... select the current word!
+			int caretPos = decoratedEditor.viewToModel2D(event.getPoint());;
+			String content = decoratedEditor.getText();
+
+			int wordStart = getWordStartFromPosition(caretPos, content);
+			int wordEnd = getWordEndFromPosition(caretPos, content);
+
+			decoratedEditor.setCaretPosition(wordStart);
+			decoratedEditor.setSelectionStart(wordStart);
+			decoratedEditor.setSelectionEnd(wordEnd);
 		}
 	}
 
