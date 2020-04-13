@@ -32,6 +32,10 @@ public class CodeEditor extends JTextPane {
 	private Color startLineColor = Color.DARK_GRAY;
 
 
+	/**
+	 * Enable or disable the start line, which is a vertical dotted line that indicates
+	 * the horizontal location at which the current line starts
+	 */
 	public void enableStartLine(boolean doEnable) {
 		this.showStartLine = doEnable;
 	}
