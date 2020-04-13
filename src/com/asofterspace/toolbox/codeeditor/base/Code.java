@@ -307,8 +307,8 @@ public abstract class Code extends DefaultStyledDocument {
 			int caretPos = decoratedEditor.getCaretPosition();
 			String content = decoratedEditor.getText();
 
-			int wordStart = getWordStartFromPosition(caretPos, content);
-			int wordEnd = getWordEndFromPosition(caretPos, content);
+			int wordStart = getWordStartFromPosition(caretPos, content, true);
+			int wordEnd = getWordEndFromPosition(caretPos, content, true);
 
 			String clickedWord = content.substring(wordStart, wordEnd);
 			// find clicked word and go there
@@ -324,19 +324,47 @@ public abstract class Code extends DefaultStyledDocument {
 
 	protected void onMouseClicked(MouseEvent event) {
 
-		// on double click...
-		if ((event.getClickCount() == 2) && SwingUtilities.isLeftMouseButton(event)) {
+		if (SwingUtilities.isLeftMouseButton(event) &&
+			(event.getClickCount() > 1) &&
+			(event.getClickCount() < 5)) {
 
-			  // ... select the current word!
 			int caretPos = decoratedEditor.viewToModel2D(event.getPoint());;
 			String content = decoratedEditor.getText();
 
-			int wordStart = getWordStartFromPosition(caretPos, content);
-			int wordEnd = getWordEndFromPosition(caretPos, content);
+			int start = 0;
+			int end = 0;
 
-			decoratedEditor.setCaretPosition(wordStart);
-			decoratedEditor.setSelectionStart(wordStart);
-			decoratedEditor.setSelectionEnd(wordEnd);
+			switch (event.getClickCount()) {
+
+				// on double click...
+				case 2:
+
+					// ... select the current word!
+					start = getWordStartFromPosition(caretPos, content, true);
+					end = getWordEndFromPosition(caretPos, content, true);
+					break;
+
+				// on triple click...
+				case 3:
+
+					// ... select the current word cluster!
+					// (e.g. like foo.bar)
+					start = getWordStartFromPosition(caretPos, content, false);
+					end = getWordEndFromPosition(caretPos, content, false);
+					break;
+
+				// on quadruple click...
+				case 4:
+
+					// ... select the current line!
+					start = getLineStartFromPosition(caretPos, content);
+					end = getLineEndFromPosition(caretPos, content);
+					break;
+			}
+
+			decoratedEditor.setCaretPosition(start);
+			decoratedEditor.setSelectionStart(start);
+			decoratedEditor.setSelectionEnd(end);
 		}
 	}
 
@@ -1112,6 +1140,26 @@ public abstract class Code extends DefaultStyledDocument {
 		return result;
 	}
 
+	public static int getLineStartFromNumber(int number, String content) {
+
+		int count = 0;
+		int lineStart = 0;
+		int lineEnd = 0;
+
+		for (int i = 0; i < content.length(); i++) {
+			char c = content.charAt(i);
+			if (c == '\n') {
+				count++;
+
+				if (count == number) {
+					return i + 1;
+				}
+			}
+		}
+
+		return content.length() - 1;
+	}
+
 	public static String getLineFromNumber(int number, String content) {
 
 		int count = 0;
@@ -1163,13 +1211,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public static String getWordFromPosition(int pos, String content) {
 
-		int start = getWordStartFromPosition(pos, content);
-		int end = getWordEndFromPosition(pos, content);
+		int start = getWordStartFromPosition(pos, content, true);
+		int end = getWordEndFromPosition(pos, content, true);
 
 		return content.substring(start, end);
 	}
 
-	public static int getWordStartFromPosition(int pos, String content) {
+	public static int getWordStartFromPosition(int pos, String content, boolean splitOnDot) {
 
 		int lineStartSpace = content.lastIndexOf(" ", pos - 1) + 1;
 		int lineStartNewline = content.lastIndexOf("\n", pos - 1) + 1;
@@ -1182,7 +1230,10 @@ public abstract class Code extends DefaultStyledDocument {
 		int lineStartRSqBracket = content.lastIndexOf("]", pos - 1) + 1;
 		int lineStartLParens = content.lastIndexOf("{", pos - 1) + 1;
 		int lineStartRParens = content.lastIndexOf("}", pos - 1) + 1;
-		int lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
+		int lineStartDot = 0;
+		if (splitOnDot) {
+			lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
+		}
 		int lineStartSemi = content.lastIndexOf(";", pos - 1) + 1;
 		int lineStartComma = content.lastIndexOf(",", pos - 1) + 1;
 
@@ -1234,7 +1285,7 @@ public abstract class Code extends DefaultStyledDocument {
 		return lineStart;
 	}
 
-	public static int getWordEndFromPosition(int pos, String content) {
+	public static int getWordEndFromPosition(int pos, String content, boolean splitOnDot) {
 
 		int lineEndSpace = content.indexOf(" ", pos);
 		int lineEndNewline = content.indexOf("\n", pos);
@@ -1247,7 +1298,10 @@ public abstract class Code extends DefaultStyledDocument {
 		int lineEndRSqBracket = content.indexOf("]", pos);
 		int lineEndLParens = content.indexOf("{", pos);
 		int lineEndRParens = content.indexOf("}", pos);
-		int lineEndDot = content.indexOf(".", pos);
+		int lineEndDot = -1;
+		if (splitOnDot) {
+			lineEndDot = content.indexOf(".", pos);
+		}
 		int lineEndSemi = content.indexOf(";", pos);
 		int lineEndComma = content.indexOf(",", pos);
 
