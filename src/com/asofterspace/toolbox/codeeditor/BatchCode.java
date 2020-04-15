@@ -175,43 +175,6 @@ public class BatchCode extends Code {
 		return commentEnd;
 	}
 
-	private int highlightString(String content, int start, int end) {
-
-		// get the string delimiter that was actually used to start this string (so " or ') to be able to find the matching one
-		String stringDelimiter = content.substring(start, start + 1);
-
-		// find the end of line - as we do not want to go further
-		int endOfLine = content.indexOf(EOL, start + 2);
-
-		if (endOfLine == -1) {
-			endOfLine = end;
-		}
-
-		// find the matching end of string
-		int endOfString = start;
-
-		while (true) {
-			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
-
-			// if the end of string is actually escaped... well, then it is not an end of string yet, continue searching!
-			if ((endOfString == -1) || (content.charAt(endOfString - 1) != '\\')) {
-				break;
-			}
-		}
-
-		if (endOfString == -1) {
-			// the string is open-ended... go for end of line
-			endOfString = endOfLine;
-		} else {
-			// the string is not open-ended... so will the end marker or the line break be first?
-			endOfString = Math.min(endOfString, endOfLine);
-		}
-
-		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
-
-		return endOfString;
-	}
-
 	private int highlightOther(String content, int start, int end) {
 
 		int couldBeKeywordEnd = start + 1;

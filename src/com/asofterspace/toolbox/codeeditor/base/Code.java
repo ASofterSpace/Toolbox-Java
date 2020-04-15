@@ -8,6 +8,8 @@ import com.asofterspace.toolbox.codeeditor.utils.CodeAtLocation;
 import com.asofterspace.toolbox.codeeditor.utils.CodeLanguage;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
+import com.asofterspace.toolbox.gui.CodeEditor;
+import com.asofterspace.toolbox.gui.CodeEditorLineMemo;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.utils.StrUtils;
 
@@ -718,6 +720,8 @@ public abstract class Code extends DefaultStyledDocument {
 	private void addJavaUtilImport(String origText, StringBuilder contentMiddle, String utility, String fullUtility, String importKeyword) {
 
 		if (origText.contains(" " + utility + "<") || origText.contains("\t" + utility + "<") ||
+			origText.contains("<" + utility + ",") || origText.contains("<" + utility + ">") ||
+			origText.contains(" " + utility + ">") || origText.contains("," + utility + ">") ||
 			origText.contains(" " + utility + " ") || origText.contains("\t" + utility + " ") ||
 			origText.contains(" " + utility + "(") || origText.contains("\t" + utility + "(") ||
 			origText.contains(" " + utility + ".") || origText.contains("\t" + utility + ".") ||
@@ -2094,6 +2098,59 @@ public abstract class Code extends DefaultStyledDocument {
 		} catch (BadLocationException e) {
 			// oops!
 		}
+	}
+
+	protected int highlightString(String content, int start, int end) {
+
+		// get the string delimiter that was actually used to start this string (so " or ') to be able to find the matching one
+		String stringDelimiter = content.substring(start, start + 1);
+
+		// find the end of line - as we do not want to go further
+		int endOfLine = content.indexOf(EOL, start + 2);
+
+		if (endOfLine == -1) {
+			endOfLine = end;
+		}
+
+		// find the matching end of string
+		int endOfString = start;
+
+		while (true) {
+			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
+
+			// the end of the line (or even file) has been reached without us finding another string end marker
+			if (endOfString == -1) {
+				break;
+			}
+
+			int i = 1;
+			while (endOfString - i >= 0) {
+				if (content.charAt(endOfString - i) == '\\') {
+					i++;
+				} else {
+					break;
+				}
+			}
+			i--;
+			// if the end of the string is not escaped...
+			// (because there are 0 escapes, or 2 (which escape each other), or 4, or 6, ...)
+			if (i % 2 == 0) {
+				// ... then it really is the end!
+				break;
+			}
+		}
+
+		if (endOfString == -1) {
+			// the string is open-ended... go for end of line
+			endOfString = endOfLine;
+		} else {
+			// the string is not open-ended... so will the end marker or the line break be first?
+			endOfString = Math.min(endOfString, endOfLine);
+		}
+
+		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
+
+		return endOfString;
 	}
 
 	private int lastLineAmount = 0;

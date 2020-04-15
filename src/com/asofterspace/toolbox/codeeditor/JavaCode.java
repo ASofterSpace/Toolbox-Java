@@ -116,6 +116,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("HashSet", "java.util.HashSet");
 		automaticallyAddedImports.put("List", "java.util.List");
 		automaticallyAddedImports.put("Map", "java.util.Map");
+		automaticallyAddedImports.put("Random", "java.util.Random");
 		automaticallyAddedImports.put("Set", "java.util.Set");
 		automaticallyAddedImports.put("AbstractButton", "javax.swing.AbstractButton");
 		automaticallyAddedImports.put("BorderFactory", "javax.swing.BorderFactory");
@@ -185,19 +186,33 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					continue;
 				}
 				for (String line : content.split("\n")) {
+					line = line.trim();
+					// add imports of other files also as possible imports, but guard against
+					// multi-line ones
+					if ((line.startsWith("import ") && line.contains(".") && line.endsWith(";"))) {
+						String thisFullImport = line.substring(7);
+						thisFullImport = thisFullImport.substring(0, thisFullImport.length() - 1).trim();
+						String thisImportClass = thisFullImport.substring(thisFullImport.lastIndexOf(".") + 1);
+						String thisImportPackageStr = thisFullImport.substring(0, thisFullImport.lastIndexOf("."));
+						if ((!thisImportPackageStr.equals(ourPackageStr)) && (!thisImportClass.equals("*"))) {
+							automaticallyAddedImports.put(thisImportClass, thisFullImport);
+						}
+					}
+					// add other source files directly as possible imports
 					if (line.startsWith("package ")) {
 						packageStr = line.substring(8).trim();
 						if (packageStr.endsWith(";")) {
 							packageStr = packageStr.substring(0, packageStr.length() - 1).trim();
 						}
 					}
-					line = line.trim();
 					if (line.contains(" class ") && line.endsWith("{")) {
 						classNameStr = line.substring(line.indexOf(" class ") + 7);
 					}
 					if (line.startsWith("class ") && line.endsWith("{")) {
 						classNameStr = line.substring(6);
 					}
+					// once a class name has been found, interrupt - as there will be no further
+					// class name or import
 					if (classNameStr != null) {
 						if (classNameStr.contains(" ")) {
 							classNameStr = classNameStr.substring(0, classNameStr.indexOf(" "));
@@ -206,7 +221,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					}
 				}
 				// for each file, check if a package and classname were found
-				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr)) {
+				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr) && !classNameStr.equals("*")) {
 					// we here override java default classes if the opened files contain the same class names...
 					// ... which is exactly the behavior we like :)
 					automaticallyAddedImports.put(classNameStr, packageStr + "." + classNameStr);
@@ -373,50 +388,6 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
 
 		return commentEnd;
-	}
-
-	protected int highlightString(String content, int start, int end) {
-
-		// get the string delimiter that was actually used to start this string (so " or ') to be able to find the matching one
-		String stringDelimiter = content.substring(start, start + 1);
-
-		// find the end of line - as we do not want to go further
-		int endOfLine = content.indexOf(EOL, start + 2);
-
-		if (endOfLine == -1) {
-			endOfLine = end;
-		}
-
-		// find the matching end of string
-		int endOfString = start;
-
-		while (true) {
-			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
-
-			if (endOfString == -1) {
-				break;
-			}
-			// if the end of string is actually escaped... well, then it is not an end of string yet, continue searching!
-			if (content.charAt(endOfString - 1) != '\\') {
-				break;
-			}
-			// but if the escaping is escaped - so \\ - then actually the end of string is not escaped, just the escape string xD
-			if ((endOfString > 1) && (content.charAt(endOfString - 1) == '\\') && (content.charAt(endOfString - 2) == '\\')) {
-				break;
-			}
-		}
-
-		if (endOfString == -1) {
-			// the string is open-ended... go for end of line
-			endOfString = endOfLine;
-		} else {
-			// the string is not open-ended... so will the end marker or the line break be first?
-			endOfString = Math.min(endOfString, endOfLine);
-		}
-
-		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
-
-		return endOfString;
 	}
 
 	private int highlightOther(String content, int start, int end) {

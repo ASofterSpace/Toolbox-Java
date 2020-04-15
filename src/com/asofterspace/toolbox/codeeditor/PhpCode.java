@@ -219,36 +219,7 @@ public class PhpCode extends HtmlCode {
 	}
 
 	private int highlightPhpString(String content, int start, int end) {
-
-		// get the string delimiter that was actually used to start this string (so " or ') to be able to find the matching one
-		String stringDelimiter = content.substring(start, start + 1);
-
-		// find the end of text - as we do not want to go further
-		int endOfText = end;
-
-		// find the matching end of string
-		int endOfString = start;
-
-		while (true) {
-			endOfString = content.indexOf(stringDelimiter, endOfString + 1);
-
-			// if the end of string is actually escaped... well, then it is not an end of string yet, continue searching!
-			if ((endOfString == -1) || (content.charAt(endOfString - 1) != '\\')) {
-				break;
-			}
-		}
-
-		if (endOfString == -1) {
-			// the string is open-ended... go for end of text
-			endOfString = endOfText;
-		} else {
-			// the string is not open-ended... so will the end marker or the line break be first?
-			endOfString = Math.min(endOfString, endOfText);
-		}
-
-		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);
-
-		return endOfString;
+		return highlightString(content, start, end);
 	}
 
 	private int highlightPhpOther(String content, int start, int end) {
