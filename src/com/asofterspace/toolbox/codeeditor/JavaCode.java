@@ -12,6 +12,7 @@ import com.asofterspace.toolbox.utils.StrUtils;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +68,13 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	public JavaCode(JTextPane editor) {
 
 		super(editor);
+
+		clearAutomaticallyAddedImports();
+	}
+
+	private void clearAutomaticallyAddedImports() {
+
+		automaticallyAddedImports = new HashMap<>();
 
 		automaticallyAddedImports.put("BorderLayout", "java.awt.BorderLayout");
 		automaticallyAddedImports.put("CardLayout", "java.awt.CardLayout");
@@ -145,6 +153,66 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 	@Override
 	public String addMissingImports(String origText) {
+
+		// we get the default java imports
+		clearAutomaticallyAddedImports();
+
+		// and if we are a regular java file with a package name...
+		// (necessary because we want to avoid importing files from our own package ^^)
+		String ourPackageStr = null;
+		for (String line : decoratedEditor.getText().split("\n")) {
+			if (line.startsWith("package ")) {
+				ourPackageStr = line.substring(8).trim();
+				if (ourPackageStr.endsWith(";")) {
+					ourPackageStr = ourPackageStr.substring(0, ourPackageStr.length() - 1).trim();
+				}
+				break;
+			}
+		}
+
+		// ... then we add missing imports based on all the open java files
+		if (ourPackageStr != null) {
+			List<String> filesToOpen = new ArrayList<>();
+			filesToOpen.add(".java");
+			filesToOpen.add(".groovy");
+
+			List<String> contents = getOtherFileContents(filesToOpen);
+
+			for (String content : contents) {
+				String packageStr = null;
+				String classNameStr = null;
+				if (content == null) {
+					continue;
+				}
+				for (String line : content.split("\n")) {
+					if (line.startsWith("package ")) {
+						packageStr = line.substring(8).trim();
+						if (packageStr.endsWith(";")) {
+							packageStr = packageStr.substring(0, packageStr.length() - 1).trim();
+						}
+					}
+					if (line.contains(" class ")) {
+						classNameStr = line.substring(line.indexOf(" class ") + 7);
+					}
+					if (line.startsWith("class ")) {
+						classNameStr = line.substring(6);
+					}
+					if (classNameStr != null) {
+						if (classNameStr.contains(" ")) {
+							classNameStr = classNameStr.substring(0, classNameStr.indexOf(" "));
+						}
+						break;
+					}
+				}
+				// for each file, check if a package and classname were found
+				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr)) {
+					// we here override java default classes if the opened files contain the same class names...
+					// ... which is exactly the behavior we like :)
+					automaticallyAddedImports.put(classNameStr, packageStr + "." + classNameStr);
+				}
+			}
+		}
+
 		return addMissingImportsJavalike("import", origText);
 	}
 

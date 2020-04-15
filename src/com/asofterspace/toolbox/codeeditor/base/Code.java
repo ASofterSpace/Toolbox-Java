@@ -2188,6 +2188,13 @@ public abstract class Code extends DefaultStyledDocument {
 		return onOpenFileCallback.openFileRelativeToThis(basePath, relativePaths, language, extraInfo);
 	}
 
+	protected List<String> getOtherFileContents(List<String> fileEndings) {
+		if (onOpenFileCallback == null) {
+			return new ArrayList<>();
+		}
+		return onOpenFileCallback.getOtherFileContents(fileEndings);
+	}
+
 	/**
 	 * Add getters for selected fields
 	 */

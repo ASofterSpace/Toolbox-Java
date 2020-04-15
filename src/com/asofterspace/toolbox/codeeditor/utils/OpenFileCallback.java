@@ -17,4 +17,9 @@ public interface OpenFileCallback {
 	 * file resolved from the base)
 	 */
 	boolean openFileRelativeToThis(String basePath, List<String> relativePaths, CodeLanguage language, String extraInfo);
+
+	/**
+	 * Get the contents of other open files whose names match one of the file endings
+	 */
+	List<String> getOtherFileContents(List<String> fileEndings);
 }
