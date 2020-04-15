@@ -191,10 +191,11 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 							packageStr = packageStr.substring(0, packageStr.length() - 1).trim();
 						}
 					}
-					if (line.contains(" class ")) {
+					line = line.trim();
+					if (line.contains(" class ") && line.endsWith("{")) {
 						classNameStr = line.substring(line.indexOf(" class ") + 7);
 					}
-					if (line.startsWith("class ")) {
+					if (line.startsWith("class ") && line.endsWith("{")) {
 						classNameStr = line.substring(6);
 					}
 					if (classNameStr != null) {
