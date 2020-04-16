@@ -102,10 +102,12 @@ public abstract class Code extends DefaultStyledDocument {
 	protected MutableAttributeSet attrReservedChar; // ,.()[]...
 	protected MutableAttributeSet attrFunction; // blubb()
 	protected MutableAttributeSet attrData; // <![CDATA[...]]>
+	protected MutableAttributeSet attrMatchingBrackets; // ( ... )
 
 	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
 	private volatile boolean pleaseHighlight = false;
+	private volatile boolean activityDetected = false;
 
 	// do we highlight functions which the user is currently in or not?
 	protected boolean doFunctionHighlighting = true;
@@ -301,6 +303,99 @@ public abstract class Code extends DefaultStyledDocument {
 			selEnd = e.getDot();
 		}
 		selLength = selEnd - selStart;
+
+		activityDetected = true;
+	}
+
+	boolean highlightedSomething = false;
+	boolean highlightedSomethingLastTime = false;
+
+	private void highlightMatchingBrackets() {
+
+		String text = decoratedEditor.getText();
+		highlightedSomething = false;
+		try {
+			highlightMatchingBrackets(selStart, text);
+			highlightMatchingBrackets(selStart - 1, text);
+		} catch (IllegalStateException ex) {
+			// whoops, we were not allowed to highlight here...
+		}
+		if ((!highlightedSomething) && highlightedSomethingLastTime) {
+			pleaseHighlight = true;
+			highlightedSomethingLastTime = false;
+		}
+	}
+
+	private void highlightMatchingBrackets(int selStart, String text) {
+		if ((text.length() > selStart) && (selStart > 0)) {
+			char curChar = text.charAt(selStart);
+			switch (curChar) {
+				case '(':
+					highlightMatchingBracketLeft(curChar, ')', selStart, text);
+					break;
+				case ')':
+					highlightMatchingBracketRight('(', curChar, selStart, text);
+					break;
+				case '[':
+					highlightMatchingBracketLeft(curChar, ']', selStart, text);
+					break;
+				case ']':
+					highlightMatchingBracketRight('[', curChar, selStart, text);
+					break;
+				case '{':
+					highlightMatchingBracketLeft(curChar, '}', selStart, text);
+					break;
+				case '}':
+					highlightMatchingBracketRight('{', curChar, selStart, text);
+					break;
+				case '<':
+					highlightMatchingBracketLeft(curChar, '>', selStart, text);
+					break;
+				case '>':
+					highlightMatchingBracketRight('<', curChar, selStart, text);
+					break;
+			}
+		}
+	}
+
+	private void highlightMatchingBracketLeft(char foundChar, char searchChar, int selStart, String text) {
+
+		int depth = 1;
+		for (int i = selStart + 1; i < text.length(); i++) {
+			if (text.charAt(i) == foundChar) {
+				depth++;
+			}
+			if (text.charAt(i) == searchChar) {
+				depth--;
+			}
+			if (depth < 1) {
+				this.setCharacterAttributes(selStart, 1, attrMatchingBrackets, false);
+				this.setCharacterAttributes(i, 1, attrMatchingBrackets, false);
+				highlightedSomething = true;
+				highlightedSomethingLastTime = true;
+				return;
+			}
+		}
+	}
+
+	private void highlightMatchingBracketRight(char searchChar, char foundChar, int selStart, String text) {
+
+		int depth = 1;
+		for (int i = selStart - 1; i >= 0; i--) {
+			if (text.charAt(i) == foundChar) {
+				depth++;
+			}
+			if (text.charAt(i) == searchChar) {
+				depth--;
+			}
+			if (depth < 1) {
+				this.setCharacterAttributes(selStart, 1, attrMatchingBrackets, false);
+				this.setCharacterAttributes(i, 1, attrMatchingBrackets, false);
+				highlightedSomething = true;
+				highlightedSomethingLastTime = true;
+				return;
+			}
+		}
 	}
 
 	/**
@@ -1432,6 +1527,10 @@ public abstract class Code extends DefaultStyledDocument {
 									instance.highlightText(0, len);
 									instance.highlightSearch(0, len);
 								}
+								if (instance.activityDetected) {
+									instance.highlightMatchingBrackets();
+									instance.activityDetected = false;
+								}
 							}
 						}
 						//Thread.yield();
@@ -1581,6 +1680,9 @@ public abstract class Code extends DefaultStyledDocument {
 		attrData = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrData, new Color(48, 48, 48));
 
+		attrMatchingBrackets = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrMatchingBrackets, new Color(255, 0, 0));
+
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
 		decoratedEditor.setCaretColor(schemeForegroundColor);
@@ -1648,6 +1750,9 @@ public abstract class Code extends DefaultStyledDocument {
 
 		attrData = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrData, new Color(178, 178, 178));
+
+		attrMatchingBrackets = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrMatchingBrackets, new Color(255, 0, 0));
 
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
@@ -2493,7 +2598,12 @@ public abstract class Code extends DefaultStyledDocument {
 	@Override
 	public void setCharacterAttributes(int offset, int length, AttributeSet s, boolean replace) {
 		if (attributeSetting) {
-			super.setCharacterAttributes(offset, length, s, replace);
+			try {
+				super.setCharacterAttributes(offset, length, s, replace);
+			} catch (Error e) {
+				// we got a StateInvariantError, which should be avoided
+				// (by not calling updates while ourselves being updated)
+			}
 		}
 	}
 
