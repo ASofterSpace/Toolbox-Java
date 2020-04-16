@@ -161,7 +161,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		// and if we are a regular java file with a package name...
 		// (necessary because we want to avoid importing files from our own package ^^)
 		String ourPackageStr = null;
-		for (String line : decoratedEditor.getText().split("\n")) {
+		for (String line : removeCommentsAndStrings(decoratedEditor.getText()).split("\n")) {
 			if (line.startsWith("package ")) {
 				ourPackageStr = line.substring(8).trim();
 				if (ourPackageStr.endsWith(";")) {
@@ -185,6 +185,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				if (content == null) {
 					continue;
 				}
+				content = removeCommentsAndStrings(content);
 				for (String line : content.split("\n")) {
 					line = line.trim();
 					// add imports of other files also as possible imports, but guard against
@@ -205,10 +206,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 							packageStr = packageStr.substring(0, packageStr.length() - 1).trim();
 						}
 					}
-					if (line.contains(" class ") && line.endsWith("{")) {
+					if (line.contains(" class ")) {
 						classNameStr = line.substring(line.indexOf(" class ") + 7);
 					}
-					if (line.startsWith("class ") && line.endsWith("{")) {
+					if (line.startsWith("class ")) {
 						classNameStr = line.substring(6);
 					}
 					// once a class name has been found, interrupt - as there will be no further
@@ -250,6 +251,63 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 		insertStringJavalike(offset, insertedString, attrs);
+	}
+
+	@Override
+	public String removeCommentsAndStrings(String content) {
+
+		StringBuilder result = new StringBuilder();
+
+		attributeSetting = false;
+
+		int start = 0;
+		int prev = 0;
+		int end = content.length() - 1;
+
+		while (start <= end) {
+
+			// while we have a delimiter...
+			char curChar = content.charAt(start);
+
+			startingWhitespace = false;
+
+			while (isDelimiter(curChar)) {
+
+				// ... check for a comment (which starts with a delimiter)
+				if (isCommentStart(content, start, end)) {
+					start = highlightComment(content, start, end);
+
+				// ... and check for a quoted string
+				} else if (isStringDelimiter(content.charAt(start))) {
+
+					// then let's get that string!
+					start = highlightString(content, start, end);
+
+				} else {
+					result.append(curChar);
+				}
+
+				if (start < end) {
+
+					// jump forward and try again!
+					start++;
+
+				} else {
+					attributeSetting = true;
+					return result.toString();
+				}
+
+				curChar = content.charAt(start);
+			}
+
+			// or any other token instead?
+			prev = start;
+			start = highlightOther(content, start, end, false);
+			result.append(content.substring(prev, start));
+		}
+
+		attributeSetting = true;
+		return "";
 	}
 
 	// this is the main function that... well... highlights our text :)
@@ -333,7 +391,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				}
 
 				// or any other token instead?
-				start = highlightOther(content, start, end);
+				start = highlightOther(content, start, end, true);
 			}
 
 		} catch (BadLocationException e) {
@@ -390,7 +448,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return commentEnd;
 	}
 
-	private int highlightOther(String content, int start, int end) {
+	private int highlightOther(String content, int start, int end, boolean detectFunctions) {
 
 		int couldBeKeywordEnd = start + 1;
 

@@ -22,6 +22,9 @@ public class CodeEditorLineMemo extends JTextPane {
 	private final static long serialVersionUID = 1L;
 
 
+	public CodeEditorLineMemo() {
+	}
+
 	public boolean getScrollableTracksViewportWidth() {
 
 		// do NOT report something fancy...

@@ -23,6 +23,8 @@ public class CoderJavaTest implements Test {
 		removeUnusedImports();
 
 		functionListTest();
+
+		removeCommentsAndStrings();
 	}
 
 	public void reorganizeImports() {
@@ -230,5 +232,66 @@ public class CoderJavaTest implements Test {
 		}
 
 		TestUtils.fail("We attempted to read out the function list of a Java program - but failed! (Input: " + origStr + ", output: " + resultStr + ")");
+	}
+
+	private void removeCommentsAndStrings() {
+
+		TestUtils.start("Remove Comments and Strings in Java Code Editor");
+
+		JTextPane editor = new JTextPane();
+		JavaCode javaCode = new JavaCode(editor);
+
+		String content =
+			"/** foo bla\n" +
+			" * lorem\n" +
+			" * ipsum\n" +
+			" */\n" +
+			"package foo.bla;\n" +
+			"\n" +
+			"import something.someother.Thing;\n" +
+			"\n" +
+			"\n" +
+			"// This class does something!\n" +
+			"public class SomethingDoingClass {\n" +
+			"\n" +
+			"	// some Thing!\n" +
+			"	private Thing some = new Thing();\n" +
+			"\n" +
+			"	private String description = \"blubb\";\n" +
+			"\n" +
+			"	private char descriptionChar = '?';\n" +
+			"\n" +
+			"}";
+
+		String target =
+			"\n" +
+			"package foo.bla;\n" +
+			"\n" +
+			"import something.someother.Thing;\n" +
+			"\n" +
+			"\n" +
+			"\n" +
+			"public class SomethingDoingClass {\n" +
+			"\n" +
+			"	\n" +
+			"	private Thing some = new Thing();\n" +
+			"\n" +
+			"	private String description = ;\n" +
+			"\n" +
+			"	private char descriptionChar = ;\n" +
+			"\n" +
+			"}";
+
+		String removed = javaCode.removeCommentsAndStrings(content);
+
+		if (target.equals(removed)) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We attempted to remove comments and strings from some java source code, but they were not properly removed!\n" +
+			"Original source code:\n\n" + content +
+			"\n\nResult:\n\n" + removed +
+			"\n\nIntended result:\n\n" + target);
 	}
 }

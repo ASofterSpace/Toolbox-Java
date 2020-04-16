@@ -138,6 +138,9 @@ public abstract class Code extends DefaultStyledDocument {
 	// a map of imported classes and their package names which should be automatically added if missing
 	protected Map<String, String> automaticallyAddedImports;
 
+	// enable or disable setting attributes
+	protected boolean attributeSetting = true;
+
 
 	public Code(JTextPane editor) {
 
@@ -710,6 +713,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 		StringBuilder contentMiddle = new StringBuilder();
 
+		origText = removeCommentsAndStrings(origText);
+
 		for (Map.Entry<String, String> entry : automaticallyAddedImports.entrySet()) {
 			addJavaUtilImport(origText, contentMiddle, entry.getKey(), entry.getValue(), importKeyword);
 		}
@@ -1051,6 +1056,17 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	/**
+	 * Take the original source code and return the same code, but with comments
+	 * and strings removed, to only get the actual code itself
+	 * Particular classes should override this
+	 */
+	public String removeCommentsAndStrings(String origText) {
+
+		// just do nothing :)
+		return origText;
+	}
+
+	/**
 	 * This is the stuff that is actually done when unused imports are removed;
 	 * we need to have this string-in, string-out available both for testing
 	 * and for using this from the outside, with the plain reorganizeImports()
@@ -1074,7 +1090,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 		getImportsJavalike(importKeyword, origText, output, imports, secondOutput);
 
-		String codeContent = secondOutput.toString();
+		String codeContent = removeCommentsAndStrings(secondOutput.toString());
 
 		for (String importLine : imports) {
 
@@ -1520,7 +1536,6 @@ public abstract class Code extends DefaultStyledDocument {
 		// change the attribute sets
 		attrRegular = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrRegular, schemeForegroundColor);
-		StyleConstants.setBackground(attrRegular, schemeBackgroundColor);
 
 		attrBold = new SimpleAttributeSet();
 		StyleConstants.setBold(attrBold, true);
@@ -1589,7 +1604,6 @@ public abstract class Code extends DefaultStyledDocument {
 		// change the attribute sets
 		attrRegular = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrRegular, schemeForegroundColor);
-		StyleConstants.setBackground(attrRegular, schemeBackgroundColor);
 
 		attrBold = new SimpleAttributeSet();
 		StyleConstants.setBold(attrBold, true);
@@ -2474,6 +2488,13 @@ public abstract class Code extends DefaultStyledDocument {
 		int selPos = contentStart.length() + newCode.length();
 		decoratedEditor.setSelectionStart(selPos);
 		decoratedEditor.setSelectionEnd(selPos);
+	}
+
+	@Override
+	public void setCharacterAttributes(int offset, int length, AttributeSet s, boolean replace) {
+		if (attributeSetting) {
+			super.setCharacterAttributes(offset, length, s, replace);
+		}
 	}
 
 }
