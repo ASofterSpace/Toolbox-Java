@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -104,5 +105,23 @@ public class DateUtils {
 
 	public static String numericalDateTimeStampNow() {
 		return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
+	}
+
+	public static Date now() {
+		return new Date();
+	}
+
+	/**
+	 * Returns a date is that is the current date time plus howMany days
+	 * (negative values are also allowed)
+	 */
+	public static Date daysInTheFuture(Integer howMany) {
+		if (howMany == null) {
+			return new Date();
+		}
+
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, howMany);
+		return cal.getTime();
 	}
 }
