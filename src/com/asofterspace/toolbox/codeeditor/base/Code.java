@@ -2063,6 +2063,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 						int lineStart = getLineStartFromPosition(offset, content);
 						int lineEnd = getLineEndFromPosition(offset, content);
+						int lineOffset = offset - lineStart;
 
 						String contentStart = content.substring(0, lineStart);
 						String line = content.substring(lineStart, lineEnd);
@@ -2070,15 +2071,36 @@ public abstract class Code extends DefaultStyledDocument {
 
 						int ifAt = line.indexOf("if (");
 
-						if ((ifAt >= 0) && (ifAt < offset)) {
-							if (line.indexOf("if ((") < 0) {
+						if ((ifAt >= 0) && (ifAt < lineOffset)) {
+							// if we have:          if (blubb = foo) && |
+							// or if we have:       if (blubb = foo && |)
+							// but NOT if we have:  if (blubb(foo) && |)
+							if (line.indexOf("(", ifAt + 4) < 0) {
+								int foundEndAt = line.indexOf(")", ifAt + 4);
+								int insertedAmount = 0;
+
 								line = line.substring(0, ifAt + 4) + "(" + line.substring(ifAt + 4);
 								String newContent = contentStart + line + contentEnd;
-								newContent = newContent.substring(0, offset + 1) + " )" + newContent.substring(offset + 1);
+
+								if ((foundEndAt >= 0) && (foundEndAt < lineOffset)) {
+									// we have:       if (blubb = foo) && |
+									// we insert:     if ((blubb = foo) && |)
+
+									newContent = newContent.substring(0, offset + 1) + " )" + newContent.substring(offset + 1);
+									insertedAmount = 2;
+
+								} else {
+									// we have:       if (blubb = foo && |)
+									// we insert:     if ((blubb = foo) && |)
+
+									newContent = newContent.substring(0, offset - 2) + ")" +
+										newContent.substring(offset - 2, offset + 1) + " " + newContent.substring(offset + 1);
+									insertedAmount = 3;
+								}
 
 								int origCaretPos = decoratedEditor.getCaretPosition();
 								decoratedEditor.setText(newContent);
-								decoratedEditor.setCaretPosition(origCaretPos + 2);
+								decoratedEditor.setCaretPosition(origCaretPos + insertedAmount);
 
 								// we do NOT bubble up the chain, as we already set the text explicitly!
 								return;
