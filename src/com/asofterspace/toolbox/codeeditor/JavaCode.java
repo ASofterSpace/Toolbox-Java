@@ -195,7 +195,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						thisFullImport = thisFullImport.substring(0, thisFullImport.length() - 1).trim();
 						String thisImportClass = thisFullImport.substring(thisFullImport.lastIndexOf(".") + 1);
 						String thisImportPackageStr = thisFullImport.substring(0, thisFullImport.lastIndexOf("."));
-						if ((!thisImportPackageStr.equals(ourPackageStr)) && (!thisImportClass.equals("*"))) {
+						if ((!thisImportPackageStr.equals(ourPackageStr)) && (!thisImportClass.equals("*")) &&
+							!thisImportPackageStr.equals("java.lang")) {
 							automaticallyAddedImports.put(thisImportClass, thisFullImport);
 						}
 					}
@@ -222,7 +223,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					}
 				}
 				// for each file, check if a package and classname were found
-				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr) && !classNameStr.equals("*")) {
+				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr) &&
+					!classNameStr.equals("*") && !packageStr.equals("java.lang")) {
 					// we here override java default classes if the opened files contain the same class names...
 					// ... which is exactly the behavior we like :)
 					automaticallyAddedImports.put(classNameStr, packageStr + "." + classNameStr);

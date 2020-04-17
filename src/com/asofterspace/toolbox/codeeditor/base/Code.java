@@ -808,16 +808,26 @@ public abstract class Code extends DefaultStyledDocument {
 
 		StringBuilder contentMiddle = new StringBuilder();
 
-		origText = removeCommentsAndStrings(origText);
+		List<String> alreadyImported = new ArrayList<>();
+		getImportsJavalike(importKeyword, origText, null, alreadyImported, null);
+
+		origText = removeCommentsAndStrings(contentAfter);
 
 		for (Map.Entry<String, String> entry : automaticallyAddedImports.entrySet()) {
-			addJavaUtilImport(origText, contentMiddle, entry.getKey(), entry.getValue(), importKeyword);
+			addJavaUtilImport(origText, alreadyImported, contentMiddle, entry.getKey(), entry.getValue(), importKeyword);
 		}
 
 		return contentBefore + contentMiddle + contentAfter;
 	}
 
-	private void addJavaUtilImport(String origText, StringBuilder contentMiddle, String utility, String fullUtility, String importKeyword) {
+	private void addJavaUtilImport(String origText, List<String> alreadyImported, StringBuilder contentMiddle, String utility, String fullUtility, String importKeyword) {
+
+		// if something already imports this, do not import it from a different (wrong!) source again!
+		for (String alreadyImportedStr : alreadyImported) {
+			if (alreadyImportedStr.endsWith("." + utility) || alreadyImportedStr.endsWith("." + utility + ";")) {
+				return;
+			}
+		}
 
 		if (origText.contains(" " + utility + "<") || origText.contains("\t" + utility + "<") ||
 			origText.contains("<" + utility + ",") || origText.contains("<" + utility + ">") ||
@@ -895,8 +905,10 @@ public abstract class Code extends DefaultStyledDocument {
 			if (line.startsWith(importKeyword)) {
 				break;
 			} else {
-				outputBeforeImports.append(line);
-				outputBeforeImports.append("\n");
+				if (outputBeforeImports != null) {
+					outputBeforeImports.append(line);
+					outputBeforeImports.append("\n");
+				}
 			}
 		}
 
@@ -907,6 +919,10 @@ public abstract class Code extends DefaultStyledDocument {
 			} else {
 				break;
 			}
+		}
+
+		if (outputAfterImports == null) {
+			return;
 		}
 
 		String sep = "";
@@ -1187,6 +1203,26 @@ public abstract class Code extends DefaultStyledDocument {
 
 		String codeContent = removeCommentsAndStrings(secondOutput.toString());
 
+		// we first want to find for all import foo.bar.* just foo.bar.,
+		// such that we later know that we can drop foo.bar.Fluff, as it
+		// is already included...
+		List<String> importStarPackages = new ArrayList<>();
+
+		for (String importLine : imports) {
+
+			String importedClass = importLine.trim();
+
+			if (importedClass.endsWith(";")) {
+				importedClass = importedClass.substring(0, importedClass.length() - 1).trim();
+			}
+
+			if (importedClass.startsWith(importKeyword) && importedClass.endsWith("*")) {
+				importedClass = importedClass.substring(importKeyword.length()).trim();
+				importedClass = importedClass.substring(0, importedClass.length() - 1).trim();
+				importStarPackages.add(importedClass);
+			}
+		}
+
 		for (String importLine : imports) {
 
 			// keep empty lines
@@ -1204,7 +1240,9 @@ public abstract class Code extends DefaultStyledDocument {
 				importedClass = importedClass.substring(importKeyword.length()).trim();
 			}
 
+			String curPackage = "";
 			if (importedClass.contains(".")) {
+				curPackage = importedClass.substring(0, importedClass.lastIndexOf(".") + 1);
 				importedClass = importedClass.substring(importedClass.lastIndexOf(".") + 1);
 			}
 
@@ -1217,6 +1255,16 @@ public abstract class Code extends DefaultStyledDocument {
 				// ... and if the code does not contain the class name
 				if (!codeContent.contains(importedClass)) {
 					// remove it!
+					continue;
+				}
+				// ... also, if the same package is already included for a star, remove it!
+				boolean doRemove = false;
+				for (String importStarPackage : importStarPackages) {
+					if (importStarPackage.equals(curPackage)) {
+						doRemove = true;
+					}
+				}
+				if (doRemove) {
 					continue;
 				}
 			}
