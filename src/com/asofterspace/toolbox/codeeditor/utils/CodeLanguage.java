@@ -48,6 +48,10 @@ public enum CodeLanguage {
 
 		String lowfilename = filename.toLowerCase();
 
+		if (lowfilename.endsWith("~")) {
+			lowfilename = lowfilename.substring(0, lowfilename.length() - 1);
+		}
+
 		if (lowfilename.endsWith(".java")) {
 			return CodeLanguage.JAVA;
 		}
@@ -96,7 +100,7 @@ public enum CodeLanguage {
 			return CodeLanguage.BATCH;
 		}
 
-		if (lowfilename.endsWith(".sh")) {
+		if (lowfilename.endsWith(".sh") || lowfilename.endsWith(".gitignore") || lowfilename.endsWith(".bashrc")) {
 			return CodeLanguage.SHELL;
 		}
 
