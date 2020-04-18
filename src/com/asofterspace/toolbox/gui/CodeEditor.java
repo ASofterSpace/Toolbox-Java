@@ -162,15 +162,6 @@ public class CodeEditor extends JTextPane {
 			} catch (BadLocationException e) {
 				// whoops!
 			}
-
-			g.setColor(startLineColor);
-			int y = 0;
-			int height = getHeight();
-			while (y < height) {
-				g.drawLine(prevStartLinePos, y, prevStartLinePos, y+2);
-				y += 10;
-			}
-			// g.drawLine(prevStartLinePos, 0, prevStartLinePos, getHeight());
 		}
 
 		if (showHorzLine) {
@@ -189,7 +180,30 @@ public class CodeEditor extends JTextPane {
 			} catch (BadLocationException e) {
 				// whoops!
 			}
+		}
 
+		// if the line positions changed...
+		if (doRepaint) {
+
+			// ... call repaint! (and then we will end up here again, so no need to actually draw
+			// anything right now...)
+			repaint();
+
+		} else {
+
+			// if the line positions did not change, then actually paint:
+			// first the vertical line...
+			g.setColor(startLineColor);
+			int y = 0;
+			int height = getHeight();
+			while (y < height) {
+				g.drawLine(prevStartLinePos, y, prevStartLinePos, y+2);
+				y += 10;
+			}
+			// we could also just draw a plain vertical line instead
+			// g.drawLine(prevStartLinePos, 0, prevStartLinePos, getHeight());
+
+			// ... and now the horizontal line
 			g.setColor(horzLineColor);
 			int x = 0;
 			int width = getWidth();
@@ -197,10 +211,6 @@ public class CodeEditor extends JTextPane {
 				g.drawLine(x, actualHorzLinePos, x+2, actualHorzLinePos);
 				x += 10;
 			}
-		}
-
-		if (doRepaint) {
-			repaint();
 		}
 	}
 
