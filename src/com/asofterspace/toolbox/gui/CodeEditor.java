@@ -26,10 +26,14 @@ public class CodeEditor extends JTextPane {
 	private final static long serialVersionUID = 1L;
 
 	private boolean showStartLine = false;
+	private boolean showHorzLine = false;
 
 	private int prevStartLinePos = 0;
+	private int prevHorzLinePos = 0;
+	private int actualHorzLinePos = 0;
 
 	private Color startLineColor = Color.DARK_GRAY;
+	private Color horzLineColor = Color.DARK_GRAY;
 
 	private boolean fancyBackground;
 
@@ -59,6 +63,18 @@ public class CodeEditor extends JTextPane {
 
 	public void setStartLineColor(Color startLineColor) {
 		this.startLineColor = startLineColor;
+	}
+
+	/**
+	 * Enable or disable the horz line, which is a horizontal dotted line that indicates
+	 * the vertical location below the current line
+	 */
+	public void enableHorzLine(boolean doEnable) {
+		this.showHorzLine = doEnable;
+	}
+
+	public void setHorzLineColor(Color horzLineColor) {
+		this.horzLineColor = horzLineColor;
 	}
 
 	@Override
@@ -97,60 +113,95 @@ public class CodeEditor extends JTextPane {
 
 		super.paint(g);
 
-		if (!showStartLine) {
+		if ((!showStartLine) && (!showHorzLine)) {
 			return;
 		}
 
+		// only get these once, not once per line
 		String text = getText();
 		int len = text.length();
 		int pos = getSelectionStart();
 		int firstLetter = pos;
-		char chr = ' ';
-		while (pos < len) {
-			chr = text.charAt(pos);
-			if ((chr != ' ') && (chr != '\t')) {
-				break;
+		boolean doRepaint = false;
+
+		if (showStartLine) {
+			char chr = ' ';
+			while (pos < len) {
+				chr = text.charAt(pos);
+				if ((chr != ' ') && (chr != '\t')) {
+					break;
+				}
+				pos++;
 			}
-			pos++;
-		}
-		if (chr == '\n') {
-			pos--;
-		}
-		while (pos >= len) {
-			pos--;
-		}
-		while (pos > 0) {
-			chr = text.charAt(pos);
 			if (chr == '\n') {
-				break;
+				pos--;
 			}
-			if ((chr != ' ') && (chr != '\t')) {
-				firstLetter = pos;
+			while (pos >= len) {
+				pos--;
 			}
-			pos--;
+			while (pos > 0) {
+				chr = text.charAt(pos);
+				if (chr == '\n') {
+					break;
+				}
+				if ((chr != ' ') && (chr != '\t')) {
+					firstLetter = pos;
+				}
+				pos--;
+			}
+
+			try {
+				// in the future, modelToView2D is used instead, but we want to be backwards compatible...
+				int x = ((int) modelToView(firstLetter).getX()) - 1;
+
+				if (prevStartLinePos != x) {
+					prevStartLinePos = x;
+					doRepaint = true;
+				}
+
+			} catch (BadLocationException e) {
+				// whoops!
+			}
+
+			g.setColor(startLineColor);
+			int y = 0;
+			int height = getHeight();
+			while (y < height) {
+				g.drawLine(prevStartLinePos, y, prevStartLinePos, y+2);
+				y += 10;
+			}
+			// g.drawLine(prevStartLinePos, 0, prevStartLinePos, getHeight());
 		}
 
-		try {
-			// in the future, modelToView2D is used instead, but we want to be backwards compatible...
-			int x = ((int) modelToView(firstLetter).getX()) - 1;
+		if (showHorzLine) {
 
-			if (prevStartLinePos != x) {
-				prevStartLinePos = x;
-				repaint();
+			g.setColor(startLineColor);
+			try {
+				// in the future, modelToView2D is used instead, but we want to be backwards compatible...
+				int y = ((int) modelToView(firstLetter).getY());
+
+				if (prevHorzLinePos != y) {
+					prevHorzLinePos = y;
+					actualHorzLinePos = prevHorzLinePos + getFontMetrics(getFont()).getHeight();
+					doRepaint = true;
+				}
+
+			} catch (BadLocationException e) {
+				// whoops!
 			}
 
-		} catch (BadLocationException e) {
-			// whoops!
+			g.setColor(horzLineColor);
+			int x = 0;
+			int width = getWidth();
+			while (x < width) {
+				g.drawLine(x, actualHorzLinePos, x+2, actualHorzLinePos);
+				x += 10;
+			}
 		}
 
-		g.setColor(startLineColor);
-		int y = 0;
-		int height = getHeight();
-		while (y < height) {
-			g.drawLine(prevStartLinePos, y, prevStartLinePos, y+2);
-			y += 10;
+		if (doRepaint) {
+			repaint();
 		}
-		// g.drawLine(prevStartLinePos, 0, prevStartLinePos, getHeight());
 	}
 
 	@Override
