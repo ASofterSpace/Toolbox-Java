@@ -20,6 +20,8 @@ public class DateUtilsTest implements Test {
 
 		parseAndSerializeDateTest();
 
+		parseDifficultDatesTest();
+
 		parseAndSerializeDateTimeTest();
 
 		createTimestampWithoutExceptionTest();
@@ -64,6 +66,52 @@ public class DateUtilsTest implements Test {
 		}
 
 		TestUtils.succeed();
+	}
+
+	public void parseDifficultDatesTest() {
+
+		TestUtils.start("Parse Difficult Dates");
+
+		compareDateParsing("2020-04-02", "2020-April-02");
+		compareDateParsing("2020-04-02", "2020-APR-02");
+		compareDateParsing("2020-04-02", "2. 4. 2020");
+		compareDateParsing("2020-04-02", "02 04 2020");
+		compareDateParsing("2020-04-02", "2. 04 2020");
+		compareDateParsing("2020-04-02", "2. April 2020");
+		compareDateParsing("2020-04-02", "2.4.2020");
+
+		compareDateParsing("1989-12-10", "10.12.1989");
+		compareDateParsing("1989-12-10", "10. Dez 1989");
+		compareDateParsing("1989-12-10", "10. Dec 1989");
+		compareDateParsing("1989-12-10", "10. december 1989");
+		compareDateParsing("1989-12-10", "10. dezember 1989");
+		compareDateParsing("1989-12-10", "1989-dec-10");
+
+		compareDateParsing("2001-01-01", "1. Januar 2001");
+		compareDateParsing("2001-02-01", "1. februARY 2001");
+		compareDateParsing("2001-03-01", "1. march 2001");
+		compareDateParsing("2001-04-01", "1. april 2001");
+		compareDateParsing("2001-05-01", "1. may 2001");
+		compareDateParsing("2001-06-01", "1. Juni 2001");
+		compareDateParsing("2001-07-01", "1. July 2001");
+		compareDateParsing("2001-08-01", "1. August 2001");
+		compareDateParsing("2001-09-01", "1. sept 2001");
+		compareDateParsing("2001-10-01", "1. October 2001");
+		compareDateParsing("2001-11-01", "1. nov 2001");
+		compareDateParsing("2001-12-01", "1. DEC 2001");
+
+		TestUtils.succeed();
+	}
+
+	private void compareDateParsing(String dateStr1, String dateStr2) {
+
+		Date date1 = DateUtils.parseDate(dateStr1);
+		Date date2 = DateUtils.parseDate(dateStr2);
+
+		if (!date1.equals(date2)) {
+			TestUtils.fail("We parsed the date " + dateStr1 + " and the date " + dateStr2 +
+				" but they did not result in the same date!");
+		}
 	}
 
 	public void parseAndSerializeDateTimeTest() {

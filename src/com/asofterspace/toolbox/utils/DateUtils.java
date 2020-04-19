@@ -39,6 +39,43 @@ public class DateUtils {
 			dateStr = serializeDate(new Date());
 		}
 
+		// also parse months that are written out in English or German
+		dateStr = dateStr.toLowerCase();
+		dateStr = dateStr.replaceAll("january", "01");
+		dateStr = dateStr.replaceAll("januar", "01");
+		dateStr = dateStr.replaceAll("jan", "01");
+		dateStr = dateStr.replaceAll("february", "02");
+		dateStr = dateStr.replaceAll("februar", "02");
+		dateStr = dateStr.replaceAll("feb", "02");
+		dateStr = dateStr.replaceAll("march", "03");
+		dateStr = dateStr.replaceAll("märz", "03");
+		dateStr = dateStr.replaceAll("mar", "03");
+		dateStr = dateStr.replaceAll("april", "04");
+		dateStr = dateStr.replaceAll("apr", "04");
+		dateStr = dateStr.replaceAll("may", "05");
+		dateStr = dateStr.replaceAll("mai", "05");
+		dateStr = dateStr.replaceAll("june", "06");
+		dateStr = dateStr.replaceAll("juni", "06");
+		dateStr = dateStr.replaceAll("jun", "06");
+		dateStr = dateStr.replaceAll("july", "07");
+		dateStr = dateStr.replaceAll("juli", "07");
+		dateStr = dateStr.replaceAll("jul", "07");
+		dateStr = dateStr.replaceAll("august", "08");
+		dateStr = dateStr.replaceAll("aug", "08");
+		dateStr = dateStr.replaceAll("september", "09");
+		dateStr = dateStr.replaceAll("sept", "09");
+		dateStr = dateStr.replaceAll("sep", "09");
+		dateStr = dateStr.replaceAll("october", "10");
+		dateStr = dateStr.replaceAll("oktober", "10");
+		dateStr = dateStr.replaceAll("oct", "10");
+		dateStr = dateStr.replaceAll("okt", "10");
+		dateStr = dateStr.replaceAll("november", "11");
+		dateStr = dateStr.replaceAll("nov", "11");
+		dateStr = dateStr.replaceAll("december", "12");
+		dateStr = dateStr.replaceAll("dezember", "12");
+		dateStr = dateStr.replaceAll("dec", "12");
+		dateStr = dateStr.replaceAll("dez", "12");
+
 		// handle date time string by omitting the timestamp such that we only get a date
 		if (dateStr.length() == DEFAULT_DATE_TIME_FORMAT_STR.length()) {
 			dateStr = dateStr.substring(0, DEFAULT_DATE_FORMAT_STR.length());
@@ -48,7 +85,31 @@ public class DateUtils {
 			return DEFAULT_DATE_FORMAT.parse(dateStr);
 		} catch (ParseException ex) {
 
+			// we want to be able to parse:
+			// dd. MM. yyyy
+			// dd MM yyyy
+			// dd.MM.yyyy
+
+			dateStr = dateStr.replaceAll(" ", ". ");
+
+			// we are now at:
+			// dd.. MM.. yyyy
+			// dd. MM. yyyy
+			// dd.MM.yyyy
+
 			dateStr = dateStr.replaceAll(" ", "");
+
+			// we are now at:
+			// dd..MM..yyyy
+			// dd.MM.yyyy
+			// dd.MM.yyyy
+
+			dateStr = dateStr.replaceAll("\\.\\.", ".");
+
+			// we are now at:
+			// dd.MM.yyyy
+			// dd.MM.yyyy
+			// dd.MM.yyyy
 
 			try {
 				return FALLBACK_DATE_FORMAT.parse(dateStr);

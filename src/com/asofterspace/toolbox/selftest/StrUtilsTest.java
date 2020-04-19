@@ -17,6 +17,10 @@ public class StrUtilsTest implements Test {
 		countStringInStringTest();
 
 		parseMoneyTest();
+
+		getLineFromPositionTest();
+
+		getWordFromPositionTest();
 	}
 
 	public void countStringInStringTest() {
@@ -76,4 +80,31 @@ public class StrUtilsTest implements Test {
 			"(Expected " + intendedResult + ", but got " + actualResult + ")");
 	}
 
+	public void getLineFromPositionTest() {
+
+		TestUtils.start("Get Line from Position");
+
+		String line = StrUtils.getLineFromPosition(14, "  MOV AX, BX\n  MOV BX, CX\nRET");
+
+		if (!line.equals("  MOV BX, CX")) {
+			TestUtils.fail("We wanted to get the line MOV BX, CX, but instead got " + line + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void getWordFromPositionTest() {
+
+		TestUtils.start("Get Word from Position");
+
+		String word = StrUtils.getWordFromPosition(10, "    this.someObj := 27398;");
+
+		if (!word.equals("someObj")) {
+			TestUtils.fail("We wanted to get the word someObj, but instead got " + word + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
 }
