@@ -2283,7 +2283,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// find all fields in contentMiddle
 		for (String line : contentMiddle.split("\n")) {
-			if ("".equals(line.trim())) {
+
+			line = line.trim();
+
+			if ("".equals(line)) {
+				continue;
+			}
+			if (line.startsWith("//")) {
 				continue;
 			}
 
@@ -2291,7 +2297,6 @@ public abstract class Code extends DefaultStyledDocument {
 			// private String blubb;
 			// private Object foo = new AwesomeObject(blabliblubb);
 
-			line = line.trim();
 			if (line.endsWith(";")) {
 				line = line.substring(0, line.length() - 1);
 				line = line.trim();
