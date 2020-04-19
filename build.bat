@@ -1,6 +1,6 @@
 @echo off
 
-rd /s /q bin
+rd /s /q bin 2>nul
 
 md bin
 
