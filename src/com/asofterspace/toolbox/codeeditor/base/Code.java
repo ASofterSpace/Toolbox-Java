@@ -369,6 +369,13 @@ public abstract class Code extends DefaultStyledDocument {
 				depth--;
 			}
 			if (depth < 1) {
+				// if we still have a lingering highlighting of the previous matched brackets,
+				// re-highlight the entire text to get rid of it
+				if (highlightedSomethingLastTime) {
+					pleaseHighlight = false;
+					highlightText(0, text.length());
+					highlightSearch(0, text.length());
+				}
 				this.setCharacterAttributes(selStart, 1, attrMatchingBrackets, false);
 				this.setCharacterAttributes(i, 1, attrMatchingBrackets, false);
 				highlightedSomething = true;
@@ -389,6 +396,13 @@ public abstract class Code extends DefaultStyledDocument {
 				depth--;
 			}
 			if (depth < 1) {
+				// if we still have a lingering highlighting of the previous matched brackets,
+				// re-highlight the entire text to get rid of it
+				if (highlightedSomethingLastTime) {
+					pleaseHighlight = false;
+					highlightText(0, text.length());
+					highlightSearch(0, text.length());
+				}
 				this.setCharacterAttributes(selStart, 1, attrMatchingBrackets, false);
 				this.setCharacterAttributes(i, 1, attrMatchingBrackets, false);
 				highlightedSomething = true;
