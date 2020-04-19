@@ -450,7 +450,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return commentEnd;
 	}
 
-	private int highlightOther(String content, int start, int end, boolean detectFunctions) {
+	private int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -463,24 +463,26 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
-		if (isKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
-		} else if (isPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
-		} else if (isAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
-		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
-		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
-			if (!"new".equals(lastCouldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
-				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
-					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
-						// now get the entire line that we found!
-						// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-						String functionName = StrUtils.getLineFromPosition(start, content);
-						functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+		if (setAttributesAndDetectFunctions) {
+			if (isKeyword(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			} else if (isPrimitiveType(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			} else if (isAdvancedType(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			} else if (isAnnotation(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
+				if (!"new".equals(lastCouldBeKeyword)) {
+					this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+					if ((start > 0) && (content.charAt(start-1) == ' ')) {
+						// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
+						if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
+							// now get the entire line that we found!
+							// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+							String functionName = StrUtils.getLineFromPosition(start, content);
+							functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+						}
 					}
 				}
 			}
