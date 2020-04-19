@@ -25,6 +25,8 @@ public class DateUtilsTest implements Test {
 		parseAndSerializeDateTimeTest();
 
 		createTimestampWithoutExceptionTest();
+
+		monthToNumAndBackTest();
 	}
 
 	public void parseAndSerializeDateTest() {
@@ -158,5 +160,45 @@ public class DateUtilsTest implements Test {
 		}
 
 		TestUtils.succeed();
+	}
+
+	public void monthToNumAndBackTest() {
+
+		TestUtils.start("Month to Num and Back");
+
+		compareMonthToNum("Jan", 0);
+		compareMonthToNum("february", 1);
+		compareMonthToNum("MÄRZ", 2);
+		compareNumToMonth(3, "April");
+		compareMonthToNum("JUN", 5);
+		compareMonthToNum("sept", 8);
+		compareNumToMonth(9-12, "October");
+		compareNumToMonth(10+12, "November");
+		compareMonthToNum("december", 11);
+
+		TestUtils.succeed();
+	}
+
+	private void compareMonthToNum(String monthStr, Integer monthNum) {
+
+		if (DateUtils.monthNameToNum(monthStr) == null) {
+			if (monthNum != null) {
+				TestUtils.fail("The month '" + monthStr + "' parses as " + DateUtils.monthNameToNum(monthStr) +
+					" instead of " + monthNum + "!");
+				return;
+			}
+		}
+		if (!DateUtils.monthNameToNum(monthStr).equals(monthNum)) {
+			TestUtils.fail("The month '" + monthStr + "' parses as " + DateUtils.monthNameToNum(monthStr) +
+				" instead of " + monthNum + "!");
+		}
+	}
+
+	private void compareNumToMonth(Integer monthNum, String monthStr) {
+
+		if (!DateUtils.monthNumToName(monthNum).equals(monthStr)) {
+			TestUtils.fail("The month " + monthNum + " is serialized as " + DateUtils.monthNumToName(monthNum) +
+				" instead of " + monthStr + "!");
+		}
 	}
 }

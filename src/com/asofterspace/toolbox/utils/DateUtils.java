@@ -29,6 +29,17 @@ public class DateUtils {
 	public static final SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
 
+	private static final String[] MONTH_NAMES = new String[]{"January", "February", "March",
+		"April", "May", "June", "July", "August", "September", "October", "November", "December"};
+	private static final String[] MONTH_NAMES_GERMAN = new String[]{"Januar", "Februar", "März",
+		"April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"};
+	private static final String[] MONTH_NAMES_HALF_SHORT = new String[]{"Janr", "Febr", "Marc",
+		"Aprl", "May", "June", "July", "Augs", "Sept", "Octb", "Novm", "Decm"};
+	private static final String[] MONTH_NAMES_SHORT = new String[]{"Jan", "Feb", "Mar",
+		"Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	private static final String[] MONTH_NAMES_SHORT_GERMAN = new String[]{"Jan", "Feb", "Mär",
+		"Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"};
+
 
 	/**
 	 * Parses just the date from either a date string or a date time string
@@ -41,40 +52,17 @@ public class DateUtils {
 
 		// also parse months that are written out in English or German
 		dateStr = dateStr.toLowerCase();
-		dateStr = dateStr.replaceAll("january", "01");
-		dateStr = dateStr.replaceAll("januar", "01");
-		dateStr = dateStr.replaceAll("jan", "01");
-		dateStr = dateStr.replaceAll("february", "02");
-		dateStr = dateStr.replaceAll("februar", "02");
-		dateStr = dateStr.replaceAll("feb", "02");
-		dateStr = dateStr.replaceAll("march", "03");
-		dateStr = dateStr.replaceAll("märz", "03");
-		dateStr = dateStr.replaceAll("mar", "03");
-		dateStr = dateStr.replaceAll("april", "04");
-		dateStr = dateStr.replaceAll("apr", "04");
-		dateStr = dateStr.replaceAll("may", "05");
-		dateStr = dateStr.replaceAll("mai", "05");
-		dateStr = dateStr.replaceAll("june", "06");
-		dateStr = dateStr.replaceAll("juni", "06");
-		dateStr = dateStr.replaceAll("jun", "06");
-		dateStr = dateStr.replaceAll("july", "07");
-		dateStr = dateStr.replaceAll("juli", "07");
-		dateStr = dateStr.replaceAll("jul", "07");
-		dateStr = dateStr.replaceAll("august", "08");
-		dateStr = dateStr.replaceAll("aug", "08");
-		dateStr = dateStr.replaceAll("september", "09");
-		dateStr = dateStr.replaceAll("sept", "09");
-		dateStr = dateStr.replaceAll("sep", "09");
-		dateStr = dateStr.replaceAll("october", "10");
-		dateStr = dateStr.replaceAll("oktober", "10");
-		dateStr = dateStr.replaceAll("oct", "10");
-		dateStr = dateStr.replaceAll("okt", "10");
-		dateStr = dateStr.replaceAll("november", "11");
-		dateStr = dateStr.replaceAll("nov", "11");
-		dateStr = dateStr.replaceAll("december", "12");
-		dateStr = dateStr.replaceAll("dezember", "12");
-		dateStr = dateStr.replaceAll("dec", "12");
-		dateStr = dateStr.replaceAll("dez", "12");
+		for (int i = 0; i < 12; i++) {
+			String num = "" + (i+1);
+			if (num.length() < 2) {
+				num = "0" + num;
+			}
+			dateStr = dateStr.replaceAll(MONTH_NAMES[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_GERMAN[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_HALF_SHORT[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_SHORT[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_SHORT_GERMAN[i].toLowerCase(), num);
+		}
 
 		// handle date time string by omitting the timestamp such that we only get a date
 		if (dateStr.length() == DEFAULT_DATE_TIME_FORMAT_STR.length()) {
@@ -184,5 +172,44 @@ public class DateUtils {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, howMany);
 		return cal.getTime();
+	}
+
+	public static Integer monthNameToNum(String name) {
+		if (name == null) {
+			return null;
+		}
+
+		name = name.toLowerCase();
+		for (int i = 0; i < 12; i++) {
+			if (name.equals(MONTH_NAMES[i].toLowerCase())) {
+				return i;
+			}
+			if (name.equals(MONTH_NAMES_GERMAN[i].toLowerCase())) {
+				return i;
+			}
+			if (name.equals(MONTH_NAMES_HALF_SHORT[i].toLowerCase())) {
+				return i;
+			}
+			if (name.equals(MONTH_NAMES_SHORT[i].toLowerCase())) {
+				return i;
+			}
+			if (name.equals(MONTH_NAMES_SHORT_GERMAN[i].toLowerCase())) {
+				return i;
+			}
+		}
+		return null;
+	}
+
+	public static String monthNumToName(Integer num) {
+		if (num == null) {
+			return null;
+		}
+		while (num < 0) {
+			num += 12;
+		}
+		while (num > 11) {
+			num -= 12;
+		}
+		return MONTH_NAMES[num];
 	}
 }
