@@ -398,4 +398,287 @@ public class StrUtils {
 		return null;
 	}
 
+	public static String getLineFromPosition(int pos, String content) {
+
+		int start = getLineStartFromPosition(pos, content);
+		int end = getLineEndFromPosition(pos, content);
+
+		if (end >= start) {
+			return content.substring(start, end);
+		}
+
+		return "";
+	}
+
+	public static int getLineNumberFromPosition(int pos, String content) {
+
+		int result = 0;
+		int until = pos;
+		if (content.length() < until) {
+			until = content.length();
+		}
+		for (int i = 0; i < until; i++) {
+			char c = content.charAt(i);
+			if (c == '\n') {
+				result++;
+			}
+		}
+		return result;
+	}
+
+	public static int getLineStartFromNumber(int number, String content) {
+
+		int count = 0;
+		int lineStart = 0;
+		int lineEnd = 0;
+
+		for (int i = 0; i < content.length(); i++) {
+			char c = content.charAt(i);
+			if (c == '\n') {
+				count++;
+
+				if (count == number) {
+					return i + 1;
+				}
+			}
+		}
+
+		return content.length() - 1;
+	}
+
+	public static String getLineFromNumber(int number, String content) {
+
+		int count = 0;
+		int lineStart = 0;
+		int lineEnd = 0;
+
+		for (int i = 0; i < content.length(); i++) {
+			char c = content.charAt(i);
+			if (c == '\n') {
+				count++;
+
+				if (count == number) {
+					lineStart = i + 1;
+				} else if (count == number + 1) {
+					lineEnd = i;
+					break;
+				}
+			}
+		}
+
+		if (lineEnd < lineStart) {
+			return "";
+		}
+
+		return content.substring(lineStart, lineEnd);
+	}
+
+	public static int getLineStartFromPosition(int pos, String content) {
+
+		int lineStart = 0;
+
+		if (pos > 0) {
+			lineStart = content.lastIndexOf("\n", pos - 1) + 1;
+		}
+
+		return lineStart;
+	}
+
+	public static int getLineEndFromPosition(int pos, String content) {
+
+		int lineEnd = content.indexOf("\n", pos);
+
+		if (lineEnd < 0) {
+			lineEnd = content.length();
+		}
+
+		return lineEnd;
+	}
+
+	public static String getWordFromPosition(int pos, String content) {
+
+		int start = getWordStartFromPosition(pos, content, true);
+		int end = getWordEndFromPosition(pos, content, true);
+
+		return content.substring(start, end);
+	}
+
+	public static int getWordStartFromPosition(int pos, String content, boolean splitWordClusters) {
+
+		int lineStartSpace = content.lastIndexOf(" ", pos - 1) + 1;
+		int lineStartNewline = content.lastIndexOf("\n", pos - 1) + 1;
+		int lineStartTab = content.lastIndexOf("\t", pos - 1) + 1;
+		int lineStartLAngle = content.lastIndexOf("<", pos - 1) + 1;
+		int lineStartRAngle = content.lastIndexOf(">", pos - 1) + 1;
+		int lineStartLBracket = content.lastIndexOf("(", pos - 1) + 1;
+		int lineStartRBracket = content.lastIndexOf(")", pos - 1) + 1;
+		int lineStartLSqBracket = content.lastIndexOf("[", pos - 1) + 1;
+		int lineStartRSqBracket = content.lastIndexOf("]", pos - 1) + 1;
+		int lineStartLParens = content.lastIndexOf("{", pos - 1) + 1;
+		int lineStartRParens = content.lastIndexOf("}", pos - 1) + 1;
+		int lineStartSemi = content.lastIndexOf(";", pos - 1) + 1;
+		int lineStartComma = content.lastIndexOf(",", pos - 1) + 1;
+		int lineStartDot = 0;
+		int lineStartEquals = 0;
+		int lineStartApo = 0;
+		int lineStartQuot = 0;
+		int lineStartSlash = 0;
+		if (splitWordClusters) {
+			lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
+			lineStartEquals = content.lastIndexOf("=", pos - 1) + 1;
+			lineStartApo = content.lastIndexOf("'", pos - 1) + 1;
+			lineStartQuot = content.lastIndexOf("\"", pos - 1) + 1;
+			lineStartSlash = content.lastIndexOf("/", pos - 1) + 1;
+		}
+
+		int lineStart = 0;
+
+		if (lineStartSpace > lineStart) {
+			lineStart = lineStartSpace;
+		}
+		if (lineStartNewline > lineStart) {
+			lineStart = lineStartNewline;
+		}
+		if (lineStartTab > lineStart) {
+			lineStart = lineStartTab;
+		}
+		if (lineStartLAngle > lineStart) {
+			lineStart = lineStartLAngle;
+		}
+		if (lineStartRAngle > lineStart) {
+			lineStart = lineStartRAngle;
+		}
+		if (lineStartLBracket > lineStart) {
+			lineStart = lineStartLBracket;
+		}
+		if (lineStartRBracket > lineStart) {
+			lineStart = lineStartRBracket;
+		}
+		if (lineStartLSqBracket > lineStart) {
+			lineStart = lineStartLSqBracket;
+		}
+		if (lineStartRSqBracket > lineStart) {
+			lineStart = lineStartRSqBracket;
+		}
+		if (lineStartLParens > lineStart) {
+			lineStart = lineStartLParens;
+		}
+		if (lineStartRParens > lineStart) {
+			lineStart = lineStartRParens;
+		}
+		if (lineStartSemi > lineStart) {
+			lineStart = lineStartSemi;
+		}
+		if (lineStartComma > lineStart) {
+			lineStart = lineStartComma;
+		}
+
+		if (lineStartDot > lineStart) {
+			lineStart = lineStartDot;
+		}
+		if (lineStartEquals > lineStart) {
+			lineStart = lineStartEquals;
+		}
+		if (lineStartApo > lineStart) {
+			lineStart = lineStartApo;
+		}
+		if (lineStartQuot > lineStart) {
+			lineStart = lineStartQuot;
+		}
+		if (lineStartSlash > lineStart) {
+			lineStart = lineStartSlash;
+		}
+
+		return lineStart;
+	}
+
+	public static int getWordEndFromPosition(int pos, String content, boolean splitWordClusters) {
+
+		int lineEndSpace = content.indexOf(" ", pos);
+		int lineEndNewline = content.indexOf("\n", pos);
+		int lineEndTab = content.indexOf("\t", pos);
+		int lineEndLAngle = content.indexOf("<", pos);
+		int lineEndRAngle = content.indexOf(">", pos);
+		int lineEndLBracket = content.indexOf("(", pos);
+		int lineEndRBracket = content.indexOf(")", pos);
+		int lineEndLSqBracket = content.indexOf("[", pos);
+		int lineEndRSqBracket = content.indexOf("]", pos);
+		int lineEndLParens = content.indexOf("{", pos);
+		int lineEndRParens = content.indexOf("}", pos);
+		int lineEndSemi = content.indexOf(";", pos);
+		int lineEndComma = content.indexOf(",", pos);
+		int lineEndDot = -1;
+		int lineEndEquals = -1;
+		int lineEndApo = -1;
+		int lineEndQuot = -1;
+		int lineEndSlash = -1;
+		if (splitWordClusters) {
+			lineEndDot = content.indexOf(".", pos);
+			lineEndEquals = content.indexOf("=", pos);
+			lineEndApo = content.indexOf("'", pos);
+			lineEndQuot = content.indexOf("\"", pos);
+			lineEndSlash = content.indexOf("/", pos);
+		}
+
+		int lineEnd = content.length();
+
+		if ((lineEndSpace >= 0) && (lineEndSpace < lineEnd)) {
+			lineEnd = lineEndSpace;
+		}
+		if ((lineEndNewline >= 0) && (lineEndNewline < lineEnd)) {
+			lineEnd = lineEndNewline;
+		}
+		if ((lineEndTab >= 0) && (lineEndTab < lineEnd)) {
+			lineEnd = lineEndTab;
+		}
+		if ((lineEndLAngle >= 0) && (lineEndLAngle < lineEnd)) {
+			lineEnd = lineEndLAngle;
+		}
+		if ((lineEndRAngle >= 0) && (lineEndRAngle < lineEnd)) {
+			lineEnd = lineEndRAngle;
+		}
+		if ((lineEndLBracket >= 0) && (lineEndLBracket < lineEnd)) {
+			lineEnd = lineEndLBracket;
+		}
+		if ((lineEndRBracket >= 0) && (lineEndRBracket < lineEnd)) {
+			lineEnd = lineEndRBracket;
+		}
+		if ((lineEndLSqBracket >= 0) && (lineEndLSqBracket < lineEnd)) {
+			lineEnd = lineEndLSqBracket;
+		}
+		if ((lineEndRSqBracket >= 0) && (lineEndRSqBracket< lineEnd)) {
+			lineEnd = lineEndRSqBracket;
+		}
+		if ((lineEndLParens >= 0) && (lineEndLParens < lineEnd)) {
+			lineEnd = lineEndLParens;
+		}
+		if ((lineEndRParens >= 0) && (lineEndRParens < lineEnd)) {
+			lineEnd = lineEndRParens;
+		}
+		if ((lineEndSemi >= 0) && (lineEndSemi < lineEnd)) {
+			lineEnd = lineEndSemi;
+		}
+		if ((lineEndComma >= 0) && (lineEndComma < lineEnd)) {
+			lineEnd = lineEndComma;
+		}
+
+		if ((lineEndDot >= 0) && (lineEndDot < lineEnd)) {
+			lineEnd = lineEndDot;
+		}
+		if ((lineEndEquals >= 0) && (lineEndEquals < lineEnd)) {
+			lineEnd = lineEndEquals;
+		}
+		if ((lineEndApo >= 0) && (lineEndApo < lineEnd)) {
+			lineEnd = lineEndApo;
+		}
+		if ((lineEndQuot >= 0) && (lineEndQuot < lineEnd)) {
+			lineEnd = lineEndQuot;
+		}
+		if ((lineEndSlash >= 0) && (lineEndSlash < lineEnd)) {
+			lineEnd = lineEndSlash;
+		}
+
+		return lineEnd;
+	}
+
 }

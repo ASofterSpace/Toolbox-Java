@@ -182,7 +182,8 @@ public class JSON extends Record {
 
 			int endIndex = jsonString.indexOf(doStringWith, pos);
 			if (endIndex < pos) {
-				throw new JsonParseException("Encountered an unclosed string while parsing JSON near: " +
+				throw new JsonParseException("Encountered an unclosed string while parsing JSON near line " +
+					StrUtils.getLineNumberFromPosition(pos, jsonString) + ": " +
 					jsonString.substring(pos, Math.min(jsonString.length(), pos + 100)));
 			}
 			String simpleContentsStr = jsonString.substring(pos, endIndex);
@@ -296,7 +297,9 @@ public class JSON extends Record {
 			if (until >= jsonString.length()) {
 				until = jsonString.length() - 1;
 			}
-			throw new JsonParseException("Invalid JSON found around: " + jsonString.substring(pos, until));
+			throw new JsonParseException("Invalid JSON found near line " +
+					StrUtils.getLineNumberFromPosition(pos, jsonString) + " around: " +
+					jsonString.substring(pos, until));
 		}
 
 		pos = charPos;

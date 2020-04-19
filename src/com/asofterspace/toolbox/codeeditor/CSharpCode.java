@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -241,8 +242,8 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 				// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 				if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 					// now get the entire line that we found!
-					String functionName = getLineFromPosition(start, content);
-					functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
+					String functionName = StrUtils.getLineFromPosition(start, content);
+					functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 				}
 			}
 		} else if (isAnnotation(couldBeKeyword)) {

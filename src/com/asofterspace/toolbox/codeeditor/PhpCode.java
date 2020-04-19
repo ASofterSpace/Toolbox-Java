@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -251,11 +252,11 @@ public class PhpCode extends HtmlCode {
 					if ((curLineStartingWhitespacePhp < 5) && "function".equals(lastCouldBeKeywordPhp)) {
 						// now get the entire line that we found!
 						// String functionName = lastCouldBeKeywordPhp + " " + couldBeKeyword + "()";
-						String functionName = getLineFromPosition(start, content);
+						String functionName = StrUtils.getLineFromPosition(start, content);
 						if (functionName.startsWith("function ")) {
 							functionName = functionName.substring(9);
 						}
-						functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
+						functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 					}
 				}
 			}

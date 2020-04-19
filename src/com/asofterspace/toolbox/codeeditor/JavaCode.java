@@ -479,8 +479,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 						// now get the entire line that we found!
 						// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-						String functionName = getLineFromPosition(start, content);
-						functions.add(new CodeSnippetWithLocation(functionName, getLineStartFromPosition(start, content)));
+						String functionName = StrUtils.getLineFromPosition(start, content);
+						functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 					}
 				}
 			}
@@ -526,14 +526,14 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 			int caretPos = decoratedEditor.getCaretPosition();
 			String content = decoratedEditor.getText();
 			String[] lines = content.split("\n");
-			String line = getLineFromPosition(caretPos, content).trim();
+			String line = StrUtils.getLineFromPosition(caretPos, content).trim();
 			String importLine = null;
 
 			if ((line != null) && line.startsWith("import ") && line.endsWith(";")) {
 				// the user clicked on a line like import foo.bar.nonsense.Object;
 				importLine = line;
 			} else {
-				String curWord = getWordFromPosition(caretPos, content);
+				String curWord = StrUtils.getWordFromPosition(caretPos, content);
 				// perform the following only for words starting with upper-case characters (so, in Java, classnames),
 				// NOT for any words (as we e.g. want to jump around function names within the file - if we did not
 				// check this, then for every time we Ctrl+click on a function name here we would search half the
