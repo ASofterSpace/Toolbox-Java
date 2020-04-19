@@ -1790,6 +1790,77 @@ public abstract class Code extends DefaultStyledDocument {
 				// if ((blubb) && )
 				if (offset > 5) {
 					String content = decoratedEditor.getText();
+					if (offset > 10) {
+						if ((content.charAt(offset - 6) == ' ') && (content.charAt(offset - 5) == '=') &&
+							(content.charAt(offset - 4) == ' ') && (content.charAt(offset - 3) == 'n') &&
+							(content.charAt(offset - 2) == 'e') && (content.charAt(offset - 1) == 'w')) {
+
+							int lineStart = StrUtils.getLineStartFromPosition(offset, content);
+							int lineEnd = StrUtils.getLineEndFromPosition(offset, content);
+							int lineOffset = offset - lineStart;
+
+							String contentStart = content.substring(0, lineStart);
+							String line = content.substring(lineStart, lineEnd);
+							String contentEnd = content.substring(lineEnd, content.length());
+
+							int tabAt = line.indexOf("\tList<");
+							int spaceAt = line.indexOf(" List<");
+
+							if (line.substring(lineOffset).equals("")) {
+								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+									((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+									line = line + " ArrayList<>();";
+									String newContent = contentStart + line + contentEnd;
+
+									int origCaretPos = decoratedEditor.getCaretPosition();
+									decoratedEditor.setText(newContent);
+									decoratedEditor.setCaretPosition(origCaretPos + 15);
+
+									// we do NOT bubble up the chain, as we already set the text explicitly!
+									return;
+								}
+							}
+
+							tabAt = line.indexOf("\tSet<");
+							spaceAt = line.indexOf(" Set<");
+
+							if (line.substring(lineOffset).equals("")) {
+								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+									((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+									line = line + " HashSet<>();";
+									String newContent = contentStart + line + contentEnd;
+
+									int origCaretPos = decoratedEditor.getCaretPosition();
+									decoratedEditor.setText(newContent);
+									decoratedEditor.setCaretPosition(origCaretPos + 13);
+
+									// we do NOT bubble up the chain, as we already set the text explicitly!
+									return;
+								}
+							}
+
+							tabAt = line.indexOf("\tMap<");
+							spaceAt = line.indexOf(" Map<");
+
+							if (line.substring(lineOffset).equals("")) {
+								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+									((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+									line = line + " HashMap<>();";
+									String newContent = contentStart + line + contentEnd;
+
+									int origCaretPos = decoratedEditor.getCaretPosition();
+									decoratedEditor.setText(newContent);
+									decoratedEditor.setCaretPosition(origCaretPos + 13);
+
+									// we do NOT bubble up the chain, as we already set the text explicitly!
+									return;
+								}
+							}
+						}
+					}
 					if (((content.charAt(offset - 1) == '&') && (content.charAt(offset - 2) == '&')) ||
 						((content.charAt(offset - 1) == '|') && (content.charAt(offset - 2) == '|'))) {
 
