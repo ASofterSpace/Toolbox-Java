@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.codeeditor.base;
 
+import com.asofterspace.toolbox.codeeditor.utils.CanonicalJavaLikeImport;
 import com.asofterspace.toolbox.codeeditor.utils.CodeAtLocation;
 import com.asofterspace.toolbox.codeeditor.utils.CodeLanguage;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
@@ -1060,12 +1061,22 @@ public abstract class Code extends DefaultStyledDocument {
 		// put imports into two different groups: one starting with java, one not doing so
 		List<String> javaImports = new ArrayList<>();
 		List<String> otherImports = new ArrayList<>();
+		List<String> javaStaticImports = new ArrayList<>();
+		List<String> otherStaticImports = new ArrayList<>();
 		for (String curImport : imports) {
 			if (curImport.startsWith(importKeyword + " java") ||
 				curImport.startsWith(importKeyword + " " + staticKeyword + " java")) {
-				javaImports.add(curImport);
+				if (curImport.startsWith(importKeyword + " " + staticKeyword + " ")) {
+					javaStaticImports.add(curImport);
+				} else {
+					javaImports.add(curImport);
+				}
 			} else {
-				otherImports.add(curImport);
+				if (curImport.startsWith(importKeyword + " " + staticKeyword + " ")) {
+					otherStaticImports.add(curImport);
+				} else {
+					otherImports.add(curImport);
+				}
 			}
 		}
 
@@ -1076,8 +1087,18 @@ public abstract class Code extends DefaultStyledDocument {
 		// so a class is always sorted before a package name, even though Bat (b) comes after adala (a)
 		Comparator<String> wonkyComparator = new Comparator<String>() {
 			public int compare(String a, String b) {
-				a = canonicizeJavalikeImport(a, importKeyword, staticKeyword);
-				b = canonicizeJavalikeImport(b, importKeyword, staticKeyword);
+				CanonicalJavaLikeImport aImp = new CanonicalJavaLikeImport(a, importKeyword, staticKeyword);
+				CanonicalJavaLikeImport bImp = new CanonicalJavaLikeImport(b, importKeyword, staticKeyword);
+				// if only one is static, that one gets sorted behind...
+				// if both are or are not static, compare as usual instead...
+				if (aImp.isStatic() && !bImp.isStatic()) {
+					return 1;
+				}
+				if (!aImp.isStatic() && bImp.isStatic()) {
+					return -1;
+				}
+				a = aImp.getImport();
+				b = bImp.getImport();
 				String aPackage = getPackageJavalike(a);
 				String bPackage = getPackageJavalike(b);
 				// in case of same packages, compare normally
@@ -1091,12 +1112,21 @@ public abstract class Code extends DefaultStyledDocument {
 				if (bPackage.startsWith(aPackage)) {
 					return -1;
 				}
-				// in case of different packages, sort by package
+				// in case of different packages, sort by package, but ensure that
+				// javax.foo.bar comes before java.foo.bar
+				if (aPackage.startsWith("javax.") && bPackage.startsWith("java.")) {
+					return -1;
+				}
+				if (aPackage.startsWith("java.") && bPackage.startsWith("javax.")) {
+					return 1;
+				}
 				return aPackage.compareTo(bPackage);
 			}
 		};
 		Collections.sort(javaImports, wonkyComparator);
 		Collections.sort(otherImports, wonkyComparator);
+		Collections.sort(javaStaticImports, wonkyComparator);
+		Collections.sort(otherStaticImports, wonkyComparator);
 
 
 		int i = 0;
@@ -1136,6 +1166,44 @@ public abstract class Code extends DefaultStyledDocument {
 			i++;
 		}
 
+		if (i > 0) {
+			output.append("\n");
+		}
+		i = 0;
+
+		for (String importLine : otherStaticImports) {
+
+			// remove duplicates
+			if ("".equals(importLine) || lastImport.equals(importLine)) {
+				continue;
+			}
+
+			// actually add the import
+			output.append(importLine);
+			output.append("\n");
+			lastImport = importLine;
+			i++;
+		}
+
+		if (i > 0) {
+			output.append("\n");
+		}
+		i = 0;
+
+		for (String importLine : javaStaticImports) {
+
+			// remove duplicates
+			if ("".equals(importLine) || lastImport.equals(importLine)) {
+				continue;
+			}
+
+			// actually add the import
+			output.append(importLine);
+			output.append("\n");
+			lastImport = importLine;
+			i++;
+		}
+
 		// actually have two empty lines between the import end and the class start
 		output.append("\n");
 		if (i > 0) {
@@ -1143,20 +1211,6 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		return output.toString() + secondOutput.toString();
-	}
-
-	private String canonicizeJavalikeImport(String val, String importKeyword, String staticKeyword) {
-		val = val.toLowerCase();
-		val = val.trim();
-		if (val.startsWith(importKeyword)) {
-			val = val.substring(importKeyword.length());
-			val = val.trim();
-		}
-		if (val.startsWith(staticKeyword)) {
-			val = val.substring(staticKeyword.length());
-			val = val.trim();
-		}
-		return val;
 	}
 
 	/**
@@ -2290,6 +2344,9 @@ public abstract class Code extends DefaultStyledDocument {
 				continue;
 			}
 			if (line.startsWith("//")) {
+				continue;
+			}
+			if (line.startsWith("/**") || line.startsWith("*")) {
 				continue;
 			}
 
