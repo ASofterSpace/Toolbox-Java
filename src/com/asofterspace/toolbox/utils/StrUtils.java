@@ -322,6 +322,8 @@ public class StrUtils {
 		try {
 			amountStr = amountStr.replaceAll(" ", "");
 			amountStr = amountStr.replaceAll("\t", "");
+			amountStr = amountStr.replaceAll("\r", "");
+			amountStr = amountStr.replaceAll("\n", "");
 			amountStr = amountStr.replaceAll("EUR", "");
 			amountStr = amountStr.replaceAll("USD", "");
 			amountStr = amountStr.replaceAll("€", "");

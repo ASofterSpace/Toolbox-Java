@@ -233,4 +233,14 @@ public class DateUtils {
 		}
 		return MONTH_NAMES[num];
 	}
+
+	/**
+	 * Checks if these dates represent they same day, ignoring the time
+	 */
+	public static boolean isSameDay(Date someDate, Date otherDate) {
+		if (someDate == null) {
+			return otherDate == null;
+		}
+		return serializeDate(someDate).equals(serializeDate(otherDate));
+	}
 }
