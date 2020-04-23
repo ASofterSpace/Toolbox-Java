@@ -157,7 +157,7 @@ public class PdfObject {
 			// we create a buffer into which we unzip the stream - however, the stream might be zipped really really really
 			// well, and might exceed any specific buffer...
 			int bufferSize = streamContent.length();
-			if (bufferSize < 1024) {
+			if (bufferSize > 1024) {
 				bufferSize = 1024;
 			}
 			byte[] buffer = new byte[bufferSize];
@@ -169,13 +169,17 @@ public class PdfObject {
 			while (!inflater.finished()) {
 				try {
 					int bufferSizeFilled = inflater.inflate(buffer);
+
 					if (bufferSizeFilled < 1) {
 						// aaand we are done! no more data incoming!
 						break;
 					}
+
 					output.write(buffer, 0, bufferSizeFilled);
+
 				} catch (DataFormatException e) {
-					System.err.println("[ERROR] Unzipping a PDF object stream failed - oh well!");
+					System.err.println("[ERROR] Unzipping a PDF object stream failed - this can happen if it was encrypted.");
+					System.err.println("Please use a tool like qpdf to decrypt it first!");
 					inflater.end();
 					// return streamContent;
 					throw new RuntimeException(e);
