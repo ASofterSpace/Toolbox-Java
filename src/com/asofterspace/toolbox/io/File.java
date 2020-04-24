@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -73,6 +75,18 @@ public class File {
 	public File(Directory parentDirectory, String filename) {
 
 		this.filename = parentDirectory.getJavaPath().resolve(filename).toAbsolutePath().toString();
+	}
+
+	/**
+	 * Create a list of file instances based on several Java Files
+	 * @param javaFiles
+	 */
+	public static List<File> fromJavaFiles(java.io.File[] javaFiles) {
+		List<File> result = new ArrayList<>();
+		for (java.io.File javaFile : javaFiles) {
+			result.add(new File(javaFile));
+		}
+		return result;
 	}
 
 	/**
