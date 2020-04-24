@@ -98,6 +98,18 @@ public class File {
 	}
 
 	/**
+	 * Gets the type of this file, purely based on the filename (so basically just
+	 * whatever happens to follow the last dot in the filename)
+	 */
+	public String getFiletype() {
+		int lastDotIndex = filename.lastIndexOf(".");
+		if (lastDotIndex >= 0) {
+			return filename.substring(lastDotIndex + 1);
+		}
+		return filename;
+	}
+
+	/**
 	 * Get only the local part of the filename associated with this file object,
 	 * so just the name itself instead of the full path
 	 */

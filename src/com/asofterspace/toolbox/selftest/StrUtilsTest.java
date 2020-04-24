@@ -56,6 +56,7 @@ public class StrUtilsTest implements Test {
 
 		testMoneyParsing("1", 100);
 		testMoneyParsing("2,5", 250);
+		testMoneyParsing("19.5", 1950);
 		testMoneyParsing("3.50€", 350);
 		testMoneyParsing("1,004.50€", 100450);
 		testMoneyParsing("1.015,50 EUR", 101550);

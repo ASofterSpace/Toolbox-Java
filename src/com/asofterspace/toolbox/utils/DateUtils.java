@@ -243,4 +243,13 @@ public class DateUtils {
 		}
 		return serializeDate(someDate).equals(serializeDate(otherDate));
 	}
+
+	public static Integer getYear(Date someDate) {
+		if (someDate == null) {
+			return null;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(someDate);
+		return cal.get(Calendar.YEAR);
+	}
 }
