@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.gui;
 
 import com.asofterspace.toolbox.utils.DateUtils;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ public class GraphPanel extends JPanel {
 
 	private Integer ourMinimumHeight = null;
 
+	private Color dataColor;
+
 
 	public GraphPanel() {
 		super();
@@ -42,7 +45,7 @@ public class GraphPanel extends JPanel {
 
 		Collections.sort(newData, new Comparator<GraphDataPoint>() {
 			public int compare(GraphDataPoint a, GraphDataPoint b) {
-				return (int) (b.getPosition() - a.getPosition());
+				return (int) (a.getPosition() - b.getPosition());
 			}
 		});
 
@@ -117,6 +120,17 @@ public class GraphPanel extends JPanel {
 		}
 	}
 
+	public void setDataColor(Color newColor) {
+		this.dataColor = newColor;
+	}
+
+	public Color getDataColor() {
+		if (dataColor == null) {
+			return getForeground();
+		}
+		return dataColor;
+	}
+
 	@Override
 	public Dimension getMinimumSize() {
 		Dimension result = super.getMinimumSize();
@@ -149,8 +163,12 @@ public class GraphPanel extends JPanel {
 		g.setColor(getForeground());
 		// y axis
 		g.drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + innerHeight);
+		g.drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH - 4, BORDER_WIDTH + 9);
+		g.drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + 4, BORDER_WIDTH + 9);
 		// x axis
 		g.drawLine(BORDER_WIDTH, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight);
+		g.drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight - 4);
+		g.drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight + 4);
 
 		if (data == null) {
 			return;
@@ -158,6 +176,8 @@ public class GraphPanel extends JPanel {
 		if (data.size() < 1) {
 			return;
 		}
+
+		g.setColor(getDataColor());
 
 		double xMin = data.get(0).getPosition();
 		double xMax = xMin;
@@ -195,16 +215,22 @@ public class GraphPanel extends JPanel {
 		int prevX = (int) (xMultiplier * data.get(0).getPosition());
 		int prevY = (int) (yMultiplier * data.get(0).getValue());
 
+		int minX = (int) (xMultiplier * xMin);
+		int minY = (int) (yMultiplier * yMin);
+
+		int offsetX = BORDER_WIDTH - minX;
+		int offsetY = BORDER_WIDTH + innerHeight + minY;
+
 		for (GraphDataPoint dataPoint : data) {
 
 			int newX = (int) (xMultiplier * dataPoint.getPosition());
 			int newY = (int) (yMultiplier * dataPoint.getValue());
 
 			g.drawLine(
-				prevX + BORDER_WIDTH,
-				BORDER_WIDTH + innerHeight - prevY,
-				newX + BORDER_WIDTH,
-				BORDER_WIDTH + innerHeight - newY
+				prevX + offsetX,
+				offsetY - prevY,
+				newX + offsetX,
+				offsetY - newY
 			);
 
 			prevX = newX;
