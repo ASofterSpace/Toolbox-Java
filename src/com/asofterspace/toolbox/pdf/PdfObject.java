@@ -229,14 +229,20 @@ public class PdfObject {
 	 */
 	public Integer preGetStreamLength() {
 
-		// do NOT rely on contentReader already being done with its thing!
-		String contents = contentReader.toString();
+		PdfDictionary curDictContent = this.dictContent;
 
-		if (contents.startsWith("<<")) {
-			PdfDictionary dictContent = new PdfDictionary();
-			dictContent.loadFromString(contents);
+		if (contentReader == null) {
+			// do NOT rely on contentReader already being done with its thing!
+			String contents = contentReader.toString();
 
-			String strLen = dictContent.getAsString("/Length");
+			if (contents.startsWith("<<")) {
+				curDictContent = new PdfDictionary();
+				curDictContent.loadFromString(contents);
+			}
+		}
+
+		if (curDictContent != null) {
+			String strLen = curDictContent.getAsString("/Length");
 
 			strLen = parent.resolve(strLen);
 
