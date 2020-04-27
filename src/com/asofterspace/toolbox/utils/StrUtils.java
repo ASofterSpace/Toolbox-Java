@@ -6,7 +6,10 @@ package com.asofterspace.toolbox.utils;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -683,4 +686,70 @@ public class StrUtils {
 		return lineEnd;
 	}
 
+	/**
+	 * Sorts a list of strings case-insensitively, then removes duplicates case-sensitively,
+	 * so if we put in:
+	 * ["foo", "bar", "FOO", "foo"]
+	 * we expect as output:
+	 * ["bar", "foo", "FOO"] or ["bar", "FOO", "foo"]
+	 */
+	public static List<String> sortAndRemoveDuplicates(List<String> stringList) {
+
+		// we sort first case-sensitively (to get e.g. foo, foo, BAR, FOO)
+		Collections.sort(stringList, new Comparator<String>() {
+			public int compare(String a, String b) {
+				return a.compareTo(b);
+			}
+		});
+
+		// we then sort case-insensitively (to get e.g. BAR, foo, foo, FOO)
+		Collections.sort(stringList, new Comparator<String>() {
+			public int compare(String a, String b) {
+				return a.toLowerCase().compareTo(b.toLowerCase());
+			}
+		});
+
+		// due to the two sorts (with a *stable* sorting algorithm!), we know
+		// now that case-sensitive duplicates are really direct neighbours
+		// (if we had only done the second sorting, we might have ended up
+		// with foo, FOO, foo, and then the now following duplicate removal
+		// step would have occasionally failed!)
+		List<String> result = new ArrayList<>();
+		String lastStr = null;
+		for (String str : stringList) {
+			if (!str.equals(lastStr)) {
+				result.add(str);
+				lastStr = str;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Checks two string lists for equality
+	 */
+	public static boolean equals(List<String> someList, List<String> otherList) {
+		if (someList == null) {
+			return otherList == null;
+		}
+		if (otherList == null) {
+			return false;
+		}
+		if (someList.size() != otherList.size()) {
+			return false;
+		}
+		for (int i = 0; i < someList.size(); i++) {
+			if (someList.get(i) == null) {
+				if (otherList.get(i) == null) {
+					continue;
+				} else {
+					return false;
+				}
+			}
+			if (!someList.get(i).equals(otherList.get(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
