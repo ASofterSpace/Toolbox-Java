@@ -23,7 +23,7 @@ public class WebPreviewer {
 			String absolutePath = new java.io.File(previewFileName).getCanonicalPath().toString().replace("\\", "/");
 
 			if (Desktop.isDesktopSupported()) {
-					Desktop.getDesktop().browse(new URI("file:///" + absolutePath));
+				Desktop.getDesktop().browse(new URI("file:///" + absolutePath));
 			}
 		} catch (IOException | URISyntaxException e) {
 			System.err.println("[ERROR] trying to open the local file " + previewFileName + " in a browser resulted in an I/O Exception - not quite inconceivable!");

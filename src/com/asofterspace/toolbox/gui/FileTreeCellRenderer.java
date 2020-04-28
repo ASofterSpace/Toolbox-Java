@@ -67,10 +67,11 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 			}
 		}
 		setOpaque(true);
-		if (hasFocus) {
+		if (hasFocus || sel) {
+			// set the focus color if the cell has the focus or is selected
+			// (as it being selected is the important thing for user;
+			// it mostly does not have the focus anyway (the actual code editor does))
 			setBackground(focusColor);
-		} else if (sel) {
-			setBackground(selectedColor);
 		} else {
 			setBackground(backgroundColor);
 			if (node instanceof FileTreeNode) {

@@ -427,11 +427,25 @@ public class Image {
 	}
 
 	public void resampleToWidth(int newWidth) {
-		resampleTo(newWidth, (height * newWidth) / width);
+
+		int origWidth = width;
+		int origHeight = height;
+
+		while (width > 3 * newWidth) {
+			resampleTo(width / 2, (origHeight * width) / (2 * origWidth));
+		}
+		resampleTo(newWidth, (origHeight * newWidth) / origWidth);
 	}
 
 	public void resampleToHeight(int newHeight) {
-		resampleTo((width * newHeight) / height, newHeight);
+
+		int origWidth = width;
+		int origHeight = height;
+
+		while (height > 3 * newHeight) {
+			resampleTo((origWidth * height) / (2 * origHeight), height / 2);
+		}
+		resampleTo((origWidth * newHeight) / origHeight, newHeight);
 	}
 
 	/**
