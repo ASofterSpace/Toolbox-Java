@@ -42,7 +42,7 @@ public class ConfigFile extends JsonFile {
 
 	private static final String FOLDER = "/config/";
 
-	private static final String FILE_EXTENSION = ".cnf";
+	public static final String FILE_EXTENSION = ".cnf";
 
 
 	/**
