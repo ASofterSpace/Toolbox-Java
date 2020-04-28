@@ -16,4 +16,6 @@ public interface FileTab {
 	public boolean hasBeenChanged();
 
 	public boolean isHighlighted();
+
+	public int getSelectionOrder();
 }

@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.images;
 
+import java.awt.Color;
+
 
 /**
  * A simple RGB triplet
@@ -27,6 +29,10 @@ public class ColorRGB {
 	// by default, just a white pixel
 	public ColorRGB() {
 		this(255, 255, 255, 255);
+	}
+
+	public ColorRGB(Color col) {
+		this(col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha());
 	}
 
 	public ColorRGB(byte r, byte g, byte b) {
@@ -383,6 +389,10 @@ public class ColorRGB {
 		}
 
 		return (int) (base * modifier);
+	}
+
+	public Color toColor() {
+		return new Color(r, g, b, a);
 	}
 
 	public String toString() {

@@ -11,9 +11,25 @@ public abstract class FileTreeNode {
 
 	FileTreeFolder parent;
 
+	// 9: this is the absolutely latest entry!
+	// 8: this is one before 9
+	// 7: this is two before 9
+	// ...
+	// 0 and below: no special selection
+	private int selectionOrder;
+
 
 	public FileTreeNode(String name) {
 		this.name = name;
+		this.selectionOrder = 0;
+	}
+
+	public int getSelectionOrder() {
+		return selectionOrder;
+	}
+
+	public void setSelectionOrder(int selectionOrder) {
+		this.selectionOrder = selectionOrder;
 	}
 
 	@Override

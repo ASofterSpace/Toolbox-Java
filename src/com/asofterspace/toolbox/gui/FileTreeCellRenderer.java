@@ -16,6 +16,8 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	public static final long serialVersionUID = 235803948593477295l;
 
+	public static final int PREV_SELECTED_TAB_AMOUNT = 12;
+
 
 	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object node,
@@ -71,6 +73,14 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 			setBackground(selectedColor);
 		} else {
 			setBackground(backgroundColor);
+			if (node instanceof FileTreeNode) {
+				int selOrder = ((FileTreeNode) node).getSelectionOrder();
+				if (selOrder > 0) {
+					Color selColor = GuiUtils.intermix(
+						selectedColor, backgroundColor, selOrder / (double) PREV_SELECTED_TAB_AMOUNT);
+					setBackground(selColor);
+				}
+			}
 		}
 
 		// if a file has been changed recently, show it in bold

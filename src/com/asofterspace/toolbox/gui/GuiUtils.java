@@ -105,4 +105,41 @@ public class GuiUtils {
 			// do nothing
 		}
 	}
+
+	/**
+	 * intermix two colors, where the amount of the first color in the mix is given,
+	 * e.g. 0.45 for 45% one, 55% two
+	 */
+	public static Color intermix(Color one, Color two, double amountOfOne) {
+
+		if (amountOfOne < 0) {
+			amountOfOne = 0;
+		}
+		if (amountOfOne > 1) {
+			amountOfOne = 1;
+		}
+
+		double aO = amountOfOne;
+		double aT = 1 - amountOfOne;
+
+		int r = (int) (one.getRed() * aO) + (int) (two.getRed() * aT);
+		if (r > 255) {
+			r = 255;
+		}
+		int g = (int) (one.getGreen() * aO) + (int) (two.getGreen() * aT);
+		if (g > 255) {
+			g = 255;
+		}
+		int b = (int) (one.getBlue() * aO) + (int) (two.getBlue() * aT);
+		if (b > 255) {
+			b = 255;
+		}
+		int a = (int) (one.getAlpha() * aO) + (int) (two.getAlpha() * aT);
+		if (a > 255) {
+			a = 255;
+		}
+
+		return new Color(r, g, b, a);
+	}
+
 }

@@ -21,6 +21,11 @@ public class FileTreeFile extends FileTreeNode {
 	}
 
 	@Override
+	public int getSelectionOrder() {
+		return tab.getSelectionOrder();
+	}
+
+	@Override
 	public String getDirectoryName() {
 		return tab.getDirectoryName();
 	}
