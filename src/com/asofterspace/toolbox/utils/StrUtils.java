@@ -322,6 +322,10 @@ public class StrUtils {
 	 */
 	public static Integer parseMoney(String amountStr) {
 
+		if (amountStr == null) {
+			return null;
+		}
+
 		try {
 			amountStr = amountStr.replaceAll(" ", "");
 			amountStr = amountStr.replaceAll("\t", "");
