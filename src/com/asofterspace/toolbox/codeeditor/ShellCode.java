@@ -5,7 +5,11 @@
 package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
+import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
+import com.asofterspace.toolbox.utils.StrUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +20,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 
-public class ShellCode extends Code {
+public class ShellCode extends FunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,6 +49,8 @@ public class ShellCode extends Code {
 
 	// are we currently in a multiline comment?
 	private boolean curMultilineComment;
+
+	private String lastCouldBeKeyword = "";
 
 
 	public ShellCode(JTextPane editor) {
@@ -92,6 +98,8 @@ public class ShellCode extends Code {
 	@Override
 	protected void highlightText(int start, int length) {
 
+		functions = new ArrayList<>();
+
 		try {
 			int end = this.getLength();
 
@@ -135,6 +143,7 @@ public class ShellCode extends Code {
 						start++;
 
 					} else {
+						updateFunctionList();
 						return;
 					}
 
@@ -142,12 +151,14 @@ public class ShellCode extends Code {
 				}
 
 				// or any other token instead?
-				start = highlightOther(content, start, end);
+				start = highlightOther(content, start, end, true);
 			}
 
 		} catch (BadLocationException e) {
 			// oops!
 		}
+
+		updateFunctionList();
 	}
 
 	private boolean isCommentStart(String content, int start, int end) {
@@ -182,7 +193,7 @@ public class ShellCode extends Code {
 		return commentEnd;
 	}
 
-	private int highlightOther(String content, int start, int end) {
+	private int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -195,15 +206,28 @@ public class ShellCode extends Code {
 
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
-		if (isKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
-		} else if (isPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
-		} else if (isAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
-		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+		if (setAttributesAndDetectFunctions) {
+			if (isKeyword(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			} else if (isPrimitiveType(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			} else if (isAdvancedType(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			} else if (isAnnotation(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			} else if ((couldBeKeywordEnd+1 <= end) && (content.charAt(couldBeKeywordEnd) == ' ') && (content.charAt(couldBeKeywordEnd+1) == '{')) {
+				if ("function".equals(lastCouldBeKeyword)) {
+					this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+					// now get the entire line that we found!
+					String functionName = StrUtils.getLineFromPosition(start, content).trim();
+					// get rid of the opening {
+					functionName = functionName.substring(0, functionName.length() - 1).trim();
+					functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+				}
+			}
 		}
+
+		lastCouldBeKeyword = couldBeKeyword;
 
 		return couldBeKeywordEnd;
 	}
