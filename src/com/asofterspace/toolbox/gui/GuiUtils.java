@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.gui;
 
+import com.asofterspace.toolbox.Utils;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
@@ -16,6 +18,7 @@ import java.io.IOException;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -29,6 +32,41 @@ public class GuiUtils {
 	public final static String LIGHT_SCHEME = "light";
 	public final static String DARK_SCHEME = "dark";
 
+
+	public static boolean complain(String complainAbout) {
+
+		JOptionPane.showMessageDialog(
+			null,
+			complainAbout,
+			Utils.getProgramTitle(),
+			JOptionPane.ERROR_MESSAGE
+		);
+
+		// we return false, which can then immediately be returned by the caller
+		return false;
+	}
+
+	/**
+	 * Asks the user to confirm the request for deleting the thing toBeDeleted.
+	 * Returns true if the user selects Yes to the deletion.
+	 */
+	public static boolean confirmDelete(String toBeDeleted) {
+
+		Object[] options = {"Yes", "Cancel"};
+
+		int result = JOptionPane.showOptionDialog(
+			null,
+			"Do you really want to delete the " + toBeDeleted + "?",
+			Utils.getProgramTitle(),
+			JOptionPane.YES_NO_OPTION,
+			JOptionPane.QUESTION_MESSAGE,
+			null,
+			options,
+			options[1]
+		);
+
+		return result == JOptionPane.YES_OPTION;
+	}
 
 	/**
 	 * Maximize the window
