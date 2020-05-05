@@ -213,6 +213,18 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					if (line.startsWith("class ")) {
 						classNameStr = line.substring(6);
 					}
+					if (line.contains(" interface ")) {
+						classNameStr = line.substring(line.indexOf(" interface ") + 11);
+					}
+					if (line.startsWith("interface ")) {
+						classNameStr = line.substring(10);
+					}
+					if (line.contains(" enum ")) {
+						classNameStr = line.substring(line.indexOf(" enum ") + 6);
+					}
+					if (line.startsWith("enum ")) {
+						classNameStr = line.substring(5);
+					}
 					// once a class name has been found, interrupt - as there will be no further
 					// class name or import
 					if (classNameStr != null) {
