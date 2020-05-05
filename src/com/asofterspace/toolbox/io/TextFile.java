@@ -24,6 +24,8 @@ public class TextFile extends File {
 
 	protected TextEncoding usingEncoding = null;
 
+	protected boolean savingAllowed = true;
+
 
 	/**
 	 * Please do not construct a file without a name ;)
@@ -239,11 +241,23 @@ public class TextFile extends File {
 		filecontent = content;
 	}
 
+	public void preventSaving() {
+		savingAllowed = false;
+	}
+
+	public void allowSaving() {
+		savingAllowed = true;
+	}
+
 	/**
 	 * Saves the current file contents of this instance
 	 * to the file system
 	 */
 	public void save() {
+
+		if (!savingAllowed) {
+			return;
+		}
 
 		// the following line works also if usingEncoding is null, in which case
 		// we want to default to UTF8_WITHOUT_BOM anyway
