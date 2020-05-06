@@ -97,7 +97,7 @@ public class SimpleFile extends TextFile {
 	 * Ensure that the contents have been loaded
 	 * @param complainIfMissing Complain on sys err if the file is missing
 	 */
-	protected void ensureContents(boolean complainIfMissing) {
+	public void ensureContents(boolean complainIfMissing) {
 
 		if (filecontents == null) {
 			loadContents(complainIfMissing);
