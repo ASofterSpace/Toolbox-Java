@@ -173,6 +173,13 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		// ... then we add missing imports based on all the open java files
 		if (ourPackageStr != null) {
+
+			// we explicitly do not want to import e.g. java.io.File if we already have
+			// com.asofterspace.toolbox.io.File, even if we are inside com.asofterspace.
+			// toolbox.io ourselves, such that the ass io File is not actually present
+			// in the final import block!
+			List<String> doNotImport = new ArrayList<>();
+
 			List<String> filesToOpen = new ArrayList<>();
 			filesToOpen.add(".java");
 			filesToOpen.add(".groovy");
@@ -234,6 +241,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						break;
 					}
 				}
+				if ((packageStr != null) && (classNameStr != null) && packageStr.equals(ourPackageStr)) {
+					doNotImport.add(classNameStr);
+				}
 				// for each file, check if a package and classname were found
 				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr) &&
 					!classNameStr.equals("*") && !packageStr.equals("java.lang")) {
@@ -241,6 +251,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					// ... which is exactly the behavior we like :)
 					automaticallyAddedImports.put(classNameStr, packageStr + "." + classNameStr);
 				}
+			}
+
+			for (String doNotImportKey : doNotImport) {
+				automaticallyAddedImports.remove(doNotImportKey);
 			}
 		}
 
