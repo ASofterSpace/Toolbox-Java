@@ -714,7 +714,7 @@ public class Record {
 		}
 
 		if (result.kind == RecordKind.STRING) {
-			return strToInt((String) result.simpleContents);
+			return StrUtils.strToInt((String) result.simpleContents);
 		}
 
 		if (result.kind == RecordKind.NULL) {
@@ -722,38 +722,6 @@ public class Record {
 		}
 
 		return null;
-	}
-
-	public static Integer strToInt(String value) {
-
-		if (value == null) {
-			return null;
-		}
-
-		// remove regular whitespace characters
-		value = value.trim();
-
-		// also remove non-breaking space character
-		value = value.replaceAll("\u00a0", "");
-
-		if ("".equals(value)) {
-			return null;
-		}
-
-		try {
-			return Integer.valueOf(value);
-		} catch (NumberFormatException e) {
-			try {
-				return (Integer) (int) Math.round(Double.valueOf(value));
-			} catch (NumberFormatException e2) {
-				try {
-					return (Integer) (int) Math.round(Double.valueOf((value).replaceAll(",", ".")));
-				} catch (NumberFormatException e3) {
-					System.err.println("Cannot convert " + value + " to integer...");
-					return null;
-				}
-			}
-		}
 	}
 
 	/**

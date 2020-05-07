@@ -37,6 +37,8 @@ public class AllTests {
 
 		TestUtils.run(new DateUtilsTest());
 
+		TestUtils.run(new FinanceUtilsTest());
+
 		TestUtils.run(new SimpleFileTest());
 
 		TestUtils.run(new ConfigFileTest());

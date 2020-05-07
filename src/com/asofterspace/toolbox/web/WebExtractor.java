@@ -95,19 +95,4 @@ public class WebExtractor {
 			startindexnew = endindex;
 		}
 	}
-
-	/**
-	 * The numbers we are getting here are German-ly numbers, so 1.546,00...
-	 * so we first replace . with nothing, then , with .
-	 */
-	public static Integer germanStrToInt(String value) {
-		if (value == null) {
-			return null;
-		}
-		value = value.trim();
-		value = value.replaceAll("\\.", "");
-		value = value.replaceAll(",", ".");
-		Integer result = Record.strToInt(value);
-		return result;
-	}
 }

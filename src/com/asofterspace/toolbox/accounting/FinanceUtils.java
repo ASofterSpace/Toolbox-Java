@@ -24,6 +24,113 @@ public class FinanceUtils {
 		return (int) Math.round((postTaxAmount * 100.00) / (100 + taxationPercent));
 	}
 
+	/**
+	 * Takes in:        Gives out:
+	 *      1                 100
+	 *      2,5               250
+	 *      2.50€             250
+	 *   1,002.50€         100250
+	 *   1.002,50 EUR      100250
+	 *   1.002.50USD       100250
+	 */
+	public static Integer parseMoney(String amountStr) {
+
+		if (amountStr == null) {
+			return null;
+		}
+
+		try {
+			amountStr = amountStr.replaceAll(" ", "");
+			amountStr = amountStr.replaceAll("\t", "");
+			amountStr = amountStr.replaceAll("\r", "");
+			amountStr = amountStr.replaceAll("\n", "");
+			amountStr = amountStr.replaceAll("EUR", "");
+			amountStr = amountStr.replaceAll("USD", "");
+			amountStr = amountStr.replaceAll("€", "");
+
+			// ensure this ends with a dot, and all commas are taken out
+			int lastComma = amountStr.lastIndexOf(",");
+			int lastDot = amountStr.lastIndexOf(".");
+			boolean endsWithDot = false;
+			// if we have both commas and dots...
+			if ((lastComma > 0) && (lastDot > 0)) {
+				// ... then we end with the last of the two
+				endsWithDot = (lastComma < lastDot);
+			} else {
+				// if we do not have both, but we have a dot, we end with a dot
+				if (lastDot > 0) {
+					endsWithDot = true;
+				}
+			}
+			if (endsWithDot) {
+				amountStr = amountStr.replaceAll(",", "");
+			} else {
+				amountStr = amountStr.replaceAll("\\.", "");
+				amountStr = amountStr.replaceAll(",", ".");
+			}
+
+			// now we have:
+			//      1                1
+			//      2,5              2.5
+			//      2.50€            2.50
+			//   1,002.50€        1002.50
+			//   1.002,50 EUR     1002.50
+			//   1.002.50USD     1.002.50
+			// so all commas should be gone, all currency texts should be gone
+			// however, if there were several dots, then there still are several
+
+			// we now want to ensure that there are exactly two digits behind the dot,
+			// and then drop all dots!
+			if (!amountStr.contains(".")) {
+				amountStr = amountStr += ".00";
+			}
+
+			// we are now sure that there is a dot somewhere in there, but the offset
+			// from the end might be wrong...
+			int offset = amountStr.length() - amountStr.lastIndexOf(".");
+			// shorten, so 2.500 to 2.50
+			if (offset > 3) {
+				amountStr = amountStr.substring(0, amountStr.length() - (offset - 3));
+			}
+			// elongate, so 2.5 to 2.50
+			if (offset == 1) {
+				amountStr += "00";
+			}
+			if (offset == 2) {
+				amountStr += "0";
+			}
+
+			// now we have:
+			//      1                1.00
+			//      2,5              2.50
+			//      2.50€            2.50
+			//   1,002.50€        1002.50
+			//   1.002,50 EUR     1002.50
+			//   1.002.50USD     1.002.50
+			// so drop all the dots...
+			amountStr = amountStr.replaceAll("\\.", "");
+
+			// aaaand finally interpret as integer :D
+			return Integer.valueOf(amountStr);
+
+		} catch (NumberFormatException e) {
+			// return null and let the caller decide how to handle that
+		}
+
+		return null;
+	}
+
+	public static Integer parseMoneyInWholeDigits(String amountStr) {
+
+		Integer result = parseMoney(amountStr);
+
+		if (result != null) {
+			result = result / 100;
+		}
+
+		return result;
+	}
+
 	public static String formatMoney(Integer amount) {
 
 		if (amount == null) {
