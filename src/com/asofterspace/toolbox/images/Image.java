@@ -10,6 +10,11 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 
 /**
@@ -77,6 +82,71 @@ public class Image {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Replaces some same pixel values with single object instances
+	 * (replacing all would take a LONG time in a picture that has many different colors,
+	 * so instead we sample 256 values, check if any occur more than once, and those we
+	 * replace in the entire image)
+	 */
+	public void minify() {
+
+		/*
+		// simplest approach, but too slow:
+
+		List<ColorRGB> encountered = new ArrayList<>();
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				boolean found = false;
+				for (ColorRGB col : encountered) {
+					if (data[y][x].equals(col)) {
+						data[y][x] = col;
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					encountered.add(data[y][x]);
+				}
+			}
+		}
+		*/
+
+		Map<ColorRGB, Integer> sample = new HashMap<>();
+		Random rand = new Random();
+		for (int i = 0; i < 256; i++) {
+			ColorRGB sampleCol = data[rand.nextInt(height)][rand.nextInt(width)];
+			Integer soFar = sample.get(sampleCol);
+			if (soFar == null) {
+				sample.put(sampleCol, 1);
+			} else {
+				sample.put(sampleCol, soFar + 1);
+			}
+		}
+
+		List<ColorRGB> encountered = new ArrayList<>();
+		for (Map.Entry<ColorRGB, Integer> sampleCol : sample.entrySet()) {
+			if (sampleCol.getValue() > 1) {
+				encountered.add(sampleCol.getKey());
+			}
+		}
+
+		// if we will not be able to minimize anything then there is no need to loop over the entire image...
+		if (encountered.size() < 1) {
+			return;
+		}
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				for (ColorRGB col : encountered) {
+					if (data[y][x].equals(col)) {
+						data[y][x] = col;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	public void clear() {

@@ -8,6 +8,8 @@ import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.utils.Record;
 
+import java.util.List;
+
 
 /**
  * This provides utility functions for extracting data from crawled HTML pages
@@ -87,6 +89,32 @@ public class WebExtractor {
 				return result;
 			}
 			int endindex = html.indexOf(strafter, startindex + len);
+			String z = html.substring(startindex + len, endindex);
+			Integer curResult = Integer.valueOf(z);
+			if (curResult > result) {
+				result = curResult;
+			}
+			startindexnew = endindex;
+		}
+	}
+
+	public static Integer getHighestNumberFromHtml(String html, String strbefore, List<String> strsafter) {
+		int len = strbefore.length();
+		int startindex = 0;
+		int startindexnew = 0;
+		Integer result = 1;
+		while (true) {
+			startindex = html.indexOf(strbefore, startindexnew);
+			if (startindex < 0) {
+				return result;
+			}
+			int endindex = Integer.MAX_VALUE;
+			for (String strafter : strsafter) {
+				int possibleEndindex = html.indexOf(strafter, startindex + len);
+				if ((possibleEndindex >= 0) && (possibleEndindex < endindex)) {
+					endindex = possibleEndindex;
+				}
+			}
 			String z = html.substring(startindex + len, endindex);
 			Integer curResult = Integer.valueOf(z);
 			if (curResult > result) {
