@@ -4,9 +4,6 @@
  */
 package com.asofterspace.toolbox.io;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,6 +124,23 @@ public class CsvFile extends SimpleFile {
 		}
 
 		return result.toString();
+	}
+
+	public static String sanitizeForCsv(Object val) {
+		if (val == null) {
+			return "";
+		}
+		if (val instanceof Double) {
+			return val.toString().replace(".", ",");
+		}
+		String strVal = val.toString();
+		strVal = strVal.trim();
+		strVal = strVal.replaceAll(",", "");
+		strVal = strVal.replaceAll(";", "");
+		strVal = strVal.replaceAll("\n", "");
+		strVal = strVal.replaceAll("\r", "");
+		strVal = strVal.replaceAll("\t", " ");
+		return strVal;
 	}
 
 	/**
