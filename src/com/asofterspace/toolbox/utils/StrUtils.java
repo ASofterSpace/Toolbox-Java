@@ -675,13 +675,34 @@ public class StrUtils {
 		return true;
 	}
 
-	private static String prepareForParsing(String value) {
+	public static String prepareForParsing(String value) {
 
 		// remove non-breaking space character
 		value = value.replaceAll("\u00a0", "");
 
 		// remove regular whitespace characters
 		value = value.trim();
+
+		// ensure this ends with a dot, and all commas are taken out
+		int lastComma = value.lastIndexOf(",");
+		int lastDot = value.lastIndexOf(".");
+		boolean endsWithDot = false;
+		// if we have both commas and dots...
+		if ((lastComma > 0) && (lastDot > 0)) {
+			// ... then we end with the last of the two
+			endsWithDot = (lastComma < lastDot);
+		} else {
+			// if we do not have both, but we have a dot, we end with a dot
+			if (lastDot > 0) {
+				endsWithDot = true;
+			}
+		}
+		if (endsWithDot) {
+			value = value.replaceAll(",", "");
+		} else {
+			value = value.replaceAll("\\.", "");
+			value = value.replaceAll(",", ".");
+		}
 
 		return value;
 	}
@@ -704,12 +725,8 @@ public class StrUtils {
 			try {
 				return (Integer) (int) Math.round(Double.valueOf(value));
 			} catch (NumberFormatException e2) {
-				try {
-					return (Integer) (int) Math.round(Double.valueOf((value).replaceAll(",", ".")));
-				} catch (NumberFormatException e3) {
-					System.err.println("Cannot convert " + value + " to integer...");
-					return null;
-				}
+				System.err.println("Cannot convert " + value + " to integer...");
+				return null;
 			}
 		}
 	}
@@ -729,12 +746,8 @@ public class StrUtils {
 		try {
 			return Double.valueOf(value);
 		} catch (NumberFormatException e) {
-			try {
-				return Double.valueOf(value.replaceAll(",", "."));
-			} catch (NumberFormatException e2) {
-				System.err.println("Cannot convert " + value + " to double...");
-				return null;
-			}
+			System.err.println("Cannot convert " + value + " to double...");
+			return null;
 		}
 	}
 

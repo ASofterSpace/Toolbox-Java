@@ -8,7 +8,10 @@ package com.asofterspace.toolbox.accounting;
 public enum Currency {
 
 	EUR,
-	USD;
+	USD,
+	GBP,
+	CHF,
+	SEK;
 
 
 	public static Currency fromString(String str) {

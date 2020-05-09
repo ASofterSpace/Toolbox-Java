@@ -128,6 +128,8 @@ public class StrUtilsTest implements Test {
 		testStrToInt("3.1415926", 3);
 		testStrToInt(" \u00a0 4 \t\r\n", 4);
 		testStrToInt("5,17", 5);
+		testStrToInt("1.024,28", 1024);
+		testStrToInt("2,024.28", 2024);
 		testStrToInt("foobar", null);
 
 		TestUtils.succeed();
@@ -156,6 +158,8 @@ public class StrUtilsTest implements Test {
 		testStrToDouble("3.1415926", 3.1, 3.2);
 		testStrToDouble(" \u00a0 4 \t\r\n", 3.9, 4.1);
 		testStrToDouble("5,17", 5.1, 5.2);
+		testStrToDouble("1.024,28", 1024.2, 1024.3);
+		testStrToDouble("2,024.28", 2024.27, 2024.29);
 		testStrToDouble("foobar", null, null);
 
 		TestUtils.succeed();

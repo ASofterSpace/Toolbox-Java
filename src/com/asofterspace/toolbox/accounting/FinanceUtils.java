@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.accounting;
 
+import com.asofterspace.toolbox.utils.StrUtils;
+
 
 /**
  * Utility functions related to finances
@@ -48,26 +50,7 @@ public class FinanceUtils {
 			amountStr = amountStr.replaceAll("USD", "");
 			amountStr = amountStr.replaceAll("€", "");
 
-			// ensure this ends with a dot, and all commas are taken out
-			int lastComma = amountStr.lastIndexOf(",");
-			int lastDot = amountStr.lastIndexOf(".");
-			boolean endsWithDot = false;
-			// if we have both commas and dots...
-			if ((lastComma > 0) && (lastDot > 0)) {
-				// ... then we end with the last of the two
-				endsWithDot = (lastComma < lastDot);
-			} else {
-				// if we do not have both, but we have a dot, we end with a dot
-				if (lastDot > 0) {
-					endsWithDot = true;
-				}
-			}
-			if (endsWithDot) {
-				amountStr = amountStr.replaceAll(",", "");
-			} else {
-				amountStr = amountStr.replaceAll("\\.", "");
-				amountStr = amountStr.replaceAll(",", ".");
-			}
+			amountStr = StrUtils.prepareForParsing(amountStr);
 
 			// now we have:
 			//      1                1
