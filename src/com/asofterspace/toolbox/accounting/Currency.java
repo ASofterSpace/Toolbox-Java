@@ -9,4 +9,23 @@ public enum Currency {
 
 	EUR,
 	USD;
+
+
+	public static Currency fromString(String str) {
+
+		if (str == null) {
+			return null;
+		}
+
+		str = str.trim().toUpperCase();
+
+		switch (str) {
+			case "EUR":
+				return EUR;
+			case "USD":
+				return USD;
+		}
+
+		return null;
+	}
 }
