@@ -74,8 +74,15 @@ public class DateUtilsTest implements Test {
 
 		TestUtils.start("Parse Difficult Dates");
 
+		compareDateParsing("2027-01-28", "2027-01-28 00:00:00.000");
+		compareDateParsing("2027-01-28", "2027-01-28 01:02:03.234");
+
 		compareDateParsing("2020-04-02", "2020-April-02");
 		compareDateParsing("2020-04-02", "2020-APR-02");
+		compareDateParsing("2020-04-02", "2020 04 02");
+		compareDateParsing("2020-04-02", "2020 4 2");
+		compareDateParsing("2020-04-02", "2020-4 2");
+		compareDateParsing("2020-04-02", "2020 4-2");
 		compareDateParsing("2020-04-02", "2. 4. 2020");
 		compareDateParsing("2020-04-02", "02 04 2020");
 		compareDateParsing("2020-04-02", "2. 04 2020");
@@ -112,7 +119,9 @@ public class DateUtilsTest implements Test {
 
 		if (!date1.equals(date2)) {
 			TestUtils.fail("We parsed the date " + dateStr1 + " and the date " + dateStr2 +
-				" but they did not result in the same date!");
+				" but they did not result in the same date!\n" +
+				"(The first gave " + DateUtils.serializeDate(date1) + " and the second gave " +
+				DateUtils.serializeDate(date2) + ")");
 		}
 	}
 

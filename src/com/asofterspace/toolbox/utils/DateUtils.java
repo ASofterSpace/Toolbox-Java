@@ -67,46 +67,46 @@ public class DateUtils {
 		}
 
 		// handle date time string by omitting the timestamp such that we only get a date
-		if (dateStr.length() == DEFAULT_DATE_TIME_FORMAT_STR.length()) {
+		if (dateStr.length() > DEFAULT_DATE_TIME_FORMAT_STR.length()) {
 			dateStr = dateStr.substring(0, DEFAULT_DATE_FORMAT_STR.length());
 		}
 
 		try {
-			return DEFAULT_DATE_FORMAT.parse(dateStr);
-		} catch (ParseException ex) {
-
-			// we want to be able to parse:
-			// dd. MM. yyyy
-			// dd MM yyyy
-			// dd.MM.yyyy
-
-			dateStr = dateStr.replaceAll(" ", ". ");
-
-			// we are now at:
-			// dd.. MM.. yyyy
-			// dd. MM. yyyy
-			// dd.MM.yyyy
-
-			dateStr = dateStr.replaceAll(" ", "");
-
-			// we are now at:
-			// dd..MM..yyyy
-			// dd.MM.yyyy
-			// dd.MM.yyyy
-
-			dateStr = dateStr.replaceAll("\\.\\.", ".");
-
-			// we are now at:
-			// dd.MM.yyyy
-			// dd.MM.yyyy
-			// dd.MM.yyyy
-
-			try {
-				return FALLBACK_DATE_FORMAT.parse(dateStr);
-			} catch (ParseException ex2) {
-				System.err.println("Could not parse the date " + dateStr + " - using current date instead!");
-				return parseDate(null);
+			dateStr = dateStr.replaceAll(" ", "-");
+			// if we do not have 02-04-2020, but more like 2020-04-02
+			if (!((dateStr.charAt(2) == '-') && (dateStr.charAt(5) == '-'))) {
+				return DEFAULT_DATE_FORMAT.parse(dateStr);
 			}
+		} catch (ParseException ex) {
+			// oh no! fall through to backup approach...
+		}
+
+		dateStr = dateStr.replaceAll("-", " ");
+
+		// we want to be able to parse:
+		// dd. MM. yyyy
+		// dd MM yyyy
+		// dd.MM.yyyy
+
+		dateStr = dateStr.replaceAll(" ", ".");
+
+		// we are now at:
+		// dd..MM..yyyy
+		// dd.MM.yyyy
+		// dd.MM.yyyy
+
+		dateStr = dateStr.replaceAll("\\.\\.", ".");
+
+		// we are now at:
+		// dd.MM.yyyy
+		// dd.MM.yyyy
+		// dd.MM.yyyy
+
+		try {
+			return FALLBACK_DATE_FORMAT.parse(dateStr);
+		} catch (ParseException ex2) {
+			System.err.println("Could not parse the date " + dateStr + " - returning null instead!");
+			return null;
 		}
 	}
 
@@ -120,7 +120,7 @@ public class DateUtils {
 		}
 
 		// handle date string by adding zeroes to get a date time stamp
-		if (dateTimeStr.length() == DEFAULT_DATE_FORMAT_STR.length()) {
+		if (!dateTimeStr.contains(":")) {
 			dateTimeStr = dateTimeStr + " 00:00:00.000";
 		}
 
