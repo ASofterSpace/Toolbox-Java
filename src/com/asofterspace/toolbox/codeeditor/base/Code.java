@@ -2567,7 +2567,7 @@ public abstract class Code extends DefaultStyledDocument {
 		newCode.append("\t\t\t" + ourClassName + " other" + ourClassName + " = (" + ourClassName + ") other;\n");
 		newCode.append("\t\t\t// TODO - actually compare other" + ourClassName + " to this\n");
 		newCode.append("\t\t\tif (this.? == " + ourClassName + ".?) {\n");
-		newCode.append("\t\t\t\t return true;\n");
+		newCode.append("\t\t\t\treturn true;\n");
 		newCode.append("\t\t\t}\n");
 		newCode.append("\t\t}\n");
 		newCode.append("\t\treturn false;\n");
