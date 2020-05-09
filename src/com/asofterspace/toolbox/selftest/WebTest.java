@@ -12,8 +12,13 @@ import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
+import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.web.WebAccessor;
+import com.asofterspace.toolbox.web.WebExtractor;
 import com.asofterspace.toolbox.web.WebServer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class WebTest implements Test {
@@ -35,6 +40,17 @@ public class WebTest implements Test {
 		getFileTest();
 
 		stopServer();
+
+
+		extractDataTest();
+
+		getNumberFromHtmlTest();
+
+		getHighestNumberFromHtmlTest();
+
+		getHighestNumberFromHtmlByListTest();
+
+		extractJsonDictTest();
 	}
 
 	public void clearEverything() {
@@ -146,6 +162,115 @@ public class WebTest implements Test {
 	public void stopServer() {
 
 		server.stop();
+	}
+
+	public void extractDataTest() {
+
+		TestUtils.start("Extract Data");
+
+		String html = "<html>\nbla blubb <a href='boink'>\n</html>";
+
+		String result = WebExtractor.extract(html, "<a href='", "'");
+
+		if (!"boink".equals(result)) {
+			TestUtils.fail("We tried to extract 'boink' from an html string but got '" + result + "' instead!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void getNumberFromHtmlTest() {
+
+		TestUtils.start("Get Number from HTML");
+
+		String html = "<html>\nbla blubb <a href='boink'>\n" +
+			"<div class=\"bla1\">bla</div>\n" +
+			"<div class=\"bla2\">bli</div>\n" +
+			"<div class=\"bla4\">blö</div>\n" +
+			"<div class=\"bla3\">blu</div>\n" +
+			"</html>";
+
+		Integer result = WebExtractor.getNumberFromHtml(html, "<div class=\"bla", "\"");
+
+		if ((result == null) || !result.equals(1)) {
+			TestUtils.fail("We tried to extract the first number '1' from an html string " +
+				"but got '" + result + "' instead!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void getHighestNumberFromHtmlTest() {
+
+		TestUtils.start("Get Highest Number from HTML");
+
+		String html = "<html>\nbla blubb <a href='boink'>\n" +
+			"<div class=\"bla1\">bla</div>\n" +
+			"<div class=\"bla2\">bli</div>\n" +
+			"<div class=\"bla4\">blö</div>\n" +
+			"<div class=\"bla3\">blu</div>\n" +
+			"</html>";
+
+		Integer result = WebExtractor.getHighestNumberFromHtml(html, "<div class=\"bla", "\"");
+
+		if ((result == null) || !result.equals(4)) {
+			TestUtils.fail("We tried to extract the hightest number '4' from an html string " +
+				"but got '" + result + "' instead!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void getHighestNumberFromHtmlByListTest() {
+
+		TestUtils.start("Get Highest Number from HTML by List");
+
+		String html = "<html>\nbla blubb <a href='boink'>\n" +
+			"<div class=\"bla1\">bla</div>\n" +
+			"<div class=\"bla2\">bli</div>\n" +
+			"<div class=\'bla4\'>blö</div>\n" +
+			"<div class=\"bla3\">blu</div>\n" +
+			"</html>";
+
+		List<String> before = new ArrayList<>();
+		before.add("<div class=\"bla");
+		before.add("<div class='bla");
+		List<String> after = new ArrayList<>();
+		after.add("\"");
+		after.add("'");
+		Integer result = WebExtractor.getHighestNumberFromHtml(html, before, after);
+
+		if ((result == null) || !result.equals(4)) {
+			TestUtils.fail("We tried to extract the hightest number '4' from an html string " +
+				"but got '" + result + "' instead!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void extractJsonDictTest() {
+
+		TestUtils.start("Extract JSON Dict");
+
+		String html = "<html>\nbla blubb <a href='boink'>\n" +
+			"<script>\n" +
+			"var bla = {\"foo\": \"b&auml;r\"}\n" +
+			"</script>\n" +
+			"</html>";
+
+		Record rec = WebExtractor.extractJsonDict(html, "var bla = {", "}", true, null);
+
+		if (!"bär".equals(rec.getString("foo"))) {
+			TestUtils.fail("We tried to extract the entry 'bär' for key 'foo' from a JSON object in an html string " +
+				"but got '" + rec.getString("foo") + "' instead!");
+			return;
+		}
+
+		TestUtils.succeed();
 	}
 
 }

@@ -77,7 +77,9 @@ public class WebExtractor {
 		return Integer.valueOf(z);
 	}
 
-	// we search again and again and take the highest number we found
+	/**
+	 * We search again and again and take the highest number we found
+	 */
 	public static Integer getHighestNumberFromHtml(String html, String strbefore, String strafter) {
 		int len = strbefore.length();
 		int startindex = 0;
@@ -98,29 +100,29 @@ public class WebExtractor {
 		}
 	}
 
-	public static Integer getHighestNumberFromHtml(String html, String strbefore, List<String> strsafter) {
-		int len = strbefore.length();
-		int startindex = 0;
-		int startindexnew = 0;
-		Integer result = 1;
-		while (true) {
-			startindex = html.indexOf(strbefore, startindexnew);
-			if (startindex < 0) {
-				return result;
+	/**
+	 * Get the highest number for each tuple of before and after (they are not combined in all combinations,
+	 * just the first before with the first after, the second before with the second after, etc.!)
+	 */
+	public static Integer getHighestNumberFromHtml(String html, List<String> strsbefore, List<String> strsafter) {
+		Integer result = null;
+		if ((strsbefore == null) || (strsafter == null)) {
+			return result;
+		}
+		int len = Math.min(strsbefore.size(), strsafter.size());
+		for (int i = 0; i < len; i++) {
+			Integer cur = getHighestNumberFromHtml(html, strsbefore.get(i), strsafter.get(i));
+			if (cur == null) {
+				continue;
 			}
-			int endindex = Integer.MAX_VALUE;
-			for (String strafter : strsafter) {
-				int possibleEndindex = html.indexOf(strafter, startindex + len);
-				if ((possibleEndindex >= 0) && (possibleEndindex < endindex)) {
-					endindex = possibleEndindex;
+			if (result == null) {
+				result = cur;
+			} else {
+				if (result < cur) {
+					result = cur;
 				}
 			}
-			String z = html.substring(startindex + len, endindex);
-			Integer curResult = Integer.valueOf(z);
-			if (curResult > result) {
-				result = curResult;
-			}
-			startindexnew = endindex;
 		}
+		return result;
 	}
 }
