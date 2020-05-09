@@ -63,8 +63,11 @@ public class WebExtractor {
 		int len = strbefore.length();
 		int startindex = html.indexOf(strbefore);
 		int endindex = html.indexOf(strafter, startindex + len);
-		if (startindex != -1) {
+		if ((startindex >= 0) && (endindex >= startindex + len)) {
 			return html.substring(startindex + len, endindex);
+		}
+		if (startindex >= 0) {
+			return html.substring(startindex + len);
 		}
 		return null;
 	}
@@ -124,5 +127,24 @@ public class WebExtractor {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Takes in something like:
+	 * Bla! Blubb? <a href="foo.bar">Foo bar</a> and so on!
+	 *
+	 * Returns something like:
+	 * Bla! Blubb? Foo bar and so on!
+	 */
+	public static String removeHtmlTagsFromText(String str) {
+
+		if (str == null) {
+			return null;
+		}
+
+		while (str.contains("<")) {
+			str = str.substring(0, str.indexOf("<")) + str.substring(str.indexOf(">") + 1);
+		}
+		return str;
 	}
 }
