@@ -432,12 +432,14 @@ public class StrUtils {
 		int lineStartSemi = content.lastIndexOf(";", pos - 1) + 1;
 		int lineStartComma = content.lastIndexOf(",", pos - 1) + 1;
 		int lineStartDot = 0;
+		int lineStartDoubleDot = 0;
 		int lineStartEquals = 0;
 		int lineStartApo = 0;
 		int lineStartQuot = 0;
 		int lineStartSlash = 0;
 		if (splitWordClusters) {
 			lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
+			lineStartDoubleDot = content.lastIndexOf(":", pos - 1) + 1;
 			lineStartEquals = content.lastIndexOf("=", pos - 1) + 1;
 			lineStartApo = content.lastIndexOf("'", pos - 1) + 1;
 			lineStartQuot = content.lastIndexOf("\"", pos - 1) + 1;
@@ -489,6 +491,9 @@ public class StrUtils {
 		if (lineStartDot > lineStart) {
 			lineStart = lineStartDot;
 		}
+		if (lineStartDoubleDot > lineStart) {
+			lineStart = lineStartDoubleDot;
+		}
 		if (lineStartEquals > lineStart) {
 			lineStart = lineStartEquals;
 		}
@@ -521,12 +526,14 @@ public class StrUtils {
 		int lineEndSemi = content.indexOf(";", pos);
 		int lineEndComma = content.indexOf(",", pos);
 		int lineEndDot = -1;
+		int lineEndDoubleDot = -1;
 		int lineEndEquals = -1;
 		int lineEndApo = -1;
 		int lineEndQuot = -1;
 		int lineEndSlash = -1;
 		if (splitWordClusters) {
 			lineEndDot = content.indexOf(".", pos);
+			lineEndDoubleDot = content.indexOf(":", pos);
 			lineEndEquals = content.indexOf("=", pos);
 			lineEndApo = content.indexOf("'", pos);
 			lineEndQuot = content.indexOf("\"", pos);
@@ -578,6 +585,9 @@ public class StrUtils {
 		if ((lineEndDot >= 0) && (lineEndDot < lineEnd)) {
 			lineEnd = lineEndDot;
 		}
+		if ((lineEndDoubleDot >= 0) && (lineEndDoubleDot < lineEnd)) {
+			lineEnd = lineEndDoubleDot;
+		}
 		if ((lineEndEquals >= 0) && (lineEndEquals < lineEnd)) {
 			lineEnd = lineEndEquals;
 		}
@@ -589,6 +599,10 @@ public class StrUtils {
 		}
 		if ((lineEndSlash >= 0) && (lineEndSlash < lineEnd)) {
 			lineEnd = lineEndSlash;
+		}
+
+		if ((lineEnd > 0) && (content.charAt(lineEnd - 1) == '\\')) {
+			lineEnd--;
 		}
 
 		return lineEnd;
