@@ -675,17 +675,24 @@ public class StrUtils {
 		return true;
 	}
 
+	private static String prepareForParsing(String value) {
+
+		// remove non-breaking space character
+		value = value.replaceAll("\u00a0", "");
+
+		// remove regular whitespace characters
+		value = value.trim();
+
+		return value;
+	}
+
 	public static Integer strToInt(String value) {
 
 		if (value == null) {
 			return null;
 		}
 
-		// remove regular whitespace characters
-		value = value.trim();
-
-		// also remove non-breaking space character
-		value = value.replaceAll("\u00a0", "");
+		value = prepareForParsing(value);
 
 		if ("".equals(value)) {
 			return null;
@@ -703,6 +710,30 @@ public class StrUtils {
 					System.err.println("Cannot convert " + value + " to integer...");
 					return null;
 				}
+			}
+		}
+	}
+
+	public static Double strToDouble(String value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		value = prepareForParsing(value);
+
+		if ("".equals(value)) {
+			return null;
+		}
+
+		try {
+			return Double.valueOf(value);
+		} catch (NumberFormatException e) {
+			try {
+				return Double.valueOf(value.replaceAll(",", "."));
+			} catch (NumberFormatException e2) {
+				System.err.println("Cannot convert " + value + " to double...");
+				return null;
 			}
 		}
 	}

@@ -24,6 +24,10 @@ public class StrUtilsTest implements Test {
 		getWordFromPositionTest();
 
 		sortAndRemoveDuplicatesTest();
+
+		strToIntTest();
+
+		strToDoubleTest();
 	}
 
 	public void countStringInStringTest() {
@@ -114,4 +118,61 @@ public class StrUtilsTest implements Test {
 
 		TestUtils.succeed();
 	}
+
+	public void strToIntTest() {
+
+		TestUtils.start("strToInt");
+
+		testStrToInt("1", 1);
+		testStrToInt(" 2\t", 2);
+		testStrToInt("3.1415926", 3);
+		testStrToInt(" \u00a0 4 \t\r\n", 4);
+		testStrToInt("5,17", 5);
+		testStrToInt("foobar", null);
+
+		TestUtils.succeed();
+	}
+
+	private void testStrToInt(String origStr, Integer targetInt) {
+
+		Integer result = StrUtils.strToInt(origStr);
+
+		if ((result == null) && (targetInt == null)) {
+			return;
+		}
+
+		if ((result == null) || !result.equals(targetInt)) {
+			TestUtils.fail("We called strToInt(\"" + origStr + "\") and got " + result +
+				", but expected " + targetInt + "!");
+		}
+	}
+
+	public void strToDoubleTest() {
+
+		TestUtils.start("strToDouble");
+
+		testStrToDouble("1", 0.9, 1.1);
+		testStrToDouble(" 2\t", 1.9, 2.1);
+		testStrToDouble("3.1415926", 3.1, 3.2);
+		testStrToDouble(" \u00a0 4 \t\r\n", 3.9, 4.1);
+		testStrToDouble("5,17", 5.1, 5.2);
+		testStrToDouble("foobar", null, null);
+
+		TestUtils.succeed();
+	}
+
+	private void testStrToDouble(String origStr, Double targetDoubleLow, Double targetDoubleHigh) {
+
+		Double result = StrUtils.strToDouble(origStr);
+
+		if ((result == null) && (targetDoubleLow == null)) {
+			return;
+		}
+
+		if ((result == null) || !((result > targetDoubleLow) && (result < targetDoubleHigh))) {
+			TestUtils.fail("We called strToDouble(\"" + origStr + "\") and got " + result +
+				", but expected a result between " + targetDoubleLow + " and " + targetDoubleHigh + "!");
+		}
+	}
+
 }

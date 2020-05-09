@@ -51,6 +51,8 @@ public class WebTest implements Test {
 		getHighestNumberFromHtmlByListTest();
 
 		extractJsonDictTest();
+
+		removeHtmlTagsFromTextTest();
 	}
 
 	public void clearEverything() {
@@ -267,6 +269,31 @@ public class WebTest implements Test {
 		if (!"bär".equals(rec.getString("foo"))) {
 			TestUtils.fail("We tried to extract the entry 'bär' for key 'foo' from a JSON object in an html string " +
 				"but got '" + rec.getString("foo") + "' instead!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void removeHtmlTagsFromTextTest() {
+
+		TestUtils.start("Remove HTML Tags from Text");
+
+		String html = "<html>\nbla blubb <a href='boink'>\n" +
+			"<script>\n" +
+			"var bla = {\"foo\": \"b&auml;r\"}\n" +
+			"</script>\n" +
+			"</html>";
+
+		String expectedResult = "\nbla blubb \n" +
+			"\n" +
+			"var bla = {\"foo\": \"b&auml;r\"}\n" +
+			"\n";
+
+		String result = WebExtractor.removeHtmlTagsFromText(html);
+
+		if (!expectedResult.equals(result)) {
+			TestUtils.fail("We tried to remove HTML tags from a given string but got:\n" + result);
 			return;
 		}
 
