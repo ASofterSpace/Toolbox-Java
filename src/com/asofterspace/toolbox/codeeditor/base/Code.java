@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.codeeditor.base;
 
 import com.asofterspace.toolbox.codeeditor.utils.CanonicalJavaLikeImport;
 import com.asofterspace.toolbox.codeeditor.utils.CodeAtLocation;
+import com.asofterspace.toolbox.codeeditor.utils.CodeField;
 import com.asofterspace.toolbox.codeeditor.utils.CodeLanguage;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
@@ -2298,42 +2299,9 @@ public abstract class Code extends DefaultStyledDocument {
 		return onOpenFileCallback.getOtherFileContents(fileEndings);
 	}
 
-	/**
-	 * Add getters for selected fields
-	 */
-	public void addGetters() {
+	private List<CodeField> getFields(String contentMiddle) {
 
-		addGettersAndOrSetters(true, false);
-	}
-
-	/**
-	 * Add setters for selected fields
-	 */
-	public void addSetters() {
-
-		addGettersAndOrSetters(false, true);
-	}
-
-
-	/**
-	 * Add getters and setters for selected fields
-	 */
-	public void addGettersAndSetters() {
-
-		addGettersAndOrSetters(true, true);
-	}
-
-	protected void addGettersAndOrSetters(boolean addGetters, boolean addSetters) {
-
-		String content = decoratedEditor.getText();
-		int lineStart = StrUtils.getLineStartFromPosition(selStart, content);
-		int lineEnd = StrUtils.getLineEndFromPosition(selEnd, content);
-
-		String contentStart = content.substring(0, lineStart);
-		String contentMiddle = content.substring(lineStart, lineEnd);
-		String contentEnd = content.substring(lineEnd, content.length());
-
-		StringBuilder newCode = new StringBuilder();
+		List<CodeField> fields = new ArrayList<>();
 
 		// find all fields in contentMiddle
 		for (String line : contentMiddle.split("\n")) {
@@ -2391,36 +2359,128 @@ public abstract class Code extends DefaultStyledDocument {
 			// String
 			// Object
 
-			String lineUpcase = lineName.substring(0, 1).toUpperCase() + lineName.substring(1);
+			fields.add(new CodeField(lineName, lineType));
+		}
 
-			// the lineUpcase could look like:
-			// Blubb
-			// Foo
+		return fields;
+	}
+
+	/**
+	 * Add constructor based on selected fields
+	 */
+	public void addConstructor() {
+
+		String content = decoratedEditor.getText();
+		int lineStart = StrUtils.getLineStartFromPosition(selStart, content);
+		int lineEnd = StrUtils.getLineEndFromPosition(selEnd, content);
+
+		String contentStart = content.substring(0, lineStart);
+		String contentMiddle = content.substring(lineStart, lineEnd);
+		String contentEnd = content.substring(lineEnd, content.length());
+
+		StringBuilder newCode = new StringBuilder();
+
+		List<CodeField> fields = getFields(contentMiddle);
+
+		newCode.append("\n\n\tpublic ");
+		newCode.append(getClassName());
+		newCode.append("(");
+		String sep = "";
+
+		for (CodeField field : fields) {
+			newCode.append(sep);
+			newCode.append(field.getType());
+			newCode.append(" ");
+			newCode.append(field.getName());
+			sep = ", ";
+		}
+
+		newCode.append(") {\n");
+
+		for (CodeField field : fields) {
+			newCode.append("\t\tthis.");
+			newCode.append(field.getName());
+			newCode.append(" = ");
+			newCode.append(field.getName());
+			newCode.append(";\n");
+		}
+
+		newCode.append("\t}\n");
+
+		content = contentStart + contentMiddle + newCode.toString() + contentEnd;
+
+		decoratedEditor.setText(content);
+
+		int selPos = contentStart.length() + contentMiddle.length() + newCode.length();
+		decoratedEditor.setSelectionStart(selPos);
+		decoratedEditor.setSelectionEnd(selPos);
+	}
+
+	/**
+	 * Add getters for selected fields
+	 */
+	public void addGetters() {
+
+		addGettersAndOrSetters(true, false);
+	}
+
+	/**
+	 * Add setters for selected fields
+	 */
+	public void addSetters() {
+
+		addGettersAndOrSetters(false, true);
+	}
+
+
+	/**
+	 * Add getters and setters for selected fields
+	 */
+	public void addGettersAndSetters() {
+
+		addGettersAndOrSetters(true, true);
+	}
+
+	protected void addGettersAndOrSetters(boolean addGetters, boolean addSetters) {
+
+		String content = decoratedEditor.getText();
+		int lineStart = StrUtils.getLineStartFromPosition(selStart, content);
+		int lineEnd = StrUtils.getLineEndFromPosition(selEnd, content);
+
+		String contentStart = content.substring(0, lineStart);
+		String contentMiddle = content.substring(lineStart, lineEnd);
+		String contentEnd = content.substring(lineEnd, content.length());
+
+		StringBuilder newCode = new StringBuilder();
+
+		List<CodeField> fields = getFields(contentMiddle);
+
+		for (CodeField field : fields) {
 
 			if (addGetters) {
 				newCode.append("\n\tpublic ");
-				newCode.append(lineType);
+				newCode.append(field.getType());
 				newCode.append(" get");
-				newCode.append(lineUpcase);
+				newCode.append(field.getNameUpcase());
 				newCode.append("() {\n");
 				newCode.append("\t\treturn ");
-				newCode.append(lineName);
+				newCode.append(field.getName());
 				newCode.append(";\n");
 				newCode.append("\t}\n");
 			}
 
 			if (addSetters) {
 				newCode.append("\n\tpublic void set");
-				newCode.append(lineUpcase);
+				newCode.append(field.getNameUpcase());
 				newCode.append("(");
-				newCode.append(lineType);
+				newCode.append(field.getType());
 				newCode.append(" ");
-				newCode.append(lineName);
+				newCode.append(field.getName());
 				newCode.append(") {\n");
 				newCode.append("\t\tthis.");
-				newCode.append(lineName);
+				newCode.append(field.getName());
 				newCode.append(" = ");
-				newCode.append(lineName);
+				newCode.append(field.getName());
 				newCode.append(";\n");
 				newCode.append("\t}\n");
 			}
