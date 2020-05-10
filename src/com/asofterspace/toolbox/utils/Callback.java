@@ -7,7 +7,7 @@ package com.asofterspace.toolbox.utils;
 /**
  * Interface that anything can implement that is just a generic callback
  *
- * @author Moya (a softer space), 2018
+ * @author Tom Moya Schiller, moya@asofterspace.com
  */
 public interface Callback {
 

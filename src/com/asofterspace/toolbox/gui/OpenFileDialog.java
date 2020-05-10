@@ -6,12 +6,24 @@ package com.asofterspace.toolbox.gui;
 
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.utils.Callback;
+import com.asofterspace.toolbox.utils.CallbackWithStatus;
 
-import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.Frame;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 
 public class OpenFileDialog {
@@ -43,21 +55,102 @@ public class OpenFileDialog {
 	}
 
 	public OpenFileDialog(Directory currentDirectory) {
+		this();
 		this.currentDirectory = currentDirectory;
 	}
 
-	/**
-	 * Shows the open dialog and synchronously returns only after the user picked a file
-	 * or closed the dialog in some other way, with the return value indicating what
-	 * actually happened
-	 */
-	public int showOpenDialog(Component parent) {
+	public void showOpenDialog(Frame parent, CallbackWithStatus callback) {
 
-		selectedFiles = new ArrayList<>();
-		selectedFolders = new ArrayList<>();
+		this.selectedFiles = new ArrayList<>();
+		this.selectedFolders = new ArrayList<>();
 
-		// TODO
-		return ERROR_OPTION;
+		// Create the window
+		final JDialog dialog = new JDialog(parent, dialogTitle, true);
+		GridLayout dialogLayout = new GridLayout(7, 1);
+		dialogLayout.setVgap(8);
+		dialog.setLayout(dialogLayout);
+		dialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+
+		// Populate the window
+		final JTextField currentDirPathField = new JTextField();
+		dialog.add(currentDirPathField);
+
+		final JList<String> fileView = new JList<>();
+		dialog.add(fileView);
+
+		JPanel buttonRow = new JPanel();
+		GridLayout buttonRowLayout = new GridLayout(1, 3);
+		buttonRowLayout.setHgap(8);
+		buttonRow.setLayout(buttonRowLayout);
+		dialog.add(buttonRow);
+
+		JButton openButton = new JButton("Open");
+		openButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// open the currently selected file(s)
+				// TODO
+			}
+		});
+		buttonRow.add(openButton);
+
+		JButton enterButton = new JButton("Enter");
+		enterButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// enter into the currently selected folder
+				// TODO
+			}
+		});
+		buttonRow.add(enterButton);
+
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// cancel the dialog
+				dialog.dispose();
+				callback.call(CANCEL_OPTION);
+			}
+		});
+		buttonRow.add(cancelButton);
+
+		// Set the preferred size of the dialog
+		int width = 600;
+		int height = 320;
+		dialog.setSize(width, height);
+		dialog.setPreferredSize(new Dimension(width, height));
+
+		GuiUtils.centerAndShowWindow(dialog);
+	}
+
+	public Directory getCurrentDirectory() {
+		return currentDirectory;
+	}
+
+	public void setCurrentDirectory(Directory currentDirectory) {
+		this.currentDirectory = currentDirectory;
+	}
+
+	public String getDialogTitle() {
+		return dialogTitle;
+	}
+
+	public void setDialogTitle(String dialogTitle) {
+		this.dialogTitle = dialogTitle;
+	}
+
+	public int getFileSelectionMode() {
+		return fileSelectionMode;
+	}
+
+	public void setFileSelectionMode(int fileSelectionMode) {
+		this.fileSelectionMode = fileSelectionMode;
+	}
+
+	public boolean getMultiSelectionEnabled() {
+		return multiSelectionEnabled;
+	}
+
+	public void setMultiSelectionEnabled(boolean multiSelectionEnabled) {
+		this.multiSelectionEnabled = multiSelectionEnabled;
 	}
 
 	public List<File> getSelectedFiles() {
