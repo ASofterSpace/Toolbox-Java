@@ -431,12 +431,17 @@ public class StrUtils {
 		int lineStartRParens = content.lastIndexOf("}", pos - 1) + 1;
 		int lineStartSemi = content.lastIndexOf(";", pos - 1) + 1;
 		int lineStartComma = content.lastIndexOf(",", pos - 1) + 1;
+
 		int lineStartDot = 0;
 		int lineStartDoubleDot = 0;
 		int lineStartEquals = 0;
 		int lineStartApo = 0;
 		int lineStartQuot = 0;
 		int lineStartSlash = 0;
+		int lineStartN = 0;
+		int lineStartR = 0;
+		int lineStartT = 0;
+
 		if (splitWordClusters) {
 			lineStartDot = content.lastIndexOf(".", pos - 1) + 1;
 			lineStartDoubleDot = content.lastIndexOf(":", pos - 1) + 1;
@@ -444,6 +449,10 @@ public class StrUtils {
 			lineStartApo = content.lastIndexOf("'", pos - 1) + 1;
 			lineStartQuot = content.lastIndexOf("\"", pos - 1) + 1;
 			lineStartSlash = content.lastIndexOf("/", pos - 1) + 1;
+
+			lineStartN = content.lastIndexOf("\\n", pos - 1) + 2;
+			lineStartR = content.lastIndexOf("\\r", pos - 1) + 2;
+			lineStartT = content.lastIndexOf("\\t", pos - 1) + 2;
 		}
 
 		int lineStart = 0;
@@ -507,6 +516,16 @@ public class StrUtils {
 			lineStart = lineStartSlash;
 		}
 
+		if (lineStartN > lineStart) {
+			lineStart = lineStartN;
+		}
+		if (lineStartR > lineStart) {
+			lineStart = lineStartR;
+		}
+		if (lineStartT > lineStart) {
+			lineStart = lineStartT;
+		}
+
 		return lineStart;
 	}
 
@@ -525,12 +544,18 @@ public class StrUtils {
 		int lineEndRParens = content.indexOf("}", pos);
 		int lineEndSemi = content.indexOf(";", pos);
 		int lineEndComma = content.indexOf(",", pos);
+
 		int lineEndDot = -1;
 		int lineEndDoubleDot = -1;
 		int lineEndEquals = -1;
 		int lineEndApo = -1;
 		int lineEndQuot = -1;
 		int lineEndSlash = -1;
+
+		int lineEndN = -1;
+		int lineEndR = -1;
+		int lineEndT = -1;
+
 		if (splitWordClusters) {
 			lineEndDot = content.indexOf(".", pos);
 			lineEndDoubleDot = content.indexOf(":", pos);
@@ -538,6 +563,10 @@ public class StrUtils {
 			lineEndApo = content.indexOf("'", pos);
 			lineEndQuot = content.indexOf("\"", pos);
 			lineEndSlash = content.indexOf("/", pos);
+
+			lineEndN = content.indexOf("\\n", pos);
+			lineEndR = content.indexOf("\\r", pos);
+			lineEndT = content.indexOf("\\t", pos);
 		}
 
 		int lineEnd = content.length();
@@ -599,6 +628,16 @@ public class StrUtils {
 		}
 		if ((lineEndSlash >= 0) && (lineEndSlash < lineEnd)) {
 			lineEnd = lineEndSlash;
+		}
+
+		if ((lineEndN >= 0) && (lineEndN < lineEnd)) {
+			lineEnd = lineEndN;
+		}
+		if ((lineEndR >= 0) && (lineEndR < lineEnd)) {
+			lineEnd = lineEndR;
+		}
+		if ((lineEndT >= 0) && (lineEndT < lineEnd)) {
+			lineEnd = lineEndT;
 		}
 
 		if ((lineEnd > 0) && (content.charAt(lineEnd - 1) == '\\')) {
