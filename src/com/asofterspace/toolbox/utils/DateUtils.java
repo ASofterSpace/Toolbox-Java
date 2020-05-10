@@ -21,14 +21,12 @@ public class DateUtils {
 
 	private static final String DEFAULT_DATE_FORMAT_STR = "yyyy-MM-dd";
 	private static final String FALLBACK_DATE_FORMAT_STR = "dd.MM.yyyy";
-	private static final String LONG_DATE_FORMAT_STR = "dd. MMM yyyy";
 	private static final String DEFAULT_DATE_TIME_FORMAT_STR = "yyyy-MM-dd HH:mm:ss.SSS";
 	private static final String NUMERICAL_DATE_TIME_FORMAT_STR = "yyyyMMddHHmmssSSS";
 	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
 
 	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
 	public static final SimpleDateFormat FALLBACK_DATE_FORMAT = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
-	public static final SimpleDateFormat LONG_DATE_FORMAT = new SimpleDateFormat(LONG_DATE_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
@@ -155,7 +153,14 @@ public class DateUtils {
 			return null;
 		}
 
-		return LONG_DATE_FORMAT.format(date);
+		// we explicitly want the result to always be in English, so we do not want to rely on
+		// standard serialization from MMM in the format string but instead serialize the month
+		// part ourselves...
+		String result = FALLBACK_DATE_FORMAT.format(date);
+		for (int i = 0; i < MONTH_NAMES_SHORT.length; i++) {
+			result = result.replaceAll("\\." + StrUtils.leftPad0(i+1, 2) + "\\.", ". " + MONTH_NAMES_SHORT[i] + " ");
+		}
+		return result;
 	}
 
 	/**
