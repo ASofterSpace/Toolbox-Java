@@ -763,4 +763,24 @@ public class StrUtils {
 		Integer result = strToInt(value);
 		return result;
 	}
+
+	public static String upcaseFirstLetter(String str) {
+		if (str == null) {
+			return null;
+		}
+		if (str.length() < 1) {
+			return str;
+		}
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
+
+	public static String lowcaseFirstLetter(String str) {
+		if (str == null) {
+			return null;
+		}
+		if (str.length() < 1) {
+			return str;
+		}
+		return str.substring(0, 1).toLowerCase() + str.substring(1);
+	}
 }

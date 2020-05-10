@@ -21,12 +21,14 @@ public class DateUtils {
 
 	private static final String DEFAULT_DATE_FORMAT_STR = "yyyy-MM-dd";
 	private static final String FALLBACK_DATE_FORMAT_STR = "dd.MM.yyyy";
+	private static final String LONG_DATE_FORMAT_STR = "dd. MMM yyyy";
 	private static final String DEFAULT_DATE_TIME_FORMAT_STR = "yyyy-MM-dd HH:mm:ss.SSS";
 	private static final String NUMERICAL_DATE_TIME_FORMAT_STR = "yyyyMMddHHmmssSSS";
 	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
 
 	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
 	public static final SimpleDateFormat FALLBACK_DATE_FORMAT = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
+	public static final SimpleDateFormat LONG_DATE_FORMAT = new SimpleDateFormat(LONG_DATE_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
@@ -132,6 +134,9 @@ public class DateUtils {
 		}
 	}
 
+	/**
+	 * Serializes a date as e.g. 2020-05-10
+	 */
 	public static String serializeDate(Date date) {
 
 		if (date == null) {
@@ -141,6 +146,21 @@ public class DateUtils {
 		return DEFAULT_DATE_FORMAT.format(date);
 	}
 
+	/**
+	 * Serializes a date as e.g. 10. May 2020
+	 */
+	public static String serializeDateLong(Date date) {
+
+		if (date == null) {
+			return null;
+		}
+
+		return LONG_DATE_FORMAT.format(date);
+	}
+
+	/**
+	 * Serializes a date as e.g. 2020-05-10 01:23:45.678
+	 */
 	public static String serializeDateTime(Date dateTime) {
 
 		if (dateTime == null) {
