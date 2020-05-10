@@ -251,6 +251,21 @@ public class WebTest implements Test {
 			return;
 		}
 
+		html = "<html>\nbla blubb <a href='boink'>\n" +
+			"<div class=\"bla5\">bla</div>\n" +
+			"<div class=\"bla2\">bli</div>\n" +
+			"<div class=\'bla4\'>blö</div>\n" +
+			"<div class=\"bla3\">blu</div>\n" +
+			"</html>";
+
+		result = WebExtractor.getHighestNumberFromHtml(html, before, after);
+
+		if ((result == null) || !result.equals(5)) {
+			TestUtils.fail("We tried to extract the hightest number '5' from an html string " +
+				"but got '" + result + "' instead!");
+			return;
+		}
+
 		TestUtils.succeed();
 	}
 

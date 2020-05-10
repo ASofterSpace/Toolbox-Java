@@ -725,7 +725,6 @@ public class StrUtils {
 			try {
 				return (Integer) (int) Math.round(Double.valueOf(value));
 			} catch (NumberFormatException e2) {
-				System.err.println("Cannot convert " + value + " to integer...");
 				return null;
 			}
 		}
@@ -746,7 +745,6 @@ public class StrUtils {
 		try {
 			return Double.valueOf(value);
 		} catch (NumberFormatException e) {
-			System.err.println("Cannot convert " + value + " to double...");
 			return null;
 		}
 	}

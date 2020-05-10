@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.web;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.utils.Record;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.List;
 
@@ -83,11 +84,11 @@ public class WebExtractor {
 	/**
 	 * We search again and again and take the highest number we found
 	 */
-	public static Integer getHighestNumberFromHtml(String html, String strbefore, String strafter) {
+	public static int getHighestNumberFromHtml(String html, String strbefore, String strafter) {
 		int len = strbefore.length();
 		int startindex = 0;
 		int startindexnew = 0;
-		Integer result = 1;
+		int result = 1;
 		while (true) {
 			startindex = html.indexOf(strbefore, startindexnew);
 			if (startindex < 0) {
@@ -95,7 +96,10 @@ public class WebExtractor {
 			}
 			int endindex = html.indexOf(strafter, startindex + len);
 			String z = html.substring(startindex + len, endindex);
-			Integer curResult = Integer.valueOf(z);
+			Integer curResult = StrUtils.strToInt(z);
+			if (curResult == null) {
+				continue;
+			}
 			if (curResult > result) {
 				result = curResult;
 			}
@@ -107,23 +111,16 @@ public class WebExtractor {
 	 * Get the highest number for each tuple of before and after (they are not combined in all combinations,
 	 * just the first before with the first after, the second before with the second after, etc.!)
 	 */
-	public static Integer getHighestNumberFromHtml(String html, List<String> strsbefore, List<String> strsafter) {
-		Integer result = null;
+	public static int getHighestNumberFromHtml(String html, List<String> strsbefore, List<String> strsafter) {
+		Integer result = 1;
 		if ((strsbefore == null) || (strsafter == null)) {
 			return result;
 		}
 		int len = Math.min(strsbefore.size(), strsafter.size());
 		for (int i = 0; i < len; i++) {
-			Integer cur = getHighestNumberFromHtml(html, strsbefore.get(i), strsafter.get(i));
-			if (cur == null) {
-				continue;
-			}
-			if (result == null) {
+			int cur = getHighestNumberFromHtml(html, strsbefore.get(i), strsafter.get(i));
+			if (cur > result) {
 				result = cur;
-			} else {
-				if (result < cur) {
-					result = cur;
-				}
 			}
 		}
 		return result;
