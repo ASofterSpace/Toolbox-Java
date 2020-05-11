@@ -85,6 +85,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("ActionListener", "java.awt.event.ActionListener");
 		automaticallyAddedImports.put("ComponentAdapter", "java.awt.event.ComponentAdapter");
 		automaticallyAddedImports.put("ComponentEvent", "java.awt.event.ComponentEvent");
+		automaticallyAddedImports.put("FocusEvent", "java.awt.event.FocusEvent");
+		automaticallyAddedImports.put("FocusListener", "java.awt.event.FocusListener");
 		automaticallyAddedImports.put("ItemEvent", "java.awt.event.ItemEvent");
 		automaticallyAddedImports.put("ItemListener", "java.awt.event.ItemListener");
 		automaticallyAddedImports.put("KeyEvent", "java.awt.event.KeyEvent");
