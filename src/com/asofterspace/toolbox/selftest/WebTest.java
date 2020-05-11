@@ -212,6 +212,7 @@ public class WebTest implements Test {
 			"<div class=\"bla1\">bla</div>\n" +
 			"<div class=\"bla2\">bli</div>\n" +
 			"<div class=\"bla4\">blö</div>\n" +
+			"<div class=\"blakeks\">bly</div>\n" +
 			"<div class=\"bla3\">blu</div>\n" +
 			"</html>";
 

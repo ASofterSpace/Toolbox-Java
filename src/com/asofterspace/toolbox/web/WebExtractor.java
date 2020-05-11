@@ -96,7 +96,7 @@ public class WebExtractor {
 			}
 			int endindex = html.indexOf(strafter, startindex + len);
 			String z = html.substring(startindex + len, endindex);
-			html = html.substring(startindex + len);
+			startindexnew = endindex;
 			Integer curResult = StrUtils.strToInt(z);
 			if (curResult == null) {
 				continue;
@@ -104,7 +104,6 @@ public class WebExtractor {
 			if (curResult > result) {
 				result = curResult;
 			}
-			startindexnew = endindex;
 		}
 	}
 
