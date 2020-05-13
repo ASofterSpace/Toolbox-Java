@@ -318,7 +318,6 @@ public abstract class Code extends DefaultStyledDocument {
 		highlightedSomething = false;
 		try {
 			highlightMatchingBrackets(selStart, text);
-			highlightMatchingBrackets(selStart - 1, text);
 		} catch (IllegalStateException ex) {
 			// whoops, we were not allowed to highlight here...
 		}
@@ -329,37 +328,53 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	private void highlightMatchingBrackets(int selStart, String text) {
-		if ((text.length() > selStart) && (selStart > 0)) {
+
+		int round = 0;
+		int square = 0;
+		int squiggle = 0;
+
+		while ((text.length() > selStart) && (selStart > 0)) {
+
 			char curChar = text.charAt(selStart);
+
 			switch (curChar) {
 				case '(':
-					highlightMatchingBracketLeft(curChar, ')', selStart, text);
+					round++;
 					break;
 				case ')':
-					highlightMatchingBracketRight('(', curChar, selStart, text);
+					round--;
+					if (round < 0) {
+						highlightMatchingBracketRight('(', curChar, selStart, text);
+						return;
+					}
 					break;
 				case '[':
-					highlightMatchingBracketLeft(curChar, ']', selStart, text);
+					square++;
 					break;
 				case ']':
-					highlightMatchingBracketRight('[', curChar, selStart, text);
+					square--;
+					if (square < 0) {
+						highlightMatchingBracketRight('[', curChar, selStart, text);
+						return;
+					}
 					break;
 				case '{':
-					highlightMatchingBracketLeft(curChar, '}', selStart, text);
+					squiggle++;
 					break;
 				case '}':
-					highlightMatchingBracketRight('{', curChar, selStart, text);
-					break;
-				case '<':
-					highlightMatchingBracketLeft(curChar, '>', selStart, text);
-					break;
-				case '>':
-					highlightMatchingBracketRight('<', curChar, selStart, text);
+					squiggle--;
+					if (squiggle < 0) {
+						highlightMatchingBracketRight('{', curChar, selStart, text);
+						return;
+					}
 					break;
 			}
+
+			selStart++;
 		}
 	}
 
+	/*
 	private void highlightMatchingBracketLeft(char foundChar, char searchChar, int selStart, String text) {
 
 		int depth = 1;
@@ -386,6 +401,7 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 		}
 	}
+	*/
 
 	private void highlightMatchingBracketRight(char searchChar, char foundChar, int selStart, String text) {
 
