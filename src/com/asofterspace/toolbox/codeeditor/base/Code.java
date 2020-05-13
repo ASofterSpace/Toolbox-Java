@@ -1915,6 +1915,21 @@ public abstract class Code extends DefaultStyledDocument {
 									return;
 								}
 							}
+
+							// for all others, if we have Foo bar = new, then actually automagically add:
+							// Foo bar = new Foo();
+							String newClazz = line.trim();
+							newClazz = newClazz.substring(0, newClazz.indexOf(" "));
+
+							line = line + " " + newClazz + "();";
+							String newContent = contentStart + line + contentEnd;
+
+							int origCaretPos = decoratedEditor.getCaretPosition();
+							decoratedEditor.setText(newContent);
+							decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + 2);
+
+							// we do NOT bubble up the chain, as we already set the text explicitly!
+							return;
 						}
 					}
 					if (((content.charAt(offset - 1) == '&') && (content.charAt(offset - 2) == '&')) ||
