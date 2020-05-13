@@ -193,15 +193,12 @@ public class GoCode extends FunctionSupplyingCode {
 	@Override
 	protected void highlightText(int start, int length) {
 
-		functions = new ArrayList<>();
+		super.highlightText(start, length);
 
 		try {
 			int end = this.getLength();
 
 			String content = this.getText(0, end);
-
-			// set the entire document back to regular
-			this.setCharacterAttributes(0, end, attrRegular, true);
 
 			// TODO :: actually use the start and length passed in as arguments!
 			// (currently, they are just being ignored...)

@@ -109,6 +109,7 @@ public abstract class Code extends DefaultStyledDocument {
 	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
 	private volatile boolean pleaseHighlight = false;
+	private volatile boolean pleaseDoNotHighlightThisRound = false;
 	private volatile boolean activityDetected = false;
 
 	// do we highlight functions which the user is currently in or not?
@@ -144,6 +145,11 @@ public abstract class Code extends DefaultStyledDocument {
 
 	// enable or disable setting attributes
 	protected boolean attributeSetting = true;
+
+	// keep of track of brackets that have been highlighted before,
+	// so that they do not need to be highlighted again
+	private Integer lastBracketStart = null;
+	private Integer lastBracketEnd = null;
 
 
 	public Code(JTextPane editor) {
@@ -414,6 +420,16 @@ public abstract class Code extends DefaultStyledDocument {
 				depth--;
 			}
 			if (depth < 1) {
+				if ((lastBracketStart != null) && ((int) lastBracketStart == selStart) &&
+					(lastBracketEnd != null) && ((int) lastBracketEnd == i)) {
+					// do nothing, as this is already highlighted, except for setting
+					// "highlightedSomething" because we did just highlight a thing...
+					// which was already highlighted...
+					// by not doing anything at all xD
+					highlightedSomething = true;
+					return;
+				}
+
 				// if we still have a lingering highlighting of the previous matched brackets,
 				// re-highlight the entire text to get rid of it
 				if (highlightedSomethingLastTime) {
@@ -425,6 +441,8 @@ public abstract class Code extends DefaultStyledDocument {
 				this.setCharacterAttributes(i, 1, attrMatchingBrackets, false);
 				highlightedSomething = true;
 				highlightedSomethingLastTime = true;
+				lastBracketStart = selStart;
+				lastBracketEnd = i;
 				return;
 			}
 		}
@@ -1373,6 +1391,13 @@ public abstract class Code extends DefaultStyledDocument {
 					while (true) {
 						synchronized (instances) {
 							for (Code instance : instances) {
+								// while we are entering text, we do not highlight anything, but instead
+								// JUST focus on entering text quickly... so in that case, skip until
+								// next round!
+								if (instance.pleaseDoNotHighlightThisRound) {
+									instance.pleaseDoNotHighlightThisRound = false;
+									continue;
+								}
 								if (instance.pleaseHighlight) {
 									instance.pleaseHighlight = false;
 									int len = instance.getLength();
@@ -1714,6 +1739,8 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	protected void insertString(int offset, String insertedString, AttributeSet attrs, int overrideCaretPos) {
 
+		pleaseDoNotHighlightThisRound = true;
+
 		if (preventInsert > 0) {
 			preventInsert--;
 			return;
@@ -2040,6 +2067,8 @@ public abstract class Code extends DefaultStyledDocument {
 			return;
 		}
 
+		pleaseDoNotHighlightThisRound = true;
+
 		try {
 			super.remove(offset, length);
 		} catch (BadLocationException e) {
@@ -2060,6 +2089,8 @@ public abstract class Code extends DefaultStyledDocument {
 	@Override
 	protected void fireInsertUpdate(DocumentEvent event) {
 
+		pleaseDoNotHighlightThisRound = true;
+
 		super.fireInsertUpdate(event);
 
 		// highlightText(event.getOffset(), event.getLength());
@@ -2072,6 +2103,8 @@ public abstract class Code extends DefaultStyledDocument {
 	 */
 	@Override
 	protected void fireRemoveUpdate(DocumentEvent event) {
+
+		pleaseDoNotHighlightThisRound = true;
 
 		super.fireRemoveUpdate(event);
 
@@ -2157,8 +2190,11 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	// this is the main function that... well... highlights our text :)
-	// you might want to override it ;)
+	// you might want to override it, but do call super! ;)
 	protected void highlightText(int start, int length) {
+
+		this.lastBracketStart = null;
+		this.lastBracketEnd = null;
 
 		int end = this.getLength();
 

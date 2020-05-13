@@ -7,7 +7,6 @@ package com.asofterspace.toolbox.codeeditor;
 import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
 
 import java.awt.Font;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -137,7 +136,7 @@ public class HtmlCode extends PublicPrivateFunctionSupplyingCode {
 	@Override
 	protected void highlightText(int start, int length) {
 
-		functions = new ArrayList<>();
+		super.highlightText(start, length);
 
 		continueWithJavascript = false;
 
@@ -145,9 +144,6 @@ public class HtmlCode extends PublicPrivateFunctionSupplyingCode {
 			int end = this.getLength();
 
 			String content = this.getText(0, end);
-
-			// set the entire document back to regular
-			this.setCharacterAttributes(0, end, attrRegular, true);
 
 			// TODO :: actually use the start and length passed in as arguments!
 			// (currently, they are just being ignored...)

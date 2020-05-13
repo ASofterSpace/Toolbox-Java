@@ -61,6 +61,14 @@ public abstract class FunctionSupplyingCode extends Code {
 		return true;
 	}
 
+	@Override
+	protected void highlightText(int start, int length) {
+
+		functions = new ArrayList<>();
+
+		super.highlightText(start, length);
+	}
+
 	public List<CodeSnippetWithLocation> getFunctions() {
 		return functions;
 	}

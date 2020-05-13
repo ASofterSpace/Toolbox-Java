@@ -9,7 +9,6 @@ import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.utils.StrUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -98,15 +97,12 @@ public class ShellCode extends FunctionSupplyingCode {
 	@Override
 	protected void highlightText(int start, int length) {
 
-		functions = new ArrayList<>();
+		super.highlightText(start, length);
 
 		try {
 			int end = this.getLength();
 
 			String content = this.getText(0, end);
-
-			// set the entire document back to regular
-			this.setCharacterAttributes(0, end, attrRegular, true);
 
 			// TODO :: actually use the start and length passed in as arguments!
 			// (currently, they are just being ignored...)
