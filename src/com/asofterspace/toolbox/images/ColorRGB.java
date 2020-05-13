@@ -209,6 +209,31 @@ public class ColorRGB {
 		return (this.r == other.r) && (this.g == other.g) && (this.b == other.b) && (this.a == other.a);
 	}
 
+	public boolean fastSimilar(ColorRGB other) {
+
+		int diffR = (int) this.r - (int) other.r;
+		if ((diffR > 16) || (diffR < -16)) {
+			return false;
+		}
+
+		int diffG = (int) this.g - (int) other.g;
+		if ((diffG > 16) || (diffG < -16)) {
+			return false;
+		}
+
+		int diffB = (int) this.b - (int) other.b;
+		if ((diffB > 16) || (diffB < -16)) {
+			return false;
+		}
+
+		int diffA = (int) this.a - (int) other.a;
+		if ((diffA > 16) || (diffA < -16)) {
+			return false;
+		}
+
+		return true;
+	}
+
 	/**
 	 * intermix two colors, where the amount of the first color in the mix is given,
 	 * e.g. 0.45 for 45% one, 55% two
