@@ -1758,6 +1758,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 				int startOfThisLine = content.lastIndexOf("\n") + 1;
 
+				String line = content.substring(startOfThisLine, offset);
+
 				StringBuilder curLineWhitespace = new StringBuilder();
 
 				for (int i = startOfThisLine; i < content.length(); i++) {
@@ -1770,6 +1772,15 @@ public abstract class Code extends DefaultStyledDocument {
 				}
 
 				String origWhitespace = curLineWhitespace.toString();
+
+				// in case of case "blubb":, indent with extra whitespace
+				if (content.endsWith(":") && (line.trim().startsWith("case ") || line.trim().equals("default:"))) {
+					if (origWhitespace.endsWith(" ")) {
+						curLineWhitespace.append("	");
+					} else {
+						curLineWhitespace.append("\t");
+					}
+				}
 
 				// in case of {, add indent, and in case of }, remove it
 				// TODO ::put this into the individual programming languages
