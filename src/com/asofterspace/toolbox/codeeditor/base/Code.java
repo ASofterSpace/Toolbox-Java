@@ -1813,6 +1813,30 @@ public abstract class Code extends DefaultStyledDocument {
 		// automagically close brackets that are being opened
 		switch (insertedString) {
 			case "{":
+				// automagically add some empty cases and a default for a switch statement
+				String content = decoratedEditor.getText();
+				int lineStart = StrUtils.getLineStartFromPosition(offset, content);
+				int lineEnd = StrUtils.getLineEndFromPosition(offset, content);
+				String line = content.substring(lineStart, lineEnd);
+				if (line.trim().startsWith("switch ")) {
+					String indent = line.substring(0, line.indexOf("switch "));
+					String ind4 = "\t";
+					if (!indent.startsWith("\t")) {
+						ind4 = "    ";
+					}
+					insertedString =
+						"{\n" +
+						indent + ind4 + "case :\n" +
+						indent + ind4 + ind4 + "break;\n" +
+						indent + ind4 + "case :\n" +
+						indent + ind4 + ind4 + "break;\n" +
+						indent + ind4 + "default:\n" +
+						indent + ind4 + ind4 + "break;\n" +
+						indent + "}";
+					overrideCaretPos = 1;
+					break;
+				}
+
 				insertedString = "{}";
 				overrideCaretPos = 1;
 				break;
@@ -1845,18 +1869,18 @@ public abstract class Code extends DefaultStyledDocument {
 				// add a bracket after the if and close it after the cursor:
 				// if ((blubb) && )
 				if (offset > 5) {
-					String content = decoratedEditor.getText();
+					content = decoratedEditor.getText();
 					if (offset > 10) {
 						if ((content.charAt(offset - 6) == ' ') && (content.charAt(offset - 5) == '=') &&
 							(content.charAt(offset - 4) == ' ') && (content.charAt(offset - 3) == 'n') &&
 							(content.charAt(offset - 2) == 'e') && (content.charAt(offset - 1) == 'w')) {
 
-							int lineStart = StrUtils.getLineStartFromPosition(offset, content);
-							int lineEnd = StrUtils.getLineEndFromPosition(offset, content);
+							lineStart = StrUtils.getLineStartFromPosition(offset, content);
+							lineEnd = StrUtils.getLineEndFromPosition(offset, content);
 							int lineOffset = offset - lineStart;
 
 							String contentStart = content.substring(0, lineStart);
-							String line = content.substring(lineStart, lineEnd);
+							line = content.substring(lineStart, lineEnd);
 							String contentEnd = content.substring(lineEnd, content.length());
 
 							int tabAt = line.indexOf("\tList<");
@@ -1935,12 +1959,12 @@ public abstract class Code extends DefaultStyledDocument {
 					if (((content.charAt(offset - 1) == '&') && (content.charAt(offset - 2) == '&')) ||
 						((content.charAt(offset - 1) == '|') && (content.charAt(offset - 2) == '|'))) {
 
-						int lineStart = StrUtils.getLineStartFromPosition(offset, content);
-						int lineEnd = StrUtils.getLineEndFromPosition(offset, content);
+						lineStart = StrUtils.getLineStartFromPosition(offset, content);
+						lineEnd = StrUtils.getLineEndFromPosition(offset, content);
 						int lineOffset = offset - lineStart;
 
 						String contentStart = content.substring(0, lineStart);
-						String line = content.substring(lineStart, lineEnd);
+						line = content.substring(lineStart, lineEnd);
 						String contentEnd = content.substring(lineEnd, content.length());
 
 						int ifAt = line.indexOf("if (");
