@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,10 @@ public class Record {
 
 		if (recordOrWhatever instanceof Enum<?>) {
 			return new Record(recordOrWhatever.toString());
+		}
+
+		if (recordOrWhatever instanceof Date) {
+			return new Record(DateUtils.serializeDate((Date) recordOrWhatever));
 		}
 
 		return Record.nullRecord();
@@ -644,6 +649,16 @@ public class Record {
 			default:
 				return result.toString();
 		}
+	}
+
+	/**
+	 * Gets a date value stored in a key
+	 */
+	public Date getDate(Object key) {
+
+		String str = getString(key);
+
+		return DateUtils.parseDate(str);
 	}
 
 	/**
