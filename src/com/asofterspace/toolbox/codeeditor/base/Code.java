@@ -1999,15 +1999,22 @@ public abstract class Code extends DefaultStyledDocument {
 							String newClazz = line.trim();
 							newClazz = newClazz.substring(0, newClazz.indexOf(" "));
 
-							line = line + " " + newClazz + "();";
-							String newContent = contentStart + line + contentEnd;
+							// buuut do not do it if the string contains a dot, or does not start with a
+							// capital letter - so do not do it for Foo.blubb = new or bar = new
+							if ((newClazz.length() > 0) &&
+								(!newClazz.contains(".")) &&
+								(Character.isUpperCase(newClazz.charAt(0)))) {
 
-							int origCaretPos = decoratedEditor.getCaretPosition();
-							decoratedEditor.setText(newContent);
-							decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + 2);
+								line = line + " " + newClazz + "();";
+								String newContent = contentStart + line + contentEnd;
 
-							// we do NOT bubble up the chain, as we already set the text explicitly!
-							return;
+								int origCaretPos = decoratedEditor.getCaretPosition();
+								decoratedEditor.setText(newContent);
+								decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + 2);
+
+								// we do NOT bubble up the chain, as we already set the text explicitly!
+								return;
+							}
 						}
 					}
 					if (((content.charAt(offset - 1) == '&') && (content.charAt(offset - 2) == '&')) ||
