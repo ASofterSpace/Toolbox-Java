@@ -12,6 +12,8 @@ import com.asofterspace.toolbox.utils.CallbackWithStatus;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -56,6 +58,10 @@ public class OpenFileDialog {
 	// GUI parts
 	private JTextField currentDirPathField;
 	private JList<String> fileView;
+
+	// data for the GUI
+	private List<String> visibleFiles;
+	private List<String> visibleFolders;
 
 
 	public OpenFileDialog() {
@@ -116,6 +122,25 @@ public class OpenFileDialog {
 		fileViewScroller.setPreferredSize(new Dimension(8, 8));
 		dialog.add(fileViewScroller, new Arrangement(0, 1, 1.0, 1.0));
 
+		fileView.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					int index = fileView.locationToIndex(e.getPoint());
+					if (index < visibleFolders.size()) {
+						// enter this folder
+						enterFolder(visibleFolders.get(index));
+					} else {
+						// open this file
+						selectedFiles = new ArrayList<>();
+						selectedFolders = new ArrayList<>();
+						selectedFiles.add(new File(currentDirectory, visibleFiles.get(index - visibleFolders.size())));
+						dialog.dispose();
+						callback.call(APPROVE_OPTION);
+					}
+				}
+			}
+		});
+
 		JPanel buttonRow = new JPanel();
 		GridLayout buttonRowLayout = new GridLayout(1, 3);
 		buttonRowLayout.setHgap(8);
@@ -149,11 +174,7 @@ public class OpenFileDialog {
 				// enter into the currently selected folder
 				List<String> highlightedEntries = fileView.getSelectedValuesList();
 				if (highlightedEntries.size() > 0) {
-					Directory newDirectory = new Directory(currentDirectory, highlightedEntries.get(0));
-					if (newDirectory.exists()) {
-						currentDirectory = newDirectory;
-						refreshFileView();
-					}
+					enterFolder(highlightedEntries.get(0));
 				}
 			}
 		});
@@ -189,32 +210,40 @@ public class OpenFileDialog {
 
 		boolean recursively = false;
 
-		List<String> folders = new ArrayList<>();
+		visibleFolders = new ArrayList<>();
 
 		for (Directory cur : currentDirectory.getAllDirectories(recursively)) {
-			folders.add(cur.getLocalDirname());
+			visibleFolders.add(cur.getLocalDirname());
 		}
 
-		Collections.sort(folders);
+		Collections.sort(visibleFolders);
 
-		List<String> files = new ArrayList<>();
+		visibleFiles = new ArrayList<>();
 
 		for (File cur : currentDirectory.getAllFiles(recursively)) {
-			files.add(cur.getLocalFilename());
+			visibleFiles.add(cur.getLocalFilename());
 		}
 
-		Collections.sort(files);
+		Collections.sort(visibleFiles);
 
-		String[] fileViewData = new String[folders.size() + files.size()];
+		String[] fileViewData = new String[visibleFolders.size() + visibleFiles.size()];
 
-		for (int i = 0; i < folders.size(); i++) {
-			fileViewData[i] = folders.get(i);
+		for (int i = 0; i < visibleFolders.size(); i++) {
+			fileViewData[i] = visibleFolders.get(i);
 		}
-		for (int i = 0; i < files.size(); i++) {
-			fileViewData[i + folders.size()] = files.get(i);
+		for (int i = 0; i < visibleFiles.size(); i++) {
+			fileViewData[i + visibleFolders.size()] = visibleFiles.get(i);
 		}
 
 		fileView.setListData(fileViewData);
+	}
+
+	private void enterFolder(String folderName) {
+		Directory newDirectory = new Directory(currentDirectory, folderName);
+		if (newDirectory.exists()) {
+			currentDirectory = newDirectory;
+			refreshFileView();
+		}
 	}
 
 	public Directory getCurrentDirectory() {
