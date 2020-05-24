@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Frame;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +52,8 @@ public class OpenFileDialog {
 
 	private List<Directory> selectedFolders;
 
+	// GUI parts
+	private JTextField currentDirPathField;
 	private JList<String> fileView;
 
 
@@ -69,23 +72,22 @@ public class OpenFileDialog {
 
 		// Create the window
 		final JDialog dialog = new JDialog(parent, dialogTitle, true);
-		GridLayout dialogLayout = new GridLayout(7, 1);
-		dialogLayout.setVgap(8);
+		GridBagLayout dialogLayout = new GridBagLayout();
 		dialog.setLayout(dialogLayout);
 		dialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
 		// Populate the window
-		final JTextField currentDirPathField = new JTextField();
-		dialog.add(currentDirPathField);
+		currentDirPathField = new JTextField();
+		dialog.add(currentDirPathField, new Arrangement(0, 0, 1.0, 0.0));
 
 		fileView = new JList<>();
-		dialog.add(fileView);
+		dialog.add(fileView, new Arrangement(0, 1, 1.0, 1.0));
 
 		JPanel buttonRow = new JPanel();
 		GridLayout buttonRowLayout = new GridLayout(1, 3);
 		buttonRowLayout.setHgap(8);
 		buttonRow.setLayout(buttonRowLayout);
-		dialog.add(buttonRow);
+		dialog.add(buttonRow, new Arrangement(0, 2, 1.0, 0.0));
 
 		JButton openButton = new JButton("Open");
 		openButton.addActionListener(new ActionListener() {
@@ -102,6 +104,7 @@ public class OpenFileDialog {
 						selectedFiles.add(new File(currentDirectory, highlightedEntry));
 					}
 				}
+				dialog.dispose();
 				callback.call(APPROVE_OPTION);
 			}
 		});
@@ -148,6 +151,8 @@ public class OpenFileDialog {
 	 * Refreshes the folders and files shown in the file view based on the current directory
 	 */
 	private void refreshFileView() {
+
+		currentDirPathField.setText(currentDirectory.getCanonicalDirname());
 
 		boolean recursively = false;
 
