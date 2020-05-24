@@ -25,6 +25,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 
@@ -81,7 +82,9 @@ public class OpenFileDialog {
 		dialog.add(currentDirPathField, new Arrangement(0, 0, 1.0, 0.0));
 
 		fileView = new JList<>();
-		dialog.add(fileView, new Arrangement(0, 1, 1.0, 1.0));
+		JScrollPane fileViewScroller = new JScrollPane(fileView);
+		fileViewScroller.setPreferredSize(new Dimension(8, 8));
+		dialog.add(fileViewScroller, new Arrangement(0, 1, 1.0, 1.0));
 
 		JPanel buttonRow = new JPanel();
 		GridLayout buttonRowLayout = new GridLayout(1, 3);
