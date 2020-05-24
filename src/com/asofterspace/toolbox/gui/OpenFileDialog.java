@@ -81,6 +81,18 @@ public class OpenFileDialog {
 		currentDirPathField = new JTextField();
 		dialog.add(currentDirPathField, new Arrangement(0, 0, 1.0, 0.0));
 
+		// listen to the enter key being pressed
+		currentDirPathField.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Directory newDir = new Directory(currentDirPathField.getText());
+				if (newDir.exists()) {
+					currentDirectory = newDir;
+					refreshFileView();
+				}
+			}
+		});
+
 		fileView = new JList<>();
 		JScrollPane fileViewScroller = new JScrollPane(fileView);
 		fileViewScroller.setPreferredSize(new Dimension(8, 8));
