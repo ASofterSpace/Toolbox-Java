@@ -78,8 +78,12 @@ public class OpenFileDialog {
 		dialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
 		// Populate the window
+		JPanel topPanel = new JPanel();
+		GridBagLayout topPanelLayout = new GridBagLayout();
+		topPanel.setLayout(topPanelLayout);
+
 		currentDirPathField = new JTextField();
-		dialog.add(currentDirPathField, new Arrangement(0, 0, 1.0, 0.0));
+		topPanel.add(currentDirPathField, new Arrangement(0, 0, 1.0, 0.0));
 
 		// listen to the enter key being pressed
 		currentDirPathField.addActionListener(new ActionListener() {
@@ -92,6 +96,20 @@ public class OpenFileDialog {
 				}
 			}
 		});
+
+		JButton upBtn = new JButton("Up");
+		upBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Directory newDir = currentDirectory.getParentDirectory();
+				if (newDir.exists()) {
+					currentDirectory = newDir;
+					refreshFileView();
+				}
+			}
+		});
+		topPanel.add(upBtn, new Arrangement(1, 0, 0.0, 0.0));
+
+		dialog.add(topPanel, new Arrangement(0, 0, 1.0, 0.0));
 
 		fileView = new JList<>();
 		JScrollPane fileViewScroller = new JScrollPane(fileView);

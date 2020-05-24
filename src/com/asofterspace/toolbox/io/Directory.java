@@ -115,6 +115,15 @@ public class Directory {
 	}
 
 	/**
+	 * Gets the parent directory without ensuring that it exists (which it might not, in case
+	 * that we are already at the top-level)
+	 */
+	public Directory getParentDirectory() {
+
+		return new Directory(dirname + "/..");
+	}
+
+	/**
 	 * Get the path of the directory
 	 */
 	public String getDirname() {
