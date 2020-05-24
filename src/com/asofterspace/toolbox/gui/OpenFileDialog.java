@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -50,6 +51,8 @@ public class OpenFileDialog {
 
 	private List<Directory> selectedFolders;
 
+	private JList<String> fileView;
+
 
 	public OpenFileDialog() {
 	}
@@ -75,7 +78,7 @@ public class OpenFileDialog {
 		final JTextField currentDirPathField = new JTextField();
 		dialog.add(currentDirPathField);
 
-		final JList<String> fileView = new JList<>();
+		fileView = new JList<>();
 		dialog.add(fileView);
 
 		JPanel buttonRow = new JPanel();
@@ -88,7 +91,18 @@ public class OpenFileDialog {
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// open the currently selected file(s)
-				// TODO
+				selectedFiles = new ArrayList<>();
+				selectedFolders = new ArrayList<>();
+				List<String> highlightedEntries = fileView.getSelectedValuesList();
+				for (String highlightedEntry : highlightedEntries) {
+					Directory newDir = new Directory(currentDirectory, highlightedEntry);
+					if (newDir.exists()) {
+						selectedFolders.add(newDir);
+					} else {
+						selectedFiles.add(new File(currentDirectory, highlightedEntry));
+					}
+				}
+				callback.call(APPROVE_OPTION);
 			}
 		});
 		buttonRow.add(openButton);
@@ -97,7 +111,14 @@ public class OpenFileDialog {
 		enterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// enter into the currently selected folder
-				// TODO
+				List<String> highlightedEntries = fileView.getSelectedValuesList();
+				if (highlightedEntries.size() > 0) {
+					Directory newDirectory = new Directory(currentDirectory, highlightedEntries.get(0));
+					if (newDirectory.exists()) {
+						currentDirectory = newDirectory;
+						refreshFileView();
+					}
+				}
 			}
 		});
 		buttonRow.add(enterButton);
@@ -119,6 +140,43 @@ public class OpenFileDialog {
 		dialog.setPreferredSize(new Dimension(width, height));
 
 		GuiUtils.centerAndShowWindow(dialog);
+
+		refreshFileView();
+	}
+
+	/**
+	 * Refreshes the folders and files shown in the file view based on the current directory
+	 */
+	private void refreshFileView() {
+
+		boolean recursively = false;
+
+		List<String> folders = new ArrayList<>();
+
+		for (Directory cur : currentDirectory.getAllDirectories(recursively)) {
+			folders.add(cur.getLocalDirname());
+		}
+
+		Collections.sort(folders);
+
+		List<String> files = new ArrayList<>();
+
+		for (File cur : currentDirectory.getAllFiles(recursively)) {
+			files.add(cur.getLocalFilename());
+		}
+
+		Collections.sort(files);
+
+		String[] fileViewData = new String[folders.size() + files.size()];
+
+		for (int i = 0; i < folders.size(); i++) {
+			fileViewData[i] = folders.get(i);
+		}
+		for (int i = 0; i < files.size(); i++) {
+			fileViewData[i + folders.size()] = files.get(i);
+		}
+
+		fileView.setListData(fileViewData);
 	}
 
 	public Directory getCurrentDirectory() {

@@ -34,6 +34,8 @@ public class FinanceUtils {
 	 *   1,002.50€         100250
 	 *   1.002,50 EUR      100250
 	 *   1.002.50USD       100250
+	 *
+	 * So parses the passed in money string and returns the result in cents (!)
 	 */
 	public static Integer parseMoney(String amountStr) {
 
