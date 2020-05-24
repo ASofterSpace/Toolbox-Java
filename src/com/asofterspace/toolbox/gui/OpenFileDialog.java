@@ -54,7 +54,7 @@ public class OpenFileDialog {
 
 	private List<File> selectedFiles;
 
-	private List<Directory> selectedFolders;
+	private List<Directory> selectedDirectories;
 
 	// GUI parts
 	private JTextField currentDirPathField;
@@ -62,7 +62,7 @@ public class OpenFileDialog {
 
 	// data for the GUI
 	private List<String> visibleFiles;
-	private List<String> visibleFolders;
+	private List<String> visibleDirectories;
 
 
 	public OpenFileDialog() {
@@ -76,7 +76,7 @@ public class OpenFileDialog {
 	public void showOpenDialog(CallbackWithStatus callback) {
 
 		this.selectedFiles = new ArrayList<>();
-		this.selectedFolders = new ArrayList<>();
+		this.selectedDirectories = new ArrayList<>();
 
 		// Create the window
 		final JFrame dialog = new JFrame(dialogTitle);
@@ -128,17 +128,17 @@ public class OpenFileDialog {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					int index = fileView.locationToIndex(e.getPoint());
-					if (index < visibleFolders.size()) {
-						// enter this folder
-						enterFolder(visibleFolders.get(index));
+					if (index < visibleDirectories.size()) {
+						// enter this directory
+						enterDirectory(visibleDirectories.get(index));
 					} else {
 						if (fileSelectionMode == DIRECTORIES_ONLY) {
 							return;
 						}
 						// open this file
 						selectedFiles = new ArrayList<>();
-						selectedFolders = new ArrayList<>();
-						selectedFiles.add(new File(currentDirectory, visibleFiles.get(index - visibleFolders.size())));
+						selectedDirectories = new ArrayList<>();
+						selectedFiles.add(new File(currentDirectory, visibleFiles.get(index - visibleDirectories.size())));
 						dialog.dispose();
 						callback.call(APPROVE_OPTION);
 					}
@@ -157,13 +157,13 @@ public class OpenFileDialog {
 			public void actionPerformed(ActionEvent e) {
 				// open the currently selected file(s)
 				selectedFiles = new ArrayList<>();
-				selectedFolders = new ArrayList<>();
+				selectedDirectories = new ArrayList<>();
 				List<String> highlightedEntries = fileView.getSelectedValuesList();
 				for (String highlightedEntry : highlightedEntries) {
 					Directory newDir = new Directory(currentDirectory, highlightedEntry);
 					if (newDir.exists()) {
 						if (fileSelectionMode != FILES_ONLY) {
-							selectedFolders.add(newDir);
+							selectedDirectories.add(newDir);
 						}
 					} else {
 						if (fileSelectionMode != DIRECTORIES_ONLY) {
@@ -180,10 +180,10 @@ public class OpenFileDialog {
 		JButton enterButton = new JButton("Enter");
 		enterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// enter into the currently selected folder
+				// enter into the currently selected directory
 				List<String> highlightedEntries = fileView.getSelectedValuesList();
 				if (highlightedEntries.size() > 0) {
-					enterFolder(highlightedEntries.get(0));
+					enterDirectory(highlightedEntries.get(0));
 				}
 			}
 		});
@@ -211,7 +211,7 @@ public class OpenFileDialog {
 	}
 
 	/**
-	 * Refreshes the folders and files shown in the file view based on the current directory
+	 * Refreshes the directorys and files shown in the file view based on the current directory
 	 */
 	private void refreshFileView() {
 
@@ -219,13 +219,13 @@ public class OpenFileDialog {
 
 		boolean recursively = false;
 
-		visibleFolders = new ArrayList<>();
+		visibleDirectories = new ArrayList<>();
 
 		for (Directory cur : currentDirectory.getAllDirectories(recursively)) {
-			visibleFolders.add(cur.getLocalDirname());
+			visibleDirectories.add(cur.getLocalDirname());
 		}
 
-		Collections.sort(visibleFolders);
+		Collections.sort(visibleDirectories);
 
 		visibleFiles = new ArrayList<>();
 
@@ -235,20 +235,20 @@ public class OpenFileDialog {
 
 		Collections.sort(visibleFiles);
 
-		String[] fileViewData = new String[visibleFolders.size() + visibleFiles.size()];
+		String[] fileViewData = new String[visibleDirectories.size() + visibleFiles.size()];
 
-		for (int i = 0; i < visibleFolders.size(); i++) {
-			fileViewData[i] = visibleFolders.get(i);
+		for (int i = 0; i < visibleDirectories.size(); i++) {
+			fileViewData[i] = visibleDirectories.get(i);
 		}
 		for (int i = 0; i < visibleFiles.size(); i++) {
-			fileViewData[i + visibleFolders.size()] = visibleFiles.get(i);
+			fileViewData[i + visibleDirectories.size()] = visibleFiles.get(i);
 		}
 
 		fileView.setListData(fileViewData);
 	}
 
-	private void enterFolder(String folderName) {
-		Directory newDirectory = new Directory(currentDirectory, folderName);
+	private void enterDirectory(String directoryName) {
+		Directory newDirectory = new Directory(currentDirectory, directoryName);
 		if (newDirectory.exists()) {
 			currentDirectory = newDirectory;
 			refreshFileView();
@@ -301,8 +301,8 @@ public class OpenFileDialog {
 		return selectedFiles;
 	}
 
-	public List<Directory> getSelectedFolders() {
-		return selectedFolders;
+	public List<Directory> getSelectedDirectories() {
+		return selectedDirectories;
 	}
 
 }
