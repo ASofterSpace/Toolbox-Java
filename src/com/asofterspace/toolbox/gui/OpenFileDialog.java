@@ -29,6 +29,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
 
 public class OpenFileDialog {
@@ -118,6 +119,7 @@ public class OpenFileDialog {
 		dialog.add(topPanel, new Arrangement(0, 0, 1.0, 0.0));
 
 		fileView = new JList<>();
+		setMultiSelectionEnabled(multiSelectionEnabled);
 		JScrollPane fileViewScroller = new JScrollPane(fileView);
 		fileViewScroller.setPreferredSize(new Dimension(8, 8));
 		dialog.add(fileViewScroller, new Arrangement(0, 1, 1.0, 1.0));
@@ -130,6 +132,9 @@ public class OpenFileDialog {
 						// enter this folder
 						enterFolder(visibleFolders.get(index));
 					} else {
+						if (fileSelectionMode == DIRECTORIES_ONLY) {
+							return;
+						}
 						// open this file
 						selectedFiles = new ArrayList<>();
 						selectedFolders = new ArrayList<>();
@@ -157,9 +162,13 @@ public class OpenFileDialog {
 				for (String highlightedEntry : highlightedEntries) {
 					Directory newDir = new Directory(currentDirectory, highlightedEntry);
 					if (newDir.exists()) {
-						selectedFolders.add(newDir);
+						if (fileSelectionMode != FILES_ONLY) {
+							selectedFolders.add(newDir);
+						}
 					} else {
-						selectedFiles.add(new File(currentDirectory, highlightedEntry));
+						if (fileSelectionMode != DIRECTORIES_ONLY) {
+							selectedFiles.add(new File(currentDirectory, highlightedEntry));
+						}
 					}
 				}
 				dialog.dispose();
@@ -278,6 +287,14 @@ public class OpenFileDialog {
 
 	public void setMultiSelectionEnabled(boolean multiSelectionEnabled) {
 		this.multiSelectionEnabled = multiSelectionEnabled;
+
+		if (fileView != null) {
+			if (multiSelectionEnabled) {
+				fileView.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+			} else {
+				fileView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			}
+		}
 	}
 
 	public List<File> getSelectedFiles() {
