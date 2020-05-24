@@ -184,7 +184,9 @@ public class OpenFileDialog {
 	}
 
 	public void setCurrentDirectory(Directory currentDirectory) {
-		this.currentDirectory = currentDirectory;
+		if (currentDirectory != null) {
+			this.currentDirectory = currentDirectory;
+		}
 	}
 
 	public String getDialogTitle() {
