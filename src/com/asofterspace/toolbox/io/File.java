@@ -214,7 +214,9 @@ public class File {
 	 */
 	public boolean exists() {
 
-		return getJavaFile().exists();
+		java.io.File javaFile = getJavaFile();
+
+		return javaFile.exists() && !javaFile.isDirectory();
 	}
 
 	/**

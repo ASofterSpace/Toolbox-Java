@@ -221,7 +221,7 @@ public class Directory {
 
 		java.io.File entryPoint = new java.io.File(dirname);
 
-		return entryPoint.exists();
+		return entryPoint.exists() && entryPoint.isDirectory();
 	}
 
 	/**

@@ -21,8 +21,8 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -66,13 +66,13 @@ public class OpenFileDialog {
 		this.currentDirectory = currentDirectory;
 	}
 
-	public void showOpenDialog(Frame parent, CallbackWithStatus callback) {
+	public void showOpenDialog(CallbackWithStatus callback) {
 
 		this.selectedFiles = new ArrayList<>();
 		this.selectedFolders = new ArrayList<>();
 
 		// Create the window
-		final JDialog dialog = new JDialog(parent, dialogTitle, true);
+		final JFrame dialog = new JFrame(dialogTitle);
 		GridBagLayout dialogLayout = new GridBagLayout();
 		dialog.setLayout(dialogLayout);
 		dialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
