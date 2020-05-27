@@ -219,12 +219,30 @@ public class BitUtils {
 	public static int bytesToInt(byte first, byte second, byte third, byte fourth) {
 		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*(third & 0xFF) + 16*16*16*16*16*16*(fourth & 0xFF);
 	}
+
+	/**
+	 * Same as bytesToInt(bytes, offset, 4), but a bit more optimized
+	 */
 	public static int bytesToInt(byte[] bytes, int offset) {
 		byte first = bytes[offset];
 		byte second = bytes[offset+1];
 		byte third = bytes[offset+2];
 		byte fourth = bytes[offset+3];
 		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*(third & 0xFF) + 16*16*16*16*16*16*(fourth & 0xFF);
+	}
+
+	/**
+	 * Reads amount bytes from the byte array and converts them into an int
+	 */
+	public static int bytesToInt(byte[] bytes, int offset, int amountOfBytes) {
+		byte[] input = new byte[4];
+		for (int i = 0; i < amountOfBytes; i++) {
+			input[i] = bytes[offset+i];
+		}
+		for (int i = amountOfBytes; i < 4; i++) {
+			input[i] = 0;
+		}
+		return bytesToInt(input, 0);
 	}
 
 	public static void readBitsIntoBitArr(boolean[] bitArr, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {

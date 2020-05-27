@@ -47,11 +47,20 @@ public class WavFile extends BinaryFile {
 		int subchunk1Start = 12;
 		int subchunk1SizeOffset = 8;
 		int subchunk1Size = BitUtils.bytesToInt(bytes, 16);
+		int numberOfChannels = BitUtils.bytesToInt(bytes, 22, 2);
+		int sampleRate = BitUtils.bytesToInt(bytes, 24, 4);
+		int byteRate = BitUtils.bytesToInt(bytes, 28, 4);
+		int bitsPerSample = BitUtils.bytesToInt(bytes, 34, 2);
+
+		System.out.println("Number of Channels: " + numberOfChannels);
+		System.out.println("Sample Rate: " + sampleRate);
+		System.out.println("Byte Rate: " + byteRate);
+		System.out.println("Bits per Sample: " + bitsPerSample);
 
 		int subchunk2Start = subchunk1Start + subchunk1SizeOffset + subchunk1Size;
-		int subchunk2Size = BitUtils.bytesToInt(bytes, subchunk2Start + 4);
+		int dataSize = BitUtils.bytesToInt(bytes, subchunk2Start + 4);
 		int dataStart = subchunk2Start + 8;
-		int dataEnd = subchunk2Start + 8 + subchunk2Size;
+		int dataEnd = dataStart + dataSize;
 
 		if (dataEnd > bytes.length) {
 			System.err.println("It looks like the wave file you are trying to load has been cut off!");
