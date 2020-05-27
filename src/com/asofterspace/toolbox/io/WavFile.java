@@ -178,9 +178,71 @@ public class WavFile extends BinaryFile {
 
 		initialize();
 
-		byte[] bytes = new byte[0];
+		// prepare settings that we actually know how to write
+		bitsPerSample = 16;
+		int dataSize = leftData.length * 2;
+		if (numberOfChannels < 1) {
+			numberOfChannels = 1;
+		}
+		if (numberOfChannels > 1) {
+			numberOfChannels = 2;
+			dataSize *= 2;
+		}
+		audioFormat = 1;
 
-		// TODO create bytes based on data
+		// create bytes based on data
+		byte[] bytes = new byte[44 + dataSize];
+
+		// RIFF
+		bytes[0] = 'R';
+		bytes[1] = 'I';
+		bytes[2] = 'F';
+		bytes[3] = 'F';
+
+		// overall size
+		BitUtils.intToBytes(36 + dataSize, bytes, 4);
+
+		// WAVE
+		bytes[8] = 'W';
+		bytes[9] = 'A';
+		bytes[10] = 'V';
+		bytes[11] = 'E';
+
+		// fmt
+		bytes[12] = 'f';
+		bytes[13] = 'm';
+		bytes[14] = 't';
+		bytes[15] = ' ';
+
+		// fmt subchunk size
+		BitUtils.intToBytes(16, bytes, 16);
+
+		// fmt info
+		BitUtils.intToBytes(audioFormat, bytes, 20, 2);
+		BitUtils.intToBytes(numberOfChannels, bytes, 22, 2);
+		BitUtils.intToBytes(sampleRate, bytes, 24);
+		BitUtils.intToBytes(byteRate, bytes, 28);
+		BitUtils.intToBytes(4, bytes, 32, 2); // block align
+		BitUtils.intToBytes(bitsPerSample, bytes, 34, 2);
+
+		// data
+		bytes[36] = 'd';
+		bytes[37] = 'a';
+		bytes[38] = 't';
+		bytes[39] = 'a';
+
+		BitUtils.intToBytes(dataSize, bytes, 40);
+
+		if (numberOfChannels < 2) {
+			for (int i = 0; i < leftData.length; i++) {
+				BitUtils.intToBytes(leftData[i], bytes, 44+(i*2), 2);
+			}
+		} else {
+			for (int i = 0; i < leftData.length; i++) {
+				BitUtils.intToBytes(leftData[i], bytes, 44+(i*4), 2);
+				BitUtils.intToBytes(rightData[i], bytes, 44+(i*4)+2, 2);
+			}
+		}
 
 		super.saveContent(bytes);
 	}

@@ -259,6 +259,29 @@ public class BitUtils {
 		return bytesToInt(input, 0);
 	}
 
+	public static void intToBytes(int intVal, byte[] bytes, int pos) {
+		bytes[pos] = (byte) intVal;
+		bytes[pos+1] = (byte) (intVal >>> 8);
+		bytes[pos+2] = (byte) (intVal >>> 16);
+		bytes[pos+3] = (byte) (intVal >>> 24);
+	}
+
+	public static void intToBytes(int intVal, byte[] bytes, int pos, int amountOfBytes) {
+		switch (amountOfBytes) {
+			case 4:
+				intToBytes(intVal, bytes, pos);
+				break;
+			case 2:
+				bytes[pos] = (byte) intVal;
+				// we want to get the first bit of the fourth byte and the other seven bits of the second byte
+				bytes[pos+1] = (byte) ((intVal >>> 24) | ((intVal >>> 8) & 0x3F));
+				break;
+			default:
+				System.err.println(amountOfBytes + " bytes as amountOfBytes is not yet implemented for intToBytes!");
+				break;
+		}
+	}
+
 	public static void readBitsIntoBitArr(boolean[] bitArr, int offset, boolean b1, boolean b2, boolean b3, boolean b4, boolean b5, boolean b6, boolean b7, boolean b8) {
 
 		bitArr[offset+0] = b8;
