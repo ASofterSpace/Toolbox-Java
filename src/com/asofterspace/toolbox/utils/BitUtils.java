@@ -222,7 +222,6 @@ public class BitUtils {
 
 	/**
 	 * Same as bytesToInt(bytes, offset, 4), but a bit more optimized
-	 * assuming big-endian encoding
 	 */
 	public static int bytesToInt(byte[] bytes, int offset) {
 		byte first = bytes[offset];
@@ -234,7 +233,6 @@ public class BitUtils {
 
 	/**
 	 * Reads amount bytes from the byte array and converts them into an int
-	 * assuming big-endian encoding
 	 */
 	public static int bytesToInt(byte[] bytes, int offset, int amountOfBytes) {
 
@@ -274,7 +272,11 @@ public class BitUtils {
 			case 2:
 				bytes[pos] = (byte) intVal;
 				// we want to get the first bit of the fourth byte and the other seven bits of the second byte
-				bytes[pos+1] = (byte) ((intVal >>> 24) | ((intVal >>> 8) & 0x3F));
+				// bytes[pos+1] = (byte) ((intVal >>> 24) | ((intVal >>> 8) & 0x3F));
+				bytes[pos+1] = (byte) (intVal >>> 8);
+				if (((intVal < 0) && (bytes[pos+1] > 0)) || ((intVal > 0) && (bytes[pos+1] < 0))) {
+					bytes[pos+1] = (byte) (-bytes[pos+1]);
+				}
 				break;
 			default:
 				System.err.println(amountOfBytes + " bytes as amountOfBytes is not yet implemented for intToBytes!");
@@ -314,6 +316,29 @@ public class BitUtils {
 	public static String longToHumanReadableByteAmount(long byteAmount) {
 
 		return longToHumanReadableByteAmountLocal(byteAmount).replace(",", ".");
+	}
+
+	public static int compare(byte[] byteArr1, byte[] byteArr2) {
+		if (byteArr1 == null) {
+			if (byteArr2 == null) {
+				return 0;
+			} else {
+				return 1;
+			}
+		} else {
+			if (byteArr2 == null) {
+				return -1;
+			}
+		}
+		if (byteArr1.length != byteArr2.length) {
+			return byteArr1.length - byteArr2.length;
+		}
+		for (int i = 0; i < byteArr1.length; i++) {
+			if (byteArr1[i] != byteArr2[i]) {
+				return byteArr2[i] - byteArr1[i];
+			}
+		}
+		return 0;
 	}
 
 	public static String toString(boolean[] bitArr) {

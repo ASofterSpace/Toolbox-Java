@@ -21,6 +21,8 @@ public class BitUtilsTest implements Test {
 		byteToBitsTest();
 
 		longToHumanReadableByteAmountTest();
+
+		intToBytesTest();
 	}
 
 	public void toStringTest() {
@@ -223,6 +225,53 @@ public class BitUtilsTest implements Test {
 
 		if (!"300.00 GB".equals(BitUtils.longToHumanReadableByteAmount(300*1024*1024*1024l))) {
 			TestUtils.fail("We tried to convert 300.00 GB, but we got " + BitUtils.longToHumanReadableByteAmount(300*1024*1024*1024l) + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void intToBytesTest() {
+
+		TestUtils.start("Int to Bytes and Back");
+
+		byte[] bytes = new byte[4];
+		bytes[0] = 17;
+		bytes[1] = 0;
+		bytes[2] = 0;
+		bytes[3] = 0;
+		int someNum = BitUtils.bytesToInt(bytes, 0);
+		byte[] newBytes = new byte[4];
+		BitUtils.intToBytes(someNum, newBytes, 0);
+
+		if (BitUtils.compare(bytes, newBytes) != 0) {
+			TestUtils.fail("We compared the first two byte arrays and they are not the same!");
+			return;
+		}
+
+		bytes = new byte[4];
+		bytes[0] = 17;
+		bytes[1] = (byte) 129;
+		bytes[2] = (byte) 240;
+		bytes[3] = (byte) 201;
+		someNum = BitUtils.bytesToInt(bytes, 0);
+		newBytes = new byte[4];
+		BitUtils.intToBytes(someNum, newBytes, 0);
+
+		if (BitUtils.compare(bytes, newBytes) != 0) {
+			TestUtils.fail("We compared the second two byte arrays and they are not the same!");
+			return;
+		}
+
+		bytes = new byte[2];
+		bytes[0] = (byte) 170;
+		bytes[1] = (byte) 129;
+		someNum = BitUtils.bytesToInt(bytes, 0, 2);
+		newBytes = new byte[2];
+		BitUtils.intToBytes(someNum, newBytes, 0, 2);
+
+		if (BitUtils.compare(bytes, newBytes) != 0) {
+			TestUtils.fail("We compared the third two byte arrays and they are not the same!");
 			return;
 		}
 
