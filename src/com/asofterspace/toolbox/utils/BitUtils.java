@@ -235,6 +235,18 @@ public class BitUtils {
 	 * Reads amount bytes from the byte array and converts them into an int
 	 */
 	public static int bytesToInt(byte[] bytes, int offset, int amountOfBytes) {
+
+		switch (amountOfBytes) {
+
+			case 2:
+				byte first = bytes[offset];
+				byte second = bytes[offset+1];
+				return (first & 0xFF) + 16*16*(second & 0xFF);
+
+			case 1:
+				return bytes[offset] & 0xFF;
+		}
+
 		byte[] input = new byte[4];
 		for (int i = 0; i < amountOfBytes; i++) {
 			input[i] = bytes[offset+i];

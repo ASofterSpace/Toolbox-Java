@@ -16,6 +16,11 @@ public class WavFile extends BinaryFile {
 
 	private int[] data;
 
+	private Integer numberOfChannels;
+	private Integer sampleRate;
+	private Integer byteRate;
+	private Integer bitsPerSample;
+
 
 	/**
 	 * You can construct a WavFile instance directly from a path name.
@@ -44,33 +49,58 @@ public class WavFile extends BinaryFile {
 
 		byte[] bytes = loadContent();
 
-		int subchunk1Start = 12;
-		int subchunk1SizeOffset = 8;
-		int subchunk1Size = BitUtils.bytesToInt(bytes, 16);
-		int numberOfChannels = BitUtils.bytesToInt(bytes, 22, 2);
-		int sampleRate = BitUtils.bytesToInt(bytes, 24, 4);
-		int byteRate = BitUtils.bytesToInt(bytes, 28, 4);
-		int bitsPerSample = BitUtils.bytesToInt(bytes, 34, 2);
+		// first step: process the entire file and search for the fmt and the data chunks
+		// (they could be anywhere among a lot of other chunks!)
+		int curChunkStart = 12;
+
+		int dataStart = 0;
+		int dataEnd = 0;
+
+		while (curChunkStart < bytes.length) {
+			int curChunkSize = BitUtils.bytesToInt(bytes, curChunkStart + 4);
+			byte[] curChunkNameBytes = new byte[4];
+			curChunkNameBytes[0] = bytes[curChunkStart];
+			curChunkNameBytes[1] = bytes[curChunkStart+1];
+			curChunkNameBytes[2] = bytes[curChunkStart+2];
+			curChunkNameBytes[3] = bytes[curChunkStart+3];
+			String curChunkName = new String(curChunkNameBytes);
+
+			if ("fmt ".equals(curChunkName)) {
+				numberOfChannels = BitUtils.bytesToInt(bytes, curChunkStart + 10, 2);
+				sampleRate = BitUtils.bytesToInt(bytes, curChunkStart + 12, 4);
+				byteRate = BitUtils.bytesToInt(bytes, curChunkStart + 16, 4);
+				bitsPerSample = BitUtils.bytesToInt(bytes, curChunkStart + 22, 2);
+			}
+
+			if ("data".equals(curChunkName)) {
+				dataStart = curChunkStart + 8;
+				dataEnd = dataStart + curChunkSize;
+			}
+
+			curChunkStart += 8 + curChunkSize;
+		}
 
 		System.out.println("Number of Channels: " + numberOfChannels);
 		System.out.println("Sample Rate: " + sampleRate);
 		System.out.println("Byte Rate: " + byteRate);
 		System.out.println("Bits per Sample: " + bitsPerSample);
 
-		int subchunk2Start = subchunk1Start + subchunk1SizeOffset + subchunk1Size;
-		int dataSize = BitUtils.bytesToInt(bytes, subchunk2Start + 4);
-		int dataStart = subchunk2Start + 8;
-		int dataEnd = dataStart + dataSize;
-
 		if (dataEnd > bytes.length) {
 			System.err.println("It looks like the wave file you are trying to load has been cut off!");
 			dataEnd = bytes.length;
 		}
 
-		int[] data = new int[dataEnd - dataStart];
+		// TODO :: actually parse left and right channel!
+		// (and when asked for either, if mono, return same)
+		data = new int[(8 * (dataEnd - dataStart)) / bitsPerSample];
 
-		for (int i = dataStart; i < dataEnd; i++) {
-			// TODO: actually load the data
+		if (bitsPerSample == 16) {
+			int j = 0;
+			for (int i = dataStart; i < dataEnd; i += 2, j++) {
+				data[j] = BitUtils.bytesToInt(bytes, i, 2);
+			}
+		} else {
+			System.err.println("Cannot read WAVs with " + bitsPerSample + " bits per sample!");
 		}
 	}
 
