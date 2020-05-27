@@ -21,6 +21,7 @@ public class WavFile extends BinaryFile {
 	private Integer sampleRate;
 	private Integer byteRate;
 	private Integer bitsPerSample;
+	private Integer audioFormat;
 
 
 	/**
@@ -67,6 +68,7 @@ public class WavFile extends BinaryFile {
 			String curChunkName = new String(curChunkNameBytes);
 
 			if ("fmt ".equals(curChunkName)) {
+				audioFormat = BitUtils.bytesToInt(bytes, curChunkStart + 8, 2);
 				numberOfChannels = BitUtils.bytesToInt(bytes, curChunkStart + 10, 2);
 				sampleRate = BitUtils.bytesToInt(bytes, curChunkStart + 12, 4);
 				byteRate = BitUtils.bytesToInt(bytes, curChunkStart + 16, 4);
@@ -81,6 +83,7 @@ public class WavFile extends BinaryFile {
 			curChunkStart += 8 + curChunkSize;
 		}
 
+		System.out.println("Audio Format: " + audioFormat);
 		System.out.println("Number of Channels: " + numberOfChannels);
 		System.out.println("Sample Rate: " + sampleRate);
 		System.out.println("Byte Rate: " + byteRate);
@@ -100,11 +103,9 @@ public class WavFile extends BinaryFile {
 			int j = 0;
 			for (int i = dataStart; i < dataEnd; i += 2, j++) {
 				leftData[j] = BitUtils.bytesToInt(bytes, i, 2);
-				leftData[j] -= 8*16*16*16;
 				if (numberOfChannels > 1) {
 					i += 2;
 					rightData[j] = BitUtils.bytesToInt(bytes, i, 2);
-					rightData[j] -= 8*16*16*16;
 				}
 			}
 		} else {

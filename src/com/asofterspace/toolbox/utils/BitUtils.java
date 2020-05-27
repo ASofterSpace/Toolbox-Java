@@ -211,28 +211,30 @@ public class BitUtils {
 		return first & 0xFF;
 	}
 	public static int bytesToInt(byte first, byte second) {
-		return (first & 0xFF) + 16*16*(second & 0xFF);
+		return (first & 0xFF) + 16*16*second;
 	}
 	public static int bytesToInt(byte first, byte second, byte third) {
-		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*(third & 0xFF);
+		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*third;
 	}
 	public static int bytesToInt(byte first, byte second, byte third, byte fourth) {
-		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*(third & 0xFF) + 16*16*16*16*16*16*(fourth & 0xFF);
+		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*(third & 0xFF) + 16*16*16*16*16*16*fourth;
 	}
 
 	/**
 	 * Same as bytesToInt(bytes, offset, 4), but a bit more optimized
+	 * assuming big-endian encoding
 	 */
 	public static int bytesToInt(byte[] bytes, int offset) {
 		byte first = bytes[offset];
 		byte second = bytes[offset+1];
 		byte third = bytes[offset+2];
 		byte fourth = bytes[offset+3];
-		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*(third & 0xFF) + 16*16*16*16*16*16*(fourth & 0xFF);
+		return (first & 0xFF) + 16*16*(second & 0xFF) + 16*16*16*16*(third & 0xFF) + 16*16*16*16*16*16*fourth;
 	}
 
 	/**
 	 * Reads amount bytes from the byte array and converts them into an int
+	 * assuming big-endian encoding
 	 */
 	public static int bytesToInt(byte[] bytes, int offset, int amountOfBytes) {
 
@@ -241,10 +243,10 @@ public class BitUtils {
 			case 2:
 				byte first = bytes[offset];
 				byte second = bytes[offset+1];
-				return (first & 0xFF) + 16*16*(second & 0xFF);
+				return (first & 0xFF) + 16*16*second;
 
 			case 1:
-				return bytes[offset] & 0xFF;
+				return bytes[offset];
 		}
 
 		byte[] input = new byte[4];
