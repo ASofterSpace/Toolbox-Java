@@ -100,9 +100,11 @@ public class WavFile extends BinaryFile {
 			int j = 0;
 			for (int i = dataStart; i < dataEnd; i += 2, j++) {
 				leftData[j] = BitUtils.bytesToInt(bytes, i, 2);
+				leftData[j] -= 8*16*16*16;
 				if (numberOfChannels > 1) {
 					i += 2;
 					rightData[j] = BitUtils.bytesToInt(bytes, i, 2);
+					rightData[j] -= 8*16*16*16;
 				}
 			}
 		} else {
