@@ -575,7 +575,7 @@ public class PdfFile extends BinaryFile {
 	 */
 	@Override
 	public String toString() {
-		return "com.asofterspace.toolbox.io.PdfFile: " + filename;
+		return "com.asofterspace.toolbox.pdf.PdfFile: " + filename;
 	}
 
 }
