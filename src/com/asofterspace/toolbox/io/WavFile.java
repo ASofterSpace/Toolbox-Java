@@ -14,7 +14,8 @@ import com.asofterspace.toolbox.utils.BitUtils;
  */
 public class WavFile extends BinaryFile {
 
-	private int[] data;
+	private int[] leftData;
+	private int[] rightData;
 
 	private Integer numberOfChannels;
 	private Integer sampleRate;
@@ -40,7 +41,7 @@ public class WavFile extends BinaryFile {
 
 	private void initialize() {
 
-		if (data == null) {
+		if (leftData == null) {
 			loadWavContents();
 		}
 	}
@@ -90,14 +91,19 @@ public class WavFile extends BinaryFile {
 			dataEnd = bytes.length;
 		}
 
-		// TODO :: actually parse left and right channel!
-		// (and when asked for either, if mono, return same)
-		data = new int[(8 * (dataEnd - dataStart)) / bitsPerSample];
+		leftData = new int[(8 * (dataEnd - dataStart)) / (bitsPerSample * numberOfChannels)];
+		if (numberOfChannels > 1) {
+			rightData = new int[leftData.length];
+		}
 
 		if (bitsPerSample == 16) {
 			int j = 0;
 			for (int i = dataStart; i < dataEnd; i += 2, j++) {
-				data[j] = BitUtils.bytesToInt(bytes, i, 2);
+				leftData[j] = BitUtils.bytesToInt(bytes, i, 2);
+				if (numberOfChannels > 1) {
+					i += 2;
+					rightData[j] = BitUtils.bytesToInt(bytes, i, 2);
+				}
 			}
 		} else {
 			System.err.println("Cannot read WAVs with " + bitsPerSample + " bits per sample!");
@@ -105,10 +111,64 @@ public class WavFile extends BinaryFile {
 	}
 
 	public int[] getData() {
+		return getLeftData();
+	}
 
+	public int[] getLeftData() {
 		initialize();
+		return leftData;
+	}
 
-		return data;
+	public void setLeftData(int[] leftData) {
+		this.leftData = leftData;
+	}
+
+	public int[] getRightData() {
+		initialize();
+		if (numberOfChannels < 2) {
+			return leftData;
+		}
+		return rightData;
+	}
+
+	public void setRightData(int[] rightData) {
+		this.rightData = rightData;
+	}
+
+	public Integer getNumberOfChannels() {
+		initialize();
+		return numberOfChannels;
+	}
+
+	public void setNumberOfChannels(Integer numberOfChannels) {
+		this.numberOfChannels = numberOfChannels;
+	}
+
+	public Integer getSampleRate() {
+		initialize();
+		return sampleRate;
+	}
+
+	public void setSampleRate(Integer sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+
+	public Integer getByteRate() {
+		initialize();
+		return byteRate;
+	}
+
+	public void setByteRate(Integer byteRate) {
+		this.byteRate = byteRate;
+	}
+
+	public Integer getBitsPerSample() {
+		initialize();
+		return bitsPerSample;
+	}
+
+	public void setBitsPerSample(Integer bitsPerSample) {
+		this.bitsPerSample = bitsPerSample;
 	}
 
 	public void save() {
