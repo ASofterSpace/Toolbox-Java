@@ -258,9 +258,9 @@ public class BitUtils {
 	}
 
 	public static void intToBytes(int intVal, byte[] bytes, int pos) {
-		bytes[pos] = (byte) intVal;
-		bytes[pos+1] = (byte) (intVal >>> 8);
-		bytes[pos+2] = (byte) (intVal >>> 16);
+		bytes[pos] = (byte) (intVal & 0xFF);
+		bytes[pos+1] = (byte) ((intVal >>> 8) & 0xFF);
+		bytes[pos+2] = (byte) ((intVal >>> 16) & 0xFF);
 		bytes[pos+3] = (byte) (intVal >>> 24);
 	}
 
@@ -270,13 +270,8 @@ public class BitUtils {
 				intToBytes(intVal, bytes, pos);
 				break;
 			case 2:
-				bytes[pos] = (byte) intVal;
-				// we want to get the first bit of the fourth byte and the other seven bits of the second byte
-				// bytes[pos+1] = (byte) ((intVal >>> 24) | ((intVal >>> 8) & 0x3F));
+				bytes[pos] = (byte) (intVal & 0xFF);
 				bytes[pos+1] = (byte) (intVal >>> 8);
-				if (((intVal < 0) && (bytes[pos+1] > 0)) || ((intVal > 0) && (bytes[pos+1] < 0))) {
-					bytes[pos+1] = (byte) (-bytes[pos+1]);
-				}
 				break;
 			default:
 				System.err.println(amountOfBytes + " bytes as amountOfBytes is not yet implemented for intToBytes!");

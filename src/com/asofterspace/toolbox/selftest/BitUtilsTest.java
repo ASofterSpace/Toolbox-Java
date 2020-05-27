@@ -263,6 +263,20 @@ public class BitUtilsTest implements Test {
 			return;
 		}
 
+		bytes = new byte[4];
+		bytes[0] = (byte) 164;
+		bytes[1] = 12;
+		bytes[2] = (byte) 240;
+		bytes[3] = (byte) 201;
+		someNum = BitUtils.bytesToInt(bytes, 0);
+		newBytes = new byte[4];
+		BitUtils.intToBytes(someNum, newBytes, 0);
+
+		if (BitUtils.compare(bytes, newBytes) != 0) {
+			TestUtils.fail("We compared the third two byte arrays and they are not the same!");
+			return;
+		}
+
 		bytes = new byte[2];
 		bytes[0] = (byte) 170;
 		bytes[1] = (byte) 129;
@@ -271,7 +285,7 @@ public class BitUtilsTest implements Test {
 		BitUtils.intToBytes(someNum, newBytes, 0, 2);
 
 		if (BitUtils.compare(bytes, newBytes) != 0) {
-			TestUtils.fail("We compared the third two byte arrays and they are not the same!");
+			TestUtils.fail("We compared the second two byte arrays and they are not the same!");
 			return;
 		}
 
