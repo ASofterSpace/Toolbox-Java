@@ -118,6 +118,21 @@ public class File {
 		return toLocalName(filename);
 	}
 
+	/**
+	 * Get only the local part of the filename, without the type ending, so instead
+	 * of foobar.txt, get just foobar
+	 */
+	public String getLocalFilenameWithoutType() {
+
+		String result = getLocalFilename();
+
+		if (result.contains(".")) {
+			result = result.substring(0, result.lastIndexOf("."));
+		}
+
+		return result;
+	}
+
 	static String toLocalName(String path) {
 
 		// TODO :: this here might have problems if the filename legitimately contains

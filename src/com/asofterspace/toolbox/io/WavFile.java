@@ -71,6 +71,9 @@ public class WavFile extends BinaryFile {
 
 		while (curChunkStart < bytes.length) {
 			int curChunkSize = BitUtils.bytesToInt(bytes, curChunkStart + 4);
+			if (curChunkSize < 0) {
+				curChunkSize = Integer.MAX_VALUE - (Integer.MIN_VALUE - curChunkSize);
+			}
 			byte[] curChunkNameBytes = new byte[4];
 			curChunkNameBytes[0] = bytes[curChunkStart];
 			curChunkNameBytes[1] = bytes[curChunkStart+1];
