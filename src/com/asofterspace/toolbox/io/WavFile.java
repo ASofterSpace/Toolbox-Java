@@ -40,6 +40,17 @@ public class WavFile extends BinaryFile {
 		super(regularFile);
 	}
 
+	/**
+	 * Create a new WavFile instance based on a parent Directory and the name of
+	 * the file inside the parent directory
+	 * @param parentDirectory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public WavFile(Directory parentDirectory, String filename) {
+
+		super(parentDirectory, filename);
+	}
+
 	private void initialize() {
 
 		if (leftData == null) {
@@ -99,18 +110,70 @@ public class WavFile extends BinaryFile {
 			rightData = new int[leftData.length];
 		}
 
-		if (bitsPerSample == 16) {
-			int j = 0;
-			for (int i = dataStart; i < dataEnd; i += 2, j++) {
-				leftData[j] = BitUtils.bytesToInt(bytes, i, 2);
-				if (numberOfChannels > 1) {
-					i += 2;
-					rightData[j] = BitUtils.bytesToInt(bytes, i, 2);
+		switch (bitsPerSample) {
+			case 8:
+				int j = 0;
+				for (int i = dataStart; i < dataEnd; i++, j++) {
+					leftData[j] = bytes[i];
+					if (numberOfChannels > 1) {
+						i++;
+						rightData[j] = bytes[i];
+					}
 				}
-			}
-		} else {
-			System.err.println("Cannot read WAVs with " + bitsPerSample + " bits per sample!");
+				break;
+			case 16:
+				j = 0;
+				for (int i = dataStart; i < dataEnd; i += 2, j++) {
+					leftData[j] = BitUtils.bytesToInt(bytes, i, 2);
+					if (numberOfChannels > 1) {
+						i += 2;
+						rightData[j] = BitUtils.bytesToInt(bytes, i, 2);
+					}
+				}
+				break;
+			case 24:
+				j = 0;
+				for (int i = dataStart; i < dataEnd; i += 3, j++) {
+					leftData[j] = BitUtils.bytesToInt(bytes, i, 3);
+					if (numberOfChannels > 1) {
+						i += 3;
+						rightData[j] = BitUtils.bytesToInt(bytes, i, 3);
+					}
+				}
+				break;
+			default:
+				System.err.println("Cannot read WAVs with " + bitsPerSample + " bits per sample!");
+				break;
 		}
+	}
+
+	/**
+	 * Normalize the volume to the volume offered by a 16 bit WAV file
+	 */
+	public void normalizeTo16Bits() {
+		initialize();
+
+		switch (bitsPerSample) {
+			case 8:
+				for (int i = 0; i < leftData.length; i++) {
+					leftData[i] = leftData[i] << 8;
+					if (numberOfChannels > 1) {
+						rightData[i] = rightData[i] << 8;
+					}
+				}
+				break;
+			case 24:
+				for (int i = 0; i < leftData.length; i++) {
+					leftData[i] = leftData[i] >>> 8;
+					if (numberOfChannels > 1) {
+						rightData[i] = rightData[i] >>> 8;
+					}
+				}
+				break;
+		}
+
+		// we renormalized to 16
+		bitsPerSample = 16;
 	}
 
 	public int[] getData() {
