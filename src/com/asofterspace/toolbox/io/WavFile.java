@@ -16,6 +16,7 @@ public class WavFile extends BinaryFile {
 
 	private int[] leftData;
 	private int[] rightData;
+	private int[] monoData;
 
 	private Integer numberOfChannels;
 	private Integer sampleRate;
@@ -61,6 +62,8 @@ public class WavFile extends BinaryFile {
 	private void loadWavContents() {
 
 		byte[] bytes = loadContent();
+
+		this.monoData = null;
 
 		// first step: process the entire file and search for the fmt and the data chunks
 		// (they could be anywhere among a lot of other chunks!)
@@ -168,8 +171,14 @@ public class WavFile extends BinaryFile {
 			case 24:
 				for (int i = 0; i < leftData.length; i++) {
 					leftData[i] = leftData[i] >>> 8;
+					if (leftData[i] > 8*16*16*16) {
+						leftData[i] -= 16*16*16*16;
+					}
 					if (numberOfChannels > 1) {
 						rightData[i] = rightData[i] >>> 8;
+						if (rightData[i] > 8*16*16*16) {
+							rightData[i] -= 16*16*16*16;
+						}
 					}
 				}
 				break;
@@ -190,6 +199,7 @@ public class WavFile extends BinaryFile {
 
 	public void setLeftData(int[] leftData) {
 		this.leftData = leftData;
+		monoData = null;
 	}
 
 	public int[] getRightData() {
@@ -202,6 +212,22 @@ public class WavFile extends BinaryFile {
 
 	public void setRightData(int[] rightData) {
 		this.rightData = rightData;
+		monoData = null;
+	}
+
+	public int[] getMonoData() {
+		initialize();
+		if (monoData == null) {
+			monoData = new int[leftData.length];
+			for (int i = 0; i < leftData.length; i++) {
+				if (numberOfChannels > 1) {
+					monoData[i] = (leftData[i] + rightData[i]) / 2;
+				} else {
+					monoData[i] = leftData[i];
+				}
+			}
+		}
+		return monoData;
 	}
 
 	public Integer getNumberOfChannels() {
