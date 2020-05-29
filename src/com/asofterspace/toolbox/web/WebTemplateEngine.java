@@ -38,6 +38,10 @@ public class WebTemplateEngine {
 		this.config = config;
 	}
 
+	public Record getConfig() {
+		return config;
+	}
+
 	public boolean compileTo(Directory targetDir) {
 		return compileTo(targetDir, "", true);
 	}
