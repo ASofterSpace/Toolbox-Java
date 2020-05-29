@@ -30,6 +30,8 @@ public class Image {
 
 	private int height;
 
+	private int lineWidth = 1;
+
 
 	public Image(int width, int height) {
 
@@ -189,6 +191,13 @@ public class Image {
 		data[y][x] = pix;
 	}
 
+	public void setPixelSafely(int x, int y, ColorRGB pix) {
+		if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) {
+			return;
+		}
+		data[y][x] = pix;
+	}
+
 	private int clipHorz(int x) {
 
 		if (x < 0) {
@@ -261,7 +270,7 @@ public class Image {
 
 		// no line drawn at all (it is just one pixel?) - well okay!
 		if ((lineWidth < 1) && (lineHeight < 1)) {
-			data[startY][startX] = lineColor;
+			drawLinePoint(startX, startY, lineColor);
 			return;
 		}
 
@@ -274,7 +283,7 @@ public class Image {
 				} else {
 					y = startY + (((x - startX) * lineHeight) / lineWidth);
 				}
-				data[y][x] = lineColor;
+				drawLinePoint(x, y, lineColor);
 			}
 		} else {
 			for (int y = startY; y <= endY; y++) {
@@ -284,8 +293,24 @@ public class Image {
 				} else {
 					x = startX + (((y - startY) * lineWidth) / lineHeight);
 				}
-				data[y][x] = lineColor;
+				drawLinePoint(x, y, lineColor);
 			}
+		}
+	}
+
+	private void drawLinePoint(int x, int y, ColorRGB color) {
+		setPixelSafely(x, y, color);
+		if (lineWidth > 1) {
+			setPixelSafely(x+1, y, color);
+			setPixelSafely(x+1, y+1, color);
+			setPixelSafely(x, y+1, color);
+		}
+		if (lineWidth > 2) {
+			setPixelSafely(x-1, y+1, color);
+			setPixelSafely(x-1, y, color);
+			setPixelSafely(x-1, y-1, color);
+			setPixelSafely(x, y-1, color);
+			setPixelSafely(x+1, y-1, color);
 		}
 	}
 
@@ -769,6 +794,14 @@ public class Image {
 				data[y][x] = data[y][x].getRemovedPerceivedColors();
 			}
 		}
+	}
+
+	public int getLineWidth() {
+		return lineWidth;
+	}
+
+	public void setLineWidth(int lineWidth) {
+		this.lineWidth = lineWidth;
 	}
 
 	@Override
