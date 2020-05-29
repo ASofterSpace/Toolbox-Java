@@ -36,12 +36,20 @@ public class GraphPanel extends JPanel {
 
 	private Color dataColor;
 
+	private Double baseXmin;
+	private Double baseXmax;
+	private Double baseYmin;
+	private Double baseYmax;
+
 
 	public GraphPanel() {
 		super();
 	}
 
-	public void setDataPoints(List<GraphDataPoint> newData) {
+	/**
+	 * Set absolute data points
+	 */
+	public void setAbsoluteDataPoints(List<GraphDataPoint> newData) {
 
 		Collections.sort(newData, new Comparator<GraphDataPoint>() {
 			public int compare(GraphDataPoint a, GraphDataPoint b) {
@@ -52,7 +60,24 @@ public class GraphPanel extends JPanel {
 		this.data = newData;
 	}
 
-	public void setTimeDataPoints(List<GraphTimeDataPoint> timeData) {
+	/**
+	 * Set relative data points that have dates associated with them
+	 * (relative meaning that each data point contains the difference to the previous one)
+	 */
+	public void setRelativeTimeDataPoints(List<GraphTimeDataPoint> timeData) {
+
+		setTimeDataPoints(timeData, false);
+	}
+
+	/**
+	 * Set absolute data points that have dates associated with them
+	 */
+	public void setAbsoluteTimeDataPoints(List<GraphTimeDataPoint> timeData) {
+
+		setTimeDataPoints(timeData, true);
+	}
+
+	private void setTimeDataPoints(List<GraphTimeDataPoint> timeData, boolean pointsAreAbsolute) {
 
 		if (timeData.size() < 1) {
 			this.data = new ArrayList<>();
@@ -76,7 +101,11 @@ public class GraphPanel extends JPanel {
 		int i = 0;
 		for (Date day : days) {
 			while ((i < timeData.size()) && DateUtils.isSameDay(day, timeData.get(i).getDateTime())) {
-				y += timeData.get(i).getValue();
+				if (pointsAreAbsolute) {
+					y = timeData.get(i).getValue();
+				} else {
+					y += timeData.get(i).getValue();
+				}
 				i++;
 			}
 			actualData.add(new GraphDataPoint(x, y, DateUtils.serializeDate(day)));
@@ -85,7 +114,7 @@ public class GraphPanel extends JPanel {
 
 		// call setDataPoints such that the sorting will be called again
 		// (the datapoints are already sorted, but meh, you never know... ^^)
-		setDataPoints(actualData);
+		setAbsoluteDataPoints(actualData);
 	}
 
 	public void setMinimumHeight(int height) {
@@ -129,6 +158,38 @@ public class GraphPanel extends JPanel {
 			return getForeground();
 		}
 		return dataColor;
+	}
+
+	public Double getBaseXmin() {
+		return baseXmin;
+	}
+
+	public void setBaseXmin(Double baseXmin) {
+		this.baseXmin = baseXmin;
+	}
+
+	public Double getBaseXmax() {
+		return baseXmax;
+	}
+
+	public void setBaseXmax(Double baseXmax) {
+		this.baseXmax = baseXmax;
+	}
+
+	public Double getBaseYmin() {
+		return baseYmin;
+	}
+
+	public void setBaseYmin(Double baseYmin) {
+		this.baseYmin = baseYmin;
+	}
+
+	public Double getBaseYmax() {
+		return baseYmax;
+	}
+
+	public void setBaseYmax(Double baseYmax) {
+		this.baseYmax = baseYmax;
 	}
 
 	@Override
@@ -180,9 +241,21 @@ public class GraphPanel extends JPanel {
 		g.setColor(getDataColor());
 
 		double xMin = data.get(0).getPosition();
+		if (baseXmin != null) {
+			xMin = baseXmin;
+		}
 		double xMax = xMin;
+		if (baseXmax != null) {
+			xMax = baseXmax;
+		}
 		double yMin = 0;
+		if (baseYmin != null) {
+			yMin = baseYmin;
+		}
 		double yMax = 0;
+		if (baseYmax != null) {
+			yMax = baseYmax;
+		}
 
 		for (GraphDataPoint dataPoint : data) {
 			if (dataPoint.getPosition() < xMin) {
