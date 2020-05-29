@@ -19,6 +19,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -225,7 +226,11 @@ public class OpenFileDialog {
 			visibleDirectories.add(cur.getLocalDirname());
 		}
 
-		Collections.sort(visibleDirectories);
+		Collections.sort(visibleDirectories, new Comparator<String>() {
+			public int compare(String a, String b) {
+				return a.toLowerCase().compareTo(b.toLowerCase());
+			}
+		});
 
 		visibleFiles = new ArrayList<>();
 
@@ -233,7 +238,11 @@ public class OpenFileDialog {
 			visibleFiles.add(cur.getLocalFilename());
 		}
 
-		Collections.sort(visibleFiles);
+		Collections.sort(visibleFiles, new Comparator<String>() {
+			public int compare(String a, String b) {
+				return a.toLowerCase().compareTo(b.toLowerCase());
+			}
+		});
 
 		String[] fileViewData = new String[visibleDirectories.size() + visibleFiles.size()];
 
