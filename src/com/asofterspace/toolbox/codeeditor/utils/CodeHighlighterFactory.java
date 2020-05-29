@@ -20,6 +20,7 @@ import com.asofterspace.toolbox.codeeditor.PhpCode;
 import com.asofterspace.toolbox.codeeditor.PlainText;
 import com.asofterspace.toolbox.codeeditor.PythonCode;
 import com.asofterspace.toolbox.codeeditor.ShellCode;
+import com.asofterspace.toolbox.codeeditor.TypeScriptCode;
 import com.asofterspace.toolbox.codeeditor.XmlCode;
 
 import javax.swing.JTextPane;
@@ -62,6 +63,9 @@ public class CodeHighlighterFactory {
 				break;
 			case JAVASCRIPT:
 				highlighter = new JavaScriptCode(editor);
+				break;
+			case TYPESCRIPT:
+				highlighter = new TypeScriptCode(editor);
 				break;
 			case DELPHI:
 				highlighter = new DelphiCode(editor);

@@ -530,7 +530,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return KEYWORDS.contains(token);
 	}
 
-	private boolean isPrimitiveType(String token) {
+	protected boolean isPrimitiveType(String token) {
 		return PRIMITIVE_TYPES.contains(token);
 	}
 

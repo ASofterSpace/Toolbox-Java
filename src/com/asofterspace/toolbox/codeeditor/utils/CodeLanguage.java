@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.codeeditor.utils;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
+import com.asofterspace.toolbox.io.JSON;
 
 import javax.swing.JTextPane;
 
@@ -23,6 +24,7 @@ public enum CodeLanguage {
 	HTML("HTML"),
 	JAVA("Java"),
 	JAVASCRIPT("JavaScript"),
+	TYPESCRIPT("TypeScript"),
 	JSON("JSON"),
 	MARKDOWN("Markdown"),
 	PLAINTEXT("Plain Text"),
@@ -86,6 +88,10 @@ public enum CodeLanguage {
 
 		if (lowfilename.endsWith(".js")) {
 			return CodeLanguage.JAVASCRIPT;
+		}
+
+		if (lowfilename.endsWith(".ts") || lowfilename.endsWith(".tsx")) {
+			return CodeLanguage.TYPESCRIPT;
 		}
 
 		if (lowfilename.endsWith(".json")) {
