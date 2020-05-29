@@ -36,6 +36,7 @@ public class CdmCtrl {
 	public static final String MCM_PATH_DELIMITER = ".";
 
 	private static final List<String> KNOWN_CDM_VERSIONS = Arrays.asList(
+		"1.14.2",
 		"1.14.1",
 		"1.14.0",
 		"1.14.0b",
@@ -47,6 +48,7 @@ public class CdmCtrl {
 	);
 
 	private static final List<String> KNOWN_CDM_PREFIXES = Arrays.asList(
+		"http://www.esa.int/egscc/", // 1.14.2
 		"http://www.esa.int/egscc/", // 1.14.1
 		"http://www.esa.int/egscc/", // 1.14.0
 		"http://www.esa.int/dme/", // 1.14.0b
@@ -553,7 +555,12 @@ public class CdmCtrl {
 				return NOT_A_RELEASE;
 			case "1.14.1":
 				if ("http://www.esa.int/egscc/".equals(prefix)) {
-					return "IR4d1";
+					return "IR4d1batch4";
+				}
+				return NOT_A_RELEASE;
+			case "1.14.2":
+				if ("http://www.esa.int/egscc/".equals(prefix)) {
+					return "IR4d1batch5";
 				}
 				return NOT_A_RELEASE;
 		}
