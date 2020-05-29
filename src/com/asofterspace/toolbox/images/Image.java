@@ -255,6 +255,12 @@ public class Image {
 		int lineWidth = endX - startX;
 		int lineHeight = endY - startY;
 
+		// no line drawn at all (it is just one pixel?) - well okay!
+		if ((lineWidth < 1) && (lineHeight < 1)) {
+			data[startY][startX] = lineColor;
+			return;
+		}
+
 		// actually do the drawing - mainly horizontally or mainly vertically
 		if (lineWidth > lineHeight) {
 			for (int x = startX; x <= endX; x++) {
@@ -265,6 +271,14 @@ public class Image {
 			for (int y = startY; y <= endY; y++) {
 				int x = startX + (((y - startY) * lineWidth) / lineHeight);
 				data[y][x] = lineColor;
+			}
+		}
+	}
+
+	public void drawRectangle(int startX, int startY, int endX, int endY, ColorRGB rectColor) {
+		for (int x = startX; x <= endX; x++) {
+			for (int y = startY; y <= endY; y++) {
+				data[y][x] = rectColor;
 			}
 		}
 	}
