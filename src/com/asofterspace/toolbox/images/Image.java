@@ -232,6 +232,8 @@ public class Image {
 
 	public void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
 
+		boolean invertDirection = false;
+
 		// ensure we stay in the drawable area
 		startX = clipHorz(startX);
 		endX = clipHorz(endX);
@@ -243,12 +245,14 @@ public class Image {
 			int buf = endX;
 			endX = startX;
 			startX = buf;
+			invertDirection = !invertDirection;
 		}
 
 		if (startY > endY) {
 			int buf = endY;
 			endY = startY;
 			startY = buf;
+			invertDirection = !invertDirection;
 		}
 
 		// figure out how far we draw horizontally and vertically
@@ -264,12 +268,22 @@ public class Image {
 		// actually do the drawing - mainly horizontally or mainly vertically
 		if (lineWidth > lineHeight) {
 			for (int x = startX; x <= endX; x++) {
-				int y = startY + (((x - startX) * lineHeight) / lineWidth);
+				int y;
+				if (invertDirection) {
+					y = startY + (((endX - x) * lineHeight) / lineWidth);
+				} else {
+					y = startY + (((x - startX) * lineHeight) / lineWidth);
+				}
 				data[y][x] = lineColor;
 			}
 		} else {
 			for (int y = startY; y <= endY; y++) {
-				int x = startX + (((y - startY) * lineWidth) / lineHeight);
+				int x;
+				if (invertDirection) {
+					x = startX + (((endY - y) * lineWidth) / lineHeight);
+				} else {
+					x = startX + (((y - startY) * lineWidth) / lineHeight);
+				}
 				data[y][x] = lineColor;
 			}
 		}
