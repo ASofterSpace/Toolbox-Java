@@ -407,6 +407,21 @@ public class File {
 	}
 
 	/**
+	 * Move this file to a new directory, returns true if it worked
+	 */
+	public boolean moveTo(Directory newParentDir) {
+		try {
+			Path newPath = newParentDir.getFile(getLocalFilename()).getJavaPath();
+			Files.move(getJavaPath(), newPath, StandardCopyOption.REPLACE_EXISTING);
+			initFromJavaFile(newPath.toFile());
+			return true;
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to move the file " + filename + " to " + newParentDir.getAbsoluteDirname() + " - inconceivable!");
+		}
+		return false;
+	}
+
+	/**
 	 * Delete this file from disk
 	 */
 	public void delete() {
