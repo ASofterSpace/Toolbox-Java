@@ -88,7 +88,11 @@ public class IoUtils {
 	public static void execute(String command) {
 		try {
 			Process process = Runtime.getRuntime().exec(command);
-			process.waitFor();
+			try {
+				process.waitFor();
+			} catch (InterruptedException e2) {
+				// well, stop waiting...
+			}
 		} catch (IOException e) {
 			System.err.println("There was an I/O Exception while executing an external command synchronously: " + e);
 		}
