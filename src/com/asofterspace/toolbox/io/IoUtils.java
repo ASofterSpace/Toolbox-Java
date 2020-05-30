@@ -83,13 +83,25 @@ public class IoUtils {
 	}
 
 	/**
-	 * Just execute a simple command
+	 * Just execute a simple command, waiting until it returns
 	 */
 	public static void execute(String command) {
 		try {
+			Process process = Runtime.getRuntime().exec(command);
+			process.waitFor();
+		} catch (IOException e) {
+			System.err.println("There was an I/O Exception while executing an external command synchronously: " + e);
+		}
+	}
+
+	/**
+	 * Just execute a simple command asynchronously
+	 */
+	public static void executeAsync(String command) {
+		try {
 			Runtime.getRuntime().exec(command);
 		} catch (IOException e) {
-			System.err.println("There was an I/O Exception while executing an external command: " + e);
+			System.err.println("There was an I/O Exception while executing an external command asynchronously: " + e);
 		}
 	}
 
