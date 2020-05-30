@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.CallbackWithString;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -96,6 +98,48 @@ public class IoUtils {
 		} catch (IOException e) {
 			System.err.println("There was an I/O Exception while executing an external command synchronously: " + e);
 		}
+	}
+
+	/**
+	 * Just execute a simple command, waiting until it returns, and for each line call the callback
+	 */
+	public static void execute(String command, CallbackWithString callback) {
+
+		try {
+			Process process = Runtime.getRuntime().exec(command);
+
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String curline = reader.readLine();
+
+				while (curline != null) {
+					callback.call(curline);
+					curline = reader.readLine();
+				}
+			} catch (IOException e) {
+				System.err.println("There was an I/O Exception while executing an external command: " + e);
+			}
+
+		} catch (IOException e) {
+			System.err.println("There was an I/O Exception while executing an external command synchronously: " + e);
+		}
+
+		/*
+		List<String> input = new ArrayList<>();
+		input.add(command);
+
+		ProcessBuilder builder = new ProcessBuilder(input);
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
+			String curline = reader.readLine();
+
+			while (curline != null) {
+				callback.call(curline);
+				curline = reader.readLine();
+			}
+		} catch (IOException e) {
+			System.err.println("There was an I/O Exception while executing an external command: " + e);
+		}
+		*/
 	}
 
 	/**
