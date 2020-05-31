@@ -163,7 +163,7 @@ public class XmlTest implements Test {
 
 		JSON json = new JSON(xml);
 
-		json.removeAllKeysExcept("one", "two", "three");
+		json.removeAllExcept("one", "two", "three");
 
 		String jsonStr = json.toString();
 
@@ -171,7 +171,7 @@ public class XmlTest implements Test {
 
 		XML target = new XML(jsonDecoded);
 
-		target.removeAllKeysExcept("one", "two", "four");
+		target.removeAllExcept("one", "two", "four");
 
 		// TODO :: also convert XML to string and back to XML object before checking the output
 
