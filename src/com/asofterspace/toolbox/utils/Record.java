@@ -853,20 +853,27 @@ public class Record {
 	 * Removes a key (and its value, duh) from this object
 	 * @param key .. the key to remove
 	 */
-	public void removeKey(Object key) {
+	public void remove(Object key) {
+
+		if (key == null) {
+			return;
+		}
+
+		if (key instanceof Integer) {
+			remove((int) key);
+			return;
+		}
 
 		makeObject();
 
-		if (key != null) {
-			objContents.remove(key.toString());
-		}
+		objContents.remove(key.toString());
 	}
 
 	/**
 	 * Removes the index-th entry from this array
 	 * @param index .. the index of the entry which should be removed
 	 */
-	public void removeIndex(int index) {
+	public void remove(int index) {
 
 		makeArray();
 
@@ -877,15 +884,19 @@ public class Record {
 	 * Removes all keys from this object except the ones given as arguments
 	 * @param keys .. the keys to keep
 	 */
-	public void removeAllKeysExcept(String... keys) {
+	public void removeAllExcept(Object... keys) {
 
 		makeObject();
 
 		TreeMap<String, Record> newObjContents = new TreeMap<String, Record>();
 
-		for (String key : keys) {
-			if (objContents.containsKey(key)) {
-				newObjContents.put(key, objContents.get(key));
+		for (Object key : keys) {
+			if (key == null) {
+				continue;
+			}
+			String keyStr = key.toString();
+			if (objContents.containsKey(keyStr)) {
+				newObjContents.put(keyStr, objContents.get(keyStr));
 			}
 		}
 
