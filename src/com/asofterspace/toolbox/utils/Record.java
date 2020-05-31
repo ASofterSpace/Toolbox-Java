@@ -692,6 +692,14 @@ public class Record {
 		return defaultValue;
 	}
 
+	public Integer getInteger(Object key, Integer defaultValue) {
+		Integer result = getInteger(key);
+		if (result == null) {
+			return defaultValue;
+		}
+		return result;
+	}
+
 	/**
 	 * Gets an int value stored in a key of a Record object
 	 * @param key  the key to be searched for
