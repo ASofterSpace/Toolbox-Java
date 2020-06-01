@@ -162,6 +162,10 @@ public class Image {
 		}
 	}
 
+	public void setWidthAndHeight(int newWidth, int newHeight) {
+		init(this, newWidth, newHeight);
+	}
+
 	public int getWidth() {
 		return width;
 	}
@@ -802,6 +806,15 @@ public class Image {
 
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
+	}
+
+	/**
+	 * Instructs this image to redraw itself, e.g. as its resolution has changed
+	 * For the base class, nothing happens; an extending class which always draws a certain image
+	 * can override this
+	 */
+	public void redraw() {
+		// do nothing in the base implementation
 	}
 
 	@Override

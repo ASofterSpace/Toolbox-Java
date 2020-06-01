@@ -2,29 +2,22 @@
  * Unlicensed code created by A Softer Space, 2020
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.gui;
+package com.asofterspace.toolbox.images;
 
 import com.asofterspace.toolbox.utils.DateUtils;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.JPanel;
-
 
 /**
- * This is a JPanel that, instead of just showing a boring background color,
- * actually shows a fancy graph! :D
+ * An image displaying a graph
  */
-public class GraphPanel extends JPanel {
-
-	public static final long serialVersionUID = 3458397457249723l;
+public class GraphImage extends Image {
 
 	// pixels around the graph on all sides
 	// (in that area, labels are allowed!)
@@ -32,9 +25,9 @@ public class GraphPanel extends JPanel {
 
 	private List<GraphDataPoint> data;
 
-	private Integer ourMinimumHeight = null;
-
-	private Color dataColor;
+	private ColorRGB backgroundColor;
+	private ColorRGB foregroundColor;
+	private ColorRGB dataColor;
 
 	private Double baseXmin;
 	private Double baseXmax;
@@ -44,8 +37,12 @@ public class GraphPanel extends JPanel {
 	private boolean includeTodayInTimeData = false;
 
 
-	public GraphPanel() {
-		super();
+	public GraphImage(int width, int height) {
+		super(width, height);
+	}
+
+	public GraphImage() {
+		super(8, 8);
 	}
 
 	/**
@@ -60,6 +57,8 @@ public class GraphPanel extends JPanel {
 		});
 
 		this.data = newData;
+
+		redraw();
 	}
 
 	/**
@@ -128,10 +127,6 @@ public class GraphPanel extends JPanel {
 		setAbsoluteDataPoints(actualData);
 	}
 
-	public void setMinimumHeight(int height) {
-		this.ourMinimumHeight = height;
-	}
-
 	public double getMinimumValue() {
 
 		if ((data == null) || (data.size() < 1)) {
@@ -160,13 +155,35 @@ public class GraphPanel extends JPanel {
 		}
 	}
 
-	public void setDataColor(Color newColor) {
+	public ColorRGB getBackgroundColor() {
+		if (backgroundColor == null) {
+			return new ColorRGB(255, 255, 255);
+		}
+		return backgroundColor;
+	}
+
+	public void setBackgroundColor(ColorRGB backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	public ColorRGB getForegroundColor() {
+		if (foregroundColor == null) {
+			return new ColorRGB(0, 0, 0);
+		}
+		return foregroundColor;
+	}
+
+	public void setForegroundColor(ColorRGB foregroundColor) {
+		this.foregroundColor = foregroundColor;
+	}
+
+	public void setDataColor(ColorRGB newColor) {
 		this.dataColor = newColor;
 	}
 
-	public Color getDataColor() {
+	public ColorRGB getDataColor() {
 		if (dataColor == null) {
-			return getForeground();
+			return getForegroundColor();
 		}
 		return dataColor;
 	}
@@ -215,43 +232,26 @@ public class GraphPanel extends JPanel {
 	}
 
 	@Override
-	public Dimension getMinimumSize() {
-		Dimension result = super.getMinimumSize();
-		if (ourMinimumHeight == null) {
-			return result;
-		}
-		result.height = ourMinimumHeight;
-		return result;
-	}
+	public void redraw() {
 
-	@Override
-	public Dimension getPreferredSize() {
-		Dimension result = super.getPreferredSize();
-		if (ourMinimumHeight == null) {
-			return result;
-		}
-		result.height = ourMinimumHeight;
-		return result;
-	}
+		super.redraw();
 
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+		drawRectangle(0, 0, getWidth()-1, getHeight()-1, getBackgroundColor());
 
 		int outerWidth = getWidth();
 		int outerHeight = getHeight();
 		int innerWidth = outerWidth - 2 * BORDER_WIDTH;
 		int innerHeight = outerHeight - 2 * BORDER_WIDTH;
 
-		g.setColor(getForeground());
+		ColorRGB black = getForegroundColor();
 		// y axis
-		g.drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + innerHeight);
-		g.drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH - 4, BORDER_WIDTH + 9);
-		g.drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + 4, BORDER_WIDTH + 9);
+		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + innerHeight, black);
+		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH - 4, BORDER_WIDTH + 9, black);
+		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + 4, BORDER_WIDTH + 9, black);
 		// x axis
-		g.drawLine(BORDER_WIDTH, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight);
-		g.drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight - 4);
-		g.drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight + 4);
+		drawLine(BORDER_WIDTH, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, black);
+		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight - 4, black);
+		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight + 4, black);
 
 		if (data == null) {
 			return;
@@ -260,7 +260,7 @@ public class GraphPanel extends JPanel {
 			return;
 		}
 
-		g.setColor(getDataColor());
+		ColorRGB dataColor = getDataColor();
 
 		double xMin = data.get(0).getPosition();
 		if (baseXmin != null) {
@@ -321,11 +321,12 @@ public class GraphPanel extends JPanel {
 			int newX = (int) (xMultiplier * dataPoint.getPosition());
 			int newY = (int) (yMultiplier * dataPoint.getValue());
 
-			g.drawLine(
+			drawLine(
 				prevX + offsetX,
 				offsetY - prevY,
 				newX + offsetX,
-				offsetY - newY
+				offsetY - newY,
+				dataColor
 			);
 
 			prevX = newX;
