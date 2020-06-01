@@ -41,6 +41,8 @@ public class GraphPanel extends JPanel {
 	private Double baseYmin;
 	private Double baseYmax;
 
+	private boolean includeTodayInTimeData = false;
+
 
 	public GraphPanel() {
 		super();
@@ -92,6 +94,15 @@ public class GraphPanel extends JPanel {
 
 		Date firstDate = timeData.get(0).getDateTime();
 		Date lastDate = timeData.get(timeData.size() - 1).getDateTime();
+
+		if (includeTodayInTimeData) {
+			if (firstDate.after(new Date())) {
+				firstDate = new Date();
+			}
+			if (lastDate.before(new Date())) {
+				lastDate = new Date();
+			}
+		}
 
 		List<Date> days = DateUtils.listDaysFromTo(firstDate, lastDate);
 
@@ -190,6 +201,17 @@ public class GraphPanel extends JPanel {
 
 	public void setBaseYmax(Double baseYmax) {
 		this.baseYmax = baseYmax;
+	}
+
+	public boolean getIncludeTodayInTimeData() {
+		return includeTodayInTimeData;
+	}
+
+	/**
+	 * Set this before calling setRelativeTimeDataPoints or setAbsoluteTimeDataPoints!
+	 */
+	public void setIncludeTodayInTimeData(boolean includeTodayInTimeData) {
+		this.includeTodayInTimeData = includeTodayInTimeData;
 	}
 
 	@Override
