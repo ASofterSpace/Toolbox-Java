@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.images;
 
 import com.asofterspace.toolbox.io.BinaryFile;
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 
 
@@ -31,8 +32,21 @@ public abstract class ImageFile extends BinaryFile {
 		super(regularFile);
 	}
 
+	/**
+	 * Create a new file instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public ImageFile(Directory directory, String filename) {
+
+		super(directory, filename);
+	}
+
 
 	public abstract void assign(Image img);
+
+	public abstract void setImage(Image img);
 
 	public abstract Image getImage();
 

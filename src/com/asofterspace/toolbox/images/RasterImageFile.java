@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.images;
 
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 
 
@@ -33,9 +34,25 @@ public abstract class RasterImageFile extends ImageFile {
 		super(regularFile);
 	}
 
+	/**
+	 * Create a new file instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public RasterImageFile(Directory directory, String filename) {
+
+		super(directory, filename);
+	}
+
 	protected abstract void loadImageContents();
 
 	public void assign(Image img) {
+
+		setImage(img);
+	}
+
+	public void setImage(Image img) {
 
 		this.img = img;
 	}

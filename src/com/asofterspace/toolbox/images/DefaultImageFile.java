@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.images;
 
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 
 import java.awt.image.BufferedImage;
@@ -36,6 +37,17 @@ public class DefaultImageFile extends RasterImageFile {
 	public DefaultImageFile(File regularFile) {
 
 		super(regularFile);
+	}
+
+	/**
+	 * Create a new file instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public DefaultImageFile(Directory directory, String filename) {
+
+		super(directory, filename);
 	}
 
 	protected void loadImageContents() {
