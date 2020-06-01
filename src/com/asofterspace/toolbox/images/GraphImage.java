@@ -36,6 +36,27 @@ public class GraphImage extends Image {
 
 	private boolean includeTodayInTimeData = false;
 
+	// all of the following are calculated when calculateNumerics() is called by redraw() and
+	// stay constant until the next redraw()
+	private int outerWidth;
+	private int outerHeight;
+	private int innerWidth;
+	private int innerHeight;
+	private double xMin;
+	private double xMax;
+	private double yMin;
+	private double yMax;
+	private double xRange;
+	private double yRange;
+	private double xMultiplier;
+	private double yMultiplier;
+	private int prevX;
+	private int prevY;
+	private int minX;
+	private int minY;
+	private int offsetX;
+	private int offsetY;
+
 
 	public GraphImage(int width, int height) {
 		super(width, height);
@@ -231,50 +252,42 @@ public class GraphImage extends Image {
 		this.includeTodayInTimeData = includeTodayInTimeData;
 	}
 
-	@Override
-	public void redraw() {
+	/**
+	 * Draws a vertical line inside the graph (it will vanish again when redraw() is called!)
+	 */
+	public void drawVerticalLineAt(int position, ColorRGB col) {
 
-		super.redraw();
+		int newX = (int) (xMultiplier * position);
 
-		drawRectangle(0, 0, getWidth()-1, getHeight()-1, getBackgroundColor());
+		drawLine(
+			newX + offsetX,
+			BORDER_WIDTH,
+			newX + offsetX,
+			getHeight() - BORDER_WIDTH,
+			col
+		);
+	}
 
-		int outerWidth = getWidth();
-		int outerHeight = getHeight();
-		int innerWidth = outerWidth - 2 * BORDER_WIDTH;
-		int innerHeight = outerHeight - 2 * BORDER_WIDTH;
+	private void calculateNumerics() {
 
-		ColorRGB black = getForegroundColor();
-		// y axis
-		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + innerHeight, black);
-		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH - 4, BORDER_WIDTH + 9, black);
-		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + 4, BORDER_WIDTH + 9, black);
-		// x axis
-		drawLine(BORDER_WIDTH, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, black);
-		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight - 4, black);
-		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight + 4, black);
+		outerWidth = getWidth();
+		outerHeight = getHeight();
+		innerWidth = outerWidth - 2 * BORDER_WIDTH;
+		innerHeight = outerHeight - 2 * BORDER_WIDTH;
 
-		if (data == null) {
-			return;
-		}
-		if (data.size() < 1) {
-			return;
-		}
-
-		ColorRGB dataColor = getDataColor();
-
-		double xMin = data.get(0).getPosition();
+		xMin = data.get(0).getPosition();
 		if (baseXmin != null) {
 			xMin = baseXmin;
 		}
-		double xMax = xMin;
+		xMax = xMin;
 		if (baseXmax != null) {
 			xMax = baseXmax;
 		}
-		double yMin = 0;
+		yMin = 0;
 		if (baseYmin != null) {
 			yMin = baseYmin;
 		}
-		double yMax = 0;
+		yMax = 0;
 		if (baseYmax != null) {
 			yMax = baseYmax;
 		}
@@ -294,8 +307,8 @@ public class GraphImage extends Image {
 			}
 		}
 
-		double xRange = xMax - xMin;
-		double yRange = yMax - yMin;
+		xRange = xMax - xMin;
+		yRange = yMax - yMin;
 
 		if (xRange < 1) {
 			xRange = 1;
@@ -304,17 +317,46 @@ public class GraphImage extends Image {
 			yRange = 1;
 		}
 
-		double xMultiplier = innerWidth / xRange;
-		double yMultiplier = innerHeight / yRange;
+		xMultiplier = innerWidth / xRange;
+		yMultiplier = innerHeight / yRange;
 
-		int prevX = (int) (xMultiplier * data.get(0).getPosition());
-		int prevY = (int) (yMultiplier * data.get(0).getValue());
+		prevX = (int) (xMultiplier * data.get(0).getPosition());
+		prevY = (int) (yMultiplier * data.get(0).getValue());
 
-		int minX = (int) (xMultiplier * xMin);
-		int minY = (int) (yMultiplier * yMin);
+		minX = (int) (xMultiplier * xMin);
+		minY = (int) (yMultiplier * yMin);
 
-		int offsetX = BORDER_WIDTH - minX;
-		int offsetY = BORDER_WIDTH + innerHeight + minY;
+		offsetX = BORDER_WIDTH - minX;
+		offsetY = BORDER_WIDTH + innerHeight + minY;
+	}
+
+	@Override
+	public void redraw() {
+
+		super.redraw();
+
+		calculateNumerics();
+
+		drawRectangle(0, 0, getWidth()-1, getHeight()-1, getBackgroundColor());
+
+		ColorRGB black = getForegroundColor();
+		// y axis
+		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + innerHeight, black);
+		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH - 4, BORDER_WIDTH + 9, black);
+		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + 4, BORDER_WIDTH + 9, black);
+		// x axis
+		drawLine(BORDER_WIDTH, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, black);
+		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight - 4, black);
+		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight + 4, black);
+
+		if (data == null) {
+			return;
+		}
+		if (data.size() < 1) {
+			return;
+		}
+
+		ColorRGB dataColor = getDataColor();
 
 		for (GraphDataPoint dataPoint : data) {
 
