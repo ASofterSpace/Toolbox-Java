@@ -769,6 +769,14 @@ public class StrUtils {
 		}
 	}
 
+	public static String intToStr(Integer value) {
+		return ""+value;
+	}
+
+	public static String intToStr(int value) {
+		return ""+value;
+	}
+
 	public static Double strToDouble(String value) {
 
 		if (value == null) {
@@ -786,6 +794,14 @@ public class StrUtils {
 		} catch (NumberFormatException e) {
 			return null;
 		}
+	}
+
+	public static String doubleToStr(Double value) {
+		return ""+value;
+	}
+
+	public static String doubleToStr(double value) {
+		return ""+value;
 	}
 
 	/**

@@ -61,6 +61,9 @@ public class WebExtractor {
 	}
 
 	public static String extract(String html, String strbefore, String strafter) {
+		if (html == null) {
+			return null;
+		}
 		int len = strbefore.length();
 		int startindex = html.indexOf(strbefore);
 		int endindex = html.indexOf(strafter, startindex + len);
