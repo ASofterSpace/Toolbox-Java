@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.images;
 
+import com.asofterspace.toolbox.utils.MathUtils;
+
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
@@ -34,18 +36,23 @@ public class Image {
 
 
 	public Image(int width, int height) {
-
-		init(this, width, height);
-
-		clear();
+		init(width, height);
 	}
 
-	private static void init(Image instance, int width, int height) {
+	public Image() {
+		init(8, 8);
+	}
 
-		instance.height = height;
-		instance.width = width;
-
-		instance.data = new ColorRGB[height][width];
+	/**
+	 * Internal constructor; only called by copy() and static factory methods,
+	 * as we want to only allow the outside world to actually create cleared images
+	 */
+	private Image(int width, int height, boolean doClear) {
+		if (doClear) {
+			init(width, height);
+		} else {
+			initWithoutClear(width, height);
+		}
 	}
 
 	public Image(ColorRGB[][] data) {
@@ -61,10 +68,19 @@ public class Image {
 		}
 	}
 
-	/**
-	 * internal constructor; only called by copy() and static factory methods
-	 */
-	private Image() {
+	protected void init(int width, int height) {
+
+		initWithoutClear(width, height);
+
+		clear();
+	}
+
+	protected void initWithoutClear(int width, int height) {
+
+		this.height = height;
+		this.width = width;
+
+		this.data = new ColorRGB[height][width];
 	}
 
 	/**
@@ -73,9 +89,7 @@ public class Image {
 	 */
 	public Image copy() {
 
-		Image result = new Image();
-
-		init(result, width, height);
+		Image result = new Image(width, height, false);
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -163,7 +177,7 @@ public class Image {
 	}
 
 	public void setWidthAndHeight(int newWidth, int newHeight) {
-		init(this, newWidth, newHeight);
+		init(newWidth, newHeight);
 	}
 
 	public int getWidth() {
@@ -283,9 +297,9 @@ public class Image {
 			for (int x = startX; x <= endX; x++) {
 				int y;
 				if (invertDirection) {
-					y = startY + (((endX - x) * lineHeight) / lineWidth);
+					y = startY + MathUtils.divideInts((endX - x) * lineHeight, lineWidth);
 				} else {
-					y = startY + (((x - startX) * lineHeight) / lineWidth);
+					y = startY + MathUtils.divideInts((x - startX) * lineHeight, lineWidth);
 				}
 				drawLinePoint(x, y, lineColor);
 			}
@@ -293,9 +307,9 @@ public class Image {
 			for (int y = startY; y <= endY; y++) {
 				int x;
 				if (invertDirection) {
-					x = startX + (((endY - y) * lineWidth) / lineHeight);
+					x = startX + MathUtils.divideInts((endY - y) * lineWidth, lineHeight);
 				} else {
-					x = startX + (((y - startY) * lineWidth) / lineHeight);
+					x = startX + MathUtils.divideInts((y - startY) * lineWidth, lineHeight);
 				}
 				drawLinePoint(x, y, lineColor);
 			}
@@ -398,9 +412,7 @@ public class Image {
 
 	public static Image createFromAwtImage(BufferedImage javaImg) {
 
-		Image result = new Image();
-
-		init(result, javaImg.getWidth(), javaImg.getHeight());
+		Image result = new Image(javaImg.getWidth(), javaImg.getHeight(), false);
 
 		result.drawAwtImage(javaImg, 0, 0);
 

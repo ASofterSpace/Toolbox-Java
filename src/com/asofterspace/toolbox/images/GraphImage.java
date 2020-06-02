@@ -63,7 +63,11 @@ public class GraphImage extends Image {
 	}
 
 	public GraphImage() {
-		super(8, 8);
+		super();
+	}
+
+	public void setInnerWidthAndHeight(int newWidth, int newHeight) {
+		init(newWidth + (2 * BORDER_WIDTH), newHeight + (2 * BORDER_WIDTH));
 	}
 
 	/**
@@ -274,6 +278,13 @@ public class GraphImage extends Image {
 		outerHeight = getHeight();
 		innerWidth = outerWidth - 2 * BORDER_WIDTH;
 		innerHeight = outerHeight - 2 * BORDER_WIDTH;
+
+		if (data == null) {
+			return;
+		}
+		if (data.size() < 1) {
+			return;
+		}
 
 		xMin = data.get(0).getPosition();
 		if (baseXmin != null) {
