@@ -18,6 +18,8 @@ public class MathUtilsTest implements Test {
 		findMinimaTest();
 
 		findMaximaTest();
+
+		divideIntsTest();
 	}
 
 	public void findMinimaTest() {
@@ -133,6 +135,31 @@ public class MathUtilsTest implements Test {
 		}
 
 		TestUtils.succeed();
+	}
+
+	public void divideIntsTest() {
+
+		TestUtils.start("Divide Ints");
+
+		testDivideInts(0, 1, 0);
+		testDivideInts(4, 2, 2);
+		testDivideInts(6, 2, 3);
+		testDivideInts(9, 3, 3);
+		testDivideInts(10, 3, 3);
+		testDivideInts(11, 3, 4);
+		testDivideInts(12, 3, 4);
+
+		TestUtils.succeed();
+	}
+
+	private void testDivideInts(int dividend, int divisor, int expectedResult) {
+
+		int res = MathUtils.divideInts(dividend, divisor);
+
+		if (res != expectedResult) {
+			TestUtils.fail("We called x = " + dividend + " / " + divisor +
+				" and did not get x == " + expectedResult + "!");
+		}
 	}
 
 }

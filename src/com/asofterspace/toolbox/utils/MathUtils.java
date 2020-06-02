@@ -101,4 +101,18 @@ public class MathUtils {
 		return result;
 	}
 
+	/**
+	 * Calculates the result of dividend / divisor - that is, this divides one int by
+	 * another int and does so cheaply (so, quickly) but still kind-of-correctly -
+	 * that is, instead of just throwing away the remainder, we do check for it and
+	 * round up if it is high enough
+	 */
+	public static int divideInts(int dividend, int divisor) {
+		int result = dividend / divisor;
+		if (dividend % divisor > divisor / 2) {
+			result++;
+		}
+		return result;
+	}
+
 }
