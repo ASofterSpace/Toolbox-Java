@@ -11,7 +11,11 @@ public enum Currency {
 	USD,
 	GBP,
 	CHF,
-	SEK;
+	SEK,
+	DKK,
+	CAD,
+	PLN,
+	TRY;
 
 
 	public static Currency fromString(String str) {
@@ -27,6 +31,20 @@ public enum Currency {
 				return EUR;
 			case "USD":
 				return USD;
+			case "GBP":
+				return GBP;
+			case "CHF":
+				return CHF;
+			case "SEK":
+				return SEK;
+			case "DKK":
+				return DKK;
+			case "CAD":
+				return CAD;
+			case "PLN":
+				return PLN;
+			case "TRY":
+				return TRY;
 		}
 
 		return null;
