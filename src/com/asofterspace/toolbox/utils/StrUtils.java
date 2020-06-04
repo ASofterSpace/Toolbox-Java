@@ -838,4 +838,82 @@ public class StrUtils {
 		}
 		return str.substring(0, 1).toLowerCase() + str.substring(1);
 	}
+
+	public static String replaceFirst(String origStr, String findThis, String replaceWith) {
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		if (replaceWith == null) {
+			replaceWith = "";
+		}
+		int index = origStr.indexOf(findThis);
+		if (index < 0) {
+			return origStr;
+		}
+		origStr = origStr.substring(0, index) + replaceWith + origStr.substring(index + findThis.length());
+		return origStr;
+	}
+
+	public static String replaceLast(String origStr, String findThis, String replaceWith) {
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		if (replaceWith == null) {
+			replaceWith = "";
+		}
+		int index = origStr.lastIndexOf(findThis);
+		if (index < 0) {
+			return origStr;
+		}
+		origStr = origStr.substring(0, index) + replaceWith + origStr.substring(index + findThis.length());
+		return origStr;
+	}
+
+	/**
+	 * Replaces all occurrences of findThis in a string with replaceWith
+	 * This does NOT use a regex, or any other nonsense - just plain string comparison
+	 * Also, this only replaces all once - call replaceAllRepeatedly if you want to ensure
+	 * that the result does not contain any occurrences of findThis anymore at all
+	 * (With this method, if origStr is "foobar", and findThis is "o" and replaceWith is "oo",
+	 * we return "foooobar" instead of looping forever)
+	 */
+	public static String replaceAll(String origStr, String findThis, String replaceWith) {
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		if (replaceWith == null) {
+			replaceWith = "";
+		}
+		StringBuilder result = new StringBuilder();
+		int index = origStr.indexOf(findThis);
+		while (index >= 0) {
+			result.append(origStr.substring(0, index));
+			result.append(replaceWith);
+			origStr = origStr.substring(index + findThis.length());
+		}
+		result.append(origStr);
+		return result.toString();
+	}
+
+	public static String replaceAllRepeatedly(String origStr, String findThis, String replaceWith) {
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		while (origStr.contains(findThis)) {
+			origStr = replaceAll(origStr, findThis, replaceWith);
+		}
+		return origStr;
+	}
 }
