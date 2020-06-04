@@ -28,6 +28,10 @@ public class StrUtilsTest implements Test {
 		strToIntTest();
 
 		strToDoubleTest();
+
+		replaceAllTest();
+
+		replaceAllRepeatedlyTest();
 	}
 
 	public void countStringInStringTest() {
@@ -177,6 +181,55 @@ public class StrUtilsTest implements Test {
 			TestUtils.fail("We called strToDouble(\"" + origStr + "\") and got " + result +
 				", but expected a result between " + targetDoubleLow + " and " + targetDoubleHigh + "!");
 		}
+	}
+
+	private void replaceAllTest() {
+
+		TestUtils.start("replaceAll");
+
+		String result = StrUtils.replaceAll("foobaro", "o", "oo");
+
+		if (!"foooobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"foobaro\", \"o\", \"oo\") and got " +
+				result + " instead of \"foooobaroo\"!");
+		}
+
+		result = StrUtils.replaceAll("ofoobaro", "o", "oo");
+
+		if (!"oofoooobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"ofoobaro\", \"o\", \"oo\") and got " +
+				result + " instead of \"oofoooobaroo\"!");
+		}
+
+		result = StrUtils.replaceAll("foobarooo", "oo", "o");
+
+		if (!"fobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"foobarooo\", \"oo\", \"o\") and got " +
+				result + " instead of \"fobaroo\"!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void replaceAllRepeatedlyTest() {
+
+		TestUtils.start("replaceAllRepeatedly");
+
+		String result = StrUtils.replaceAllRepeatedly("foobaro", "oo", "o");
+
+		if (!"fobaro".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAllRepeatedly(\"foobaro\", \"oo\", \"o\") and got " +
+				result + " instead of \"fobaro\"!");
+		}
+
+		result = StrUtils.replaceAllRepeatedly("foobarooo", "oo", "o");
+
+		if (!"fobaro".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAllRepeatedly(\"foobarooo\", \"oo\", \"o\") and got " +
+				result + " instead of \"fobaro\"!");
+		}
+
+		TestUtils.succeed();
 	}
 
 }
