@@ -797,6 +797,17 @@ public abstract class Code extends DefaultStyledDocument {
 		origText = origText.replace("\",\"", "\"\n\"");
 		origText = origText.replace("\",\n", "\"\n");
 
+		String preText = "";
+		String posText = "";
+		while (origText.startsWith("(") || origText.startsWith("[") || origText.startsWith("{") || origText.startsWith("<")) {
+			preText += origText.charAt(0);
+			origText = origText.substring(1);
+		}
+		while (origText.endsWith("(") || origText.endsWith("[") || origText.endsWith("{") || origText.endsWith("<")) {
+			posText = origText.charAt(0) + posText;
+			origText = origText.substring(0, origText.length() - 1);
+		}
+
 		List<String> lines = Arrays.asList(origText.split("\n"));
 		List<String> sortlines = new ArrayList<>();
 
@@ -820,7 +831,7 @@ public abstract class Code extends DefaultStyledDocument {
 			newline = ", ";
 		}
 
-		return newText.toString();
+		return preText + newText.toString() + posText;
 	}
 
 	public void addMissingImports() {
