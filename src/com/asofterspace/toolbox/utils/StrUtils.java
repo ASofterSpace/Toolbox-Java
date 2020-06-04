@@ -899,6 +899,7 @@ public class StrUtils {
 			result.append(origStr.substring(0, index));
 			result.append(replaceWith);
 			origStr = origStr.substring(index + findThis.length());
+			index = origStr.indexOf(findThis);
 		}
 		result.append(origStr);
 		return result.toString();
