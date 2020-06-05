@@ -716,11 +716,8 @@ public class StrUtils {
 
 	public static String prepareForParsing(String value) {
 
-		// remove non-breaking space character
-		value = value.replaceAll("\u00a0", "");
-
-		// remove regular whitespace characters
-		value = value.trim();
+		// super-trim whitespace characters
+		value = normalizeWhitespace(value);
 
 		// ensure this ends with a dot, and all commas are taken out
 		int lastComma = value.lastIndexOf(",");
@@ -916,5 +913,32 @@ public class StrUtils {
 			origStr = replaceAll(origStr, findThis, replaceWith);
 		}
 		return origStr;
+	}
+
+	/**
+	 * Trims whitespace and ensures that internal whitespaces are only the " " character (no newlines,
+	 * no tabs), and that there is never more than one space, so e.g.:
+	 * " foo    bar   " turns to "foo bar"
+	 * In this way, you can also think about this function as "super-trim()" :)
+	 */
+	public static String normalizeWhitespace(String origStr) {
+
+		String value = origStr;
+
+		// TODO :: actually make this more performant by iterating over the entire string just once
+		// and building the result in a StringBuilder, char-for-char, unless the char is a whitespace...
+
+		// remove non-breaking space character
+		value = value.replaceAll("\u00a0", "");
+		value = value.replace('\r', ' ');
+		value = value.replace('\n', ' ');
+		value = value.replace('\t', ' ');
+
+		value = replaceAllRepeatedly(value, "  ", " ");
+
+		// remove outer whitespace characters
+		value = value.trim();
+
+		return value;
 	}
 }
