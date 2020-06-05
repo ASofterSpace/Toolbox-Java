@@ -198,9 +198,18 @@ public class Directory {
 	 */
 	public void clear() {
 
-		delete();
-
 		create();
+
+		boolean recursively = false;
+		List<File> delFiles = getAllFiles(recursively);
+		List<Directory> delDirs = getAllDirectories(recursively);
+
+		for (File delFile : delFiles) {
+			delFile.delete();
+		}
+		for (Directory delDir : delDirs) {
+			delDir.delete();
+		}
 	}
 
 	public Boolean isEmpty() {
