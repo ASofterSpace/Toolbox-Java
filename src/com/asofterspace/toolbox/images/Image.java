@@ -767,6 +767,15 @@ public class Image {
 		}
 	}
 
+	public void intermix(ColorRGB intermixWith, float amountOfPictureRemaining) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = ColorRGB.intermix(data[y][x], intermixWith, amountOfPictureRemaining);
+			}
+		}
+	}
+
 	public void invert() {
 
 		for (int x = 0; x < width; x++) {
