@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.io;
 import com.asofterspace.toolbox.utils.CallbackWithString;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class IoUtils {
 	 * Just execute a simple command, waiting until it returns, and for each line call the callback
 	 */
 	public static void execute(String command, CallbackWithString callback) {
-
+		/*
 		try {
 			Process process = Runtime.getRuntime().exec(command);
 
@@ -122,12 +123,18 @@ public class IoUtils {
 		} catch (IOException e) {
 			System.err.println("There was an I/O Exception while executing an external command synchronously: " + e);
 		}
+		*/
 
-		/*
 		List<String> input = new ArrayList<>();
-		input.add(command);
+		String[] commands = command.split(" ");
+		for (String curCommand : commands) {
+			input.add(curCommand);
+		}
 
 		ProcessBuilder builder = new ProcessBuilder(input);
+
+		// we want to get stdout and stderr!
+		builder.redirectErrorStream(true);
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
 			String curline = reader.readLine();
@@ -139,7 +146,6 @@ public class IoUtils {
 		} catch (IOException e) {
 			System.err.println("There was an I/O Exception while executing an external command: " + e);
 		}
-		*/
 	}
 
 	/**
