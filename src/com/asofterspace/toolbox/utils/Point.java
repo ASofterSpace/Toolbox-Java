@@ -18,7 +18,15 @@ public class Point<X, Y> extends Pair<X, Y> {
 		return getLeft();
 	}
 
+	public void setX(X x) {
+		setLeft(x);
+	}
+
 	public Y getY() {
 		return getRight();
+	}
+
+	public void setY(Y y) {
+		setRight(y);
 	}
 }
