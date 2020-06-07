@@ -2,9 +2,10 @@
  * Unlicensed code created by A Softer Space, 2020
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.io;
+package com.asofterspace.toolbox.music;
 
 import com.asofterspace.toolbox.io.BinaryFile;
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.utils.BitUtils;
 
@@ -186,6 +187,15 @@ public class WavFile extends BinaryFile {
 
 		// we renormalized to 16
 		bitsPerSample = 16;
+	}
+
+	public SoundData getSoundData() {
+		return new SoundData(getLeftData(), getRightData());
+	}
+
+	public void setSoundData(SoundData soundData) {
+		setLeftData(soundData.getLeftData());
+		setRightData(soundData.getRightData());
 	}
 
 	public int[] getData() {
