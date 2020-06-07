@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.images;
 
 import java.awt.Color;
+import java.util.Random;
 
 
 /**
@@ -21,6 +22,8 @@ public class ColorRGB {
 	private final byte g;
 	private final byte b;
 	private final byte a;
+
+	private final static Random RANDOM = new Random();
 
 	public final static ColorRGB WHITE = new ColorRGB(255, 255, 255, 255);
 	public final static ColorRGB BLACK = new ColorRGB(  0,   0,   0, 255);
@@ -256,6 +259,58 @@ public class ColorRGB {
 			(int) (((((int) one.b) & 0xFF) * aO) + ((((int) two.b) & 0xFF) * aT)),
 			(int) (((((int) one.a) & 0xFF) * aO) + ((((int) two.a) & 0xFF) * aT))
 		);
+	}
+
+	/**
+	 * Gets a random color (could be any RGB color, but non-transparent)
+	 */
+	public static ColorRGB random() {
+		return new ColorRGB(RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256));
+	}
+
+	/**
+	 * Gets a random color (ensuring that the color is actually "colorful" in some way)
+	 */
+	public static ColorRGB randomColorful() {
+		while (true) {
+			int r = RANDOM.nextInt(256);
+			int g = RANDOM.nextInt(256);
+			int b = RANDOM.nextInt(256);
+			if ((r > 64) && (r < 196)) {
+				continue;
+			}
+			if ((g > 64) && (g < 196)) {
+				continue;
+			}
+			if ((b > 64) && (b < 196)) {
+				continue;
+			}
+			return new ColorRGB(r, g, b);
+		}
+	}
+
+	/**
+	 * Gets a random color (ensuring that the color is actually "colorful" in some way and is bright)
+	 */
+	public static ColorRGB randomColorfulBright() {
+		while (true) {
+			int r = RANDOM.nextInt(256);
+			int g = RANDOM.nextInt(256);
+			int b = RANDOM.nextInt(256);
+			if ((r > 64) && (r < 196)) {
+				continue;
+			}
+			if ((g > 64) && (g < 196)) {
+				continue;
+			}
+			if ((b > 64) && (b < 196)) {
+				continue;
+			}
+			if (r + g + b < 128*3) {
+				continue;
+			}
+			return new ColorRGB(r, g, b);
+		}
 	}
 
 	public ColorRGB getEditedChannels(String baseForR, double modifierForR,
