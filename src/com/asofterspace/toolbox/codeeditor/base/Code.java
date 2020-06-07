@@ -2013,7 +2013,14 @@ public abstract class Code extends DefaultStyledDocument {
 								// for all others, if we have Foo bar = new, then actually automagically add:
 								// Foo bar = new Foo();
 								String newClazz = line.trim();
-								newClazz = newClazz.substring(0, newClazz.indexOf(" "));
+								String genericClazz = "";
+								if (newClazz.contains("<")) {
+									genericClazz = newClazz.substring(newClazz.indexOf("<"));
+									newClazz = newClazz.substring(0, newClazz.indexOf("<"));
+								}
+								if (newClazz.contains(" ")) {
+									newClazz = newClazz.substring(0, newClazz.indexOf(" "));
+								}
 
 								// buuut do not do it if the string contains a dot, or does not start with a
 								// capital letter - so do not do it for Foo.blubb = new or bar = new
@@ -2021,12 +2028,23 @@ public abstract class Code extends DefaultStyledDocument {
 									(!newClazz.contains(".")) &&
 									(Character.isUpperCase(newClazz.charAt(0)))) {
 
-									line = line + " " + newClazz + "();";
+									int caretOffset = 2;
+									if (newClazz.endsWith("[]")) {
+										line = line + " " + newClazz + ";";
+										caretOffset = 0;
+									} else {
+										if (!"".equals(genericClazz)) {
+											line = line + " " + newClazz + "<>();";
+											caretOffset = 4;
+										} else {
+											line = line + " " + newClazz + "();";
+										}
+									}
 									String newContent = contentStart + line + contentEnd;
 
 									int origCaretPos = decoratedEditor.getCaretPosition();
 									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + 2);
+									decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + caretOffset);
 
 									// we do NOT bubble up the chain, as we already set the text explicitly!
 									return;
