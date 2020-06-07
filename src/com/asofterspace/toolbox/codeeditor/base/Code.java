@@ -1944,87 +1944,90 @@ public abstract class Code extends DefaultStyledDocument {
 							lineEnd = StrUtils.getLineEndFromPosition(offset, content);
 							int lineOffset = offset - lineStart;
 
-							String contentStart = content.substring(0, lineStart);
-							line = content.substring(lineStart, lineEnd);
-							String contentEnd = content.substring(lineEnd, content.length());
+							if (offset == lineEnd) {
 
-							int tabAt = line.indexOf("\tList<");
-							int spaceAt = line.indexOf(" List<");
+								String contentStart = content.substring(0, lineStart);
+								line = content.substring(lineStart, lineEnd);
+								String contentEnd = content.substring(lineEnd, content.length());
 
-							if (line.substring(lineOffset).equals("")) {
-								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-									((spaceAt >= 0) && (spaceAt < lineOffset))) {
+								int tabAt = line.indexOf("\tList<");
+								int spaceAt = line.indexOf(" List<");
 
-									line = line + " ArrayList<>();";
+								if (line.substring(lineOffset).equals("")) {
+									if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+										((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+										line = line + " ArrayList<>();";
+										String newContent = contentStart + line + contentEnd;
+
+										int origCaretPos = decoratedEditor.getCaretPosition();
+										decoratedEditor.setText(newContent);
+										decoratedEditor.setCaretPosition(origCaretPos + 15);
+
+										// we do NOT bubble up the chain, as we already set the text explicitly!
+										return;
+									}
+								}
+
+								tabAt = line.indexOf("\tSet<");
+								spaceAt = line.indexOf(" Set<");
+
+								if (line.substring(lineOffset).equals("")) {
+									if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+										((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+										line = line + " HashSet<>();";
+										String newContent = contentStart + line + contentEnd;
+
+										int origCaretPos = decoratedEditor.getCaretPosition();
+										decoratedEditor.setText(newContent);
+										decoratedEditor.setCaretPosition(origCaretPos + 13);
+
+										// we do NOT bubble up the chain, as we already set the text explicitly!
+										return;
+									}
+								}
+
+								tabAt = line.indexOf("\tMap<");
+								spaceAt = line.indexOf(" Map<");
+
+								if (line.substring(lineOffset).equals("")) {
+									if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+										((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+										line = line + " HashMap<>();";
+										String newContent = contentStart + line + contentEnd;
+
+										int origCaretPos = decoratedEditor.getCaretPosition();
+										decoratedEditor.setText(newContent);
+										decoratedEditor.setCaretPosition(origCaretPos + 13);
+
+										// we do NOT bubble up the chain, as we already set the text explicitly!
+										return;
+									}
+								}
+
+								// for all others, if we have Foo bar = new, then actually automagically add:
+								// Foo bar = new Foo();
+								String newClazz = line.trim();
+								newClazz = newClazz.substring(0, newClazz.indexOf(" "));
+
+								// buuut do not do it if the string contains a dot, or does not start with a
+								// capital letter - so do not do it for Foo.blubb = new or bar = new
+								if ((newClazz.length() > 0) &&
+									(!newClazz.contains(".")) &&
+									(Character.isUpperCase(newClazz.charAt(0)))) {
+
+									line = line + " " + newClazz + "();";
 									String newContent = contentStart + line + contentEnd;
 
 									int origCaretPos = decoratedEditor.getCaretPosition();
 									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + 15);
+									decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + 2);
 
 									// we do NOT bubble up the chain, as we already set the text explicitly!
 									return;
 								}
-							}
-
-							tabAt = line.indexOf("\tSet<");
-							spaceAt = line.indexOf(" Set<");
-
-							if (line.substring(lineOffset).equals("")) {
-								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-									((spaceAt >= 0) && (spaceAt < lineOffset))) {
-
-									line = line + " HashSet<>();";
-									String newContent = contentStart + line + contentEnd;
-
-									int origCaretPos = decoratedEditor.getCaretPosition();
-									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + 13);
-
-									// we do NOT bubble up the chain, as we already set the text explicitly!
-									return;
-								}
-							}
-
-							tabAt = line.indexOf("\tMap<");
-							spaceAt = line.indexOf(" Map<");
-
-							if (line.substring(lineOffset).equals("")) {
-								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-									((spaceAt >= 0) && (spaceAt < lineOffset))) {
-
-									line = line + " HashMap<>();";
-									String newContent = contentStart + line + contentEnd;
-
-									int origCaretPos = decoratedEditor.getCaretPosition();
-									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + 13);
-
-									// we do NOT bubble up the chain, as we already set the text explicitly!
-									return;
-								}
-							}
-
-							// for all others, if we have Foo bar = new, then actually automagically add:
-							// Foo bar = new Foo();
-							String newClazz = line.trim();
-							newClazz = newClazz.substring(0, newClazz.indexOf(" "));
-
-							// buuut do not do it if the string contains a dot, or does not start with a
-							// capital letter - so do not do it for Foo.blubb = new or bar = new
-							if ((newClazz.length() > 0) &&
-								(!newClazz.contains(".")) &&
-								(Character.isUpperCase(newClazz.charAt(0)))) {
-
-								line = line + " " + newClazz + "();";
-								String newContent = contentStart + line + contentEnd;
-
-								int origCaretPos = decoratedEditor.getCaretPosition();
-								decoratedEditor.setText(newContent);
-								decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + 2);
-
-								// we do NOT bubble up the chain, as we already set the text explicitly!
-								return;
 							}
 						}
 					}
