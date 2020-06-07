@@ -2026,7 +2026,7 @@ public abstract class Code extends DefaultStyledDocument {
 								// capital letter - so do not do it for Foo.blubb = new or bar = new
 								if ((newClazz.length() > 0) &&
 									(!newClazz.contains(".")) &&
-									(Character.isUpperCase(newClazz.charAt(0)))) {
+									(Character.isUpperCase(newClazz.charAt(0)) || newClazz.endsWith("[]"))) {
 
 									int caretOffset = 2;
 									if (newClazz.endsWith("[]")) {
