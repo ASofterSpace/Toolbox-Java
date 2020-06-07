@@ -2441,6 +2441,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 			// the line could look like:
 			// private String blubb;
+			// private Map<Foo, Bar> boink = bla.blubb();
 			// private Object foo = new AwesomeObject(blabliblubb);
 
 			if (line.endsWith(";")) {
@@ -2450,6 +2451,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 			// the line could look like:
 			// private String blubb
+			// private Map<Foo, Bar> boink
 			// private Object foo = new AwesomeObject(blabliblubb)
 
 			if (line.contains("=")) {
@@ -2459,6 +2461,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 			// the line could look like:
 			// private String blubb
+			// private Map<Foo, Bar> boink
 			// private Object foo
 
 			String lineName = "unknown";
@@ -2469,15 +2472,34 @@ public abstract class Code extends DefaultStyledDocument {
 
 			// the lineName could look like:
 			// blubb
+			// boink
 			// foo
 
 			String lineType = "unknown";
+			String lineGenerics = "";
+			if (line.contains("<")) {
+				lineGenerics = line.substring(line.indexOf("<"));
+				line = line.substring(0, line.indexOf("<"));
+			}
 			if (line.contains(" ")) {
 				lineType = line.substring(line.lastIndexOf(" ") + 1);
 			}
 
 			// the lineType could look like:
 			// String
+			// Map
+			// Object
+
+			// the lineGenerics could look like:
+			//
+			// <Foo, Bar>
+			//
+
+			lineType += lineGenerics;
+
+			// the lineType could look like:
+			// String
+			// Map<Foo, Bar>
 			// Object
 
 			fields.add(new CodeField(lineName, lineType));

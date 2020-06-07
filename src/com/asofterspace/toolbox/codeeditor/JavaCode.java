@@ -240,6 +240,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						if (classNameStr.contains(" ")) {
 							classNameStr = classNameStr.substring(0, classNameStr.indexOf(" "));
 						}
+						if (classNameStr.contains("<")) {
+							classNameStr = classNameStr.substring(0, classNameStr.indexOf("<"));
+						}
 						break;
 					}
 				}
