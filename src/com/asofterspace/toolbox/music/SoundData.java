@@ -119,9 +119,9 @@ public class SoundData {
 		}
 		int[] newLeft = new int[noiseLength];
 		int[] newRight = new int[noiseLength];
-		for (int i = noiseStart; i < noiseLength; i++) {
-			newLeft[i - noiseStart] = leftData[i];
-			newRight[i - noiseStart] = rightData[i];
+		for (int i = 0; i < noiseLength; i++) {
+			newLeft[i] = leftData[i + noiseStart];
+			newRight[i] = rightData[i + noiseStart];
 		}
 		leftData = newLeft;
 		rightData = newRight;
