@@ -306,9 +306,15 @@ public class ColorRGB {
 			if ((b > 64) && (b < 196)) {
 				continue;
 			}
+			// avoid more than one being below 64
 			if (r + g + b < 128*3) {
 				continue;
 			}
+			// avoid more than two being above 196
+			if (r + g + b > 196*3) {
+				continue;
+			}
+			// we are now sure that two are above 196 and one is below 64
 			return new ColorRGB(r, g, b);
 		}
 	}
