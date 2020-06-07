@@ -1944,11 +1944,14 @@ public abstract class Code extends DefaultStyledDocument {
 							lineEnd = StrUtils.getLineEndFromPosition(offset, content);
 							int lineOffset = offset - lineStart;
 
-							if (offset == lineEnd) {
+							String contentStart = content.substring(0, lineStart);
+							line = content.substring(lineStart, lineEnd);
+							String contentEnd = content.substring(lineEnd, content.length());
+							String lineFollowing = line.substring(lineOffset);
 
-								String contentStart = content.substring(0, lineStart);
-								line = content.substring(lineStart, lineEnd);
-								String contentEnd = content.substring(lineEnd, content.length());
+							if ("".equals(lineFollowing.trim())) {
+
+								line = line.substring(0, lineOffset);
 
 								int tabAt = line.indexOf("\tList<");
 								int spaceAt = line.indexOf(" List<");
