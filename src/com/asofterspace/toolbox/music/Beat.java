@@ -55,4 +55,9 @@ public class Beat {
 	public void setJigglieness(long jigglieness) {
 		this.jigglieness = jigglieness;
 	}
+
+	public String toString() {
+		return "Beat at " + position + " [length: " + length + ", loudness: " +
+			loudness + ", jigglieness: " + jigglieness + "]";
+	}
 }
