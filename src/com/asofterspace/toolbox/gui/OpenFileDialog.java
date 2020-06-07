@@ -258,6 +258,19 @@ public class OpenFileDialog {
 
 	private void enterDirectory(String directoryName) {
 		Directory newDirectory = new Directory(currentDirectory, directoryName);
+
+		// automatically descend into folders that only contain exactly one other folder
+		while (true) {
+			boolean recursively = false;
+			List<Directory> dirs = newDirectory.getAllDirectories(recursively);
+			List<File> files = newDirectory.getAllFiles(recursively);
+			if ((files.size() == 0) && (dirs.size() == 1)) {
+				newDirectory = dirs.get(0);
+			} else {
+				break;
+			}
+		}
+
 		if (newDirectory.exists()) {
 			currentDirectory = newDirectory;
 			refreshFileView();
