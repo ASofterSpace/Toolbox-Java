@@ -309,7 +309,18 @@ public class WebTest implements Test {
 		String result = WebExtractor.removeHtmlTagsFromText(html);
 
 		if (!expectedResult.equals(result)) {
-			TestUtils.fail("We tried to remove HTML tags from a given string but got:\n" + result);
+			TestUtils.fail("We tried to remove HTML tags from the first given string but got:\n" + result);
+			return;
+		}
+
+		html = "<fine>blubbel<broken";
+
+		expectedResult = "blubbel";
+
+		result = WebExtractor.removeHtmlTagsFromText(html);
+
+		if (!expectedResult.equals(result)) {
+			TestUtils.fail("We tried to remove HTML tags from the second given string but got:\n" + result);
 			return;
 		}
 

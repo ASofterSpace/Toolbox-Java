@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.web;
 
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonParseException;
+import com.asofterspace.toolbox.io.XML;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.utils.StrUtils;
 
@@ -137,14 +138,6 @@ public class WebExtractor {
 	 * Bla! Blubb? Foo bar and so on!
 	 */
 	public static String removeHtmlTagsFromText(String str) {
-
-		if (str == null) {
-			return null;
-		}
-
-		while (str.contains("<")) {
-			str = str.substring(0, str.indexOf("<")) + str.substring(str.indexOf(">") + 1);
-		}
-		return str;
+		return XML.removeXmlTagsFromText(str);
 	}
 }

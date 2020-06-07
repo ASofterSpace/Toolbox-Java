@@ -185,4 +185,37 @@ public class XML extends Record {
 		return result.toString();
 	}
 
+	/**
+	 * Takes in something like:
+	 * Bla! Blubb? <a href="foo.bar">Foo bar</a> and so on!
+	 *
+	 * Returns something like:
+	 * Bla! Blubb? Foo bar and so on!
+	 */
+	public static String removeXmlTagsFromText(String str) {
+
+		if (str == null) {
+			return null;
+		}
+
+		StringBuilder result = new StringBuilder();
+		int offset = 0;
+		int pos = str.indexOf("<", offset);
+
+		while (pos >= 0) {
+			result.append(str.substring(offset, pos));
+			offset = pos;
+			offset = str.indexOf(">", offset);
+			if (offset < 0) {
+				return result.toString();
+			}
+			offset++;
+			pos = str.indexOf("<", offset);
+		}
+
+		result.append(str.substring(offset));
+
+		return result.toString();
+	}
+
 }
