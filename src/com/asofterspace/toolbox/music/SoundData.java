@@ -60,6 +60,13 @@ public class SoundData {
 		}
 	}
 
+	public void scale(double scaleFactor) {
+		for (int i = 0; i < leftData.length; i++) {
+			leftData[i] = (int) (scaleFactor * leftData[i]);
+			rightData[i] = (int) (scaleFactor * rightData[i]);
+		}
+	}
+
 	public void trim() {
 		int max = 0;
 		int min = 0;
