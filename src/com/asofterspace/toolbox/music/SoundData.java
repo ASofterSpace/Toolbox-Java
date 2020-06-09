@@ -25,12 +25,28 @@ public class SoundData {
 		return leftData;
 	}
 
+	public int[] getLeftDataCopy() {
+		int[] result = new int[leftData.length];
+		for (int i = 0; i < leftData.length; i++) {
+			result[i] = leftData[i];
+		}
+		return result;
+	}
+
 	public void setLeftData(int[] leftData) {
 		this.leftData = leftData;
 	}
 
 	public int[] getRightData() {
 		return rightData;
+	}
+
+	public int[] getRightDataCopy() {
+		int[] result = new int[rightData.length];
+		for (int i = 0; i < rightData.length; i++) {
+			result[i] = rightData[i];
+		}
+		return result;
 	}
 
 	public void setRightData(int[] rightData) {
