@@ -776,6 +776,15 @@ public class Image {
 		}
 	}
 
+	public void multiply(ColorRGB multiplyWith) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = ColorRGB.multiply(data[y][x], multiplyWith);
+			}
+		}
+	}
+
 	public void invert() {
 
 		for (int x = 0; x < width; x++) {

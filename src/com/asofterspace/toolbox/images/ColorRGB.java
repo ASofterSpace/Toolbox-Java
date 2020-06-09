@@ -301,6 +301,15 @@ public class ColorRGB {
 		);
 	}
 
+	public static ColorRGB multiply(ColorRGB one, ColorRGB two) {
+		return new ColorRGB(
+			((((int) one.r) & 0xFF) * (((int) two.r) & 0xFF)) / 255,
+			((((int) one.g) & 0xFF) * (((int) two.g) & 0xFF)) / 255,
+			((((int) one.b) & 0xFF) * (((int) two.b) & 0xFF)) / 255,
+			((((int) one.a) & 0xFF) * (((int) two.a) & 0xFF)) / 255
+		);
+	}
+
 	/**
 	 * Gets a random color (could be any RGB color, but non-transparent)
 	 */
