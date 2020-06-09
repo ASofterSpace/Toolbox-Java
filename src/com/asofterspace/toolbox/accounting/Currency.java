@@ -13,6 +13,7 @@ public enum Currency {
 	CHF,
 	SEK,
 	DKK,
+	NOK,
 	CAD,
 	PLN,
 	TRY;
@@ -39,6 +40,8 @@ public enum Currency {
 				return SEK;
 			case "DKK":
 				return DKK;
+			case "NOK":
+				return NOK;
 			case "CAD":
 				return CAD;
 			case "PLN":
