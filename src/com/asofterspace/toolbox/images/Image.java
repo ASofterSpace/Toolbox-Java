@@ -353,6 +353,14 @@ public class Image {
 	 */
 	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing) {
 
+		drawText(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, null);
+	}
+
+	/**
+	 * Specify one of left and right, and one of top and bottom - the other one will be chosen automatically
+	 */
+	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor) {
+
 		// prepare font settings for drawing the text
 		if (fontName == null) {
 			fontName = "Arial";
@@ -383,7 +391,11 @@ public class Image {
 
 		Graphics2D graphics = bufImg.createGraphics();
 		graphics.setFont(font);
-		graphics.setColor(Color.black);
+		if (textColor == null) {
+			graphics.setColor(Color.black);
+		} else {
+			graphics.setColor(textColor.toColor());
+		}
 		graphics.drawString(text, 0, textHeight);
 		graphics.dispose();
 

@@ -355,15 +355,16 @@ public class ColorRGB {
 			if ((b > 64) && (b < 196)) {
 				continue;
 			}
-			// avoid more than one being below 64
-			if (r + g + b < 128*3) {
+			// avoid more than two being below 64
+			if (r + g + b < 64+64+196) {
 				continue;
 			}
 			// avoid more than two being above 196
 			if (r + g + b > 196*3) {
 				continue;
 			}
-			// we are now sure that two are above 196 and one is below 64
+			// we are now sure that two are above 196 and one is below 64,
+			// or two are below 64 and one is above 196
 			return new ColorRGB(r, g, b);
 		}
 	}
@@ -527,7 +528,7 @@ public class ColorRGB {
 	}
 
 	public Color toColor() {
-		return new Color(r, g, b, a);
+		return new Color(((int) r) & 0xFF, ((int) g) & 0xFF, ((int) b) & 0xFF, ((int) a) & 0xFF);
 	}
 
 	public String toString() {
