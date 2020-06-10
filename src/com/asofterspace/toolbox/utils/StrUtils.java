@@ -719,6 +719,14 @@ public class StrUtils {
 		// super-trim whitespace characters
 		value = normalizeWhitespace(value);
 
+		// ignore a plusminus (it should only be in front of zero values anyway...)
+		if (value.startsWith("&plusmn;")) {
+			value = value.substring(8).trim();
+		}
+		if (value.startsWith("±")) {
+			value = value.substring(1).trim();
+		}
+
 		// ensure this ends with a dot, and all commas are taken out
 		int lastComma = value.lastIndexOf(",");
 		int lastDot = value.lastIndexOf(".");
