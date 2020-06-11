@@ -167,7 +167,10 @@ public class Image {
 
 	public void clear() {
 
-		ColorRGB defaultCol = new ColorRGB();
+		clear(new ColorRGB());
+	}
+
+	public void clear(ColorRGB defaultCol) {
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -348,18 +351,17 @@ public class Image {
 		drawText(text, top, right, bottom, left, null, null, null);
 	}
 
-	/**
-	 * Specify one of left and right, and one of top and bottom - the other one will be chosen automatically
-	 */
 	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing) {
 
 		drawText(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, null);
 	}
 
-	/**
-	 * Specify one of left and right, and one of top and bottom - the other one will be chosen automatically
-	 */
 	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor) {
+
+		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, null);
+	}
+
+	private void drawTextOnto(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor, Image targetImage, ColorRGB backgroundColor) {
 
 		// prepare font settings for drawing the text
 		if (fontName == null) {
@@ -387,6 +389,11 @@ public class Image {
 		int textWidth = metrics.stringWidth(text);
 		int textHeight = metrics.getMaxAscent();
 
+		if (targetImage != null) {
+			targetImage.setWidthAndHeight(textWidth, textHeight);
+			targetImage.clear(backgroundColor);
+		}
+
 		BufferedImage bufImg = new BufferedImage(textWidth, textHeight, BufferedImage.TYPE_INT_ARGB);
 
 		Graphics2D graphics = bufImg.createGraphics();
@@ -410,7 +417,11 @@ public class Image {
 			if (top == null) {
 				top = bottom - intermediate.getHeight();
 			}
-			draw(intermediate, left, top);
+			if (targetImage != null) {
+				targetImage.draw(intermediate, 0, 0);
+			} else {
+				draw(intermediate, left, top);
+			}
 		} else {
 			if (left == null) {
 				left = right - textWidth;
@@ -418,8 +429,19 @@ public class Image {
 			if (top == null) {
 				top = bottom - textHeight;
 			}
-			drawAwtImage(bufImg, left, top);
+			if (targetImage != null) {
+				targetImage.drawAwtImage(bufImg, 0, 0);
+			} else {
+				drawAwtImage(bufImg, left, top);
+			}
 		}
+	}
+
+	public static Image createTextImage(String text, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor, ColorRGB backgroundColor) {
+
+		Image result = new Image(1, 1);
+		result.drawTextOnto(text, 0, null, null, 0, fontName, fontSize, useAntiAliasing, textColor, result, backgroundColor);
+		return result;
 	}
 
 	public static Image createFromAwtImage(BufferedImage javaImg) {
