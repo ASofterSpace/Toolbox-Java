@@ -146,14 +146,9 @@ public class SoundData {
 	 */
 	public void trimAndAdd(int durationToAddInPos) {
 
-	}
-
-	/**
-	 * Trims the song by removing quiet parts at the beginning and end
-	 */
-	public void trim() {
 		int max = 0;
 		int min = 0;
+
 		for (int i = 0; i < leftData.length; i++) {
 			if (leftData[i] > max) {
 				max = leftData[i];
@@ -168,12 +163,16 @@ public class SoundData {
 				min = rightData[i];
 			}
 		}
+
 		if (- min > max) {
 			max = - min;
 		}
+
 		max = max / 1024;
+
 		int noiseStart = 0;
 		int noiseLength = 0;
+
 		for (int i = 0; i < leftData.length; i++) {
 			int val = leftData[i];
 			if (val < 0) {
@@ -192,6 +191,7 @@ public class SoundData {
 				break;
 			}
 		}
+
 		for (int i = noiseStart; i < leftData.length; i++) {
 			int val = leftData[i];
 			if (val < 0) {
@@ -208,13 +208,30 @@ public class SoundData {
 				noiseLength = i - noiseStart;
 			}
 		}
+
+		noiseLength += durationToAddInPos;
+
 		int[] newLeft = new int[noiseLength];
 		int[] newRight = new int[noiseLength];
+
 		for (int i = 0; i < noiseLength; i++) {
-			newLeft[i] = leftData[i + noiseStart];
-			newRight[i] = rightData[i + noiseStart];
+			if (i + noiseStart >= leftData.length) {
+				newLeft[i] = 0;
+				newRight[i] = 0;
+			} else {
+				newLeft[i] = leftData[i + noiseStart];
+				newRight[i] = rightData[i + noiseStart];
+			}
 		}
+
 		leftData = newLeft;
 		rightData = newRight;
+	}
+
+	/**
+	 * Trims the song by removing quiet parts at the beginning and end
+	 */
+	public void trim() {
+		trimAndAdd(0);
 	}
 }
