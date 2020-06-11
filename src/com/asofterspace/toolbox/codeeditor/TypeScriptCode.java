@@ -22,7 +22,7 @@ public class TypeScriptCode extends JavaCode {
 
 	// all primitive types of the Java language and other stuff that looks that way
 	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "function", "int", "interface", "long", "module", "null", "short", "string", "super", "this", "true", "undefined", "void"}
+		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "function", "int", "interface", "let", "long", "module", "null", "short", "string", "super", "this", "true", "undefined", "void"}
 	));
 
 
