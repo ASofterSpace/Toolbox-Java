@@ -39,6 +39,14 @@ public class Image {
 		init(width, height);
 	}
 
+	/**
+	 * Creates an image of the given dimensions, pre-filled with the given background color
+	 */
+	public Image(int width, int height, ColorRGB backgroundColor) {
+		initWithoutClear(width, height);
+		clear(backgroundColor);
+	}
+
 	public Image() {
 		init(8, 8);
 	}
@@ -172,10 +180,29 @@ public class Image {
 
 	public void clear(ColorRGB defaultCol) {
 
+		/*
+		// naive implementation:
+
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				this.data[y][x] = defaultCol;
 			}
+		}
+		*/
+
+		// quicker:
+
+		if ((height < 1) || (width < 1)) {
+			return;
+		}
+
+		int y = 0;
+		for (int x = 0; x < width; x++) {
+			this.data[y][x] = defaultCol;
+		}
+
+		for (y = 1; y < height; y++) {
+			System.arraycopy(this.data[0], 0, this.data[y], 0, width);
 		}
 	}
 
