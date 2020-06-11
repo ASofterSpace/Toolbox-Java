@@ -278,11 +278,27 @@ public class Image {
 	 */
 	public void draw(Image other, int drawAtX, int drawAtY) {
 
+		/*
+		// naive implementation:
+
 		for (int x = 0; (x < other.width) && (x + drawAtX < width); x++) {
 			for (int y = 0; (y < other.height) && (y + drawAtY < height); y++) {
 				if ((x + drawAtX >= 0) && (y + drawAtY >= 0)) {
 					data[y + drawAtY][x + drawAtX] = other.data[y][x];
 				}
+			}
+		}
+		*/
+
+		// quicker:
+
+		for (int y = 0; (y < other.height) && (y + drawAtY < height); y++) {
+			if (y + drawAtY >= 0) {
+				int drawWidth = other.width;
+				if (drawAtX + drawWidth > width) {
+					drawWidth = width - drawAtX;
+				}
+				System.arraycopy(other.data[y], 0, this.data[y + drawAtY], drawAtX, drawWidth);
 			}
 		}
 	}
