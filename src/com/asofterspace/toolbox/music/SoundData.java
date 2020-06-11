@@ -103,7 +103,7 @@ public class SoundData {
 		if (- min > max) {
 			max = - min;
 		}
-		max = max / 3276;
+		max = max / 1024;
 		int noiseStart = 0;
 		int noiseLength = 0;
 		for (int i = 0; i < leftData.length; i++) {

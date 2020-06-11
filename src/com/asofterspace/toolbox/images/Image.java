@@ -387,10 +387,14 @@ public class Image {
 
 		// draw text onto buffered image
 		int textWidth = metrics.stringWidth(text);
-		int textHeight = metrics.getMaxAscent();
+		int textHeight = metrics.getHeight();
 
 		if (targetImage != null) {
-			targetImage.setWidthAndHeight(textWidth, textHeight);
+			if (useAntiAliasing) {
+				targetImage.setWidthAndHeight(textWidth / 2, textHeight / 2);
+			} else {
+				targetImage.setWidthAndHeight(textWidth, textHeight);
+			}
 			targetImage.clear(backgroundColor);
 		}
 
@@ -403,7 +407,7 @@ public class Image {
 		} else {
 			graphics.setColor(textColor.toColor());
 		}
-		graphics.drawString(text, 0, textHeight);
+		graphics.drawString(text, 0, metrics.getMaxAscent());
 		graphics.dispose();
 
 		// copy image of drawn text from buffered image onto our image
