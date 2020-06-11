@@ -1950,7 +1950,7 @@ public abstract class Code extends DefaultStyledDocument {
 							String contentEnd = content.substring(lineEnd, content.length());
 							String lineFollowing = line.substring(lineOffset);
 
-							if ("".equals(lineFollowing.trim())) {
+							if ("".equals(lineFollowing.trim()) || ";".equals(lineFollowing.trim())) {
 
 								line = line.substring(0, lineOffset);
 
