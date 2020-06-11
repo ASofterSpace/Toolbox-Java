@@ -651,6 +651,17 @@ public class Record {
 		}
 	}
 
+	public String getString(Object key, String defaultValue) {
+
+		String result = getString(key);
+
+		if (result == null) {
+			return defaultValue;
+		}
+
+		return result;
+	}
+
 	/**
 	 * Gets a date value stored in a key
 	 */

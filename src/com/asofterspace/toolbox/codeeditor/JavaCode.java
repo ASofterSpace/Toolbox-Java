@@ -146,6 +146,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("JPanel", "javax.swing.JPanel");
 		automaticallyAddedImports.put("JPopupMenu", "javax.swing.JPopupMenu");
 		automaticallyAddedImports.put("JRadioButton", "javax.swing.JRadioButton");
+		automaticallyAddedImports.put("JRadioButtonMenuItem", "javax.swing.JRadioButtonMenuItem");
 		automaticallyAddedImports.put("JScrollPane", "javax.swing.JScrollPane");
 		automaticallyAddedImports.put("JTextArea", "javax.swing.JTextArea");
 		automaticallyAddedImports.put("JTextField", "javax.swing.JTextField");

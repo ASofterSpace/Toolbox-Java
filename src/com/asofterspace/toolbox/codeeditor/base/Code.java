@@ -151,6 +151,8 @@ public abstract class Code extends DefaultStyledDocument {
 	private Integer lastBracketStart = null;
 	private Integer lastBracketEnd = null;
 
+	private String defaultIndentationStr = null;
+
 
 	public Code(JTextPane editor) {
 
@@ -1743,6 +1745,10 @@ public abstract class Code extends DefaultStyledDocument {
 		insertString(offset, insertedString, attrs, insertedString.length());
 	}
 
+	public void setDefaultIndentation(String defaultIndentationStr) {
+		this.defaultIndentationStr = defaultIndentationStr;
+	}
+
 	/**
 	 * This is called internally for insertString
 	 * In addition to the regular parameters, we also have:
@@ -1787,10 +1793,14 @@ public abstract class Code extends DefaultStyledDocument {
 
 				// in case of case "blubb":, indent with extra whitespace
 				if (content.endsWith(":") && (line.trim().startsWith("case ") || line.trim().equals("default:"))) {
-					if (origWhitespace.endsWith(" ")) {
-						curLineWhitespace.append("	");
+					if (defaultIndentationStr == null) {
+						if (origWhitespace.endsWith(" ")) {
+							curLineWhitespace.append("    ");
+						} else {
+							curLineWhitespace.append("\t");
+						}
 					} else {
-						curLineWhitespace.append("\t");
+						curLineWhitespace.append(defaultIndentationStr);
 					}
 				}
 
@@ -1801,10 +1811,14 @@ public abstract class Code extends DefaultStyledDocument {
 					content.endsWith("(") ||
 					content.endsWith("begin") ||
 					content.endsWith("then")) {
-					if (origWhitespace.endsWith(" ")) {
-						curLineWhitespace.append("	");
+					if (defaultIndentationStr == null) {
+						if (origWhitespace.endsWith(" ")) {
+							curLineWhitespace.append("    ");
+						} else {
+							curLineWhitespace.append("\t");
+						}
 					} else {
-						curLineWhitespace.append("\t");
+						curLineWhitespace.append(defaultIndentationStr);
 					}
 				}
 				/*
