@@ -346,25 +346,19 @@ public class ColorRGB {
 			int r = RANDOM.nextInt(256);
 			int g = RANDOM.nextInt(256);
 			int b = RANDOM.nextInt(256);
-			if ((r > 64) && (r < 196)) {
+			int diff1 = Math.abs(r - g);
+			int diff2 = Math.abs(r - b);
+			int diff3 = Math.abs(g - b);
+			// avoid gray-ish colors
+			if ((diff1 < 48) && (diff2 < 48) && (diff3 < 48)) {
 				continue;
 			}
-			if ((g > 64) && (g < 196)) {
+			// avoid dark colors
+			if (r + g + b < 112*3) {
 				continue;
 			}
-			if ((b > 64) && (b < 196)) {
-				continue;
-			}
-			// avoid more than two being below 64
-			if (r + g + b < 64+64+196) {
-				continue;
-			}
-			// avoid more than two being above 196
-			if (r + g + b > 196*3) {
-				continue;
-			}
-			// we are now sure that two are above 196 and one is below 64,
-			// or two are below 64 and one is above 196
+			// we are now sure that the color is colorful (r, g and b are not too similar)
+			// and bright (not dark)
 			return new ColorRGB(r, g, b);
 		}
 	}

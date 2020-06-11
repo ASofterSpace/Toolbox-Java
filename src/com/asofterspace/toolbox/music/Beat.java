@@ -19,9 +19,13 @@ public class Beat {
 	// how jiggly is the beat (that is, how many up/down and down/up reversals are there within it?)
 	private long jigglieness;
 
+	// is this beat aligned with some other beat somewhere else? ^^
+	private boolean isAligned;
+
 
 	public Beat(int position) {
 		this.position = position;
+		this.isAligned = false;
 	}
 
 	public int getPosition() {
@@ -54,6 +58,14 @@ public class Beat {
 
 	public void setJigglieness(long jigglieness) {
 		this.jigglieness = jigglieness;
+	}
+
+	public boolean getIsAligned() {
+		return isAligned;
+	}
+
+	public void setIsAligned(boolean isAligned) {
+		this.isAligned = isAligned;
 	}
 
 	public String toString() {
