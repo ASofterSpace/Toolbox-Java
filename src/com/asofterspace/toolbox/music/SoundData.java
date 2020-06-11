@@ -83,6 +83,74 @@ public class SoundData {
 		}
 	}
 
+	/**
+	 * Adds a fade out effect to the end of this sound
+	 */
+	public void fadeOut(int durationInPos) {
+		fadeOut(durationInPos, leftData.length - durationInPos);
+	}
+
+	/**
+	 * Adds a fade out effect to the position in this sound
+	 */
+	public void fadeOut(int durationInPos, int position) {
+
+		for (int i = position; i < position + durationInPos; i++) {
+
+			if (i < 0) {
+				continue;
+			}
+			if (i >= leftData.length) {
+				break;
+			}
+
+			double scaleFactor = (position + durationInPos - i) / (1.0 * durationInPos);
+			leftData[i] = (int) (leftData[i] * scaleFactor);
+			rightData[i] = (int) (rightData[i] * scaleFactor);
+		}
+	}
+
+	/**
+	 * Adds a fade in effect to the beginning of this sound
+	 */
+	public void fadeIn(int durationInPos) {
+		fadeIn(durationInPos, 0);
+	}
+
+	/**
+	 * Adds a fade in effect to the position in this sound
+	 */
+	public void fadeIn(int durationInPos, int position) {
+
+		for (int i = position; i < position + durationInPos; i++) {
+
+			if (i < 0) {
+				continue;
+			}
+			if (i >= leftData.length) {
+				break;
+			}
+
+			double scaleFactor = (i - position) / (1.0 * durationInPos);
+			leftData[i] = (int) (leftData[i] * scaleFactor);
+			rightData[i] = (int) (rightData[i] * scaleFactor);
+		}
+	}
+
+	/**
+	 * Trims the song by removing quiet parts at the beginning and end, then adds silence
+	 * with the given duration to the end (in units of position in the leftData / rightData
+	 * array, not seconds or milliseconds!), but the cool thing is - instead of just silence,
+	 * if the trimming cut off a quiet part of the song, that part is reused so the data is
+	 * not lost...
+	 */
+	public void trimAndAdd(int durationToAddInPos) {
+
+	}
+
+	/**
+	 * Trims the song by removing quiet parts at the beginning and end
+	 */
 	public void trim() {
 		int max = 0;
 		int min = 0;
