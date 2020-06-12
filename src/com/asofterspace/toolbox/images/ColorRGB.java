@@ -211,6 +211,21 @@ public class ColorRGB {
 		return (byte) (result / 100);
 	}
 
+	/**
+	 * Get a slightly different color
+	 */
+	public ColorRGB getSlightlyDifferent() {
+		Random rand = new Random();
+		int diff = 16;
+		// we don't need to consider over- or underflows,
+		// as the ColorRGB(r,g,b,a) constructor will do it for us
+		int newR = getR() + rand.nextInt(2 * diff) - diff;
+		int newG = getG() + rand.nextInt(2 * diff) - diff;
+		int newB = getB() + rand.nextInt(2 * diff) - diff;
+		int newA = getA();
+		return new ColorRGB(newR, newG, newB, newA);
+	}
+
 	@Override
 	public int hashCode() {
 		return (int) r + (int) g + (int) b;
