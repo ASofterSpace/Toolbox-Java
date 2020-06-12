@@ -22,10 +22,14 @@ public class Beat {
 	// is this beat aligned with some other beat somewhere else? ^^
 	private boolean isAligned;
 
+	// has the beat been changed in some way?
+	private boolean changed;
+
 
 	public Beat(int position) {
 		this.position = position;
 		this.isAligned = false;
+		this.changed = false;
 	}
 
 	public int getPosition() {
@@ -66,6 +70,14 @@ public class Beat {
 
 	public void setIsAligned(boolean isAligned) {
 		this.isAligned = isAligned;
+	}
+
+	public boolean getChanged() {
+		return changed;
+	}
+
+	public void setChanged(boolean changed) {
+		this.changed = changed;
 	}
 
 	public String toString() {
