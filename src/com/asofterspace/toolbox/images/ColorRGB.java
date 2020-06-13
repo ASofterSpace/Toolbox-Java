@@ -226,6 +226,15 @@ public class ColorRGB {
 		return new ColorRGB(newR, newG, newB, newA);
 	}
 
+	public int getDifferenceTo(ColorRGB other) {
+		int result = 0;
+		result += Math.abs(getR() - other.getR());
+		result += Math.abs(getG() - other.getG());
+		result += Math.abs(getB() - other.getB());
+		result += Math.abs(getA() - other.getA());
+		return result;
+	}
+
 	@Override
 	public int hashCode() {
 		return (int) r + (int) g + (int) b;
