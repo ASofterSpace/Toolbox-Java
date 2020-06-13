@@ -17,12 +17,12 @@ public class TypeScriptCode extends JavaCode {
 
 	// all keywords of the TypeScript language
 	protected static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"abstract", "as", "assert", "async", "await", "break", "case", "catch", "const", "const", "constructor", "continue", "declare", "default", "do", "else", "export", "extends", "final", "finally", "for", "from", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "volatile", "while"}
+		new String[] {"abstract", "as", "assert", "async", "await", "break", "case", "catch", "constructor", "continue", "declare", "default", "do", "else", "export", "extends", "final", "finally", "for", "from", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "volatile", "while"}
 	));
 
 	// all primitive types of the Java language and other stuff that looks that way
 	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "function", "int", "interface", "let", "long", "module", "null", "short", "string", "super", "this", "true", "undefined", "void"}
+		new String[] {"any", "bigint", "boolean", "class", "const", "enum", "false", "function", "interface", "let", "module", "never", "null", "number", "object", "string", "super", "symbol", "this", "true", "undefined", "var", "void"}
 	));
 
 
