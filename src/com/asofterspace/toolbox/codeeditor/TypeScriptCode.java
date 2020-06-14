@@ -18,14 +18,24 @@ public class TypeScriptCode extends JavaCode {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the TypeScript language
+	// all keywords of the TypeScript language except import keywords
 	protected static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"abstract", "as", "assert", "async", "await", "break", "case", "catch", "constructor", "continue", "declare", "default", "do", "else", "export", "extends", "final", "finally", "for", "from", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "volatile", "while"}
+		new String[] {"abstract", "assert", "async", "await", "break", "case", "catch", "constructor", "continue", "declare", "default", "do", "else", "export", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "volatile", "while"}
 	));
 
-	// all primitive types of the Java language and other stuff that looks that way
+	// all keywords of the TypeScript language that are only keywords in import statements
+	protected static final Set<String> IMPORT_KEYWORDS = new HashSet<>(Arrays.asList(
+		new String[] {"as", "from"}
+	));
+
+	// all primitive types of the TypeScript language and other stuff that looks that way
 	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
 		new String[] {"any", "bigint", "boolean", "class", "const", "enum", "false", "function", "interface", "let", "module", "never", "null", "number", "object", "string", "super", "symbol", "this", "true", "undefined", "var", "void"}
+	));
+
+	// all string delimiters of the TypeScript language
+	protected static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
+		new Character[] {'"', '\'', '`'}
 	));
 
 
@@ -70,6 +80,8 @@ public class TypeScriptCode extends JavaCode {
 
 		if (setAttributesAndDetectFunctions) {
 			if (isKeyword(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			} else if (isImportKeyword(couldBeKeyword) && StrUtils.getLineFromPosition(start, content).trim().startsWith("import ")) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
 			} else if (isPrimitiveType(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
@@ -148,9 +160,23 @@ public class TypeScriptCode extends JavaCode {
 		return KEYWORDS.contains(token);
 	}
 
+	protected boolean isImportKeyword(String token) {
+		return IMPORT_KEYWORDS.contains(token);
+	}
+
 	@Override
 	protected boolean isPrimitiveType(String token) {
 		return PRIMITIVE_TYPES.contains(token);
+	}
+
+	@Override
+	protected boolean isDelimiter(char character) {
+		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character) || STRING_DELIMITERS.contains(character);
+	}
+
+	@Override
+	protected boolean isStringDelimiter(char character) {
+		return STRING_DELIMITERS.contains(character);
 	}
 
 }
