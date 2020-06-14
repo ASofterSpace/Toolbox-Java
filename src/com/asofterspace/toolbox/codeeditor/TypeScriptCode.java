@@ -4,6 +4,9 @@
  */
 package com.asofterspace.toolbox.codeeditor;
 
+import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
+import com.asofterspace.toolbox.utils.StrUtils;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,6 +53,65 @@ public class TypeScriptCode extends JavaCode {
 	public String removeUnusedImports(String origText) {
 		return origText;
 	}
+
+	@Override
+	protected int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions) {
+
+		int couldBeKeywordEnd = start + 1;
+
+		while (couldBeKeywordEnd <= end) {
+			if (isDelimiter(content.charAt(couldBeKeywordEnd))) {
+				break;
+			}
+			couldBeKeywordEnd++;
+		}
+
+		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
+
+		if (setAttributesAndDetectFunctions) {
+			if (isKeyword(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			} else if (isPrimitiveType(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			} else if (isAdvancedType(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			} else if (isAnnotation(couldBeKeyword)) {
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			} else {
+				// get the entire line that we found!
+				String functionName = StrUtils.getLineFromPosition(start, content).trim();
+				boolean addFunction = false;
+				if (functionName.startsWith("export ") || functionName.startsWith("function ")) {
+					addFunction = true;
+				} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
+					if (!"new".equals(lastCouldBeKeyword)) {
+						this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+						if ((start > 0) && (content.charAt(start-1) == ' ')) {
+							// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
+							if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
+								// so far this is like in Java, but we also have calls like next() directly on the four-spaces-indent,
+								// so in addition to all else also just add it as a function if it ends with {
+								if (functionName.endsWith("{")) {
+									addFunction = true;
+								}
+							}
+						}
+					}
+				}
+				if (addFunction) {
+					CodeSnippetWithLocation codeLoc = new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content));
+					if (!functions.contains(codeLoc)) {
+						functions.add(codeLoc);
+					}
+				}
+			}
+		}
+
+		lastCouldBeKeyword = couldBeKeyword;
+
+		return couldBeKeywordEnd;
+	}
+
 
 	/**
 	 * We override the exact same function from the base class to access the KEYWORDS from this class instead

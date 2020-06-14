@@ -57,13 +57,13 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	protected static final String END_MULTILINE_COMMENT = "*/";
 
 	// are we currently in a multiline comment?
-	private boolean curMultilineComment;
+	protected boolean curMultilineComment;
 
-	private int curLineStartingWhitespace = 0;
+	protected int curLineStartingWhitespace = 0;
 
-	private boolean startingWhitespace = false;
+	protected boolean startingWhitespace = false;
 
-	private String lastCouldBeKeyword = "";
+	protected String lastCouldBeKeyword = "";
 
 
 	public JavaCode(JTextPane editor) {
@@ -435,7 +435,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		updateFunctionList();
 	}
 
-	private boolean isCommentStart(String content, int start, int end) {
+	protected boolean isCommentStart(String content, int start, int end) {
 
 		if (start + 1 > end) {
 			return false;
@@ -446,7 +446,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return START_SINGLELINE_COMMENT.equals(potentialCommentStart) || START_MULTILINE_COMMENT.equals(potentialCommentStart);
 	}
 
-	private int highlightComment(String content, int start, int end) {
+	protected int highlightComment(String content, int start, int end) {
 
 		String commentStart = content.substring(start, start + 2);
 
@@ -482,7 +482,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return commentEnd;
 	}
 
-	private int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions) {
+	protected int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -525,11 +525,11 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return couldBeKeywordEnd;
 	}
 
-	private boolean isDelimiter(char character) {
+	protected boolean isDelimiter(char character) {
 		return Character.isWhitespace(character) || OPERAND_CHARS.contains(character) || STRING_DELIMITERS.contains(character);
 	}
 
-	private boolean isStringDelimiter(char character) {
+	protected boolean isStringDelimiter(char character) {
 		return STRING_DELIMITERS.contains(character);
 	}
 
@@ -541,14 +541,14 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return PRIMITIVE_TYPES.contains(token);
 	}
 
-	private boolean isAdvancedType(String token) {
+	protected boolean isAdvancedType(String token) {
 		if (token.length() < 1) {
 			return false;
 		}
 		return Character.isUpperCase(token.charAt(0));
 	}
 
-	private boolean isAnnotation(String token) {
+	protected boolean isAnnotation(String token) {
 		return token.startsWith("@");
 	}
 
