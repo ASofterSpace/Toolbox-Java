@@ -78,8 +78,9 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 					anyStaticFunctions.add(new CodeSnippetWithLocation(trimmedLine, func.getCaretPos()));
 				}
 			} else {
-				if (trimmedLine.contains("public ")) {
-					publicFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("public ", ""), func.getCaretPos()));
+				// "export " for TypeScript, the rest for Java, Groovy and friends
+				if (trimmedLine.contains("public ") || trimmedLine.startsWith("export ")) {
+					publicFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("public ", "").replace("export ", ""), func.getCaretPos()));
 				} else if (trimmedLine.contains("protected ")) {
 					protectedFunctions.add(new CodeSnippetWithLocation(trimmedLine.replace("protected ", ""), func.getCaretPos()));
 				} else if (trimmedLine.contains("private ")) {

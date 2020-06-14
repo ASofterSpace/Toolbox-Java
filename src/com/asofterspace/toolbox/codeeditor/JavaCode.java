@@ -353,10 +353,12 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		super.highlightText(start, length);
 
+		String content = "";
+
 		try {
 			int end = this.getLength();
 
-			String content = this.getText(0, end);
+			content = this.getText(0, end);
 
 			// TODO :: actually use the start and length passed in as arguments!
 			// (currently, they are just being ignored...)
@@ -417,7 +419,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						start++;
 
 					} else {
-						updateFunctionList();
+						postHighlight(content);
 						return;
 					}
 
@@ -428,10 +430,17 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				start = highlightOther(content, start, end, true);
 			}
 
+			postHighlight(content);
+			return;
+
 		} catch (BadLocationException e) {
 			// oops!
 		}
 
+		postHighlight(content);
+	}
+
+	protected void postHighlight(String content) {
 		updateFunctionList();
 	}
 

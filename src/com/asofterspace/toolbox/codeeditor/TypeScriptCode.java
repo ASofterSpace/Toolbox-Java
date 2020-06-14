@@ -77,31 +77,23 @@ public class TypeScriptCode extends JavaCode {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
 			} else if (isAnnotation(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
-			} else {
-				// get the entire line that we found!
-				String functionName = StrUtils.getLineFromPosition(start, content).trim();
-				boolean addFunction = false;
-				if (functionName.startsWith("export ") || functionName.startsWith("function ")) {
-					addFunction = true;
-				} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
-					if (!"new".equals(lastCouldBeKeyword)) {
-						this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
-						if ((start > 0) && (content.charAt(start-1) == ' ')) {
-							// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
-							if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
-								// so far this is like in Java, but we also have calls like next() directly on the four-spaces-indent,
-								// so in addition to all else also just add it as a function if it ends with {
-								if (functionName.endsWith("{")) {
-									addFunction = true;
+			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
+				if (!"new".equals(lastCouldBeKeyword)) {
+					this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+					if ((start > 0) && (content.charAt(start-1) == ' ')) {
+						// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
+						if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
+							// get the entire line that we found!
+							String functionName = StrUtils.getLineFromPosition(start, content).trim();
+							// so far this is like in Java, but we also have calls like next() directly on the four-spaces-indent,
+							// so in addition to all else also just add it as a function if it ends with {
+							if (functionName.endsWith("{")) {
+								CodeSnippetWithLocation codeLoc = new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content));
+								if (!functions.contains(codeLoc)) {
+									functions.add(codeLoc);
 								}
 							}
 						}
-					}
-				}
-				if (addFunction) {
-					CodeSnippetWithLocation codeLoc = new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content));
-					if (!functions.contains(codeLoc)) {
-						functions.add(codeLoc);
 					}
 				}
 			}
@@ -112,6 +104,41 @@ public class TypeScriptCode extends JavaCode {
 		return couldBeKeywordEnd;
 	}
 
+	@Override
+	protected void postHighlight(String content) {
+
+		int pos = 0;
+		while (true) {
+			pos = content.indexOf("export ", pos) + 1;
+			if (pos < 1) {
+				break;
+			}
+			String functionName = StrUtils.getLineFromPosition(pos, content).trim();
+			if (functionName.startsWith("export ")) {
+				CodeSnippetWithLocation codeLoc = new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(pos, content));
+				if (!functions.contains(codeLoc)) {
+					functions.add(codeLoc);
+				}
+			}
+		}
+
+		pos = 0;
+		while (true) {
+			pos = content.indexOf("function ", pos) + 1;
+			if (pos < 1) {
+				break;
+			}
+			String functionName = StrUtils.getLineFromPosition(pos, content).trim();
+			if (functionName.startsWith("function ")) {
+				CodeSnippetWithLocation codeLoc = new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(pos, content));
+				if (!functions.contains(codeLoc)) {
+					functions.add(codeLoc);
+				}
+			}
+		}
+
+		super.postHighlight(content);
+	}
 
 	/**
 	 * We override the exact same function from the base class to access the KEYWORDS from this class instead
