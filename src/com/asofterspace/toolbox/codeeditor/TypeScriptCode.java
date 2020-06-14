@@ -20,7 +20,7 @@ public class TypeScriptCode extends JavaCode {
 
 	// all keywords of the TypeScript language except import keywords
 	protected static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"abstract", "assert", "async", "await", "break", "case", "catch", "constructor", "continue", "declare", "default", "do", "else", "export", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "volatile", "while"}
+		new String[] {"abstract", "assert", "async", "await", "break", "case", "catch", "constructor", "continue", "declare", "default", "do", "else", "export", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "readonly", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "volatile", "while"}
 	));
 
 	// all keywords of the TypeScript language that are only keywords in import statements
