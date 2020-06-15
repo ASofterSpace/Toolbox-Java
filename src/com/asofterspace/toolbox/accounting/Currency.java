@@ -17,7 +17,7 @@ public enum Currency {
 	CAD,
 	PLN,
 	TRY,
-	CNY;
+	CNY,
 	JPY;
 
 
