@@ -18,6 +18,7 @@ public enum Currency {
 	PLN,
 	TRY,
 	CNY;
+	JPY;
 
 
 	public static Currency fromString(String str) {
@@ -51,6 +52,8 @@ public enum Currency {
 				return TRY;
 			case "CNY":
 				return CNY;
+			case "JPY":
+				return JPY;
 		}
 
 		return null;
