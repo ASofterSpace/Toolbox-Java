@@ -29,7 +29,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 	// all keywords of the Java language
 	protected static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "while", "volatile"}
+		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "native", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "while", "volatile"}
 	));
 
 	// all primitive types of the Java language and other stuff that looks that way
