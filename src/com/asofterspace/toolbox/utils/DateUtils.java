@@ -220,6 +220,21 @@ public class DateUtils {
 		return result;
 	}
 
+	/**
+	 * How much is the different from from until to?
+	 * (if we have the 2nd of January and the 4th of the January, the result will be 2...
+	 * if we have the same day twice, it will be zero...
+	 * if from if after to, it will be negative!)
+	 */
+	public static Integer getDayDifference(Date from, Date to) {
+		from = parseDate(serializeDate(from));
+		to = parseDate(serializeDate(to));
+		if ((from == null) || (to == null)) {
+			return null;
+		}
+		return (int) Math.round((to.getTime() - from.getTime()) / (1000.0 * 60.0 * 60.0 * 24.0));
+	}
+
 	public static Integer monthNameToNum(String name) {
 		if (name == null) {
 			return null;
