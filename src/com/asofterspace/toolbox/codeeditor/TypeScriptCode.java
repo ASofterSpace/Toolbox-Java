@@ -30,7 +30,7 @@ public class TypeScriptCode extends JavaCode {
 
 	// all primitive types of the TypeScript language and other stuff that looks that way
 	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"any", "bigint", "boolean", "class", "const", "enum", "false", "function", "interface", "let", "module", "never", "null", "number", "object", "string", "super", "symbol", "this", "true", "undefined", "var", "void"}
+		new String[] {"any", "bigint", "boolean", "class", "const", "enum", "false", "function", "interface", "let", "module", "never", "null", "number", "object", "string", "super", "symbol", "this", "true", "type", "undefined", "var", "void"}
 	));
 
 	// all string delimiters of the TypeScript language

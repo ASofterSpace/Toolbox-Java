@@ -21,6 +21,13 @@ public class SoundData {
 		this.rightData = rightData;
 	}
 
+	public int getLength() {
+		if (leftData == null) {
+			return 0;
+		}
+		return leftData.length;
+	}
+
 	public int[] getLeftData() {
 		return leftData;
 	}
@@ -233,5 +240,100 @@ public class SoundData {
 	 */
 	public void trim() {
 		trimAndAdd(0);
+	}
+
+	public int[] getLeftFourier(int from, int to) {
+		return getFourierForData(getLeftData(), from, to);
+	}
+
+	public int[] getRightFourier(int from, int to) {
+		return getFourierForData(getRightData(), from, to);
+	}
+
+	public int[] getFourier(int from, int to) {
+		int[] result = getLeftFourier(from, to);
+		int[] resultRight = getRightFourier(from, to);
+		for (int i = 0; i < resultRight.length; i++) {
+			result[i] += resultRight[i];
+		}
+		return result;
+	}
+
+	private static int[] getFourierForData(int[] data, int from, int to) {
+
+		int len = to - from;
+
+		if (len < 1) {
+			return new int[0];
+		}
+
+		int[] fourierInput = new int[len];
+
+		System.arraycopy(data, from, fourierInput, 0, len);
+
+		return getFourierForData(fourierInput);
+	}
+
+	/**
+	 * Gets the slow, basic Fourier transform for some data
+	 */
+	private static int[] getFourierForData(int[] data) {
+		int[] result = new int[data.length];
+
+		double max = 0;
+		for (int i = 0; i < data.length; i++) {
+			if (data[i] > max) {
+				max = data[i];
+			}
+			if (-data[i] > max) {
+				max = -data[i];
+			}
+		}
+
+		double[] doubleData = new double[data.length];
+
+		for (int i = 0; i < data.length; i++) {
+			doubleData[i] = data[i] / max;
+		}
+
+		// analysis
+		double[] realFourier = new double[doubleData.length];
+		double[] imaginaryFourier = new double[doubleData.length];
+		for (int i = 0; i < result.length; i++) {
+			// double cur = 0;
+			double curReal = 0;
+			double curImaginary = 0;
+			for (int n = 0; n < doubleData.length; n++) {
+				double expAngle = (2.0 * Math.PI * i * n) / doubleData.length;
+				double realPart = Math.cos(expAngle) * doubleData[n];
+				// double imaginaryPart = - Math.sin(expAngle) * doubleData[n];
+				double imaginaryPart = Math.sin(expAngle) * doubleData[n];
+				// cur += Math.sqrt((realPart*realPart) + (imaginaryPart*imaginaryPart));
+				// cur += realPart +
+				// cur += imaginaryPart;
+				curReal += realPart;
+				curImaginary += imaginaryPart;
+			}
+			realFourier[i] = 2 * curReal / doubleData.length;
+			imaginaryFourier[i] = 2 * curImaginary / doubleData.length;
+			// result[i] = (int) Math.round(cur);
+			// System.out.println(i + ": " + cur);
+		}
+
+/*
+		// synthesis
+		for (int i = 0; i < result.length; i++) {
+			double cur = 0;
+			for (int n = 0; n < doubleData.length; n++) {
+				double expAngle = (2.0 * Math.PI * i * n) / doubleData.length;
+				cur += realFourier[n] * Math.cos(expAngle);
+				// cur += imaginaryFourier[n] * Math.sin(expAngle);
+			}
+			result[i] = (int) Math.round(cur);
+			// System.out.println(i + ": " + cur);
+		}
+*/
+
+		return result;
 	}
 }
