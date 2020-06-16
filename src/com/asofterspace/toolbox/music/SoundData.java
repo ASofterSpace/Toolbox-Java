@@ -259,7 +259,8 @@ public class SoundData {
 		return result;
 	}
 
-	// takes only left channel as input, and smooshes the output into 20% of its size
+	// takes only left channel as input, and smooshes the output into 20% of its size,
+	// and only outputs the lower half (as the upper half is a symmetrical copy anyway)
 	public int[] getSmallFourier(int from, int to) {
 		return getSmallFourierForData(getLeftData(), from, to);
 	}
@@ -309,8 +310,16 @@ public class SoundData {
 	}
 
 	private static int[] getSmallFourierForData(int[] data, int from, int to) {
+
+		if (to > data.length) {
+			to = data.length;
+		}
+
 		int len = to - from;
-		int[] result = new int[len / 5];
+		int SMALLNESS_FACTOR = 5;
+
+		// we divide by two additionally as the upper half is just a copy of the lower half of the output
+		int[] result = new int[len / (2 * SMALLNESS_FACTOR)];
 		double[] doubleData = new double[len];
 
 		for (int i = from; i < to; i++) {
@@ -322,6 +331,9 @@ public class SoundData {
 		}
 
 		for (int i = 0; i < len; i++) {
+			if (i/SMALLNESS_FACTOR >= result.length) {
+				break;
+			}
 			double curReal = 0;
 			double curImaginary = 0;
 			for (int n = 0; n < len; n++) {
@@ -333,7 +345,7 @@ public class SoundData {
 			}
 			curReal = 2 * curReal / len;
 			curImaginary = 2 * curImaginary / len;
-			result[i/5] += (int) (i * Math.sqrt(curReal*curReal + curImaginary*curImaginary));
+			result[i/SMALLNESS_FACTOR] += (int) (i * Math.sqrt(curReal*curReal + curImaginary*curImaginary));
 		}
 
 		return result;
