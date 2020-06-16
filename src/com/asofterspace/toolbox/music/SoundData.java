@@ -259,6 +259,11 @@ public class SoundData {
 		return result;
 	}
 
+	// takes only left channel as input, and smooshes the output into 20% of its size
+	public int[] getSmallFourier(int from, int to) {
+		return getSmallFourierForData(getLeftData(), from, to);
+	}
+
 	private static int[] getFourierForData(int[] data, int from, int to) {
 
 		int len = to - from;
@@ -279,7 +284,7 @@ public class SoundData {
 	 */
 	private static int[] getFourierForData(int[] data) {
 		int[] result = new int[data.length];
-
+/*
 		double max = 0;
 		for (int i = 0; i < data.length; i++) {
 			if (data[i] > max) {
@@ -289,16 +294,17 @@ public class SoundData {
 				max = -data[i];
 			}
 		}
-
+*/
 		double[] doubleData = new double[data.length];
 
 		for (int i = 0; i < data.length; i++) {
-			doubleData[i] = data[i] / max;
+			// doubleData[i] = data[i] / max;
+			doubleData[i] = data[i];
 		}
 
 		// analysis
-		double[] realFourier = new double[doubleData.length];
-		double[] imaginaryFourier = new double[doubleData.length];
+		// double[] realFourier = new double[doubleData.length];
+		// double[] imaginaryFourier = new double[doubleData.length];
 		for (int i = 0; i < result.length; i++) {
 			// double cur = 0;
 			double curReal = 0;
@@ -314,10 +320,13 @@ public class SoundData {
 				curReal += realPart;
 				curImaginary += imaginaryPart;
 			}
-			realFourier[i] = 2 * curReal / doubleData.length;
-			imaginaryFourier[i] = 2 * curImaginary / doubleData.length;
+			curReal = 2 * curReal / doubleData.length;
+			curImaginary = 2 * curImaginary / doubleData.length;
+			// realFourier[i] = curReal;
+			// imaginaryFourier[i] = curImaginary;
+			result[i] = (int) (i * Math.sqrt(curReal*curReal + curImaginary*curImaginary));
 			// result[i] = (int) Math.round(cur);
-			// System.out.println(i + ": " + cur);
+			// System.out.println(i + ": " + result[i]);
 		}
 
 /*
@@ -333,6 +342,34 @@ public class SoundData {
 			// System.out.println(i + ": " + cur);
 		}
 */
+
+		return result;
+	}
+
+	private static int[] getSmallFourierForData(int[] data, int from, int to) {
+		int len = to - from;
+		int[] result = new int[len / 5];
+
+		double[] doubleData = new double[len];
+
+		for (int i = from; i < to; i++) {
+			doubleData[i - from] = data[i];
+		}
+
+		for (int i = 0; i < len; i++) {
+			double curReal = 0;
+			double curImaginary = 0;
+			for (int n = 0; n < len; n++) {
+				double expAngle = (2.0 * Math.PI * i * n) / len;
+				double realPart = Math.cos(expAngle) * doubleData[n];
+				double imaginaryPart = Math.sin(expAngle) * doubleData[n];
+				curReal += realPart;
+				curImaginary += imaginaryPart;
+			}
+			curReal = 2 * curReal / len;
+			curImaginary = 2 * curImaginary / len;
+			result[i/5] = (int) (i * Math.sqrt(curReal*curReal + curImaginary*curImaginary));
+		}
 
 		return result;
 	}
