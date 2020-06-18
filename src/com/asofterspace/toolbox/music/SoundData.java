@@ -60,7 +60,7 @@ public class SoundData {
 		this.rightData = rightData;
 	}
 
-	public void normalize() {
+	public int getMax() {
 
 		int max = 0;
 		for (int i = 0; i < leftData.length; i++) {
@@ -77,6 +77,12 @@ public class SoundData {
 				max = -rightData[i];
 			}
 		}
+		return max;
+	}
+
+	public void normalize() {
+
+		int max = getMax();
 		for (int i = 0; i < leftData.length; i++) {
 			leftData[i] = (int) ((leftData[i] * (long) 8*16*16*16) / max);
 			rightData[i] = (int) ((rightData[i] * (long) 8*16*16*16) / max);

@@ -404,6 +404,16 @@ public class Image {
 		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, null);
 	}
 
+	public static int getTextHeight(String fontName, int fontSize) {
+
+		Font font = new Font(fontName, Font.PLAIN, fontSize);
+
+		Canvas c = new Canvas();
+		FontMetrics metrics = c.getFontMetrics(font);
+
+		return metrics.getHeight();
+	}
+
 	private void drawTextOnto(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor, Image targetImage, ColorRGB backgroundColor) {
 
 		// prepare font settings for drawing the text
