@@ -303,6 +303,24 @@ public class Image {
 		}
 	}
 
+	/**
+	 * Draw another image on top of this one, starting (top left) at
+	 * coordinates x and y (respective to this image), but ignore the
+	 * transparent color in the other image
+	 */
+	public void draw(Image other, int drawAtX, int drawAtY, ColorRGB transparentColor) {
+
+		for (int x = 0; (x < other.width) && (x + drawAtX < width); x++) {
+			for (int y = 0; (y < other.height) && (y + drawAtY < height); y++) {
+				if ((x + drawAtX >= 0) && (y + drawAtY >= 0)) {
+					if (!transparentColor.fastEquals(other.data[y][x])) {
+						data[y + drawAtY][x + drawAtX] = other.data[y][x];
+					}
+				}
+			}
+		}
+	}
+
 	public void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
 
 		boolean invertDirection = false;
@@ -455,6 +473,10 @@ public class Image {
 
 		Graphics2D graphics = bufImg.createGraphics();
 		graphics.setFont(font);
+		if (backgroundColor != null) {
+			graphics.setColor(backgroundColor.toColor());
+			graphics.fillRect(0, 0, textWidth, textHeight);
+		}
 		if (textColor == null) {
 			graphics.setColor(Color.black);
 		} else {
