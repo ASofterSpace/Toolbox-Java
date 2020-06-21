@@ -14,7 +14,9 @@ import java.util.List;
  */
 public class CsvFile extends SimpleFile {
 
-	int currentLine = 0;
+	int currentLine = 1;
+
+	private char entrySeparator = ',';
 
 
 	/**
@@ -35,10 +37,23 @@ public class CsvFile extends SimpleFile {
 		regularFile.copyToFileObject(this);
 	}
 
+	public int getCurrentLineNum() {
+		return currentLine;
+	}
+
+	/**
+	 * 0 means that getContentLine() will next return the very first line (which would normally be the headline)
+	 */
+	public void setCurrentLineNum(int currentLine) {
+		this.currentLine = currentLine;
+	}
+
 	public String getHeadLine() {
 
 		// if the content has not yet been fetched... fetch it!
 		ensureContents(true);
+
+		currentLine = 1;
 
 		return filecontents.get(0);
 	}
@@ -48,15 +63,17 @@ public class CsvFile extends SimpleFile {
 		// if the content has not yet been fetched... fetch it!
 		ensureContents(true);
 
-		// get the next line...
-		currentLine++;
-
-		// ... and if we got too far, return nothing!
+		// if we got too far, return nothing!
 		if (currentLine >= filecontents.size()) {
 			return null;
 		}
 
-		return filecontents.get(currentLine);
+		String result = filecontents.get(currentLine);
+
+		// get the next line
+		currentLine++;
+
+		return result;
 	}
 
 	public List<String> getContentLineInColumns() {
@@ -77,7 +94,7 @@ public class CsvFile extends SimpleFile {
 
 			if (line.charAt(i) == '\"') {
 				inQuotedStr = !inQuotedStr;
-			} else if ((!inQuotedStr) && (line.charAt(i) == ',')) {
+			} else if ((!inQuotedStr) && (line.charAt(i) == entrySeparator)) {
 				result.add(nextStr);
 				nextStr = "";
 			} else {
@@ -107,6 +124,10 @@ public class CsvFile extends SimpleFile {
 		this.appendContent(joinColumns(lineColumns));
 	}
 
+	public void setEntrySeparator(char entrySeparator) {
+		this.entrySeparator = entrySeparator;
+	}
+
 	private String joinColumns(List<String> columns) {
 
 		if (columns == null) {
@@ -120,7 +141,7 @@ public class CsvFile extends SimpleFile {
 		for (String col : columns) {
 			result.append(sep);
 			result.append(col);
-			sep = ",";
+			sep = ""+entrySeparator;
 		}
 
 		return result.toString();
@@ -131,7 +152,7 @@ public class CsvFile extends SimpleFile {
 			return "";
 		}
 		if (val instanceof Double) {
-			return val.toString().replace(".", ",");
+			return val.toString().replace(",", ".");
 		}
 		String strVal = val.toString();
 		strVal = strVal.trim();

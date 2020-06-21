@@ -334,6 +334,15 @@ public class ColorRGB {
 		);
 	}
 
+	public static ColorRGB max(ColorRGB one, ColorRGB two) {
+		return new ColorRGB(
+			Math.max((((int) one.r) & 0xFF), (((int) two.r) & 0xFF)),
+			Math.max((((int) one.g) & 0xFF), (((int) two.g) & 0xFF)),
+			Math.max((((int) one.b) & 0xFF), (((int) two.b) & 0xFF)),
+			Math.max((((int) one.a) & 0xFF), (((int) two.a) & 0xFF))
+		);
+	}
+
 	/**
 	 * Gets a random color (could be any RGB color, but non-transparent)
 	 */
