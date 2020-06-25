@@ -82,7 +82,7 @@ public class DefaultImageFile extends RasterImageFile {
 
 			BufferedImage javaImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 
-			ColorRGB[][] data = img.getData();
+			ColorRGB[][] data = img.getDataSafely();
 
 			for (int y = 0; y < img.getHeight(); y++) {
 				for (int x = 0; x < img.getWidth(); x++) {

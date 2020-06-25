@@ -222,6 +222,20 @@ public class Image {
 		return data;
 	}
 
+	public ColorRGB[][] getDataSafely() {
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (data[y][x] == null) {
+					System.err.println("Image.getDataSafely() called, but " + x + "x" + y + " is null! Will be set to black...");
+					data[y][x] = ColorRGB.BLACK;
+				}
+			}
+		}
+
+		return data;
+	}
+
 	public BufferedImage getAwtImage() {
 
 		BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
