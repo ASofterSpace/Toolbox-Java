@@ -115,4 +115,11 @@ public class MathUtils {
 		return result;
 	}
 
+	public static int zeroIfNull(Integer value) {
+		if (value == null) {
+			return 0;
+		}
+		return (int) value;
+	}
+
 }
