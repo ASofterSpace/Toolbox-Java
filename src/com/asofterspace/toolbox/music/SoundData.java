@@ -21,6 +21,14 @@ public class SoundData {
 		this.rightData = rightData;
 	}
 
+	public SoundData copy() {
+		int[] newLeftData = new int[leftData.length];
+		System.arraycopy(leftData, 0, newLeftData, 0, leftData.length);
+		int[] newRightData = new int[rightData.length];
+		System.arraycopy(leftData, 0, newRightData, 0, rightData.length);
+		return new SoundData(newLeftData, newRightData);
+	}
+
 	public int getLength() {
 		if (leftData == null) {
 			return 0;
