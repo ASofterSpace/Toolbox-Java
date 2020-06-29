@@ -192,11 +192,25 @@ public class DateUtils {
 	 * (negative values are also allowed)
 	 */
 	public static Date daysInTheFuture(Integer howMany) {
+		return addDays(new Date(), howMany);
+	}
+
+	/**
+	 * Returns a date that is the addTo date time plus howMany days
+	 * (negative values are also allowed)
+	 */
+	public static Date addDays(Date addTo, Integer howMany) {
+
 		if (howMany == null) {
 			return new Date();
 		}
 
+		if (addTo == null) {
+			addTo = new Date();
+		}
+
 		Calendar cal = Calendar.getInstance();
+		cal.setTime(addTo);
 		cal.add(Calendar.DATE, howMany);
 		return cal.getTime();
 	}

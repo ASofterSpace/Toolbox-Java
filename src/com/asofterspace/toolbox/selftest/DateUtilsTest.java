@@ -11,6 +11,7 @@ import com.asofterspace.toolbox.Utils;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 public class DateUtilsTest implements Test {
@@ -27,6 +28,8 @@ public class DateUtilsTest implements Test {
 		createTimestampWithoutExceptionTest();
 
 		monthToNumAndBackTest();
+
+		listDatesTest();
 	}
 
 	public void parseAndSerializeDateTest() {
@@ -210,4 +213,30 @@ public class DateUtilsTest implements Test {
 				" instead of " + monthStr + "!");
 		}
 	}
+
+
+	public void listDatesTest() {
+
+		TestUtils.start("List Dates");
+
+		int amount = 10;
+
+		Date now = DateUtils.now();
+		Date tenDaysAgo = DateUtils.daysInTheFuture(-amount);
+
+		List<Date> result = DateUtils.listDaysFromTo(tenDaysAgo, now);
+
+		if (result.size() != amount) {
+			TestUtils.fail("We wanted to list the days from " + amount + " days ago until now, but did not get " + amount + " days!");
+		}
+
+		result = DateUtils.listDaysFromTo(now, tenDaysAgo);
+
+		if (result.size() != 0) {
+			TestUtils.fail("We wanted to list the days from now until " + amount + " days ago, but did not get 0 days!");
+		}
+
+		TestUtils.succeed();
+	}
+
 }
