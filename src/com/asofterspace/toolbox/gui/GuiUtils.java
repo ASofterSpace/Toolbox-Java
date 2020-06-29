@@ -33,6 +33,16 @@ public class GuiUtils {
 	public final static String DARK_SCHEME = "dark";
 
 
+	public static void notify(String notifyAbout) {
+
+		JOptionPane.showMessageDialog(
+			null,
+			notifyAbout,
+			Utils.getProgramTitle(),
+			JOptionPane.INFORMATION_MESSAGE
+		);
+	}
+
 	public static boolean complain(String complainAbout) {
 
 		JOptionPane.showMessageDialog(
