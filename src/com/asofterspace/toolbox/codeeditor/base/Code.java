@@ -899,7 +899,8 @@ public abstract class Code extends DefaultStyledDocument {
 			origText.contains(" " + utility + "(") || origText.contains("\t" + utility + "(") ||
 			origText.contains(" " + utility + ".") || origText.contains("\t" + utility + ".") ||
 			origText.contains("(" + utility + " ") || origText.contains("(" + utility + ".") ||
-			origText.contains("(" + utility + "<") ||
+			origText.contains("(" + utility + "<") || origText.contains("!" + utility + ".") ||
+			origText.contains("!" + utility + "(") ||
 			origText.contains("(" + utility + ")") || origText.contains(" instanceof " + utility + ")") ||
 			origText.contains("@" + utility + "\n") || origText.contains("@" + utility + "(")) {
 			if (!origText.contains(importKeyword + " " + fullUtility + ";")) {
