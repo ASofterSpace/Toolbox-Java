@@ -11,6 +11,12 @@ package com.asofterspace.toolbox.music;
  */
 public class SoundData {
 
+	// this is the loudest sound that can be represented:
+	// 16^4 (so 16*16*16*16) is available for all, but the volume is signed
+	// so we actually have (16^4)/2, and because it is signed, the very largest
+	// value has to be avoided, so it is (16^4)/2 - 1...
+	private final static long SOUND_MAX = (8l*16*16*16) - 1;
+
 	private int[] leftData;
 
 	private int[] rightData;
@@ -92,8 +98,8 @@ public class SoundData {
 
 		int max = getMax();
 		for (int i = 0; i < leftData.length; i++) {
-			leftData[i] = (int) ((leftData[i] * (long) 8*16*16*16) / max);
-			rightData[i] = (int) ((rightData[i] * (long) 8*16*16*16) / max);
+			leftData[i] = (int) ((leftData[i] * SOUND_MAX) / max);
+			rightData[i] = (int) ((rightData[i] * SOUND_MAX) / max);
 		}
 	}
 
