@@ -2,7 +2,7 @@
  * Unlicensed code created by A Softer Space, 2020
  * www.asofterspace.com/licenses/unlicense.txt
  */
-package com.asofterspace.toolbox.music;
+package com.asofterspace.toolbox.sound;
 
 import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.Directory;
