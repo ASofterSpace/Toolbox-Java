@@ -109,6 +109,24 @@ public class SoundData {
 		return max;
 	}
 
+	public int getMax(int pos) {
+
+		int max = 0;
+		if (leftData[pos] > max) {
+			max = leftData[pos];
+		}
+		if (-leftData[pos] > max) {
+			max = -leftData[pos];
+		}
+		if (rightData[pos] > max) {
+			max = rightData[pos];
+		}
+		if (-rightData[pos] > max) {
+			max = -rightData[pos];
+		}
+		return max;
+	}
+
 	public void normalize() {
 
 		int max = getMax();

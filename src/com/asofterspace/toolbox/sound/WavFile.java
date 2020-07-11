@@ -53,6 +53,14 @@ public class WavFile extends BinaryFile {
 		super(parentDirectory, filename);
 	}
 
+	public void copySettingsOf(WavFile other) {
+		this.numberOfChannels = other.numberOfChannels;
+		this.sampleRate = other.sampleRate;
+		this.byteRate = other.byteRate;
+		this.bitsPerSample = other.bitsPerSample;
+		this.audioFormat = other.audioFormat;
+	}
+
 	private void initialize() {
 
 		if (leftData == null) {
@@ -274,6 +282,24 @@ public class WavFile extends BinaryFile {
 
 	public void setBitsPerSample(Integer bitsPerSample) {
 		this.bitsPerSample = bitsPerSample;
+	}
+
+	/**
+	 * Takes a position in milliseconds and returns the exact offset into the int array at which
+	 * this time is occurring in the song data
+	 */
+	public int millisToChannelPos(long posInMillis) {
+		int bytesPerSample = bitsPerSample / 8;
+		return (int) ((posInMillis * byteRate) / (1000l * bytesPerSample * numberOfChannels));
+	}
+
+	/**
+	 * Takes an offset into the int array and returns the time in milliseconds at which it gets
+	 * playes
+	 */
+	public int channelPosToMillis(long channelPos) {
+		int bytesPerSample = bitsPerSample / 8;
+		return (int) ((channelPos * 1000l * bytesPerSample * numberOfChannels) / byteRate);
 	}
 
 	public void save() {
