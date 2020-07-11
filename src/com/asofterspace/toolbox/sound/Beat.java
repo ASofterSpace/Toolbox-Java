@@ -19,6 +19,9 @@ public class Beat {
 	// how jiggly is the beat (that is, how many up/down and down/up reversals are there within it?)
 	private long jigglieness;
 
+	// how intense is the beat (that is, how much louder are the first 20% compared to the last 20%?)
+	private long intensity;
+
 	// is this beat aligned with some other beat somewhere else? ^^
 	private boolean isAligned;
 
@@ -62,6 +65,14 @@ public class Beat {
 
 	public void setJigglieness(long jigglieness) {
 		this.jigglieness = jigglieness;
+	}
+
+	public long getIntensity() {
+		return intensity;
+	}
+
+	public void setIntensity(long intensity) {
+		this.intensity = intensity;
 	}
 
 	public boolean getIsAligned() {

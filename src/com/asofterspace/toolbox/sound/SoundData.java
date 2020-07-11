@@ -34,6 +34,22 @@ public class SoundData {
 		return new SoundData(newLeftData, newRightData);
 	}
 
+	/**
+	 * Makes a copy of the interval [from, until[ of SoundData
+	 */
+	public SoundData copy(int from, int until) {
+		if (until < from) {
+			from = 0;
+			until = 0;
+		}
+		int newLen = until - from;
+		int[] newLeftData = new int[newLen];
+		System.arraycopy(leftData, from, newLeftData, 0, newLen);
+		int[] newRightData = new int[newLen];
+		System.arraycopy(leftData, from, newRightData, 0, newLen);
+		return new SoundData(newLeftData, newRightData);
+	}
+
 	public int getLength() {
 		if (leftData == null) {
 			return 0;

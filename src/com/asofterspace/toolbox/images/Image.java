@@ -420,6 +420,8 @@ public class Image {
 
 	/**
 	 * Specify one of left and right, and one of top and bottom - the other one will be chosen automatically
+	 * (However, all four are absolute values starting from top left - so if you have a width of 100, and want
+	 * a distance to the right side of 10, you have to put right 90, not right 10!)
 	 */
 	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left) {
 
@@ -510,6 +512,7 @@ public class Image {
 			if (top == null) {
 				top = bottom - intermediate.getHeight();
 			}
+
 			if (targetImage != null) {
 				targetImage.draw(intermediate, 0, 0);
 			} else {
@@ -522,6 +525,7 @@ public class Image {
 			if (top == null) {
 				top = bottom - textHeight;
 			}
+
 			if (targetImage != null) {
 				targetImage.drawAwtImage(bufImg, 0, 0);
 			} else {

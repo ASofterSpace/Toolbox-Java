@@ -257,4 +257,12 @@ public class JsonFile extends SimpleFile {
 
 		super.save();
 	}
+
+	/**
+	 * Replaces the content of this JsonFile with the given Record and saves it to disk
+	 */
+	public void save(Record data) {
+		setAllContents(data);
+		save();
+	}
 }
