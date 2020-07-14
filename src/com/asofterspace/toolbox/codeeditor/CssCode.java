@@ -186,7 +186,11 @@ public class CssCode extends Code {
 					}
 					if (keyEnd > 0) {
 						keyEnd = content.indexOf(";", keyEnd);
-						start = keyEnd - 1;
+						if (keyEnd < 0) {
+							start = end;
+						} else {
+							start = keyEnd - 1;
+						}
 					}
 				}
 
