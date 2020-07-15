@@ -107,6 +107,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("OutputStream", "java.io.OutputStream");
 		automaticallyAddedImports.put("OutputStreamReader", "java.io.OutputStreamReader");
 		automaticallyAddedImports.put("OutputStreamWriter", "java.io.OutputStreamWriter");
+		automaticallyAddedImports.put("PrintStream", "java.io.PrintStream");
 		automaticallyAddedImports.put("HttpURLConnection", "java.net.HttpURLConnection");
 		automaticallyAddedImports.put("URL", "java.net.URL");
 		automaticallyAddedImports.put("URLConnection", "java.net.URLConnection");
