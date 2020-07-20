@@ -7,7 +7,6 @@ package com.asofterspace.toolbox.web;
 import com.asofterspace.toolbox.io.Directory;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -16,6 +15,10 @@ import java.util.List;
 
 /**
  * This (hopefully) simplifies serving content on the web
+ *
+ * Usually, you want to extend this generic WebServer with your own Server object
+ * which overrides the getHandler function to return your own handler that extends
+ * WebServerRequestHandler and adds functionality to it.
  *
  * @author Moya (a softer space, 2019)
  */
