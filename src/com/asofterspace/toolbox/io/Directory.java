@@ -393,8 +393,8 @@ public class Directory {
 	 */
 	public String getRelativePath(File file) {
 
-		Path filePath = file.getJavaPath();
-		Path dirPath = this.getJavaPath();
+		Path filePath = file.getJavaPath().toAbsolutePath();
+		Path dirPath = this.getJavaPath().toAbsolutePath();
 		return dirPath.relativize(filePath).toString();
 	}
 
