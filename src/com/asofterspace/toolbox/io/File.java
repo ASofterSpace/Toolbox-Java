@@ -260,9 +260,7 @@ public class File {
 
 		File result = new File(destination);
 
-		this.copyToDisk(result);
-
-		return result;
+		return this.copyToDisk(result);
 	}
 
 	/**
@@ -271,7 +269,7 @@ public class File {
 	 * Returns a File object representing the target file location
 	 * (mostly for symmetry reasons with the other copyToDisk functions -
 	 * in this case, the returned File object is just the File object that
-	 * was given as argument... ^^)
+	 * was given as argument... or null, if the operation failed! ^^)
 	 */
 	public File copyToDisk(File destination) {
 
@@ -283,11 +281,11 @@ public class File {
 		}
 
 		try {
-
 			Files.copy(this.getJavaPath(), destination.getJavaPath(), StandardCopyOption.REPLACE_EXISTING);
 
 		} catch (IOException e) {
 			System.err.println("[ERROR] The file " + filename + " could not be copied to " + destination + "!");
+			return null;
 		}
 
 		return destination;
