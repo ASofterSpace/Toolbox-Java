@@ -359,12 +359,20 @@ public class File {
 			return "application/json";
 		}
 
+		if (filename.endsWith(".pdf")) {
+			return "application/pdf";
+		}
+
 		if (filename.endsWith(".png")) {
 			return "image/png";
 		}
 
 		if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
 			return "image/jpeg";
+		}
+
+		if (filename.endsWith(".bmp")) {
+			return "image/bmp";
 		}
 
 		return "text/plain";
