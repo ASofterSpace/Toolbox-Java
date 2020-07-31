@@ -108,9 +108,11 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("OutputStreamReader", "java.io.OutputStreamReader");
 		automaticallyAddedImports.put("OutputStreamWriter", "java.io.OutputStreamWriter");
 		automaticallyAddedImports.put("PrintStream", "java.io.PrintStream");
+		automaticallyAddedImports.put("BigInteger", "java.math.BigInteger");
 		automaticallyAddedImports.put("HttpURLConnection", "java.net.HttpURLConnection");
 		automaticallyAddedImports.put("URL", "java.net.URL");
 		automaticallyAddedImports.put("URLConnection", "java.net.URLConnection");
+		automaticallyAddedImports.put("ByteBuffer", "java.nio.ByteBuffer");
 		automaticallyAddedImports.put("StandardCharsets", "java.nio.charset.StandardCharsets");
 		automaticallyAddedImports.put("Files", "java.nio.file.Files");
 		automaticallyAddedImports.put("ArrayList", "java.util.ArrayList");
@@ -124,6 +126,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("Map", "java.util.Map");
 		automaticallyAddedImports.put("Random", "java.util.Random");
 		automaticallyAddedImports.put("Set", "java.util.Set");
+		automaticallyAddedImports.put("UUID", "java.util.UUID");
 		automaticallyAddedImports.put("AbstractButton", "javax.swing.AbstractButton");
 		automaticallyAddedImports.put("BorderFactory", "javax.swing.BorderFactory");
 		automaticallyAddedImports.put("ButtonGroup", "javax.swing.ButtonGroup");

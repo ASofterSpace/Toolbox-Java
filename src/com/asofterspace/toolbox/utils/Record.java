@@ -568,6 +568,9 @@ public class Record {
 	 * @return the length of the Record array
 	 */
 	public int getLength() {
+		if (arrContents == null) {
+			return 0;
+		}
 		return arrContents.size();
 	}
 
