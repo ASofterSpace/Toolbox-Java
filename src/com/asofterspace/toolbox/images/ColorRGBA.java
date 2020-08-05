@@ -1,5 +1,5 @@
 /**
- * Unlicensed code created by A Softer Space, 2019
+ * Unlicensed code created by A Softer Space, 2020
  * www.asofterspace.com/licenses/unlicense.txt
  */
 package com.asofterspace.toolbox.images;
@@ -9,39 +9,39 @@ import java.util.Random;
 
 
 /**
- * A simple RGB triplet
+ * A simple RGBA quartlet
  *
- * @author Moya (a softer space), 2019
+ * @author Tom Moya Schau, 2020
  */
-public class ColorRGB {
+public class ColorRGBA extends ColorRGB {
 
-	// these fields are final as we want to be able to re-use pixels between images,
-	// and just because someone paints one image green we do not want all others to
-	// be green too! ;)
-	private final byte r;
-	private final byte g;
-	private final byte b;
-
-	private final static Random RANDOM = new Random();
-
-	public final static ColorRGB WHITE = new ColorRGB(255, 255, 255);
-	public final static ColorRGB BLACK = new ColorRGB(  0,   0,   0);
-
+	private final byte a;
 
 	// by default, just a white pixel
-	public ColorRGB() {
-		this(255, 255, 255);
+	public ColorRGBA() {
+		this(255, 255, 255, 255);
 	}
 
-	public ColorRGB(Color col) {
-		this(col.getRed(), col.getGreen(), col.getBlue());
+	public ColorRGBA(Color col) {
+		this(col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha());
 	}
 
-	public ColorRGB(byte r, byte g, byte b) {
-		this(r, g, b);
+	public ColorRGBA(byte r, byte g, byte b) {
+		this(r, g, b, (byte) 255);
 	}
 
-	public ColorRGB(int r, int g, int b) {
+	public ColorRGBA(byte r, byte g, byte b, byte a) {
+		this.r = r;
+		this.g = g;
+		this.b = b;
+		this.a = a;
+	}
+
+	public ColorRGBA(int r, int g, int b) {
+		this(r, g, b, 255);
+	}
+
+	public ColorRGBA(int r, int g, int b, int a) {
 
 		if (r > 255) {
 			r = 255;
@@ -64,12 +64,24 @@ public class ColorRGB {
 			b = 0;
 		}
 
+		if (a > 255) {
+			a = 255;
+		}
+		if (a < 0) {
+			a = 0;
+		}
+
 		this.r = (byte) r;
 		this.g = (byte) g;
 		this.b = (byte) b;
+		this.a = (byte) a;
 	}
 
-	public ColorRGB(long r, long g, long b) {
+	public ColorRGBA(long r, long g, long b) {
+		this(r, g, b, 255l);
+	}
+
+	public ColorRGBA(long r, long g, long b, long a) {
 
 		if (r > 255) {
 			r = 255;
@@ -92,94 +104,30 @@ public class ColorRGB {
 			b = 0;
 		}
 
+		if (a > 255) {
+			a = 255;
+		}
+		if (a < 0) {
+			a = 0;
+		}
+
 		this.r = (byte) r;
 		this.g = (byte) g;
 		this.b = (byte) b;
-	}
-
-	public boolean isDark() {
-		// make the bytes unsigned ints, as Java has no unsigned byte...
-		int intR = r & 0xFF;
-		int intG = g & 0xFF;
-		int intB = b & 0xFF;
-		int result = intR + intG + intB;
-		return result < (255 * 3) / 2;
-	}
-
-	// is this pixel the one we would expect?
-	public boolean is(int r, int g, int b) {
-		return (this.r == (byte) r) && (this.g == (byte) g) && (this.b == (byte) b);
-	}
-
-	public int getR() {
-		return r & 0xFF;
-	}
-
-	public int getG() {
-		return g & 0xFF;
-	}
-
-	public int getB() {
-		return b & 0xFF;
+		this.a = (byte) a;
 	}
 
 	public int getA() {
-		byte a = 255;
 		return a & 0xFF;
 	}
 
-	public byte getRByte() {
-		return r;
-	}
-
-	public byte getGByte() {
-		return g;
-	}
-
-	public byte getBByte() {
-		return b;
-	}
-
 	public byte getAByte() {
-		byte a = 255;
 		return a;
 	}
 
+	@Override
 	public int getRGB() {
-		byte a = 255;
 		return ((a & 0xFF) << 24) + ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
-	}
-
-	public int getGrayness() {
-		int intR = r & 0xFF;
-		int intG = g & 0xFF;
-		int intB = b & 0xFF;
-		int result = intR + intG + intB;
-		return result / 3;
-	}
-
-	public byte getGrayByte() {
-		int intR = r & 0xFF;
-		int intG = g & 0xFF;
-		int intB = b & 0xFF;
-		int result = intR + intG + intB;
-		return (byte) (result / 3);
-	}
-
-	public int getPerceivedGrayness() {
-		int intR = r & 0xFF;
-		int intG = g & 0xFF;
-		int intB = b & 0xFF;
-		int result = (30 * intR) + (59 * intG) + (11 * intB);
-		return result / 100;
-	}
-
-	public byte getPerceivedGrayByte() {
-		int intR = r & 0xFF;
-		int intG = g & 0xFF;
-		int intB = b & 0xFF;
-		int result = (30 * intR) + (59 * intG) + (11 * intB);
-		return (byte) (result / 100);
 	}
 
 	/**
