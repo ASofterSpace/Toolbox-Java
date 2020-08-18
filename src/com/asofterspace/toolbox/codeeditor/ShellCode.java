@@ -25,7 +25,7 @@ public class ShellCode extends FunctionSupplyingCode {
 
 	// all keywords of the sh language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"break", "case", "do", "done", "else", "esac", "fi", "for", "function", "if", "in", "then", "while"}
+		new String[] {"break", "case", "do", "done", "elif", "else", "esac", "fi", "for", "function", "if", "in", "then", "while"}
 	));
 
 	// all primitive types of the sh language and other stuff that looks that way
