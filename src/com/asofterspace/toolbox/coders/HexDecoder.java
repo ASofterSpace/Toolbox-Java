@@ -103,6 +103,23 @@ public class HexDecoder {
 		return new String(decodeBytesFromHex(hexStr));
 	}
 
+	public static int decodeIntFromHex(String hexStr) {
+
+		hexStr = cleanUpInputStr(hexStr);
+
+		int len = hexStr.length();
+
+		int result = 0;
+		int factor = 1;
+
+		for (int i = len - 1; i >= 0; i--) {
+			result += factor * (int) hexCharToByte(hexStr.charAt(i));
+			factor *= 16;
+		}
+
+		return result;
+	}
+
 	public static BigInteger decodeNumberFromHex(String hexStr) {
 
 		hexStr = cleanUpInputStr(hexStr);

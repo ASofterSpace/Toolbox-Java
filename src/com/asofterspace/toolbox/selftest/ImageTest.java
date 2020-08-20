@@ -21,6 +21,8 @@ public class ImageTest implements Test {
 
 		testColorRGBDarknessDetection();
 
+		testColorRGBstringification();
+
 		testImageClearing();
 
 		testImageComparison();
@@ -117,6 +119,42 @@ public class ImageTest implements Test {
 
 		if (white.isDark()) {
 			TestUtils.fail("White is dark!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void testColorRGBstringification() {
+
+		TestUtils.start("Color RGB Stringification");
+
+		ColorRGB colOne = new ColorRGB(1, 2, 3);
+		ColorRGB colTwo = new ColorRGB(10, 20, 30);
+		ColorRGB colThree = new ColorRGB(240, 31, 197);
+
+		if (!colOne.equals(ColorRGB.fromString(colOne.toString()))) {
+			TestUtils.fail("Color one does not equal itself when being transformed into a string and back!");
+			return;
+		}
+
+		if (!colTwo.equals(ColorRGB.fromString(colTwo.toString()))) {
+			TestUtils.fail("Color two does not equal itself when being transformed into a string and back!");
+			return;
+		}
+
+		if (!colThree.equals(ColorRGB.fromString(colThree.toString()))) {
+			TestUtils.fail("Color three does not equal itself when being transformed into a string and back!");
+			return;
+		}
+
+		if (!colOne.equals(ColorRGB.fromString("rgba ( 1 , 2 , 3 )"))) {
+			TestUtils.fail("Color one does not equal to rgba ( 1 , 2 , 3 )!");
+			return;
+		}
+
+		if (!colThree.equals(ColorRGB.fromString("#F01FC5"))) {
+			TestUtils.fail("Color three does not equal to #F01FC5!");
 			return;
 		}
 

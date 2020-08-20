@@ -4,6 +4,9 @@
  */
 package com.asofterspace.toolbox.images;
 
+import com.asofterspace.toolbox.coders.HexDecoder;
+import com.asofterspace.toolbox.utils.StrUtils;
+
 import java.awt.Color;
 import java.util.Random;
 
@@ -556,6 +559,51 @@ public class ColorRGB {
 
 	public Color toColor() {
 		return new Color(((int) r) & 0xFF, ((int) g) & 0xFF, ((int) b) & 0xFF, ((int) a) & 0xFF);
+	}
+
+	public static ColorRGB fromString(String str) {
+
+		if (str == null) {
+			System.err.println("No color string could not be parsed!");
+			return new ColorRGB();
+		}
+
+		str = str.toLowerCase();
+
+		if (str.startsWith("rgb")) {
+			str = str.substring(str.indexOf("(") + 1);
+			String rStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String gStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String bStr = str.substring(0, str.indexOf(")"));
+			if (bStr.contains(",")) {
+				bStr = bStr.substring(0, bStr.indexOf(","));
+			}
+			return new ColorRGB(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr));
+		}
+
+		if (str.startsWith("rgba")) {
+			str = str.substring(str.indexOf("(") + 1);
+			String rStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String gStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String bStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String aStr = str.substring(0, str.indexOf(")"));
+			return new ColorRGB(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr), StrUtils.strToInt(aStr));
+		}
+
+		if (str.startsWith("#")) {
+			String rStr = "" + str.charAt(1) + str.charAt(2);
+			String gStr = "" + str.charAt(3) + str.charAt(4);
+			String bStr = "" + str.charAt(5) + str.charAt(6);
+			return new ColorRGB(HexDecoder.decodeIntFromHex(rStr), HexDecoder.decodeIntFromHex(gStr), HexDecoder.decodeIntFromHex(bStr));
+		}
+
+		System.err.println("The color string '" + str + "' could not be parsed!");
+		return new ColorRGB();
 	}
 
 	@Override
