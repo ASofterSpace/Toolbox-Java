@@ -74,7 +74,11 @@ public class File {
 	 */
 	public File(Directory parentDirectory, String filename) {
 
-		this.filename = parentDirectory.getJavaPath().resolve(filename).toAbsolutePath().toString();
+		// complicated, and should work fine?
+		// this.filename = parentDirectory.getJavaPath().resolve(filename).toAbsolutePath().toString();
+
+		// much less complicated... and actually works better (in case of filename containing slashes)
+		this.filename = parentDirectory.getAbsoluteDirname() + "/" + filename;
 	}
 
 	/**
