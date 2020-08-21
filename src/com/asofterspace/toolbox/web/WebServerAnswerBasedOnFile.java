@@ -41,10 +41,15 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 
 	public String getPreferredCacheParadigm() {
 
+		String lowFilename = filename.toLowerCase();
+
 		// keep these a week long
 		// (if we want to invalidate, we should increase the ?v=version argument of the request)
-		if (filename.endsWith(".png") || filename.endsWith(".js")) {
-			return "max-age=604800";
+		if (lowFilename.endsWith(".jpg") ||
+			lowFilename.endsWith(".png") ||
+			lowFilename.endsWith(".pdf") ||
+			lowFilename.endsWith(".js")) {
+			return "public, max-age=604800";
 		}
 
 		// never keep the others
