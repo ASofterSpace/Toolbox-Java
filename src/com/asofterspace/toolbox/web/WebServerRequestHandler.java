@@ -514,6 +514,14 @@ public class WebServerRequestHandler implements Runnable {
 
 		List<String> whitelist = server.getFileLocationWhitelist();
 
+		if (location == null) {
+			return null;
+		}
+
+		if (!location.startsWith("/")) {
+			location = "/" + location;
+		}
+
 		for (String entry : whitelist) {
 
 			if (location.equals(entry) || location.equals("/" + entry)) {
