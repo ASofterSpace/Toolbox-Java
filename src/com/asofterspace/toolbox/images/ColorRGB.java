@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.images;
 
 import com.asofterspace.toolbox.coders.HexDecoder;
+import com.asofterspace.toolbox.coders.HexEncoder;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.awt.Color;
@@ -609,6 +610,10 @@ public class ColorRGB {
 	@Override
 	public String toString() {
 		return "RGB(" + (((int) r) & 0xFF) + ", " + (((int) g) & 0xFF) + ", " + (((int) b) & 0xFF) + ", " + (((int) a) & 0xFF) + ")";
+	}
+
+	public String toHexString() {
+		return "#" + HexEncoder.encodeNumberToHex(((int) r) & 0xFF, 2) + HexEncoder.encodeNumberToHex(((int) g) & 0xFF, 2) + HexEncoder.encodeNumberToHex(((int) b) & 0xFF, 2);
 	}
 
 }

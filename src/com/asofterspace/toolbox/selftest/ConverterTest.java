@@ -27,13 +27,11 @@ public class ConverterTest implements Test {
 		base64HexCrossTest(3);
 
 		hexStrDecoderTest();
-
 		hexNumberDecoderTest();
+		hexEncoderDecoderTest();
 
 		morseEncoderTest();
-
 		morseDecoderTest();
-
 		morseEncoderDecoderTest();
 	}
 
@@ -91,6 +89,25 @@ public class ConverterTest implements Test {
 
 		if (intOutput != 27398) {
 			TestUtils.fail("We tried to decode a well-known hex number but got " + output + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void hexEncoderDecoderTest() {
+
+		TestUtils.start("Hex Encoder Decoder");
+
+		String input = "1A34";
+
+		int output = HexDecoder.decodeIntFromHex(input);
+
+		String encOutput = HexEncoder.encodeNumberToHex(output);
+
+		if (!input.equals(encOutput)) {
+			TestUtils.fail("We tried to decode the hex str " + input + " to a number, which gave " + output +
+				" and then re-encode to hex giving " + encOutput + " - but it is not the original hex str!");
 			return;
 		}
 

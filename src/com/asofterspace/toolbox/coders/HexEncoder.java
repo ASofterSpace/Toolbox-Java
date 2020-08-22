@@ -4,6 +4,9 @@
  */
 package com.asofterspace.toolbox.coders;
 
+import com.asofterspace.toolbox.utils.StrUtils;
+
+
 /**
  * A class that can encode numbers into their hexadecimal representations
  *
@@ -46,19 +49,32 @@ public class HexEncoder {
 			case 15:
 				return 'F';
 		}
-		
+
 		return ' ';
 	}
 
-    public static String encodeStringToHex(String text) {
-	
+	public static String encodeNumberToHex(int num) {
+		String result = "";
+		while (num > 0) {
+			result = charToHex(num % 16) + result;
+			num = num / 16;
+		}
+		return result;
+	}
+
+	public static String encodeNumberToHex(int num, int digits) {
+		return StrUtils.leftPad(encodeNumberToHex(num), '0', digits);
+	}
+
+	public static String encodeStringToHex(String text) {
+
 		StringBuilder result = new StringBuilder();
-		
+
 		for (int i = 0; i < text.length(); i++) {
 			result.append(charToHex(text.charAt(i) / 16));
 			result.append(charToHex(text.charAt(i) % 16));
 		}
 
-        return result.toString();
-    }
+		return result.toString();
+	}
 }

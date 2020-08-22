@@ -158,6 +158,11 @@ public class ImageTest implements Test {
 			return;
 		}
 
+		if (!colThree.toHexString().equals("#F01FC5")) {
+			TestUtils.fail("Color three toHexString() is " + colThree.toHexString() + " which does not equal to #F01FC5!");
+			return;
+		}
+
 		TestUtils.succeed();
 	}
 
