@@ -29,7 +29,7 @@ public class WebServerRequestHandler implements Runnable {
 
 	private Socket request;
 
-	private Directory webRoot;
+	protected Directory webRoot;
 
 	protected BufferedReader input;
 
@@ -510,6 +510,21 @@ public class WebServerRequestHandler implements Runnable {
 		return getFileFromLocation(location + ".html", arguments);
 	}
 
+	protected String getWhitelistedLocationEquivalent(String location) {
+
+		List<String> whitelist = server.getFileLocationWhitelist();
+
+		for (String entry : whitelist) {
+
+			if (location.equals(entry) || location.equals("/" + entry)) {
+
+				return entry;
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * For a request like /bla.htm?foo=bar&thoom=floom,
 	 * location is /bla.htm
@@ -517,20 +532,14 @@ public class WebServerRequestHandler implements Runnable {
 	 */
 	protected File getFileFromLocation(String location, String[] arguments) {
 
+		String locEquiv = getWhitelistedLocationEquivalent(location);
+
 		// if no root is specified, then we are just not serving any files at all
-		if (webRoot == null) {
-			return null;
-		}
+		// and if no location equivalent is found on the whitelist, we are not serving this request
+		if ((webRoot != null) && (locEquiv != null)) {
 
-		List<String> whitelist = server.getFileLocationWhitelist();
-
-		for (String entry : whitelist) {
-
-			if (location.equals("/" + entry)) {
-
-				// actually get the file
-				return webRoot.getFile(entry);
-			}
+			// actually get the file
+			return webRoot.getFile(locEquiv);
 		}
 
 		// if the file was not found on the whitelist, do not return it
