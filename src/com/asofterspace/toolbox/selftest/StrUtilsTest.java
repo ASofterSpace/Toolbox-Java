@@ -29,6 +29,8 @@ public class StrUtilsTest implements Test {
 
 		strToDoubleTest();
 
+		normalizeWhitespaceTest();
+
 		replaceAllTest();
 
 		replaceAllRepeatedlyTest();
@@ -181,6 +183,15 @@ public class StrUtilsTest implements Test {
 			TestUtils.fail("We called strToDouble(\"" + origStr + "\") and got " + result +
 				", but expected a result between " + targetDoubleLow + " and " + targetDoubleHigh + "!");
 		}
+	}
+
+	private void normalizeWhitespaceTest() {
+
+		TestUtils.start("replaceAll");
+
+		String shouldBeNullNotNPE = StrUtils.normalizeWhitespace(null);
+
+		TestUtils.succeed();
 	}
 
 	private void replaceAllTest() {
