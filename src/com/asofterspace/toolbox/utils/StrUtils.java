@@ -931,6 +931,10 @@ public class StrUtils {
 	 */
 	public static String normalizeWhitespace(String origStr) {
 
+		if (origStr == null) {
+			return null;
+		}
+
 		String value = origStr;
 
 		// TODO :: actually make this more performant by iterating over the entire string just once
