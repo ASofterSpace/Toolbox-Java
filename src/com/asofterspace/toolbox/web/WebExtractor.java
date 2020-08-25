@@ -10,6 +10,7 @@ import com.asofterspace.toolbox.io.XML;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.utils.StrUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -61,6 +62,9 @@ public class WebExtractor {
 		return dictionary.getInteger(key);
 	}
 
+	/**
+	 * Extract the content from the html string that is between strbefore and strafter
+	 */
 	public static String extract(String html, String strbefore, String strafter) {
 		if (html == null) {
 			return null;
@@ -75,6 +79,32 @@ public class WebExtractor {
 			return html.substring(startindex + len);
 		}
 		return null;
+	}
+
+	/**
+	 * Extract the contents from the html string that are between strbefores and strafters
+	 */
+	public static List<String> extractAll(String html, String strbefore, String strafter) {
+		if (html == null) {
+			return null;
+		}
+		List<String> result = new ArrayList<>();
+		int cur = 0;
+		int len = strbefore.length();
+		while (html.indexOf(strbefore, cur) >= 0) {
+			int startindex = html.indexOf(strbefore, cur);
+			int endindex = html.indexOf(strafter, startindex + len);
+			if ((startindex >= 0) && (endindex >= startindex + len)) {
+				result.add(html.substring(startindex + len, endindex));
+				cur = endindex + strafter.length();
+			} else if (startindex >= 0) {
+				result.add(html.substring(startindex + len));
+				break;
+			} else {
+				break;
+			}
+		}
+		return result;
 	}
 
 	public static Integer getNumberFromHtml(String html, String strbefore, String strafter) {
@@ -139,5 +169,20 @@ public class WebExtractor {
 	 */
 	public static String removeHtmlTagsFromText(String str) {
 		return XML.removeXmlTagsFromText(str);
+	}
+
+	/**
+	 * Takes some text extracted from HTML, which might contain several linebreaks,
+	 * and which might contain funny multiple whitespaces, and transforms it into
+	 * one trimmed line with the whitespaces between words being just one space,
+	 * never more
+	 */
+	public static String makeIntoOneLine(String str) {
+		str = str.replace('\n', ' ');
+		str = str.replace('\r', ' ');
+		str = str.replace('\t', ' ');
+		str = StrUtils.replaceAllRepeatedly(str, "  ", " ");
+		str = str.trim();
+		return str;
 	}
 }

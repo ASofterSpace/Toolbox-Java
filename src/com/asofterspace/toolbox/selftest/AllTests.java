@@ -49,6 +49,8 @@ public class AllTests {
 
 		TestUtils.run(new JSONTest());
 
+		TestUtils.run(new RecordTest());
+
 		TestUtils.run(new XmlTest());
 
 		TestUtils.run(new ImageTest());

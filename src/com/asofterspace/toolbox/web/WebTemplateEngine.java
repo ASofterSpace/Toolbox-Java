@@ -115,6 +115,11 @@ public class WebTemplateEngine {
 			}
 		}
 
+		// the WebEngine increases the version on its own, but if the caller does not save this new version
+		// in the configuration that was passed in, then it will be lost when the surrounding program is
+		// closed and re-started
+		config.inc("version");
+
 		return result;
 	}
 

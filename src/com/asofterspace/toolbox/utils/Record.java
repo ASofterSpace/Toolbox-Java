@@ -762,6 +762,44 @@ public class Record {
 	}
 
 	/**
+	 * Retrieves the value that the key currently holds, increases it in the Record
+	 * and returns the increased value (or null if there was none / it was not a number)
+	 */
+	public Integer inc(Object key) {
+
+		Integer curVal = getInteger(key);
+
+		if (curVal == null) {
+			return null;
+		}
+
+		curVal += 1;
+
+		set(key, curVal);
+
+		return curVal;
+	}
+
+	/**
+	 * Retrieves the value that the key currently holds, decreases it in the Record
+	 * and returns the decreased value (or null if there was none / it was not a number)
+	 */
+	public Integer dec(Object key) {
+
+		Integer curVal = getInteger(key);
+
+		if (curVal == null) {
+			return null;
+		}
+
+		curVal -= 1;
+
+		set(key, curVal);
+
+		return curVal;
+	}
+
+	/**
 	 * Gets an long value stored in a key of a Record object
 	 * @param key  the key to be searched for
 	 * @return the integer value stored in the key
