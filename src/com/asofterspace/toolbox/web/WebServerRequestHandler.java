@@ -168,9 +168,9 @@ public class WebServerRequestHandler implements Runnable {
 
 	protected void handleGet(String fileLocation) throws IOException {
 
-		File requestedFile = getFile(fileLocation);
+		WebServerAnswer answer = answerGet(fileLocation);
 
-		if (requestedFile == null) {
+		if (answer == null) {
 			// only if the file was not found anyway...
 			if ("/coffee".equals(fileLocation)) {
 				// ... show an easteregg :)
@@ -180,9 +180,16 @@ public class WebServerRequestHandler implements Runnable {
 				respond(404);
 			}
 		} else {
-			WebServerAnswer answer = new WebServerAnswerBasedOnFile(requestedFile);
 			respond(200, answer);
 		}
+	}
+
+	/**
+	 * Overwrite this to answer GETs without (necessarily) returning a file for them;
+	 * if you return null, the fall-through is to look for a file to answer the GET request
+	 */
+	protected WebServerAnswer answerGet(String location, String[] arguments) {
+		return null;
 	}
 
 	protected void handlePut(String fileLocation) throws IOException {
@@ -467,7 +474,7 @@ public class WebServerRequestHandler implements Runnable {
 		respond(status, null);
 	}
 
-	private File getFile(String location) {
+	private WebServerAnswer answerGet(String location) {
 
 		if (location == null) {
 			location = "";
@@ -485,29 +492,52 @@ public class WebServerRequestHandler implements Runnable {
 			location = "/index";
 		}
 
+		// check if our behavior was overwritten
+		WebServerAnswer answer = answerGet(location, arguments);
+		if (answer != null) {
+			return answer;
+		}
+
 		// at first, try the file itself
 		File result = getFileFromLocation(location, arguments);
 
 		if (result != null) {
-			return result;
+			return new WebServerAnswerBasedOnFile(result);
+		}
+
+		// in case of a location like www.asofterspace.com/blubb/, actually add "index" to the end automagically...
+		if (location.endsWith("/")) {
+			location += "index";
+
+			result = getFileFromLocation(location, arguments);
+
+			if (result != null) {
+				return new WebServerAnswerBasedOnFile(result);
+			}
 		}
 
 		// then try serving a .php file that was navigated to without extension
 		result = getFileFromLocation(location + ".php", arguments);
 
 		if (result != null) {
-			return result;
+			return new WebServerAnswerBasedOnFile(result);
 		}
 
 		// finally, if no .php file was found either, try to navigate to an .htm file...
 		result = getFileFromLocation(location + ".htm", arguments);
 
 		if (result != null) {
-			return result;
+			return new WebServerAnswerBasedOnFile(result);
 		}
 
 		// ... or a .html file instead
-		return getFileFromLocation(location + ".html", arguments);
+		result = getFileFromLocation(location + ".html", arguments);
+
+		if (result != null) {
+			return new WebServerAnswerBasedOnFile(result);
+		}
+
+		return null;
 	}
 
 	protected String getWhitelistedLocationEquivalent(String location) {
@@ -552,6 +582,22 @@ public class WebServerRequestHandler implements Runnable {
 
 		// if the file was not found on the whitelist, do not return it
 		// - even if it exists on the server!
+		return null;
+	}
+
+	/**
+	 * Passes in arguments like
+	 * ["foo=bar", "blubb=blobb"], "foo"
+	 *
+	 * Returns
+	 * "bar"
+	 */
+	public static String getArgumentValueByKey(String[] arguments, String key) {
+		for (String arg : arguments) {
+			if (arg.startsWith(key + "=")) {
+				return arg.substring(key.length() + 1);
+			}
+		}
 		return null;
 	}
 

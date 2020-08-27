@@ -7,8 +7,11 @@ package com.asofterspace.toolbox.selftest;
 import com.asofterspace.toolbox.codeeditor.base.Code;
 import com.asofterspace.toolbox.codeeditor.base.PublicPrivateFunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.JavaCode;
+import com.asofterspace.toolbox.codeeditor.utils.CodeField;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
+
+import java.util.List;
 
 import javax.swing.JTextPane;
 
@@ -18,16 +21,18 @@ public class CoderJavaTest implements Test {
 	@Override
 	public void runAll() {
 
-		reorganizeImports();
+		reorganizeImportsTest();
 
-		removeUnusedImports();
+		removeUnusedImportsTest();
 
 		functionListTest();
 
-		removeCommentsAndStrings();
+		removeCommentsAndStringsTest();
+
+		getFieldsTest();
 	}
 
-	public void reorganizeImports() {
+	public void reorganizeImportsTest() {
 
 		TestUtils.start("Reorganize Imports in Java Code Editor");
 
@@ -82,7 +87,7 @@ public class CoderJavaTest implements Test {
 		TestUtils.fail("We attempted to reorganize the imports of a Java program - but failed! (Input: " + origStr + ", output: " + resultStr + ")");
 	}
 
-	public void removeUnusedImports() {
+	public void removeUnusedImportsTest() {
 
 		TestUtils.start("Remove Unused Imports in Java Code Editor");
 
@@ -234,7 +239,7 @@ public class CoderJavaTest implements Test {
 		TestUtils.fail("We attempted to read out the function list of a Java program - but failed! (Input: " + origStr + ", output: " + resultStr + ")");
 	}
 
-	private void removeCommentsAndStrings() {
+	private void removeCommentsAndStringsTest() {
 
 		TestUtils.start("Remove Comments and Strings in Java Code Editor");
 
@@ -293,5 +298,56 @@ public class CoderJavaTest implements Test {
 			"Original source code:\n\n" + content +
 			"\n\nResult:\n\n" + removed +
 			"\n\nIntended result:\n\n" + target);
+	}
+
+	private void getFieldsTest() {
+
+		TestUtils.start("Get Fields");
+
+		JavaCode javaCode = new JavaCode(null);
+
+		String content =
+			"private String blubb;\n" +
+			"\n" +
+			"    private int bli;\n" +
+			"\n" +
+			"Foo bar = new Foo();\n" +
+			"\n" +
+			"\t\tpublic static char Chara;\n" +
+			"\n" +
+			"\t\tprivate final static Foo<Foo, Bar> bar2 = new Foo<Foo, Bar>();";
+
+		List<CodeField> fields = javaCode.getFields(content);
+
+		if (fields.size() != 5) {
+			TestUtils.fail("We expected 5 fields, but we got " + fields.size() + "!");
+			return;
+		}
+
+		checkFieldTest(fields, 0, "blubb", "Blubb", "String");
+		checkFieldTest(fields, 1, "bli", "Bli", "int");
+		checkFieldTest(fields, 2, "bar", "Bar", "Foo");
+		checkFieldTest(fields, 3, "Chara", "Chara", "char");
+		checkFieldTest(fields, 4, "bar2", "Bar2", "Foo<Foo, Bar>");
+
+		TestUtils.succeed();
+	}
+
+	private void checkFieldTest(List<CodeField> fields, int index, String name, String nameUpCase, String type) {
+
+		if (!name.equals(fields.get(index).getName())) {
+			TestUtils.fail("We expected field " + index + " to have the name " + name +
+				" but it is actually " + fields.get(index).getName() + "!");
+		}
+
+		if (!nameUpCase.equals(fields.get(index).getNameUpcase())) {
+			TestUtils.fail("We expected field " + index + " to have the up-case name " + nameUpCase +
+				" but it is actually " + fields.get(index).getNameUpcase() + "!");
+		}
+
+		if (!type.equals(fields.get(index).getType())) {
+			TestUtils.fail("We expected field " + index + " to have the type " + type +
+				" but it is actually " + fields.get(index).getType() + "!");
+		}
 	}
 }

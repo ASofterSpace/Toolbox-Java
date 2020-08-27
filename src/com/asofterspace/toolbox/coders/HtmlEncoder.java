@@ -8,16 +8,16 @@ import com.asofterspace.toolbox.io.XML;
 
 
 /**
- * A class that can (badly) decode HTML-encoded strings
+ * A class that can (badly) encode strings for HTML
  */
-public class HtmlDecoder {
+public class HtmlEncoder {
 
 	/**
-	 * Takes R&amp;D and converts to R&D
+	 * Takes R&D and converts it to R&amp;D
 	 */
-	public static String decode(String str) {
+	public static String encode(String str) {
 
-		return XML.unescapeXMLstr(str);
+		return XML.escapeXMLstr(str);
 	}
 
 }

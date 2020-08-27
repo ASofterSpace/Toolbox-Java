@@ -2460,7 +2460,10 @@ public abstract class Code extends DefaultStyledDocument {
 		return onOpenFileCallback.getOtherFileContents(fileEndings);
 	}
 
-	private List<CodeField> getFields(String contentMiddle) {
+	/**
+	 * Gets the fields in a given (e.g. by being manually selected) piece of code
+	 */
+	public List<CodeField> getFields(String contentMiddle) {
 
 		List<CodeField> fields = new ArrayList<>();
 
@@ -2480,7 +2483,9 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 
 			// the line could look like:
+			// String blubb;
 			// private String blubb;
+			// private final static String blubb;
 			// private Map<Foo, Bar> boink = bla.blubb();
 			// private Object foo = new AwesomeObject(blabliblubb);
 
@@ -2490,7 +2495,9 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 
 			// the line could look like:
+			// String blubb
 			// private String blubb
+			// private final static String blubb
 			// private Map<Foo, Bar> boink
 			// private Object foo = new AwesomeObject(blabliblubb)
 
@@ -2500,7 +2507,9 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 
 			// the line could look like:
+			// String blubb
 			// private String blubb
+			// private final static String blubb
 			// private Map<Foo, Bar> boink
 			// private Object foo
 
@@ -2511,6 +2520,8 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 
 			// the lineName could look like:
+			// blubb
+			// blubb
 			// blubb
 			// boink
 			// foo
@@ -2523,14 +2534,20 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 			if (line.contains(" ")) {
 				lineType = line.substring(line.lastIndexOf(" ") + 1);
+			} else {
+				lineType = line;
 			}
 
 			// the lineType could look like:
+			// String
+			// String
 			// String
 			// Map
 			// Object
 
 			// the lineGenerics could look like:
+			//
+			//
 			//
 			// <Foo, Bar>
 			//
@@ -2538,6 +2555,8 @@ public abstract class Code extends DefaultStyledDocument {
 			lineType += lineGenerics;
 
 			// the lineType could look like:
+			// String
+			// String
 			// String
 			// Map<Foo, Bar>
 			// Object
@@ -2629,19 +2648,40 @@ public abstract class Code extends DefaultStyledDocument {
 		String content = decoratedEditor.getText();
 		int lineStart = StrUtils.getLineStartFromPosition(selStart, content);
 		int lineEnd = StrUtils.getLineEndFromPosition(selEnd, content);
-
-		String contentStart = content.substring(0, lineStart);
 		String contentMiddle = content.substring(lineStart, lineEnd);
-		String contentEnd = content.substring(lineEnd, content.length());
+		List<CodeField> fields = getFields(contentMiddle);
+
+		if (fields.size() < 1) {
+			return;
+		}
+
+		int insertAt = content.lastIndexOf("}");
+		if (insertAt < 0) {
+			insertAt = 0;
+		}
+
+		String contentStart = content.substring(0, insertAt);
+		String contentEnd = content.substring(insertAt, content.length());
+
+		String ourClassName = getClassName();
 
 		StringBuilder newCode = new StringBuilder();
 
-		List<CodeField> fields = getFields(contentMiddle);
-
+		boolean extraLineNeeded = true;
+		if (insertAt > 1) {
+			if ((content.charAt(insertAt - 1) == '\n') && (content.charAt(insertAt - 2) == '\n')) {
+				extraLineNeeded = false;
+			}
+		}
+		if (extraLineNeeded) {
+			newCode.append("\n");
+		}
+		String sep = "";
 		for (CodeField field : fields) {
 
 			if (addGetters) {
-				newCode.append("\n\tpublic ");
+				newCode.append(sep);
+				newCode.append("\tpublic ");
 				newCode.append(field.getType());
 				newCode.append(" get");
 				newCode.append(field.getNameUpcase());
@@ -2650,10 +2690,12 @@ public abstract class Code extends DefaultStyledDocument {
 				newCode.append(field.getName());
 				newCode.append(";\n");
 				newCode.append("\t}\n");
+				sep = "\n";
 			}
 
 			if (addSetters) {
-				newCode.append("\n\tpublic void set");
+				newCode.append(sep);
+				newCode.append("\tpublic void set");
 				newCode.append(field.getNameUpcase());
 				newCode.append("(");
 				newCode.append(field.getType());
@@ -2666,18 +2708,17 @@ public abstract class Code extends DefaultStyledDocument {
 				newCode.append(field.getName());
 				newCode.append(";\n");
 				newCode.append("\t}\n");
+				sep = "\n";
 			}
 		}
 
-		if (newCode.length() > 0) {
-			newCode.insert(0, "\n");
-		}
+		newCode.append("\n");
 
-		content = contentStart + contentMiddle + newCode.toString() + contentEnd;
+		content = contentStart + newCode.toString() + contentEnd;
 
 		decoratedEditor.setText(content);
 
-		int selPos = contentStart.length() + contentMiddle.length() + newCode.length();
+		int selPos = contentStart.length() + newCode.length();
 		decoratedEditor.setSelectionStart(selPos);
 		decoratedEditor.setSelectionEnd(selPos);
 	}
@@ -2713,12 +2754,73 @@ public abstract class Code extends DefaultStyledDocument {
 		return "";
 	}
 
+	public void addToString() {
+
+		String content = decoratedEditor.getText();
+		int lineStart = StrUtils.getLineStartFromPosition(selStart, content);
+		int lineEnd = StrUtils.getLineEndFromPosition(selEnd, content);
+		String contentMiddle = content.substring(lineStart, lineEnd);
+		List<CodeField> fields = getFields(contentMiddle);
+
+		int insertAt = content.lastIndexOf("}");
+		if (insertAt < 0) {
+			insertAt = 0;
+		}
+
+		String contentStart = content.substring(0, insertAt);
+		String contentEnd = content.substring(insertAt, content.length());
+
+		String ourClassName = getClassName();
+
+		StringBuilder newCode = new StringBuilder();
+
+		boolean extraLineNeeded = true;
+		if (insertAt > 1) {
+			if ((content.charAt(insertAt - 1) == '\n') && (content.charAt(insertAt - 2) == '\n')) {
+				extraLineNeeded = false;
+			}
+		}
+		if (extraLineNeeded) {
+			newCode.append("\n");
+		}
+		newCode.append("\t@Override\n");
+		newCode.append("\tpublic String toString() {\n");
+		newCode.append("\t\treturn \"" + ourClassName);
+		if (fields.size() > 0) {
+			newCode.append(" [");
+			String sep = "";
+			for (CodeField field : fields) {
+				newCode.append(sep);
+				sep = ", ";
+				newCode.append(field.getName() + ": \" + ");
+				newCode.append("this." + field.getName());
+				newCode.append(" + \"");
+			}
+			newCode.append("]");
+		}
+		newCode.append("\";\n");
+		newCode.append("\t}\n");
+		newCode.append("\n");
+
+		content = contentStart + newCode.toString() + contentEnd;
+
+		decoratedEditor.setText(content);
+
+		int selPos = contentStart.length() + newCode.length();
+		decoratedEditor.setSelectionStart(selPos);
+		decoratedEditor.setSelectionEnd(selPos);
+	}
+
 	/**
 	 * Add equals() method to the class
 	 */
 	public void addEquals() {
 
 		String content = decoratedEditor.getText();
+		int lineStart = StrUtils.getLineStartFromPosition(selStart, content);
+		int lineEnd = StrUtils.getLineEndFromPosition(selEnd, content);
+		String contentMiddle = content.substring(lineStart, lineEnd);
+		List<CodeField> fields = getFields(contentMiddle);
 
 		int insertAt = content.lastIndexOf("}");
 		if (insertAt < 0) {
@@ -2743,24 +2845,71 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 		newCode.append("\t@Override\n");
 		newCode.append("\tpublic boolean equals(Object other) {\n");
+		newCode.append("\n");
+		newCode.append("\t\t// If the other one does not even exist, we are not the same - because we exist!\n");
 		newCode.append("\t\tif (other == null) {\n");
 		newCode.append("\t\t\treturn false;\n");
 		newCode.append("\t\t}\n");
+		newCode.append("\n");
 		newCode.append("\t\tif (other instanceof " + ourClassName + ") {\n");
 		newCode.append("\t\t\t" + ourClassName + " other" + ourClassName + " = (" + ourClassName + ") other;\n");
-		newCode.append("\t\t\t// TODO - actually compare other" + ourClassName + " to this\n");
-		newCode.append("\t\t\tif (this.? == " + ourClassName + ".?) {\n");
-		newCode.append("\t\t\t\treturn true;\n");
-		newCode.append("\t\t\t}\n");
+		if (fields.size() > 0) {
+			for (CodeField field : fields) {
+				newCode.append("\n");
+				newCode.append("\t\t\t// If our values for " + field.getName() + " are different...\n");
+				if (StrUtils.startsWithUpperCase(field.getType())) {
+					newCode.append("\t\t\tif (this." + field.getName() + " == null) {\n");
+					newCode.append("\t\t\t\tif (other" + ourClassName + "." + field.getName() + " != null) {\n");
+					newCode.append("\t\t\t\t\t// ... then we are not the same!\n");
+					newCode.append("\t\t\t\t\treturn false;\n");
+					newCode.append("\t\t\t\t}\n");
+					newCode.append("\t\t\t} else if (!this." + field.getName() + ".equals(other" + ourClassName + "." + field.getName() + ")) {\n");
+				} else {
+					newCode.append("\t\t\tif (this." + field.getName() + " != other" + ourClassName + "." + field.getName() + ") {\n");
+				}
+				newCode.append("\t\t\t\t// ... then we are not the same!\n");
+				newCode.append("\t\t\t\treturn false;\n");
+				newCode.append("\t\t\t}\n");
+			}
+			newCode.append("\n");
+			newCode.append("\t\t\t// We have no reason to assume that we are not the same\n");
+			newCode.append("\t\t\treturn true;\n");
+		} else {
+			newCode.append("\n");
+			newCode.append("\t\t\t// TODO - actually compare other" + ourClassName + " to this\n");
+			newCode.append("\t\t\tif (this.? == other" + ourClassName + ".?) {\n");
+			newCode.append("\t\t\t\treturn true;\n");
+			newCode.append("\t\t\t}\n");
+		}
+
 		newCode.append("\t\t}\n");
+		newCode.append("\n");
+		newCode.append("\t\t// If the other one cannot even be cast to us, then we are not the same!\n");
 		newCode.append("\t\treturn false;\n");
 		newCode.append("\t}\n");
 
 		newCode.append("\n");
 		newCode.append("\t@Override\n");
 		newCode.append("\tpublic int hashCode() {\n");
-		newCode.append("\t\t// TODO - actually compute a useful hash\n");
-		newCode.append("\t\treturn this.?;\n");
+		if (fields.size() > 0) {
+			newCode.append("\t\treturn ");
+			String sep = "";
+			for (CodeField field : fields) {
+				newCode.append(sep);
+				sep = " + ";
+				if ("int".equals(field.getType())) {
+					newCode.append("this." + field.getName());
+				} else if (StrUtils.startsWithLowerCase(field.getType())) {
+					newCode.append("(int) this." + field.getName());
+				} else {
+					newCode.append("this." + field.getName() + ".hashCode()");
+				}
+			}
+			newCode.append(";\n");
+		} else {
+			newCode.append("\t\t// TODO - actually compute a useful hash\n");
+			newCode.append("\t\treturn this.?;\n");
+		}
 		newCode.append("\t}\n");
 		newCode.append("\n");
 

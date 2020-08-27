@@ -185,6 +185,19 @@ public class XML extends Record {
 		return result.toString();
 	}
 
+	public static String unescapeXMLstr(String str) {
+
+		str = str.replace("&#039;", "'");
+		str = str.replace("&#160;", " ");
+		str = str.replace("&gt;", ">");
+		str = str.replace("&lt;", "<");
+		str = str.replace("&apos;", "'");
+		str = str.replace("&quot;", "\"");
+		str = str.replace("&amp;", "&");
+
+		return str;
+	}
+
 	/**
 	 * Takes in something like:
 	 * Bla! Blubb? <a href="foo.bar">Foo bar</a> and so on!

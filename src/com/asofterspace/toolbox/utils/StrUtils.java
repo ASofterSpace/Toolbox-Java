@@ -844,6 +844,30 @@ public class StrUtils {
 		return str.substring(0, 1).toLowerCase() + str.substring(1);
 	}
 
+	public static boolean startsWithLowerCase(String str) {
+		if (str == null) {
+			return false;
+		}
+		str = str.trim();
+		if (str.length() < 1) {
+			return false;
+		}
+		str = str.substring(0, 1);
+		return str.equals(str.toLowerCase());
+	}
+
+	public static boolean startsWithUpperCase(String str) {
+		if (str == null) {
+			return false;
+		}
+		str = str.trim();
+		if (str.length() < 1) {
+			return false;
+		}
+		str = str.substring(0, 1);
+		return str.equals(str.toUpperCase());
+	}
+
 	public static String replaceFirst(String origStr, String findThis, String replaceWith) {
 		if (origStr == null) {
 			return null;

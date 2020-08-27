@@ -34,6 +34,10 @@ public class StrUtilsTest implements Test {
 		replaceAllTest();
 
 		replaceAllRepeatedlyTest();
+
+		startsWithLowerCaseTest();
+
+		startsWithUpperCaseTest();
 	}
 
 	public void countStringInStringTest() {
@@ -238,6 +242,62 @@ public class StrUtilsTest implements Test {
 		if (!"fobaro".equals(result)) {
 			TestUtils.fail("We called StrUtils.replaceAllRepeatedly(\"foobarooo\", \"oo\", \"o\") and got " +
 				result + " instead of \"fobaro\"!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void startsWithLowerCaseTest() {
+
+		TestUtils.start("Starts with Lower Case");
+
+		// ensure these calls work (no matter what they return) without causing NPEs
+		StrUtils.startsWithLowerCase(null);
+		StrUtils.startsWithLowerCase("");
+		StrUtils.startsWithLowerCase("   ");
+
+		if (StrUtils.startsWithLowerCase("Blubb")) {
+			TestUtils.fail("We called StrUtils.startsWithLowerCase(\"Blubb\") and it returned true!");
+		}
+
+		if (!StrUtils.startsWithLowerCase("blubb")) {
+			TestUtils.fail("We called StrUtils.startsWithLowerCase(\"blubb\") and it returned false!");
+		}
+
+		if (StrUtils.startsWithLowerCase("  Blubb")) {
+			TestUtils.fail("We called StrUtils.startsWithLowerCase(\"  Blubb\") and it returned true!");
+		}
+
+		if (!StrUtils.startsWithLowerCase("\tblubb")) {
+			TestUtils.fail("We called StrUtils.startsWithLowerCase(\"\tblubb\") and it returned false!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void startsWithUpperCaseTest() {
+
+		TestUtils.start("Starts with Upper Case");
+
+		// ensure these calls work (no matter what they return) without causing NPEs
+		StrUtils.startsWithUpperCase(null);
+		StrUtils.startsWithUpperCase("");
+		StrUtils.startsWithUpperCase("   ");
+
+		if (!StrUtils.startsWithUpperCase("Blubb")) {
+			TestUtils.fail("We called StrUtils.startsWithUpperCase(\"Blubb\") and it returned false!");
+		}
+
+		if (StrUtils.startsWithUpperCase("blubb")) {
+			TestUtils.fail("We called StrUtils.startsWithUpperCase(\"blubb\") and it returned true!");
+		}
+
+		if (!StrUtils.startsWithUpperCase("  Blubb")) {
+			TestUtils.fail("We called StrUtils.startsWithUpperCase(\"  Blubb\") and it returned false!");
+		}
+
+		if (StrUtils.startsWithUpperCase("\tblubb")) {
+			TestUtils.fail("We called StrUtils.startsWithUpperCase(\"\tblubb\") and it returned true!");
 		}
 
 		TestUtils.succeed();
