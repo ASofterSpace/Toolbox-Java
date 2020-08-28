@@ -74,8 +74,10 @@ public class DateUtils {
 		try {
 			dateStr = dateStr.replaceAll(" ", "-");
 			// if we do not have 02-04-2020, but more like 2020-04-02
-			if (!((dateStr.charAt(2) == '-') && (dateStr.charAt(5) == '-'))) {
-				return DEFAULT_DATE_FORMAT.parse(dateStr);
+			if (dateStr.length() > 5) {
+				if (!((dateStr.charAt(2) == '-') && (dateStr.charAt(5) == '-'))) {
+					return DEFAULT_DATE_FORMAT.parse(dateStr);
+				}
 			}
 		} catch (ParseException ex) {
 			// oh no! fall through to backup approach...

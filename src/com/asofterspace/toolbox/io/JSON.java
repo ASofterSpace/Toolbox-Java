@@ -190,12 +190,30 @@ public class JSON extends Record {
 			// also allow escaping " (basically, by checking here is simpleContentsStr
 			// ends with \ - in which case we add the " instead and carry on searching forward)
 			while (jsonString.charAt(endIndex - 1) == '\\') {
-				int newEndIndex = jsonString.indexOf(doStringWith, endIndex + 1);
-				if (newEndIndex < 0) {
-					simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length() - 1) +
-										jsonString.substring(endIndex);
-					endIndex = jsonString.length();
+				// we know now that there is one backslash in front of the ending " sign, which
+				// would mean that we skip it and jump to the next...
+				// HOWEVER! what if there are two backslashes in front of it? then it is just an
+				// escaped backslash... but three? but four? ... so basically we need to count,
+				// and check: if it is an even number, this IS the end... if it is an odd number,
+				// this is NOT the end!
+				int escapeAmount = 1;
+				int escapeIndex = endIndex - 2;
+				// we here don't have to guard against escapeIndex going below 0, as we know that
+				// jsonString has the starting " somewhere in the front
+				while (jsonString.charAt(escapeIndex) == '\\') {
+					escapeAmount++;
+					escapeIndex--;
+				}
+				if (escapeAmount % 2 == 0) {
+					// even! break out of here, we have found the end of the string!
 					break;
+				}
+				// odd! continue searching for the end of the string somewhere down the line...
+				int newEndIndex = jsonString.indexOf(doStringWith, endIndex + 1);
+				if (newEndIndex < pos) {
+					throw new JsonParseException("Encountered an unclosed string while parsing JSON near line " +
+						StrUtils.getLineNumberFromPosition(pos, jsonString) + ": " +
+						jsonString.substring(pos, Math.min(jsonString.length(), pos + 100)));
 				}
 				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length() - 1) +
 									jsonString.substring(endIndex, newEndIndex);

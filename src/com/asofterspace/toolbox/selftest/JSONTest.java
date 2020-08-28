@@ -39,6 +39,12 @@ public class JSONTest implements Test {
 
 		toStringTestEscapedQuotes();
 
+		fromStringTestEscapedBackslash();
+
+		toStringTestEscapedBackslash();
+
+		throwsOnOpenString();
+
 		fromStringTestEscapedChars();
 
 		toStringTestEscapedChars();
@@ -307,6 +313,50 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We stored foo:ba\"r in a JSON object, then converted the object back to JSON - and did not get our input back!");
+	}
+
+	public void fromStringTestEscapedBackslash() throws JsonParseException {
+
+		TestUtils.start("JSON from String (with Escaped Backslash)");
+
+		JSON testObject = new JSON("{\"foo\":\"ba\\\\\"}");
+
+		if (testObject.getString("foo").toString().equals("ba\\")) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We stored foo:ba\\ in a JSON object, then read the key foo - and did not get ba\\ but instead " + testObject.getString("foo") + "!");
+	}
+
+	public void toStringTestEscapedBackslash() throws JsonParseException {
+
+		TestUtils.start("JSON to String (with Escaped Backslash)");
+
+		String orig = "{\"foo\": \"ba\\\\\"}";
+
+		JSON testObject = new JSON(orig);
+
+		if (testObject.toString().equals(orig)) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We stored foo:ba\\ in a JSON object, then converted the object back to JSON - and did not get our input back, but instead we got: " + testObject.toString());
+	}
+
+	public void throwsOnOpenString() {
+
+		TestUtils.start("JSON throws on open string");
+
+		try {
+			JSON testObject = new JSON("{\"foo\":\"ba}");
+		} catch (JsonParseException e) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We wanted to get an exception because of an unclosed string, but got none!");
 	}
 
 	public void fromStringTestEscapedChars() throws JsonParseException {
