@@ -244,6 +244,10 @@ public class WebServerRequestHandler implements Runnable {
 
 		WebRequestContent content = receiveArbitraryContent();
 
+		if (content == null) {
+			return null;
+		}
+
 		if (content.hasType("application/json")) {
 			return content.getContentAsString();
 		}
@@ -254,6 +258,10 @@ public class WebServerRequestHandler implements Runnable {
 	protected WebRequestFormData receiveFormDataContent() throws IOException {
 
 		WebRequestContent content = receiveArbitraryContent();
+
+		if (content == null) {
+			return null;
+		}
 
 		if (content.hasType("multipart/form-data")) {
 			String strContent = content.getContentAsString();
