@@ -79,7 +79,7 @@ public class DateUtils {
 					return DEFAULT_DATE_FORMAT.parse(dateStr);
 				}
 			}
-		} catch (ParseException ex) {
+		} catch (ParseException | NumberFormatException ex) {
 			// oh no! fall through to backup approach...
 		}
 
@@ -106,7 +106,7 @@ public class DateUtils {
 
 		try {
 			return FALLBACK_DATE_FORMAT.parse(dateStr);
-		} catch (ParseException ex2) {
+		} catch (ParseException | NumberFormatException ex2) {
 			System.err.println("Could not parse the date " + dateStr + " - returning null instead!");
 			return null;
 		}
@@ -128,7 +128,7 @@ public class DateUtils {
 
 		try {
 			return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
-		} catch (ParseException ex) {
+		} catch (ParseException | NumberFormatException ex) {
 			System.err.println("Could not parse the date time " + dateTimeStr + " - using current time instead!");
 			return new Date();
 		}
