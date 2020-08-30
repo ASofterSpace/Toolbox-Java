@@ -460,6 +460,12 @@ public class WebServerRequestHandler implements Runnable {
 			case 404:
 				respond("404 Not Found", answer);
 				break;
+			case 405:
+				respond("405 Method Not Allowed", answer);
+				break;
+			case 406:
+				respond("406 Not Acceptable", answer);
+				break;
 			case 418:
 				respond("418 I'm a teapot", answer);
 				break;
@@ -470,6 +476,10 @@ public class WebServerRequestHandler implements Runnable {
 				respond("505 HTTP Version Not Supported", answer);
 				break;
 			default:
+				if (status != 500) {
+					System.err.println("WebServerRequestHandler responding with HTTP 500, as HTTP " +
+									   status + " is unknown!");
+				}
 				respond("500 Internal Server Error", answer);
 		}
 	}
