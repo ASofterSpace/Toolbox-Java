@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.gui;
 
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.Utils;
 
 import java.awt.Color;
@@ -141,6 +142,13 @@ public class GuiUtils {
 		JPanel corner = new JPanel();
 		corner.setBackground(color);
 		scrollPane.setCorner(which, corner);
+	}
+
+	/**
+	 * Open a folder using the default folder-opening GUI of the OS
+	 */
+	public static void openFolder(Directory folder) {
+		openFolder(folder.getAbsoluteDirname());
 	}
 
 	/**
