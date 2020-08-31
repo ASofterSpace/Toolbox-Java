@@ -22,6 +22,12 @@ public class TestUtils {
 
 	private static String currentTest;
 
+	private static LogFunction logFunction = new LogFunction() {
+		public void log(String logline) {
+			System.out.println(logline);
+		}
+	};
+
 
 	/**
 	 * Starts a Test run with a given name
@@ -33,7 +39,7 @@ public class TestUtils {
 		currentVerdict = 0;
 		currentTest = testName;
 
-		System.out.println("Starting the " + currentTest + " Test...");
+		logFunction.log("Starting the " + currentTest + " Test...");
 	}
 
 	/**
@@ -45,8 +51,8 @@ public class TestUtils {
 		if (currentVerdict == 0) {
 			currentVerdict = 2;
 
-			System.out.println("The " + currentTest + " Test succeeded! Whoop whoop!");
-			System.out.println("");
+			logFunction.log("The " + currentTest + " Test succeeded! Whoop whoop!");
+			logFunction.log("");
 		}
 	}
 
@@ -59,9 +65,9 @@ public class TestUtils {
 		if (currentVerdict == 0) {
 			currentVerdict = 1;
 
-			System.out.println("The " + currentTest + " Test failed... oh no!");
-			System.out.println("Reason: " + reason);
-			System.out.println("");
+			logFunction.log("The " + currentTest + " Test failed... oh no!");
+			logFunction.log("Reason: " + reason);
+			logFunction.log("");
 		}
 	}
 
@@ -75,11 +81,11 @@ public class TestUtils {
 		testsFailed = 0;
 		currentVerdict = -1;
 
-		System.out.println("");
-		System.out.println("------------------------------");
-		System.out.println("The test suite is starting...");
-		System.out.println("------------------------------");
-		System.out.println("");
+		logFunction.log("");
+		logFunction.log("------------------------------");
+		logFunction.log("The test suite is starting...");
+		logFunction.log("------------------------------");
+		logFunction.log("");
 	}
 
 	/**
@@ -95,7 +101,7 @@ public class TestUtils {
 
 			TestUtils.fail("There was an exception:\n" + t);
 			t.printStackTrace();
-			System.out.println("");
+			logFunction.log("");
 		}
 	}
 
@@ -106,15 +112,15 @@ public class TestUtils {
 
 		finalizePreviousTest();
 
-		System.out.println("------------------------------");
-		System.out.println("The test suite has finished!");
+		logFunction.log("------------------------------");
+		logFunction.log("The test suite has finished!");
 		String testsRunStr = "";
 		if (testsRun == 1) {
 			testsRunStr = "1 test has";
 		} else {
 			testsRunStr = testsRun + " tests have";
 		}
-		System.out.println(testsRunStr + " been run.");
+		logFunction.log(testsRunStr + " been run.");
 		String testResultStr = "There ";
 		if (testsSuccess + testsFailed == 1) {
 			testResultStr += "was ";
@@ -132,8 +138,8 @@ public class TestUtils {
 		} else {
 			testResultStr += testsFailed + " failures.";
 		}
-		System.out.println(testResultStr);
-		System.out.println("------------------------------");
+		logFunction.log(testResultStr);
+		logFunction.log("------------------------------");
 	}
 
 	/**
@@ -166,4 +172,9 @@ public class TestUtils {
 
 		currentVerdict = 0;
 	}
+
+	public void setLogFunction(LogFunction logFunction) {
+		TestUtils.logFunction = logFunction;
+	}
+
 }
