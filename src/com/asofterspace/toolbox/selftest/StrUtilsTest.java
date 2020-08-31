@@ -38,6 +38,8 @@ public class StrUtilsTest implements Test {
 		startsWithLowerCaseTest();
 
 		startsWithUpperCaseTest();
+
+		leftPadTest();
 	}
 
 	public void countStringInStringTest() {
@@ -298,6 +300,43 @@ public class StrUtilsTest implements Test {
 
 		if (StrUtils.startsWithUpperCase("\tblubb")) {
 			TestUtils.fail("We called StrUtils.startsWithUpperCase(\"\tblubb\") and it returned true!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void leftPadTest() {
+
+		TestUtils.start("Left Pad");
+
+		String result = StrUtils.leftPadW(13, 3);
+		if (!result.equals(" 13")) {
+			TestUtils.fail("We called leftPadW(13, 3) and got '" + result + "'!");
+		}
+
+		result = StrUtils.leftPadW("27398", 4);
+		if (!result.equals("27398")) {
+			TestUtils.fail("We called leftPadW(\"27398\", 4) and got '" + result + "'!");
+		}
+
+		result = StrUtils.leftPad0(27398, -1);
+		if (!result.equals("27398")) {
+			TestUtils.fail("We called leftPad0(27398, -1) and got '" + result + "'!");
+		}
+
+		result = StrUtils.leftPad0("27398", 10);
+		if (!result.equals("0000027398")) {
+			TestUtils.fail("We called leftPad0(\"27398\", 10) and got '" + result + "'!");
+		}
+
+		result = StrUtils.leftPad(3, 'b', 7);
+		if (!result.equals("bbbbbb3")) {
+			TestUtils.fail("We called leftPad(3, 'b', 7) and got '" + result + "'!");
+		}
+
+		result = StrUtils.leftPad("blubb", 'f', 6);
+		if (!result.equals("fblubb")) {
+			TestUtils.fail("We called leftPad(\"blubb\", 'f', 6) and got '" + result + "'!");
 		}
 
 		TestUtils.succeed();
