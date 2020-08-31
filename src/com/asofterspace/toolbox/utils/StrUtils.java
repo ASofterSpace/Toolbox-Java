@@ -262,7 +262,7 @@ public class StrUtils {
 	 * Takes a string, e.g. blubb, and leftpads it with a character, e.g. _,
 	 * until it reaches a certain length, e.g. 7 - which would give __blubb.
 	 * If length is smaller than the length of origStr, origStr will be
-	 * return without change - it will NOT be truncated!
+	 * returned without change - it will NOT be truncated!
 	 */
 	public static String leftPad(String origStr, char padWith, int length) {
 
