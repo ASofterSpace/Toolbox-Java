@@ -14,9 +14,9 @@ import com.asofterspace.toolbox.utils.ByteBuffer;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -137,7 +137,7 @@ public class WebAccessor {
 
 	public static String postJson(String url, String messageBody) {
 		Map<String, String> extraHeaders = new HashMap<>();
-		extraHeaders.put("Content-Type", "application/json");
+		extraHeaders.put("Content-Type", "application/json; charset=utf-8");
 		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders));
 	}
 
@@ -234,17 +234,24 @@ public class WebAccessor {
 			if (!("GET".equals(requestKind) || "HEAD".equals(requestKind))) {
 
 				connection.setDoOutput(true);
-				// when did we comment out the following things?
-				// was it correct to do so - what about the encoding, what about the content length? xD
 				/*
+				// we could url-encode the message body, but in many cases - e.g. content type
+				// application/json; charset=utf-8 - we do not want to url-encode it, we just
+				// send the plain UTF-8...
 				String postData = URLEncoder.encode(messageBody, "UTF-8");
 				byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-
-				connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+				// connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 				connection.getOutputStream().write(postDataBytes);
 				*/
-				OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
+
+				/*
+				OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
 				out.write(messageBody);
+				out.close();
+				*/
+
+				DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+				out.write(messageBody.getBytes(StandardCharsets.UTF_8));
 				out.close();
 			}
 

@@ -68,7 +68,8 @@ public class WebServerRequestHandler implements Runnable {
 		// System.out.println("Handler for request #" + socketNum + " starting up...");
 
 		try (
-			BufferedReader inputReader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8));
+			// we here use ISO_8859_1, so that we can just get one byte after the other without anything funny going on
+			BufferedReader inputReader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.ISO_8859_1));
 			BufferedOutputStream outputWriter = new BufferedOutputStream(request.getOutputStream())
 		) {
 			// System.out.println("Starting to read request #" + socketNum + "...");
@@ -363,7 +364,15 @@ public class WebServerRequestHandler implements Runnable {
 							/**/
 						} else {
 
-							readData.append((byte) iread);
+						/*	if (iread == 183) {
+								readData.append((byte) -62);
+								readData.append((byte) -73);
+							} else if (iread == 239) {
+								readData.append((byte) -61);
+								readData.append((byte) -81);
+							} else {*/
+								readData.append((byte) iread);
+							//}
 							/*
 							output.append(iread);
 							output.append(", ");
@@ -377,7 +386,15 @@ public class WebServerRequestHandler implements Runnable {
 					System.out.println("raw: " + output.toString());
 					System.out.println("bytes: " + readData.showBytes());
 
-					String specialChar = "россияне ’";
+/*
+					String specialChar = "{\"foo\": \"россияне\", " +
+						"\"letters\": \"ïäÄöÖüÜßæÆðÐþÞéÉêÊèÈóÓáÁíåçñ\", " +
+						"\"extraletters\": \"™@®©ƒ¢øØ\", " +
+						"\"currencies\": \"$&£\", " +
+						"\"others\": \"„“”‚‘’>|<…†‡·•—––˜±½¼¾¿¡×÷·¬\"}";
+					*//*
+					String specialChar = "ï";
+
 					byte[] tmp = specialChar.getBytes("UTF-8");
 					String s = new String(tmp, "UTF-8");
 					for (byte tb : tmp) {
@@ -402,53 +419,34 @@ public class WebServerRequestHandler implements Runnable {
 	private void appendBytes(ByteBuffer buf, int charNum) {
 		int one = charNum / 256;
 		int two = charNum % 256;
-		// ’
-		if ((one == 32) && (two == 25)) {
+		if ((one == 2) && (two == 220)) {
+			buf.append((byte) -53);
+			buf.append((byte) -100);
+			return;
+		}
+		// the next two together definitely work for two >= 53 and two <= 79, but we assume probably for more too
+		if ((one == 4) && (two >= 0) && (two <= 63)) {
+			buf.append((byte) -48);
+			buf.append((byte) (two - 128));
+			return;
+		}
+		if ((one == 4) && (two >= 64) && (two <= 127)) {
+			buf.append((byte) -47);
+			buf.append((byte) (two - 192));
+			return;
+		}
+		// this one definitely works for two >= 25 and two <= 30, but we assume probably for more too
+		if ((one == 32) && (two >= 0) && (two <= 127)) {
 			buf.append((byte) -30);
 			buf.append((byte) -128);
-			buf.append((byte) -103);
+			buf.append((byte) (two - 128));
 			return;
 		}
-		// е
-		if ((one == 4) && (two == 53)) {
-			buf.append((byte) -48);
-			buf.append((byte) -75);
-			return;
-		}
-		// и
-		if ((one == 4) && (two == 56)) {
-			buf.append((byte) -48);
-			buf.append((byte) -72);
-			return;
-		}
-		// н
-		if ((one == 4) && (two == 61)) {
-			buf.append((byte) -48);
-			buf.append((byte) -67);
-			return;
-		}
-		// о
-		if ((one == 4) && (two == 62)) {
-			buf.append((byte) -48);
-			buf.append((byte) -66);
-			return;
-		}
-		// р
-		if ((one == 4) && (two == 64)) {
-			buf.append((byte) -47);
-			buf.append((byte) -128);
-			return;
-		}
-		// с
-		if ((one == 4) && (two == 65)) {
-			buf.append((byte) -47);
-			buf.append((byte) -127);
-			return;
-		}
-		// я
-		if ((one == 4) && (two == 79)) {
-			buf.append((byte) -47);
-			buf.append((byte) -113);
+		// this one definitely works for two == 34, but we assume probably for more too
+		if ((one == 33) && (two >= 0) && (two <= 127)) {
+			buf.append((byte) -30);
+			buf.append((byte) -124);
+			buf.append((byte) (two - 128));
 			return;
 		}
 		buf.append((byte) one);

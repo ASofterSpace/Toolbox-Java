@@ -55,12 +55,11 @@ public class WebRequestContent {
 			return true;
 		}
 
-		// in the case of multipart form data, the content type field contains something like:
+		// content type fields may contain semicommas like:
+		// application/json; charset=utf-8
 		// multipart/form-data; boundary=---------------------------18467633426500
-		if (type.equals("multipart/form-data")) {
-			if (contentType.startsWith(type)) {
-				return true;
-			}
+		if (contentType.startsWith(type + ";")) {
+			return true;
 		}
 
 		return false;

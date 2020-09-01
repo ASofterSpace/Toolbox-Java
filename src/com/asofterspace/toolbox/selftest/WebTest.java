@@ -188,9 +188,16 @@ public class WebTest implements Test {
 
 		TestUtils.start("Send UTF8 JSON to Server");
 
-		String result = WebAccessor.postJson("http://localhost:8081/post", "{\"foo\": \"россияне\", \"others\": \"’\"}");
 
-		if (!WebTestServerRequestHandler.lastPostContentStr.equals("{\"foo\": \"россияне\", \"others\": \"’\"}")) {
+		String jsonStr = "{\"foo\": \"россияне\", " +
+			"\"letters\": \"ïäÄöÖüÜßæÆðÐþÞéÉêÊèÈóÓáÁíåçñ\", " +
+			"\"extraletters\": \"™@®©ƒ¢øØ\", " +
+			"\"currencies\": \"$&£\", " +
+			"\"others\": \"„“”‚‘’>|<…†‡·•—––˜±½¼¾¿¡×÷·¬\"}";
+
+		String result = WebAccessor.postJson("http://localhost:8081/post", jsonStr);
+
+		if (!WebTestServerRequestHandler.lastPostContentStr.equals(jsonStr)) {
 			TestUtils.fail("We sent a POST and the POST data did not arrive, instead it was: '" +
 				WebTestServerRequestHandler.lastPostContentStr + "'");
 		}
