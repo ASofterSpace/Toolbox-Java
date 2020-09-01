@@ -14,7 +14,6 @@ import com.asofterspace.toolbox.utils.ByteBuffer;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -23,6 +22,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -135,6 +135,12 @@ public class WebAccessor {
 		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "POST", null));
 	}
 
+	public static String postJson(String url, String messageBody) {
+		Map<String, String> extraHeaders = new HashMap<>();
+		extraHeaders.put("Content-Type", "application/json");
+		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders));
+	}
+
 	/**
 	 * Post a web resource synchronously, assuming that the result is in UTF-8
 	 * @param url  The url of the web resource
@@ -237,7 +243,7 @@ public class WebAccessor {
 				connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 				connection.getOutputStream().write(postDataBytes);
 				*/
-				OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+				OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
 				out.write(messageBody);
 				out.close();
 			}

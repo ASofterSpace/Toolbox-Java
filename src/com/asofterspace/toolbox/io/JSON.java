@@ -110,8 +110,14 @@ public class JSON extends Record {
 				// this should be the case - keys should be inside quote marks
 				if (jsonString.charAt(pos) == '"') {
 					int endIndex = jsonString.indexOf("\"", pos+1);
+					if (endIndex < 0) {
+						throw new JsonParseException("Encountered an unclosed key", pos, jsonString);
+					}
 					String key = jsonString.substring(pos+1, endIndex).trim();
 					pos = jsonString.indexOf(":", endIndex+1) + 1;
+					if (pos < 1) {
+						throw new JsonParseException("Encountered a key without trailing :", endIndex, jsonString);
+					}
 					JSON value = new JSON();
 					pos = value.init(jsonString, pos);
 					objContents.put(key, value);
@@ -123,6 +129,9 @@ public class JSON extends Record {
 				// this should NOT be the case - the key is not in a quote mark!
 				// but we will grudgingly accept it anyway, as we are nice people...
 				int endIndex = jsonString.indexOf(":", pos);
+				if (endIndex < 0) {
+					throw new JsonParseException("Encountered an unescaped key without trailing :", pos, jsonString);
+				}
 				String key = jsonString.substring(pos, endIndex).trim();
 				// in case someone did escape the key, but with ' instead of ", also handle that gracefully...
 				if ((key.length() > 2) && (key.charAt(0) == '\'') && (key.charAt(key.length()-1) == '\'')) {
@@ -182,9 +191,7 @@ public class JSON extends Record {
 
 			int endIndex = jsonString.indexOf(doStringWith, pos);
 			if (endIndex < pos) {
-				throw new JsonParseException("Encountered an unclosed string while parsing JSON near line " +
-					StrUtils.getLineNumberFromPosition(pos, jsonString) + ": " +
-					jsonString.substring(pos, Math.min(jsonString.length(), pos + 100)));
+				throw new JsonParseException("Encountered an unclosed string", pos, jsonString);
 			}
 			String simpleContentsStr = jsonString.substring(pos, endIndex);
 			// also allow escaping " (basically, by checking here is simpleContentsStr
@@ -211,9 +218,7 @@ public class JSON extends Record {
 				// odd! continue searching for the end of the string somewhere down the line...
 				int newEndIndex = jsonString.indexOf(doStringWith, endIndex + 1);
 				if (newEndIndex < pos) {
-					throw new JsonParseException("Encountered an unclosed string while parsing JSON near line " +
-						StrUtils.getLineNumberFromPosition(pos, jsonString) + ": " +
-						jsonString.substring(pos, Math.min(jsonString.length(), pos + 100)));
+					throw new JsonParseException("Encountered an unclosed string", pos, jsonString);
 				}
 				simpleContentsStr = simpleContentsStr.substring(0, simpleContentsStr.length() - 1) +
 									jsonString.substring(endIndex, newEndIndex);
@@ -311,13 +316,7 @@ public class JSON extends Record {
 		// are starting with something VERY unexpected, and cannot parse this...
 		// in which case we should fail, and NOT silently, but very very loudly!
 		if (charPos == pos) {
-			int until = pos + 100;
-			if (until >= jsonString.length()) {
-				until = jsonString.length() - 1;
-			}
-			throw new JsonParseException("Invalid JSON found near line " +
-					StrUtils.getLineNumberFromPosition(pos, jsonString) + " around: " +
-					jsonString.substring(pos, until));
+			throw new JsonParseException("Invalid JSON found", pos, jsonString);
 		}
 
 		pos = charPos;

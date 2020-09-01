@@ -37,6 +37,12 @@ public class WebTest implements Test {
 
 		getAdvancedJsonFromServerTest();
 
+		getUtf8JsonFromServerTest();
+
+		sendJsonToServerTest();
+
+		sendUtf8JsonToServerTest();
+
 		getFileTest();
 
 		stopServer();
@@ -62,7 +68,7 @@ public class WebTest implements Test {
 
 	public void startServer() {
 
-		this.server = new WebServer(new Directory(AllTests.TEST_DATA_PATH), 8081);
+		this.server = new WebTestServer(new Directory(AllTests.TEST_DATA_PATH), 8081);
 
 		server.serveAsync();
 	}
@@ -131,6 +137,67 @@ public class WebTest implements Test {
 		} catch (JsonParseException e) {
 			TestUtils.fail("We stored stuff in a JSON file, then read it over the web, but it could not be parsed: " + e);
 			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void getUtf8JsonFromServerTest() {
+
+		TestUtils.start("Get UTF8 JSON from Server");
+
+		server.addToWhitelist("json/utf8.json");
+
+		String result = WebAccessor.get("http://localhost:8081/json/utf8.json");
+
+		try {
+			JSON jsonContent = new JSON(result);
+
+			if (!jsonContent.getString("foo").equals("россияне")) {
+				TestUtils.fail("We stored {\"foo\": \"россияне\"} in a JSON file, then read the file - and did not get россияне when querying for foo!");
+				return;
+			}
+		} catch (JsonParseException e) {
+			TestUtils.fail("We stored stuff in a JSON file, then read it over the web, but it could not be parsed: " + e);
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void sendJsonToServerTest() {
+
+		TestUtils.start("Send JSON to Server");
+
+		String result = WebAccessor.postJson("http://localhost:8081/post", "{\"foo\": \"bar\"}");
+
+		if (!WebTestServerRequestHandler.lastPostContentStr.equals("{\"foo\": \"bar\"}")) {
+			TestUtils.fail("We sent a POST and the POST data did not arrive, instead it was: '" +
+				WebTestServerRequestHandler.lastPostContentStr + "'");
+		}
+
+		if (!WebTestServerRequestHandler.lastPostContentJSON.getString("foo").equals("bar")) {
+			TestUtils.fail("We sent a POST and the POST data did not arrive, instead it was: '" +
+				WebTestServerRequestHandler.lastPostContentJSON + "'");
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void sendUtf8JsonToServerTest() {
+
+		TestUtils.start("Send UTF8 JSON to Server");
+
+		String result = WebAccessor.postJson("http://localhost:8081/post", "{\"foo\": \"россияне\", \"others\": \"’\"}");
+
+		if (!WebTestServerRequestHandler.lastPostContentStr.equals("{\"foo\": \"россияне\", \"others\": \"’\"}")) {
+			TestUtils.fail("We sent a POST and the POST data did not arrive, instead it was: '" +
+				WebTestServerRequestHandler.lastPostContentStr + "'");
+		}
+
+		if (!WebTestServerRequestHandler.lastPostContentJSON.getString("foo").equals("россияне")) {
+			TestUtils.fail("We sent a POST and the POST data did not arrive, instead it was: '" +
+				WebTestServerRequestHandler.lastPostContentJSON + "'");
 		}
 
 		TestUtils.succeed();

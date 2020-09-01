@@ -68,7 +68,7 @@ public class WebServerRequestHandler implements Runnable {
 		// System.out.println("Handler for request #" + socketNum + " starting up...");
 
 		try (
-			BufferedReader inputReader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+			BufferedReader inputReader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8));
 			BufferedOutputStream outputWriter = new BufferedOutputStream(request.getOutputStream())
 		) {
 			// System.out.println("Starting to read request #" + socketNum + "...");
@@ -317,7 +317,7 @@ public class WebServerRequestHandler implements Runnable {
 				if (result.getContentLength() > 0) {
 					ByteBuffer readData = new ByteBuffer();
 					// StringBuilder readData = new StringBuilder();
-					// StringBuilder output = new StringBuilder();
+					StringBuilder output = new StringBuilder();
 					for (int i = 0; i < result.getContentLength(); i++) {
 						if (!input.ready()) {
 							try {
@@ -331,7 +331,7 @@ public class WebServerRequestHandler implements Runnable {
 						}
 
 						// ORIGINAL TODO :: this seems to have problem with non-ASCII nonsense currently...
-						// readData.append((char) input.read());
+						// readData.append((byte) input.read());
 
 						// TODO :: now with the current approach, basic UTF-8 is working
 						// (everything with one and two bytes, as long as the second byte
@@ -349,25 +349,26 @@ public class WebServerRequestHandler implements Runnable {
 						// 209,    8364, 208, 190, 209,   65533, 209,   65533, 208, 184, 209,   65533, 208, 189, 208, 181  ints incoming
 						// as the ints incoming for с and я are exactly the same, we believe that there is already a problem
 						// with the data coming into this function...
+
+						// now a tiny little bit of UTF-8 is working, but really not much... gnah!
 						int iread = input.read();
 
 						if (iread > 255) {
-							readData.append((byte) (iread / 256));
-							readData.append((byte) (iread % 256));
+							appendBytes(readData, iread);
 							/*
 							output.append(iread / 256);
 							output.append(",");
 							output.append(iread % 256);
 							output.append(", ");
-							*/
+							/**/
 						} else {
 
 							readData.append((byte) iread);
 							/*
 							output.append(iread);
 							output.append(", ");
-							*/
-						}
+							/**/
+						}/**/
 
 
 					}
@@ -376,13 +377,14 @@ public class WebServerRequestHandler implements Runnable {
 					System.out.println("raw: " + output.toString());
 					System.out.println("bytes: " + readData.showBytes());
 
-					String specialChar = "россияне";
+					String specialChar = "россияне ’";
 					byte[] tmp = specialChar.getBytes("UTF-8");
 					String s = new String(tmp, "UTF-8");
 					for (byte tb : tmp) {
 						System.out.println(tb);
 					}
-					*/
+					System.out.println(s);
+					/**/
 
 					String strContent = readData.toString(StandardCharsets.UTF_8);
 					// String strContent = StandardCharsets.UTF_8.encode(buffer.toByteArray());
@@ -395,6 +397,62 @@ public class WebServerRequestHandler implements Runnable {
 		}
 
 		return null;
+	}
+
+	private void appendBytes(ByteBuffer buf, int charNum) {
+		int one = charNum / 256;
+		int two = charNum % 256;
+		// ’
+		if ((one == 32) && (two == 25)) {
+			buf.append((byte) -30);
+			buf.append((byte) -128);
+			buf.append((byte) -103);
+			return;
+		}
+		// е
+		if ((one == 4) && (two == 53)) {
+			buf.append((byte) -48);
+			buf.append((byte) -75);
+			return;
+		}
+		// и
+		if ((one == 4) && (two == 56)) {
+			buf.append((byte) -48);
+			buf.append((byte) -72);
+			return;
+		}
+		// н
+		if ((one == 4) && (two == 61)) {
+			buf.append((byte) -48);
+			buf.append((byte) -67);
+			return;
+		}
+		// о
+		if ((one == 4) && (two == 62)) {
+			buf.append((byte) -48);
+			buf.append((byte) -66);
+			return;
+		}
+		// р
+		if ((one == 4) && (two == 64)) {
+			buf.append((byte) -47);
+			buf.append((byte) -128);
+			return;
+		}
+		// с
+		if ((one == 4) && (two == 65)) {
+			buf.append((byte) -47);
+			buf.append((byte) -127);
+			return;
+		}
+		// я
+		if ((one == 4) && (two == 79)) {
+			buf.append((byte) -47);
+			buf.append((byte) -113);
+			return;
+		}
+		buf.append((byte) one);
+		buf.append((byte) two);
 	}
 
 	private void send(String line) throws IOException {

@@ -45,6 +45,10 @@ public class JSONTest implements Test {
 
 		throwsOnOpenString();
 
+		throwsOnOpenKey();
+
+		throwsOnMissingColon();
+
 		fromStringTestEscapedChars();
 
 		toStringTestEscapedChars();
@@ -357,6 +361,34 @@ public class JSONTest implements Test {
 		}
 
 		TestUtils.fail("We wanted to get an exception because of an unclosed string, but got none!");
+	}
+
+	public void throwsOnOpenKey() {
+
+		TestUtils.start("JSON throws on open key");
+
+		try {
+			JSON testObject = new JSON("{\"foo\":\"bar\", \"schlu");
+		} catch (JsonParseException e) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We wanted to get an exception because of an unclosed key, but got none!");
+	}
+
+	public void throwsOnMissingColon() {
+
+		TestUtils.start("JSON throws on missing colon");
+
+		try {
+			JSON testObject = new JSON("{\"foo\" \"bar\"}");
+		} catch (JsonParseException e) {
+			TestUtils.succeed();
+			return;
+		}
+
+		TestUtils.fail("We wanted to get an exception because of a missing colon, but got none!");
 	}
 
 	public void fromStringTestEscapedChars() throws JsonParseException {

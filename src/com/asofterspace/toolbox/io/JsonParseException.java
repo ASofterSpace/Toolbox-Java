@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.StrUtils;
+
 
 public class JsonParseException extends Exception {
 
@@ -16,5 +18,11 @@ public class JsonParseException extends Exception {
 
 	public JsonParseException(String message, Throwable previousException) {
 		super(message, previousException);
+	}
+
+	public JsonParseException(String message, int pos, String jsonString) {
+		super(message + " while parsing JSON near line " +
+			StrUtils.getLineNumberFromPosition(pos, jsonString) + ": " +
+			jsonString.substring(pos, Math.min(jsonString.length(), pos + 100)));
 	}
 }
