@@ -317,8 +317,6 @@ public class WebServerRequestHandler implements Runnable {
 			if ("".equals(line)) {
 				if (result.getContentLength() > 0) {
 					ByteBuffer readData = new ByteBuffer();
-					// StringBuilder readData = new StringBuilder();
-					StringBuilder output = new StringBuilder();
 					for (int i = 0; i < result.getContentLength(); i++) {
 						if (!input.ready()) {
 							try {
@@ -331,82 +329,15 @@ public class WebServerRequestHandler implements Runnable {
 							}
 						}
 
-						// ORIGINAL TODO :: this seems to have problem with non-ASCII nonsense currently...
-						// readData.append((byte) input.read());
-
-						// TODO :: now with the current approach, basic UTF-8 is working
-						// (everything with one and two bytes, as long as the second byte
-						// is not too high or something like that), but more is not working,
-						// and we cannot get it work either... e.g. take the word "россияне",
-						// this comes in with some letters (e.g. the last two) fine,
-						// while some others like the с which are JUST too high in unicode
-						// come out mangled...
-						// this particular example SHOULD look like:
-						// р             о         с             с             и         я             н         е
-						// -47,    -128, -48, -66, -47,   -127,  -47,   -127,  -48, -72, -47,   -113,  -48, -67, -48, -75  bytes actually expected
-						// but instead, we get:
-						// -47, 32, -84, -48, -66, -47, -1, -3,  -47, -1, -3,  -48, -72, -47, -1, -3,  -48, -67, -48, -75  bytes after conversion
-						// 209, 32,172,  208, 190, 209, 255,253, 209, 255,253, 208, 184, 209, 255,253, 208, 189, 208, 181  ints after splitting above 255
-						// 209,    8364, 208, 190, 209,   65533, 209,   65533, 208, 184, 209,   65533, 208, 189, 208, 181  ints incoming
-						// as the ints incoming for с and я are exactly the same, we believe that there is already a problem
-						// with the data coming into this function...
-
-						// now a tiny little bit of UTF-8 is working, but really not much... gnah!
+						// we get one byte after the other (still all in fake ISO_8859_1, even though it is
+						// actually containing UTF-8)
 						int iread = input.read();
-
-						if (iread > 255) {
-							appendBytes(readData, iread);
-							/*
-							output.append(iread / 256);
-							output.append(",");
-							output.append(iread % 256);
-							output.append(", ");
-							/**/
-						} else {
-
-						/*	if (iread == 183) {
-								readData.append((byte) -62);
-								readData.append((byte) -73);
-							} else if (iread == 239) {
-								readData.append((byte) -61);
-								readData.append((byte) -81);
-							} else {*/
-								readData.append((byte) iread);
-							//}
-							/*
-							output.append(iread);
-							output.append(", ");
-							/**/
-						}/**/
-
-
+						readData.append((byte) iread);
 					}
 
-					/*
-					System.out.println("raw: " + output.toString());
-					System.out.println("bytes: " + readData.showBytes());
-
-/*
-					String specialChar = "{\"foo\": \"россияне\", " +
-						"\"letters\": \"ïäÄöÖüÜßæÆðÐþÞéÉêÊèÈóÓáÁíåçñ\", " +
-						"\"extraletters\": \"™@®©ƒ¢øØ\", " +
-						"\"currencies\": \"$&£\", " +
-						"\"others\": \"„“”‚‘’>|<…†‡·•—––˜±½¼¾¿¡×÷·¬\"}";
-					*//*
-					String specialChar = "ï";
-
-					byte[] tmp = specialChar.getBytes("UTF-8");
-					String s = new String(tmp, "UTF-8");
-					for (byte tb : tmp) {
-						System.out.println(tb);
-					}
-					System.out.println(s);
-					/**/
-
+					// and now that all the bytes have been gathered, we can (once) interpret this as UTF-8!
 					String strContent = readData.toString(StandardCharsets.UTF_8);
-					// String strContent = StandardCharsets.UTF_8.encode(buffer.toByteArray());
 					result.setContent(strContent);
-					// result.setContent(readData);
 					return result;
 				}
 				break;
@@ -414,43 +345,6 @@ public class WebServerRequestHandler implements Runnable {
 		}
 
 		return null;
-	}
-
-	private void appendBytes(ByteBuffer buf, int charNum) {
-		int one = charNum / 256;
-		int two = charNum % 256;
-		if ((one == 2) && (two == 220)) {
-			buf.append((byte) -53);
-			buf.append((byte) -100);
-			return;
-		}
-		// the next two together definitely work for two >= 53 and two <= 79, but we assume probably for more too
-		if ((one == 4) && (two >= 0) && (two <= 63)) {
-			buf.append((byte) -48);
-			buf.append((byte) (two - 128));
-			return;
-		}
-		if ((one == 4) && (two >= 64) && (two <= 127)) {
-			buf.append((byte) -47);
-			buf.append((byte) (two - 192));
-			return;
-		}
-		// this one definitely works for two >= 25 and two <= 30, but we assume probably for more too
-		if ((one == 32) && (two >= 0) && (two <= 127)) {
-			buf.append((byte) -30);
-			buf.append((byte) -128);
-			buf.append((byte) (two - 128));
-			return;
-		}
-		// this one definitely works for two == 34, but we assume probably for more too
-		if ((one == 33) && (two >= 0) && (two <= 127)) {
-			buf.append((byte) -30);
-			buf.append((byte) -124);
-			buf.append((byte) (two - 128));
-			return;
-		}
-		buf.append((byte) one);
-		buf.append((byte) two);
 	}
 
 	private void send(String line) throws IOException {
