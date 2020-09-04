@@ -40,8 +40,6 @@ public class StrUtilsTest implements Test {
 		startsWithUpperCaseTest();
 
 		leftPadTest();
-
-		sortNumericallyTest();
 	}
 
 	public void countStringInStringTest() {
@@ -342,92 +340,6 @@ public class StrUtilsTest implements Test {
 		}
 
 		TestUtils.succeed();
-	}
-
-	private void sortNumericallyTest() {
-
-		TestUtils.start("Sort Numerically");
-
-		List<String> list = new ArrayList<>();
-		list.add("FOOBAR-1");
-		list.add("FOOBAR-11");
-		list.add("FOOBAR-2");
-		list.add("FOOBAR-47");
-		list.add("FOOBAR-5");
-		list.add("FOOBAR-16");
-		list.add("anloInk");
-		list.add("ASLUAR");
-		list.add("Xentan");
-		list.add("FOOBAR-124");
-		list.add("FOOBAR-3");
-		list.add("xoro");
-
-		StrUtils.sortNumerically(list);
-
-		int i = 0;
-
-		if (!list.get(i).equals("anloInk")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("ASLUAR")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-1")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-2")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-3")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-5")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-11")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-16")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-47")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("FOOBAR-124")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("Xentan")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		if (!list.get(i).equals("xoro")) {
-			TestUtils.fail("Result #" + i + " is wrong!");
-		}
-		i++;
-
-		TestUtils.succeed();
-
 	}
 
 }

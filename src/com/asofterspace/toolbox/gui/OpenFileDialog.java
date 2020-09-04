@@ -12,6 +12,8 @@ import com.asofterspace.toolbox.utils.CallbackWithStatus;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Frame;
@@ -58,12 +60,15 @@ public class OpenFileDialog {
 	private List<Directory> selectedDirectories;
 
 	// GUI parts
+	private JFrame dialog;
 	private JTextField currentDirPathField;
 	private JList<String> fileView;
 
 	// data for the GUI
 	private List<String> visibleFiles;
 	private List<String> visibleDirectories;
+
+	private CallbackWithStatus callback;
 
 
 	public OpenFileDialog() {
@@ -76,11 +81,12 @@ public class OpenFileDialog {
 
 	public void showOpenDialog(CallbackWithStatus callback) {
 
+		this.callback = callback;
 		this.selectedFiles = new ArrayList<>();
 		this.selectedDirectories = new ArrayList<>();
 
 		// Create the window
-		final JFrame dialog = new JFrame(dialogTitle);
+		this.dialog = new JFrame(dialogTitle);
 		GridBagLayout dialogLayout = new GridBagLayout();
 		dialog.setLayout(dialogLayout);
 		dialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
@@ -125,24 +131,22 @@ public class OpenFileDialog {
 		fileViewScroller.setPreferredSize(new Dimension(8, 8));
 		dialog.add(fileViewScroller, new Arrangement(0, 1, 1.0, 1.0));
 
+		// enter directories / open files when double clicking
 		fileView.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					int index = fileView.locationToIndex(e.getPoint());
-					if (index < visibleDirectories.size()) {
-						// enter this directory
-						enterDirectory(visibleDirectories.get(index));
-					} else {
-						if (fileSelectionMode == DIRECTORIES_ONLY) {
-							return;
-						}
-						// open this file
-						selectedFiles = new ArrayList<>();
-						selectedDirectories = new ArrayList<>();
-						selectedFiles.add(new File(currentDirectory, visibleFiles.get(index - visibleDirectories.size())));
-						dialog.dispose();
-						callback.call(APPROVE_OPTION);
-					}
+					performFileViewActionBasedOnIndex(index);
+				}
+			}
+		});
+
+		// enter directories / open files when pressing [Enter] key
+		fileView.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					int index = fileView.getSelectedIndex();
+					performFileViewActionBasedOnIndex(index);
 				}
 			}
 		});
@@ -209,6 +213,24 @@ public class OpenFileDialog {
 		GuiUtils.centerAndShowWindow(dialog);
 
 		refreshFileView();
+	}
+
+	private void performFileViewActionBasedOnIndex(int index) {
+
+		if (index < visibleDirectories.size()) {
+			// enter this directory
+			enterDirectory(visibleDirectories.get(index));
+		} else {
+			if (fileSelectionMode == DIRECTORIES_ONLY) {
+				return;
+			}
+			// open this file
+			selectedFiles = new ArrayList<>();
+			selectedDirectories = new ArrayList<>();
+			selectedFiles.add(new File(currentDirectory, visibleFiles.get(index - visibleDirectories.size())));
+			dialog.dispose();
+			callback.call(APPROVE_OPTION);
+		}
 	}
 
 	/**

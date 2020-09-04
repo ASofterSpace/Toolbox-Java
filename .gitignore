@@ -28,14 +28,14 @@ hs_err_pid*
 *~
 
 # bin directory
-bin
+/bin
 
 # sourcefile list
-src/sourcefiles.list
+/src/sourcefiles.list
 
 # test files
-cache
-config
+/cache
+/config
 /test
 
 # analysis output file

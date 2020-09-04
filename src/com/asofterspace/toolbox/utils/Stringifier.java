@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.utils;
 
-public interface Stringifier {
+public interface Stringifier<T> {
 
-	public String getString(Object obj);
+	public String getString(T obj);
 }
