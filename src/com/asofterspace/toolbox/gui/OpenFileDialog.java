@@ -135,6 +135,8 @@ public class OpenFileDialog {
 		fileView.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
+					// one selected (as a double click always targets just one row)
+					// - enter directory (if it is one) or open file (if it is one)
 					int index = fileView.locationToIndex(e.getPoint());
 					performFileViewActionBasedOnIndex(index);
 				}
@@ -145,8 +147,22 @@ public class OpenFileDialog {
 		fileView.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					int index = fileView.getSelectedIndex();
-					performFileViewActionBasedOnIndex(index);
+
+					int[] indices = fileView.getSelectedIndices();
+
+					// none selected - do nothing
+					if (indices.length < 1) {
+						return;
+					}
+
+					// one selected - enter directory (if it is one) or open file (if it is one)
+					if (indices.length == 1) {
+						performFileViewActionBasedOnIndex(indices[0]);
+						return;
+					}
+
+					// several selected - open them all
+					openCurrentlySelectedFiles();
 				}
 			}
 		});
@@ -160,24 +176,7 @@ public class OpenFileDialog {
 		JButton openButton = new JButton("Open");
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// open the currently selected file(s)
-				selectedFiles = new ArrayList<>();
-				selectedDirectories = new ArrayList<>();
-				List<String> highlightedEntries = fileView.getSelectedValuesList();
-				for (String highlightedEntry : highlightedEntries) {
-					Directory newDir = new Directory(currentDirectory, highlightedEntry);
-					if (newDir.exists()) {
-						if (fileSelectionMode != FILES_ONLY) {
-							selectedDirectories.add(newDir);
-						}
-					} else {
-						if (fileSelectionMode != DIRECTORIES_ONLY) {
-							selectedFiles.add(new File(currentDirectory, highlightedEntry));
-						}
-					}
-				}
-				dialog.dispose();
-				callback.call(APPROVE_OPTION);
+				openCurrentlySelectedFiles();
 			}
 		});
 		buttonRow.add(openButton);
@@ -213,6 +212,32 @@ public class OpenFileDialog {
 		GuiUtils.centerAndShowWindow(dialog);
 
 		refreshFileView();
+	}
+
+	/**
+	 * open the currently selected file(s) and folder(s)
+	 */
+	private void openCurrentlySelectedFiles() {
+
+		selectedFiles = new ArrayList<>();
+		selectedDirectories = new ArrayList<>();
+
+		List<String> highlightedEntries = fileView.getSelectedValuesList();
+
+		for (String highlightedEntry : highlightedEntries) {
+			Directory newDir = new Directory(currentDirectory, highlightedEntry);
+			if (newDir.exists()) {
+				if (fileSelectionMode != FILES_ONLY) {
+					selectedDirectories.add(newDir);
+				}
+			} else {
+				if (fileSelectionMode != DIRECTORIES_ONLY) {
+					selectedFiles.add(new File(currentDirectory, highlightedEntry));
+				}
+			}
+		}
+		dialog.dispose();
+		callback.call(APPROVE_OPTION);
 	}
 
 	private void performFileViewActionBasedOnIndex(int index) {
