@@ -6,9 +6,13 @@ package com.asofterspace.toolbox.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.geom.Rectangle2D;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.util.List;
 
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -34,6 +38,8 @@ public class CodeEditor extends JTextPane {
 
 	private Color startLineColor = Color.DARK_GRAY;
 	private Color horzLineColor = Color.DARK_GRAY;
+
+	private List<String> proposedTokens;
 
 
 	public CodeEditor() {
@@ -99,6 +105,27 @@ public class CodeEditor extends JTextPane {
 	public void paint(Graphics g) {
 
 		super.paint(g);
+
+		if ((proposedTokens != null) && proposedTokens.size() > 0) {
+			try {
+				Rectangle r = modelToView(getSelectionStart());
+				FontMetrics fm = g.getFontMetrics();
+				int asc = fm.getAscent();
+				int totAsc = asc;
+				for (String token : proposedTokens) {
+					// TODO :: adjust colors based on scheme!
+					g.setColor(Color.BLACK);
+					Rectangle2D r2 = fm.getStringBounds(token, g);
+					g.fillRect(r.x, r.y + totAsc - asc, 2 + (int) r2.getWidth(), 4 + (int) r2.getHeight());
+					g.setColor(Color.LIGHT_GRAY);
+					g.drawString(token, r.x, r.y + totAsc);
+					totAsc += asc + 2;
+				}
+			} catch (BadLocationException e) {
+				// whoops!
+				System.err.println("BadLocationException in CodeEditor while showing proposed tokens!");
+			}
+		}
 
 		if ((!showStartLine) && (!showHorzLine)) {
 			return;
@@ -213,4 +240,9 @@ public class CodeEditor extends JTextPane {
 
 		super.paintComponent(graphics);
 	}
+
+	public void setProposedTokens(List<String> proposedTokens) {
+		this.proposedTokens = proposedTokens;
+	}
+
 }

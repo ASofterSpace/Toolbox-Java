@@ -11,7 +11,6 @@ import com.asofterspace.toolbox.codeeditor.utils.CodeLanguage;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
 import com.asofterspace.toolbox.gui.CodeEditor;
-import com.asofterspace.toolbox.gui.CodeEditorLineMemo;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.utils.SortOrder;
 import com.asofterspace.toolbox.utils.SortUtils;
@@ -285,11 +284,13 @@ public abstract class Code extends DefaultStyledDocument {
 
 
 
-				boolean proposeTokens = false;
+				boolean proposeTokens = decoratedEditor instanceof CodeEditor;
 
 				if (!proposeTokens) {
 					return;
 				}
+
+				((CodeEditor) decoratedEditor).setProposedTokens(null);
 
 				// propose tokens for auto-complete
 				if ((selLength == 0) && (encounteredTokens != null)) {
@@ -303,19 +304,21 @@ public abstract class Code extends DefaultStyledDocument {
 								return;
 							}
 							curToken.reverse();
+							curToken.append(event.getKeyChar());
 							String curTokenStr = curToken.toString();
-							System.out.println("\nPerforming lookahead for " + curTokenStr + ":");
 							Set<String> ourEncounteredTokenSet = new HashSet<>();
 							ourEncounteredTokenSet.addAll(encounteredTokens);
 							ArrayList<String> ourEncounteredTokens = new ArrayList<>();
 							ourEncounteredTokens.addAll(ourEncounteredTokenSet);
 							Collections.sort(ourEncounteredTokens);
+							ArrayList<String> proposedTokens = new ArrayList<>();
 							for (String encounteredToken : ourEncounteredTokens) {
 								if ((encounteredToken != null) && encounteredToken.startsWith(curTokenStr)
 									&& !encounteredToken.equals(curTokenStr)) {
-									System.out.println("  " + encounteredToken);
+									proposedTokens.add(encounteredToken.substring(curTokenStr.length()));
 								}
 							}
+							((CodeEditor) decoratedEditor).setProposedTokens(proposedTokens);
 							return;
 						}
 						curToken.append(c);
@@ -947,7 +950,7 @@ public abstract class Code extends DefaultStyledDocument {
 			origText.contains(" " + utility + ".") || origText.contains("\t" + utility + ".") ||
 			origText.contains("(" + utility + " ") || origText.contains("(" + utility + ".") ||
 			origText.contains("(" + utility + "<") || origText.contains("!" + utility + ".") ||
-			origText.contains("!" + utility + "(") ||
+			origText.contains("!" + utility + "(") ||origText.contains(" instanceof " + utility + ";") ||
 			origText.contains("(" + utility + ")") || origText.contains(" instanceof " + utility + ")") ||
 			origText.contains("@" + utility + "\n") || origText.contains("@" + utility + "(")) {
 			if (!origText.contains(importKeyword + " " + fullUtility + ";")) {
