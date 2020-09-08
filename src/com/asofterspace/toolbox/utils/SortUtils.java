@@ -51,8 +51,62 @@ public class SortUtils  {
 		return newList;
 	}
 
+	public static <T> List<T> sort(List<T> listToSort, SortOrder sortOrder) {
+		return sort(listToSort, sortOrder, null);
+	}
+
+	public static <T> List<T> sort(List<T> listToSort, SortOrder sortOrder, Stringifier<T> stringifier) {
+		if (sortOrder == null) {
+			sortOrder = SortOrder.ALPHABETICAL;
+		}
+		switch (sortOrder) {
+			case NUMERICAL:
+				return sortNumerically(listToSort, stringifier);
+			default:
+				return sortAlphabetically(listToSort, stringifier);
+		}
+	}
+
+	public static <T> List<T> sortAlphabetically(List<T> listToSort) {
+		return sortAlphabetically(listToSort, null);
+	}
+
+	public static <T> List<T> sortAlphabetically(List<T> listToSort, Stringifier<T> stringifier) {
+
+		List<T> newList = new ArrayList<>();
+
+		if (listToSort == null) {
+			return newList;
+		}
+
+		newList.addAll(listToSort);
+
+		if (stringifier == null) {
+			stringifier = new StringifierLowCase<T>();
+		}
+
+		final Stringifier<T> finalifier = stringifier;
+
+		Collections.sort(newList, new Comparator<T>() {
+
+			public int compare(T a, T b) {
+				String bLow = finalifier.getString(b);
+				String aLow = finalifier.getString(a);
+				if (aLow == null) {
+					return -1;
+				}
+				if (bLow == null) {
+					return 1;
+				}
+				return aLow.compareTo(bLow);
+			}
+		});
+
+		return newList;
+	}
+
 	public static <T> List<T> sortNumerically(List<T> listToSort) {
-		return sortNumerically(listToSort, new StringifierLowCase<T>());
+		return sortNumerically(listToSort, null);
 	}
 
 	public static <T> List<T> sortNumerically(List<T> listToSort, Stringifier<T> stringifier) {
@@ -65,6 +119,12 @@ public class SortUtils  {
 
 		newList.addAll(listToSort);
 
+		if (stringifier == null) {
+			stringifier = new StringifierLowCase<T>();
+		}
+
+		final Stringifier<T> finalifier = stringifier;
+
 		Collections.sort(newList, new Comparator<T>() {
 
 			public int compare(T a, T b) {
@@ -73,8 +133,8 @@ public class SortUtils  {
 				// if no, then we can just sort regularly as the letters are sorted alphabetically, fine...
 				// if yes, then we carry on gobbling digits, and when there are no more, then we want to
 				// add zeroes and THEN compare...
-				String bLow = stringifier.getString(b);
-				String aLow = stringifier.getString(a);
+				String bLow = finalifier.getString(b);
+				String aLow = finalifier.getString(a);
 				for (int i = 0; i < bLow.length(); i++) {
 					if (i >= aLow.length()) {
 						return -1;

@@ -13,6 +13,8 @@ import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
 import com.asofterspace.toolbox.gui.CodeEditor;
 import com.asofterspace.toolbox.gui.CodeEditorLineMemo;
 import com.asofterspace.toolbox.utils.Callback;
+import com.asofterspace.toolbox.utils.SortOrder;
+import com.asofterspace.toolbox.utils.SortUtils;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.awt.Canvas;
@@ -700,22 +702,22 @@ public abstract class Code extends DefaultStyledDocument {
 		// does nothing - as this does not support reporting function names :)
 	}
 
-	public void sortDocumentAlphabetically() {
+	public void sortDocument(SortOrder sortOrder) {
 
 		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origText = decoratedEditor.getText();
 
-		String newText = sortLinesAlphabetically(origText);
+		String newText = sortLines(origText, sortOrder);
 
 		decoratedEditor.setText(newText);
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
 
-	private String sortLinesAlphabetically(String origText) {
+	private String sortLines(String origText, SortOrder sortOrder) {
 
 		List<String> lines = Arrays.asList(origText.split("\n"));
 
-		Collections.sort(lines);
+		lines = SortUtils.sort(lines, sortOrder);
 
 		StringBuilder newText = new StringBuilder();
 
@@ -730,7 +732,7 @@ public abstract class Code extends DefaultStyledDocument {
 		return newText.toString();
 	}
 
-	public void sortSelectedLinesAlphabetically() {
+	public void sortSelectedLines(SortOrder sortOrder) {
 
 		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origText = decoratedEditor.getText();
@@ -763,13 +765,13 @@ public abstract class Code extends DefaultStyledDocument {
 		String middle = origText.substring(dot, mark);
 		String after = origText.substring(mark);
 
-		middle = sortLinesAlphabetically(middle);
+		middle = sortLines(middle, sortOrder);
 
 		decoratedEditor.setText(before + middle + after);
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
 
-	public void sortSelectedStringsAlphabetically() {
+	public void sortSelectedStrings(SortOrder sortOrder) {
 
 		int origCaretPos = decoratedEditor.getCaretPosition();
 		String origText = decoratedEditor.getText();
@@ -787,13 +789,13 @@ public abstract class Code extends DefaultStyledDocument {
 		String middle = origText.substring(dot, mark);
 		String after = origText.substring(mark);
 
-		middle = sortStringsAlphabetically(middle);
+		middle = sortStrings(middle, sortOrder);
 
 		decoratedEditor.setText(before + middle + after);
 		decoratedEditor.setCaretPosition(origCaretPos);
 	}
 
-	private String sortStringsAlphabetically(String origText) {
+	private String sortStrings(String origText, SortOrder sortOrder) {
 
 		origText = origText.replace("\", \"", "\"\n\"");
 		origText = origText.replace("\",\"", "\"\n\"");
@@ -821,7 +823,7 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 		}
 
-		Collections.sort(sortlines);
+		sortlines = SortUtils.sort(sortlines, sortOrder);
 
 		StringBuilder newText = new StringBuilder();
 
