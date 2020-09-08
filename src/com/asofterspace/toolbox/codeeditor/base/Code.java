@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -155,6 +156,9 @@ public abstract class Code extends DefaultStyledDocument {
 
 	private String defaultIndentationStr = null;
 
+	protected List<String> nextEncounteredTokens = null;
+	protected List<String> encounteredTokens = null;
+
 
 	public Code(JTextPane editor) {
 
@@ -274,6 +278,47 @@ public abstract class Code extends DefaultStyledDocument {
 						// ... and prevent the next text change (coming from the \t key)
 						preventInsert += 1;
 						preventRemove += 1;
+					}
+				}
+
+
+
+
+
+				boolean proposeTokens = false;
+
+				if (!proposeTokens) {
+					return;
+				}
+
+				// propose tokens for auto-complete
+				if ((selLength == 0) && (encounteredTokens != null)) {
+					String txt = decoratedEditor.getText();
+					StringBuilder curToken = new StringBuilder();
+
+					for (int i = selStart - 1; i >= 0; i--) {
+						char c = txt.charAt(i);
+						if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r') || (c == '.') || (c == '(') || (c == ')')) {
+							if (selStart - i < 3) {
+								return;
+							}
+							curToken.reverse();
+							String curTokenStr = curToken.toString();
+							System.out.println("\nPerforming lookahead for " + curTokenStr + ":");
+							Set<String> ourEncounteredTokenSet = new HashSet<>();
+							ourEncounteredTokenSet.addAll(encounteredTokens);
+							ArrayList<String> ourEncounteredTokens = new ArrayList<>();
+							ourEncounteredTokens.addAll(ourEncounteredTokenSet);
+							Collections.sort(ourEncounteredTokens);
+							for (String encounteredToken : ourEncounteredTokens) {
+								if ((encounteredToken != null) && encounteredToken.startsWith(curTokenStr)
+									&& !encounteredToken.equals(curTokenStr)) {
+									System.out.println("  " + encounteredToken);
+								}
+							}
+							return;
+						}
+						curToken.append(c);
 					}
 				}
 			}

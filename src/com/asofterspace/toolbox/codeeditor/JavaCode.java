@@ -359,6 +359,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		String content = "";
 
+		encounteredTokens = nextEncounteredTokens;
+		nextEncounteredTokens = new ArrayList<>();
+
 		try {
 			int end = this.getLength();
 
@@ -509,6 +512,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (setAttributesAndDetectFunctions) {
+			nextEncounteredTokens.add(couldBeKeyword);
 			if (isKeyword(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
 			} else if (isPrimitiveType(couldBeKeyword)) {
