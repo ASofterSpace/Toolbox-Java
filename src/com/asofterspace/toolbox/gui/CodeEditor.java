@@ -117,7 +117,7 @@ public class CodeEditor extends JTextPane {
 					g.setColor(Color.BLACK);
 					Rectangle2D r2 = fm.getStringBounds(token, g);
 					g.fillRect(r.x, r.y + totAsc - asc, 2 + (int) r2.getWidth(), 4 + (int) r2.getHeight());
-					g.setColor(Color.LIGHT_GRAY);
+					g.setColor(Color.YELLOW);
 					g.drawString(token, r.x, r.y + totAsc);
 					totAsc += asc + 2;
 				}
@@ -243,6 +243,10 @@ public class CodeEditor extends JTextPane {
 
 	public void setProposedTokens(List<String> proposedTokens) {
 		this.proposedTokens = proposedTokens;
+	}
+
+	public List<String> getProposedTokens() {
+		return proposedTokens;
 	}
 
 }

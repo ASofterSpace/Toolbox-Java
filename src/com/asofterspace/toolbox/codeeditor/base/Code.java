@@ -260,6 +260,31 @@ public abstract class Code extends DefaultStyledDocument {
 				}
 				*/
 
+
+				boolean proposeTokens = decoratedEditor instanceof CodeEditor;
+
+				if (proposeTokens && (event.getKeyChar() == KeyEvent.VK_TAB)) {
+					List<String> propTokens = ((CodeEditor) decoratedEditor).getProposedTokens();
+					if ((propTokens != null) && (propTokens.size() > 0)) {
+						String txt = decoratedEditor.getText();
+						String token = propTokens.get(0);
+						int nextSelStart = selStart + token.length();
+						decoratedEditor.setText(
+							txt.substring(0, selStart) +
+							token +
+							txt.substring(selStart)
+						);
+						decoratedEditor.setCaretPosition(nextSelStart);
+						((CodeEditor) decoratedEditor).setProposedTokens(null);
+
+						// ... and prevent the next text change (coming from the \t key)
+						preventInsert += 1;
+						preventRemove += 1;
+
+						return;
+					}
+				}
+
 				// on [Tab] during selection, indent whole block
 				// on [Ctrl / Shift] + [Tab] during selection, unindent whole block
 				if (tabEntireBlocks) {
@@ -280,12 +305,6 @@ public abstract class Code extends DefaultStyledDocument {
 					}
 				}
 
-
-
-
-
-				boolean proposeTokens = decoratedEditor instanceof CodeEditor;
-
 				if (!proposeTokens) {
 					return;
 				}
@@ -300,7 +319,7 @@ public abstract class Code extends DefaultStyledDocument {
 					for (int i = selStart - 1; i >= 0; i--) {
 						char c = txt.charAt(i);
 						if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r') || (c == '.') || (c == '(') || (c == ')')) {
-							if (selStart - i < 3) {
+							if (selStart - i < 2) {
 								return;
 							}
 							curToken.reverse();
@@ -343,6 +362,9 @@ public abstract class Code extends DefaultStyledDocument {
 			@Override
 			public void mouseReleased(MouseEvent event) {
 				onMouseReleased(event);
+				if (decoratedEditor instanceof CodeEditor) {
+					((CodeEditor) decoratedEditor).setProposedTokens(null);
+				}
 			}
 
 			@Override
