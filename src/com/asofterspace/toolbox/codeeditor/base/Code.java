@@ -121,6 +121,7 @@ public abstract class Code extends DefaultStyledDocument {
 	private int selStart = 0;
 	private int selEnd = 0;
 	private int selLength = 0;
+	private int prevSelStart = 0;
 
 	// prevent the next n insertions / removals
 	private int preventInsert = 0;
@@ -263,11 +264,84 @@ public abstract class Code extends DefaultStyledDocument {
 
 				boolean proposeTokens = decoratedEditor instanceof CodeEditor;
 
+				if (proposeTokens && (event.getKeyCode() == KeyEvent.VK_UP)) {
+					CodeEditor codeEditor = (CodeEditor) decoratedEditor;
+					int setTo = codeEditor.getProposedTokenSelection() - 1;
+					if (codeEditor.getProposedTokens() != null) {
+						if (codeEditor.getProposedTokens().size() > 0) {
+							if (setTo < 0) {
+								setTo = codeEditor.getProposedTokens().size() - 1;
+							}
+							codeEditor.setProposedTokenSelection(setTo);
+							int extraPrevSelStart = codeEditor.getTokenSelStart();
+							decoratedEditor.setCaretPosition(extraPrevSelStart);
+							selStart = extraPrevSelStart;
+							prevSelStart = extraPrevSelStart;
+							// codeEditor.setTokenSelStart(extraPrevSelStart);
+							Thread selThread = new Thread(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										Thread.sleep(50);
+									} catch(InterruptedException e) {
+										// Ooops...
+									}
+							decoratedEditor.setFocusable(true);
+							decoratedEditor.requestFocus();
+									decoratedEditor.setCaretPosition(extraPrevSelStart);
+									decoratedEditor.setSelectionStart(extraPrevSelStart);
+								}
+							});
+							selThread.start();
+							// decoratedEditor.setCaretPosition(selStart);
+							decoratedEditor.setFocusable(false);
+							return;
+						}
+					}
+				}
+
+				if (proposeTokens && (event.getKeyCode() == KeyEvent.VK_DOWN)) {
+					CodeEditor codeEditor = (CodeEditor) decoratedEditor;
+					int setTo = codeEditor.getProposedTokenSelection() + 1;
+					if (codeEditor.getProposedTokens() != null) {
+						if (codeEditor.getProposedTokens().size() > 0) {
+							if (setTo >= codeEditor.getProposedTokens().size()) {
+								setTo = 0;
+							}
+							codeEditor.setProposedTokenSelection(setTo);
+							int extraPrevSelStart = codeEditor.getTokenSelStart();
+							decoratedEditor.setCaretPosition(extraPrevSelStart);
+							selStart = extraPrevSelStart;
+							prevSelStart = extraPrevSelStart;
+							// codeEditor.setTokenSelStart(extraPrevSelStart);
+							Thread selThread = new Thread(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										Thread.sleep(50);
+									} catch(InterruptedException e) {
+										// Ooops...
+									}
+							decoratedEditor.setFocusable(true);
+							decoratedEditor.requestFocus();
+									decoratedEditor.setCaretPosition(extraPrevSelStart);
+									decoratedEditor.setSelectionStart(extraPrevSelStart);
+								}
+							});
+							selThread.start();
+							decoratedEditor.setFocusable(false);
+							// decoratedEditor.setCaretPosition(selStart);
+							// codeEditorLineMemo.setFocus();
+							return;
+						}
+					}
+				}
+
 				if (proposeTokens && (event.getKeyChar() == KeyEvent.VK_TAB)) {
 					List<String> propTokens = ((CodeEditor) decoratedEditor).getProposedTokens();
 					if ((propTokens != null) && (propTokens.size() > 0)) {
 						String txt = decoratedEditor.getText();
-						String token = propTokens.get(0);
+						String token = propTokens.get(((CodeEditor) decoratedEditor).getProposedTokenSelection());
 						int nextSelStart = selStart + token.length();
 						decoratedEditor.setText(
 							txt.substring(0, selStart) +
@@ -338,6 +412,8 @@ public abstract class Code extends DefaultStyledDocument {
 								}
 							}
 							((CodeEditor) decoratedEditor).setProposedTokens(proposedTokens);
+							((CodeEditor) decoratedEditor).setTokenSelStart(selStart + 1);
+							((CodeEditor) decoratedEditor).setProposedTokenSelection(0);
 							return;
 						}
 						curToken.append(c);
@@ -377,6 +453,7 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	protected void onCaretUpdate(CaretEvent e) {
+		prevSelStart = selStart;
 		if (e.getDot() < e.getMark()) {
 			selStart = e.getDot();
 			selEnd = e.getMark();

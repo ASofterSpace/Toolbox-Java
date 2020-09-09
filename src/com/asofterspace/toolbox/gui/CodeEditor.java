@@ -40,6 +40,8 @@ public class CodeEditor extends JTextPane {
 	private Color horzLineColor = Color.DARK_GRAY;
 
 	private List<String> proposedTokens;
+	private int proposedTokenSelection = 0;
+	private int tokenSelStart = 0;
 
 
 	public CodeEditor() {
@@ -108,18 +110,27 @@ public class CodeEditor extends JTextPane {
 
 		if ((proposedTokens != null) && proposedTokens.size() > 0) {
 			try {
-				Rectangle r = modelToView(getSelectionStart());
+				if (proposedTokenSelection >= proposedTokens.size()) {
+					proposedTokenSelection = 0;
+				}
+				Rectangle r = modelToView(tokenSelStart);
 				FontMetrics fm = g.getFontMetrics();
 				int asc = fm.getAscent();
 				int totAsc = asc;
+				int i = 0;
 				for (String token : proposedTokens) {
 					// TODO :: adjust colors based on scheme!
 					g.setColor(Color.BLACK);
 					Rectangle2D r2 = fm.getStringBounds(token, g);
 					g.fillRect(r.x, r.y + totAsc - asc, 2 + (int) r2.getWidth(), 4 + (int) r2.getHeight());
-					g.setColor(Color.YELLOW);
+					if (i == proposedTokenSelection) {
+						g.setColor(Color.YELLOW);
+					} else {
+						g.setColor(Color.LIGHT_GRAY);
+					}
 					g.drawString(token, r.x, r.y + totAsc);
 					totAsc += asc + 2;
+					i++;
 				}
 			} catch (BadLocationException e) {
 				// whoops!
@@ -247,6 +258,22 @@ public class CodeEditor extends JTextPane {
 
 	public List<String> getProposedTokens() {
 		return proposedTokens;
+	}
+
+	public int getProposedTokenSelection() {
+		return proposedTokenSelection;
+	}
+
+	public void setProposedTokenSelection(int proposedTokenSelection) {
+		this.proposedTokenSelection = proposedTokenSelection;
+	}
+
+	public void setTokenSelStart(int tokenSelStart) {
+		this.tokenSelStart = tokenSelStart;
+	}
+
+	public int getTokenSelStart() {
+		return tokenSelStart;
 	}
 
 }
