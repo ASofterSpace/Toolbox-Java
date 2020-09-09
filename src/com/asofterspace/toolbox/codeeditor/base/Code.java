@@ -130,6 +130,7 @@ public abstract class Code extends DefaultStyledDocument {
 	// configuration
 	// private boolean copyOnCtrlEnter = true;
 	private boolean tabEntireBlocks = true;
+	private boolean proposeTokenAutoComplete = true;
 
 	// search string - the string that is currently being searched for
 	private String searchStr = null;
@@ -262,7 +263,7 @@ public abstract class Code extends DefaultStyledDocument {
 				*/
 
 
-				boolean proposeTokens = decoratedEditor instanceof CodeEditor;
+				boolean proposeTokens = (decoratedEditor instanceof CodeEditor) && proposeTokenAutoComplete;
 
 				if (proposeTokens && (event.getKeyCode() == KeyEvent.VK_UP)) {
 					CodeEditor codeEditor = (CodeEditor) decoratedEditor;
@@ -1596,6 +1597,10 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public void setTabEntireBlocks(boolean value) {
 		tabEntireBlocks = value;
+	}
+
+	public void setProposeTokenAutoComplete(boolean value) {
+		proposeTokenAutoComplete = value;
 	}
 
 	public void setOnChange(Callback callback) {

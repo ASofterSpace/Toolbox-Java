@@ -173,7 +173,7 @@ public class OpenFileDialog {
 		buttonRow.setLayout(buttonRowLayout);
 		dialog.add(buttonRow, new Arrangement(0, 2, 1.0, 0.0));
 
-		JButton openButton = new JButton("Open");
+		JButton openButton = new JButton("Select These");
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openCurrentlySelectedFiles();
@@ -181,7 +181,7 @@ public class OpenFileDialog {
 		});
 		buttonRow.add(openButton);
 
-		JButton enterButton = new JButton("Enter");
+		JButton enterButton = new JButton("Descend Into Folder");
 		enterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// enter into the currently selected directory
