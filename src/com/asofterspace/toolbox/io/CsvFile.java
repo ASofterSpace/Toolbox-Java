@@ -37,6 +37,17 @@ public class CsvFile extends SimpleFile {
 		regularFile.copyToFileObject(this);
 	}
 
+	/**
+	 * Create a new file instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public CsvFile(Directory directory, String filename) {
+
+		super(directory, filename);
+	}
+
 	public int getCurrentLineNum() {
 		return currentLine;
 	}
