@@ -300,6 +300,15 @@ public class DateUtils {
 		return serializeDate(someDate).equals(serializeDate(otherDate));
 	}
 
+	public static Integer getMonth(Date someDate) {
+		if (someDate == null) {
+			return null;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(someDate);
+		return cal.get(Calendar.MONTH) + 1;
+	}
+
 	public static Integer getYear(Date someDate) {
 		if (someDate == null) {
 			return null;

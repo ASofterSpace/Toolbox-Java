@@ -5,11 +5,14 @@
 package com.asofterspace.toolbox.io;
 
 import java.io.IOException;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -236,6 +239,26 @@ public class File {
 		java.io.File javaFile = getJavaFile();
 
 		return javaFile.exists() && !javaFile.isDirectory();
+	}
+
+	public Date getCreationDate() {
+		try {
+			BasicFileAttributes fileAttributes = Files.readAttributes(getJavaPath(), BasicFileAttributes.class);
+			FileTime fileTime = fileAttributes.creationTime();
+			return new Date(fileTime.toMillis());
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public Date getChangeDate() {
+		try {
+			BasicFileAttributes fileAttributes = Files.readAttributes(getJavaPath(), BasicFileAttributes.class);
+			FileTime fileTime = fileAttributes.lastModifiedTime();
+			return new Date(fileTime.toMillis());
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
 	/**
