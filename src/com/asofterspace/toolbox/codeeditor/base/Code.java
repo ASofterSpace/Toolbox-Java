@@ -354,7 +354,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 						// ... and prevent the next text change (coming from the \t key)
 						preventInsert += 1;
-						preventRemove += 1;
+						// (we here to not prevent the removal, as we are not removing anything, as nothing
+						// is selected - and even if we were, we would want to remove it)
 
 						return;
 					}
@@ -375,6 +376,8 @@ public abstract class Code extends DefaultStyledDocument {
 						}
 
 						// ... and prevent the next text change (coming from the \t key)
+						// (we prevent insertion AND removal, as we have several lines selected which would be
+						// deleted if we allowed removal, and as we do not want to insert the tab character)
 						preventInsert += 1;
 						preventRemove += 1;
 					}
