@@ -8,6 +8,7 @@ import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.utils.Callback;
 import com.asofterspace.toolbox.utils.CallbackWithStatus;
+import com.asofterspace.toolbox.utils.SortUtils;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -20,8 +21,6 @@ import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -273,11 +272,7 @@ public class OpenFileDialog {
 			visibleDirectories.add(cur.getLocalDirname());
 		}
 
-		Collections.sort(visibleDirectories, new Comparator<String>() {
-			public int compare(String a, String b) {
-				return a.toLowerCase().compareTo(b.toLowerCase());
-			}
-		});
+		visibleDirectories = SortUtils.sortNumerically(visibleDirectories);
 
 		visibleFiles = new ArrayList<>();
 
@@ -285,11 +280,7 @@ public class OpenFileDialog {
 			visibleFiles.add(cur.getLocalFilename());
 		}
 
-		Collections.sort(visibleFiles, new Comparator<String>() {
-			public int compare(String a, String b) {
-				return a.toLowerCase().compareTo(b.toLowerCase());
-			}
-		});
+		visibleFiles = SortUtils.sortNumerically(visibleFiles);
 
 		String[] fileViewData = new String[visibleDirectories.size() + visibleFiles.size()];
 
