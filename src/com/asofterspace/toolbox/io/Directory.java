@@ -40,8 +40,7 @@ public class Directory {
 	 * @param javaDirectory
 	 */
 	public Directory(java.io.File javaDirectory) {
-
-		dirname = javaDirectory.getAbsolutePath();
+		initFromJavaDir(javaDirectory);
 	}
 
 	/**
@@ -52,7 +51,16 @@ public class Directory {
 	 */
 	public Directory(Directory parentDirectory, String dirname) {
 
+		if ((dirname == null) || "".equals(dirname)) {
+			this.dirname = parentDirectory.dirname;
+			return;
+		}
+
 		this.dirname = parentDirectory.getJavaPath().resolve(dirname).toAbsolutePath().toString();
+	}
+
+	private void initFromJavaDir(java.io.File javaDirectory) {
+		this.dirname = javaDirectory.getAbsolutePath();
 	}
 
 	/**
@@ -396,6 +404,45 @@ public class Directory {
 		Path filePath = file.getJavaPath().toAbsolutePath();
 		Path dirPath = this.getJavaPath().toAbsolutePath();
 		return dirPath.relativize(filePath).toString();
+	}
+
+	/**
+	 * Renames this directory by giving it a new name (but keeping it in the same path)
+	 */
+	public void rename(String newName) {
+		try {
+			if (newName.equals(getLocalDirname())) {
+				// nothing to do here
+				return;
+			}
+			if (newName.toLowerCase().equals(getLocalDirname().toLowerCase())) {
+				// if the new and old name are basically the same, and we are under
+				// Windows, then a straight renaming might be problematic... so just
+				// to be completely sure, we rename to something else, and then
+				// rename back!
+				String tempNewName = newName + ".tmp";
+				Directory dir = getParentDirectory();
+				while (true) {
+					Directory curTmpDir = dir.getChildDir(tempNewName);
+					File curTmpFile = dir.getFile(tempNewName);
+					if (!curTmpFile.exists() && !curTmpDir.exists()) {
+						break;
+					}
+					tempNewName += ".tmp";
+				}
+				Path tempNewPath = getJavaPath().resolveSibling(tempNewName);
+				Files.move(getJavaPath(), tempNewPath, StandardCopyOption.REPLACE_EXISTING);
+				Path newPath = tempNewPath.resolveSibling(newName);
+				Files.move(tempNewPath, newPath, StandardCopyOption.REPLACE_EXISTING);
+				initFromJavaDir(newPath.toFile());
+			} else {
+				Path newPath = getJavaPath().resolveSibling(newName);
+				Files.move(getJavaPath(), newPath, StandardCopyOption.REPLACE_EXISTING);
+				initFromJavaDir(newPath.toFile());
+			}
+		} catch (IOException e) {
+			System.err.println("[ERROR] An IOException occurred when trying to rename the directory " + dirname + " to " + newName + " - inconceivable!");
+		}
 	}
 
 	/**

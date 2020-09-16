@@ -261,6 +261,10 @@ public class File {
 		}
 	}
 
+	public Long getSize() {
+		return getJavaFile().length();
+	}
+
 	/**
 	 * Re-set the location of this particular file (such that when we call save() later on, the new location is used,
 	 * but until save() is called, nothing changes)
@@ -410,6 +414,10 @@ public class File {
 	 */
 	public void rename(String newName) {
 		try {
+			if (newName.equals(getLocalFilename())) {
+				// nothing to do here
+				return;
+			}
 			if (newName.toLowerCase().equals(getLocalFilename().toLowerCase())) {
 				// if the new and old name are basically the same, and we are under
 				// Windows, then a straight renaming might be problematic... so just
@@ -418,8 +426,9 @@ public class File {
 				String tempNewName = newName + ".tmp";
 				Directory dir = getParentDirectory();
 				while (true) {
+					Directory curTmpDir = dir.getChildDir(tempNewName);
 					File curTmpFile = dir.getFile(tempNewName);
-					if (!curTmpFile.exists()) {
+					if (!curTmpFile.exists() && !curTmpDir.exists()) {
 						break;
 					}
 					tempNewName += ".tmp";
