@@ -86,15 +86,17 @@ public class Directory {
 		Path targetPointPath = targetPoint.toPath();
 
 		java.io.File[] children = entryPoint.listFiles();
-		for (java.io.File curChild : children) {
-			java.io.File targetFile = targetPointPath.resolve(curChild.getName()).toFile();
-			if (curChild.isDirectory()) {
-				copyToDiskInternally(curChild, targetFile);
-			} else {
-				try {
-					Files.copy(curChild.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e) {
-					System.err.println("[ERROR] The file " + curChild.toPath() + " could not be copied to " + targetFile.toPath() + "!");
+		if (children != null) {
+			for (java.io.File curChild : children) {
+				java.io.File targetFile = targetPointPath.resolve(curChild.getName()).toFile();
+				if (curChild.isDirectory()) {
+					copyToDiskInternally(curChild, targetFile);
+				} else {
+					try {
+						Files.copy(curChild.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						System.err.println("[ERROR] The file " + curChild.toPath() + " could not be copied to " + targetFile.toPath() + "!");
+					}
 				}
 			}
 		}
@@ -228,6 +230,10 @@ public class Directory {
 		if (entryPoint.isDirectory()) {
 			java.io.File[] children = entryPoint.listFiles();
 
+			if (children == null) {
+				return true;
+			}
+
 			return children.length <= 0;
 		}
 
@@ -283,14 +289,16 @@ public class Directory {
 
 		if (entryPoint.isDirectory()) {
 			java.io.File[] children = entryPoint.listFiles();
-			for (java.io.File curChild : children) {
-				if (curChild.isDirectory()) {
-					if (recursively) {
-						result.addAll(getAllFilesInternally(curChild, endStr, true));
-					}
-				} else {
-					if ((endStr == null) || curChild.getAbsolutePath().endsWith(endStr)) {
-						result.add(new File(curChild));
+			if (children != null) {
+				for (java.io.File curChild : children) {
+					if (curChild.isDirectory()) {
+						if (recursively) {
+							result.addAll(getAllFilesInternally(curChild, endStr, true));
+						}
+					} else {
+						if ((endStr == null) || curChild.getAbsolutePath().endsWith(endStr)) {
+							result.add(new File(curChild));
+						}
 					}
 				}
 			}
@@ -314,11 +322,13 @@ public class Directory {
 
 		if (entryPoint.isDirectory()) {
 			java.io.File[] children = entryPoint.listFiles();
-			for (java.io.File curChild : children) {
-				if (curChild.isDirectory()) {
-					result.add(new Directory(curChild));
-					if (recursively) {
-						result.addAll(getAllDirectoriesInternally(curChild, true));
+			if (children != null) {
+				for (java.io.File curChild : children) {
+					if (curChild.isDirectory()) {
+						result.add(new Directory(curChild));
+						if (recursively) {
+							result.addAll(getAllDirectoriesInternally(curChild, true));
+						}
 					}
 				}
 			}
@@ -354,15 +364,17 @@ public class Directory {
 
 		if (entryPoint.isDirectory()) {
 			java.io.File[] children = entryPoint.listFiles();
-			for (java.io.File curChild : children) {
-				if (curChild.isDirectory()) {
-					File result = findFileInternally(curChild, localFilename);
-					if (result != null) {
-						return result;
-					}
-				} else {
-					if (localFilename.equals(curChild.getName())) {
-						return new File(curChild);
+			if (children != null) {
+				for (java.io.File curChild : children) {
+					if (curChild.isDirectory()) {
+						File result = findFileInternally(curChild, localFilename);
+						if (result != null) {
+							return result;
+						}
+					} else {
+						if (localFilename.equals(curChild.getName())) {
+							return new File(curChild);
+						}
 					}
 				}
 			}

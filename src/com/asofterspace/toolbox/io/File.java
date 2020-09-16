@@ -315,7 +315,7 @@ public class File {
 			Files.copy(this.getJavaPath(), destination.getJavaPath(), StandardCopyOption.REPLACE_EXISTING);
 
 		} catch (IOException e) {
-			System.err.println("[ERROR] The file " + filename + " could not be copied to " + destination + "!");
+			System.err.println("[ERROR] The file " + filename + " could not be copied to " + destination.getFilename() + "!");
 			return null;
 		}
 
