@@ -37,6 +37,9 @@ public class WebAccessor {
 
 	private static Directory cache = new Directory("cache");
 
+	// keeps track of the last accessed URL for debug purposes
+	private static String lastUrl;
+
 
 	/**
 	 * Get a web resource asynchronously
@@ -214,6 +217,8 @@ public class WebAccessor {
 	private static byte[] getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders) {
 
 		try {
+			WebAccessor.lastUrl = url;
+
 			URL urlAsURL = new URL(url);
 
 			HttpURLConnection connection = (HttpURLConnection) urlAsURL.openConnection();
@@ -361,6 +366,15 @@ public class WebAccessor {
 	 */
 	public static JSON getJSON(String url) throws JsonParseException {
 		return new JSON(get(url));
+	}
+
+	/**
+	 * Gets the last accessed URL (intended for debug usage to include the last accessed URL in error messages
+	 * and such; as this whole class is static, if some other thread uses the WebAccessor in between, you will
+	 * get the URL of that access, and not of "your" last call!)
+	 */
+	public static String getLastUrl() {
+		return lastUrl;
 	}
 
 }
