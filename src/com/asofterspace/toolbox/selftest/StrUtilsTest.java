@@ -35,6 +35,8 @@ public class StrUtilsTest implements Test {
 
 		replaceAllRepeatedlyTest();
 
+		replaceAllInBetweenTest();
+
 		startsWithLowerCaseTest();
 
 		startsWithUpperCaseTest();
@@ -244,6 +246,21 @@ public class StrUtilsTest implements Test {
 		if (!"fobaro".equals(result)) {
 			TestUtils.fail("We called StrUtils.replaceAllRepeatedly(\"foobarooo\", \"oo\", \"o\") and got " +
 				result + " instead of \"fobaro\"!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void replaceAllInBetweenTest() {
+
+		TestUtils.start("replaceAllInBetween");
+
+		String result = StrUtils.replaceAllInBetween("foo ( foo ) foo (foo)", "foo", "bar", "(", ")");
+
+		if (!"foo ( bar ) foo (bar)".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAllInBetween(\"foo ( foo ) foo (foo)\", \"foo\", " +
+				"\"bar\", \"(\", \")\") and got " +
+				result + " instead of \"foo ( bar ) foo (bar)\"!");
 		}
 
 		TestUtils.succeed();

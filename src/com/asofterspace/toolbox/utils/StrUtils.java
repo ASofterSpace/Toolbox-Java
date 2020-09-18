@@ -927,6 +927,7 @@ public class StrUtils {
 		while (index >= 0) {
 			result.append(origStr.substring(0, index));
 			result.append(replaceWith);
+			// TODO :: improve speed by not calling substring but keeping track of start!
 			origStr = origStr.substring(index + findThis.length());
 			index = origStr.indexOf(findThis);
 		}
@@ -945,6 +946,47 @@ public class StrUtils {
 			origStr = replaceAll(origStr, findThis, replaceWith);
 		}
 		return origStr;
+	}
+
+	/**
+	 * replaceAllInBetween("foo ( foo ) foo (foo)", "foo", "bar", "(", ")") gives "foo ( bar ) foo (bar)"
+	 */
+	public static String replaceAllInBetween(String origStr, String findThis, String replaceWith,
+		String betweenStart, String betweenEnd) {
+
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		if (replaceWith == null) {
+			replaceWith = "";
+		}
+		StringBuilder result = new StringBuilder();
+		int startIndex = origStr.indexOf(betweenStart);
+		int lastEndIndex = 0;
+		while (startIndex >= 0) {
+			int endIndex = origStr.indexOf(betweenEnd, startIndex + betweenStart.length());
+			if (endIndex >= 0) {
+				result.append(origStr.substring(lastEndIndex, startIndex));
+				lastEndIndex = endIndex + betweenEnd.length();
+				result.append(betweenStart);
+				// TODO :: improve speed by not calling replaceAll inside
+				// but actually doing it all in this function
+				result.append(replaceAll(
+					origStr.substring(startIndex + betweenStart.length(), endIndex),
+					findThis,
+					replaceWith)
+				);
+				result.append(betweenEnd);
+				startIndex = origStr.indexOf(betweenStart, endIndex + betweenEnd.length());
+			} else {
+				break;
+			}
+		}
+		result.append(origStr.substring(lastEndIndex));
+		return result.toString();
 	}
 
 	/**
