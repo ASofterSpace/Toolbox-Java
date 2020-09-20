@@ -1062,4 +1062,20 @@ public class Record {
 		arrContents.add(fromAnything(value));
 	}
 
+	/**
+	 * Adds any value to the Record array
+	 * @param value
+	 */
+	public void add(Object value) {
+		append(value);
+	}
+
+	/**
+	 * Pushes any value to the Record array
+	 * @param value
+	 */
+	public void push(Object value) {
+		append(value);
+	}
+
 }
