@@ -8,10 +8,15 @@ import com.asofterspace.toolbox.utils.MathUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.Toolkit;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -548,6 +553,31 @@ public class Image {
 		result.drawAwtImage(javaImg, 0, 0);
 
 		return result;
+	}
+
+	public static Image createFromClipboard() {
+
+		Transferable clipContent = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+
+		// does the clipboard contain anything at all?
+		if (clipContent == null) {
+			return null;
+		}
+
+		// is the stuff in the clipboard an image?
+		if (!clipContent.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+			return null;
+		}
+
+		try {
+			// yes to both - let's do this!
+			return createFromAwtImage((BufferedImage) clipContent.getTransferData(DataFlavor.imageFlavor));
+
+		} catch (UnsupportedFlavorException | IOException e) {
+
+			// whoops - this should not happen, as we already checked about this flavor being the right one...
+			return null;
+		}
 	}
 
 	/**
