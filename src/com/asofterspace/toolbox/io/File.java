@@ -374,35 +374,37 @@ public class File {
 	 */
 	public String getContentType() {
 
-		if (filename.endsWith(".htm") || filename.endsWith(".html")) {
+		String lowFilename = filename.toLowerCase();
+
+		if (lowFilename.endsWith(".htm") || lowFilename.endsWith(".html")) {
 			return "text/html";
 		}
 
-		if (filename.endsWith(".css")) {
+		if (lowFilename.endsWith(".css")) {
 			return "text/css";
 		}
 
-		if (filename.endsWith(".js")) {
+		if (lowFilename.endsWith(".js")) {
 			return "text/javascript";
 		}
 
-		if (filename.endsWith(".json")) {
+		if (lowFilename.endsWith(".json")) {
 			return "application/json";
 		}
 
-		if (filename.endsWith(".pdf")) {
+		if (lowFilename.endsWith(".pdf")) {
 			return "application/pdf";
 		}
 
-		if (filename.endsWith(".png")) {
+		if (lowFilename.endsWith(".png")) {
 			return "image/png";
 		}
 
-		if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+		if (lowFilename.endsWith(".jpg") || lowFilename.endsWith(".jpeg")) {
 			return "image/jpeg";
 		}
 
-		if (filename.endsWith(".bmp")) {
+		if (lowFilename.endsWith(".bmp")) {
 			return "image/bmp";
 		}
 
