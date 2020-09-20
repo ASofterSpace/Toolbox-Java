@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.web;
 
+import com.asofterspace.toolbox.coders.UrlDecoder;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.utils.ByteBuffer;
@@ -563,7 +564,7 @@ public class WebServerRequestHandler implements Runnable {
 	public static String getArgumentValueByKey(String[] arguments, String key) {
 		for (String arg : arguments) {
 			if (arg.startsWith(key + "=")) {
-				return arg.substring(key.length() + 1);
+				return UrlDecoder.decode(arg.substring(key.length() + 1));
 			}
 		}
 		return null;
