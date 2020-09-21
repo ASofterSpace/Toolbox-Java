@@ -575,6 +575,24 @@ public class Record {
 	}
 
 	/**
+	 * Get the length of the array represented by this Record
+	 * array
+	 * @return the length of the Record array
+	 */
+	public int length() {
+		return getLength();
+	}
+
+	/**
+	 * Get the length of the array represented by this Record
+	 * array
+	 * @return the length of the Record array
+	 */
+	public int size() {
+		return getLength();
+	}
+
+	/**
 	 * Get a list of Record values corresponding to a Record array
 	 * stored in a particular key of a Record object
 	 * @param key the key to search for
