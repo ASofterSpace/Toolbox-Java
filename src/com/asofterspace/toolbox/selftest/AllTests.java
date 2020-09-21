@@ -33,6 +33,8 @@ public class AllTests {
 
 		TestUtils.run(new SortUtilsTest());
 
+		TestUtils.run(new SearchUtilsTest());
+
 		TestUtils.run(new BitUtilsTest());
 
 		TestUtils.run(new MathUtilsTest());
