@@ -6,13 +6,15 @@ package com.asofterspace.toolbox.web;
 
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
 import com.asofterspace.toolbox.utils.Record;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -455,11 +457,18 @@ public class WebTemplateEngine {
 		return content;
 	}
 
-	private String insertGlossaries(String content, String contentKind) {
+	private String contentKindToLang(String contentKind) {
 
 		if (contentKind.equals("")) {
-			contentKind = "en";
+			return "en";
 		}
+
+		return contentKind;
+	}
+
+	private String insertGlossaries(String content, String contentKind) {
+
+		final String contentLang = contentKindToLang(contentKind);
 
 		while (content.contains("@glossary(")) {
 
@@ -486,20 +495,28 @@ public class WebTemplateEngine {
 
 					Record category = categories.get(i);
 
-					System.out.println("DEBUG cat " + contentKind + ": " + new JSON(category));
-
 					html.append("@include(sectionstart.php)");
-					html.append("<h1>" + category.getString("name_" + contentKind) + "</h1>");
-					html.append("<div class=\"content\">");
+					html.append("<h1>" + category.getString("name_" + contentLang) + "</h1>");
 
-					Record terms = category.get("terms");
+					List<Record> terms = category.getArray("terms");
+
+					Collections.sort(terms, new Comparator<Record>() {
+						public int compare(Record a, Record b) {
+							return a.getString("name_" + contentLang).toLowerCase().compareTo(
+								   b.getString("name_" + contentLang).toLowerCase());
+						}
+					});
+
 					for (int j = 0; j < terms.size(); j++) {
 						Record term = terms.get(j);
-						html.append(term.getString("name_" + contentKind));
+						html.append("<div class=\"content\">");
+						html.append("<b>");
+						html.append(term.getString("name_" + contentLang));
+						html.append("</b>");
 						html.append(" .. ");
-						html.append(term.getString("content_" + contentKind));
+						html.append(term.getString("content_" + contentLang));
+						html.append("</div>");
 					}
-					html.append("</div>");
 					html.append("@include(sectionend.php)");
 				}
 
