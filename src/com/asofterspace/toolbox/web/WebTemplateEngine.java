@@ -6,6 +6,9 @@ package com.asofterspace.toolbox.web;
 
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonFile;
+import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
 import com.asofterspace.toolbox.utils.Record;
 
@@ -148,6 +151,9 @@ public class WebTemplateEngine {
 
 		// first of all, remove templating comments - so if someone has {{-- @include(bla) --}}, then do not even include
 		content = removeTemplatingComments(content);
+
+		// insert glossaries, when requested (which contains @includes, so has to come before the performTemplating step)
+		content = insertGlossaries(content, contentkind);
 
 		// now perform the templating (meaning to actually follow up on those @includes)
 		content = performTemplating(content);
@@ -444,6 +450,64 @@ public class WebTemplateEngine {
 			counters.put(contentKey, counterValue);
 
 			content = beforeContent + counterValue + afterContent;
+		}
+
+		return content;
+	}
+
+	private String insertGlossaries(String content, String contentKind) {
+
+		if (contentKind.equals("")) {
+			contentKind = "en";
+		}
+
+		while (content.contains("@glossary(")) {
+
+			int atIndex = content.indexOf("@glossary(");
+
+			String beforeContent = content.substring(0, atIndex);
+
+			String contentKey = content.substring(atIndex + 10, content.length());
+
+			atIndex = contentKey.indexOf(")");
+
+			String afterContent = contentKey.substring(atIndex + 1);
+
+			contentKey = contentKey.substring(0, atIndex);
+
+			JsonFile glossary = new JsonFile(origDir, contentKey);
+			try {
+				Record glossaryRec = glossary.getAllContents();
+				Record categories = glossaryRec.get("categories");
+
+				StringBuilder html = new StringBuilder();
+
+				for (int i = 0; i < categories.size(); i++) {
+
+					Record category = categories.get(i);
+
+					System.out.println("DEBUG cat " + contentKind + ": " + new JSON(category));
+
+					html.append("@include(sectionstart.php)");
+					html.append("<h1>" + category.getString("name_" + contentKind) + "</h1>");
+					html.append("<div class=\"content\">");
+
+					Record terms = category.get("terms");
+					for (int j = 0; j < terms.size(); j++) {
+						Record term = terms.get(j);
+						html.append(term.getString("name_" + contentKind));
+						html.append(" .. ");
+						html.append(term.getString("content_" + contentKind));
+					}
+					html.append("</div>");
+					html.append("@include(sectionend.php)");
+				}
+
+				content = beforeContent + html.toString() + afterContent;
+
+			} catch (JsonParseException e) {
+				System.err.println("The contents of " + glossary.getAbsoluteFilename() + " could not be read!");
+			}
 		}
 
 		return content;
