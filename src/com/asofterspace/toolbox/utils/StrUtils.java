@@ -1020,4 +1020,21 @@ public class StrUtils {
 		return value;
 	}
 
+	/**
+	 * Takes some text extracted from HTML, which might contain several linebreaks,
+	 * and which might contain funny multiple whitespaces, and transforms it into
+	 * one trimmed line with the whitespaces between words being just one space,
+	 * never more
+	 */
+	public static String makeIntoOneLine(String str) {
+		if (str == null) {
+			return null;
+		}
+		str = str.replace('\n', ' ');
+		str = str.replace('\r', ' ');
+		str = str.replace('\t', ' ');
+		str = StrUtils.replaceAllRepeatedly(str, "  ", " ");
+		str = str.trim();
+		return str;
+	}
 }

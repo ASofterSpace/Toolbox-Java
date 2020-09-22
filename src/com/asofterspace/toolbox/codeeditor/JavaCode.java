@@ -362,6 +362,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		encounteredTokens = nextEncounteredTokens;
 		nextEncounteredTokens = new ArrayList<>();
 
+		// add a few strings which we want to get proposed all the time, even if they have not been encountered yet
+		nextEncounteredTokens.add("System.out.println");
+		nextEncounteredTokens.add("return result;");
+
 		try {
 			int end = this.getLength();
 

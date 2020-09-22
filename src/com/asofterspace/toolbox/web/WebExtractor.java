@@ -178,14 +178,6 @@ public class WebExtractor {
 	 * never more
 	 */
 	public static String makeIntoOneLine(String str) {
-		if (str == null) {
-			return null;
-		}
-		str = str.replace('\n', ' ');
-		str = str.replace('\r', ' ');
-		str = str.replace('\t', ' ');
-		str = StrUtils.replaceAllRepeatedly(str, "  ", " ");
-		str = str.trim();
-		return str;
+		return StrUtils.makeIntoOneLine(str);
 	}
 }

@@ -71,6 +71,13 @@ public class XmlElement {
 		construct(name, attributes);
 	}
 
+	public XmlElement(String name, String innerText) {
+
+		construct(name, new TinyXmlMap());
+
+		setInnerText(innerText);
+	}
+
 	public XmlElement(Record other) {
 
 		if (other instanceof XML) {

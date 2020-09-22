@@ -407,7 +407,14 @@ public abstract class Code extends DefaultStyledDocument {
 							ourEncounteredTokenSet.addAll(encounteredTokens);
 							ArrayList<String> ourEncounteredTokens = new ArrayList<>();
 							ourEncounteredTokens.addAll(ourEncounteredTokenSet);
-							Collections.sort(ourEncounteredTokens);
+							Collections.sort(ourEncounteredTokens, new Comparator<String>() {
+								public int compare(String a, String b) {
+									if (a.length() == b.length()) {
+										return a.toLowerCase().compareTo(b.toLowerCase());
+									}
+									return b.length() - a.length();
+								}
+							});
 							ArrayList<String> proposedTokens = new ArrayList<>();
 							for (String encounteredToken : ourEncounteredTokens) {
 								if ((encounteredToken != null) && encounteredToken.startsWith(curTokenStr)
