@@ -10,6 +10,7 @@ import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
 import com.asofterspace.toolbox.utils.Record;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -509,12 +510,29 @@ public class WebTemplateEngine {
 
 					for (int j = 0; j < terms.size(); j++) {
 						Record term = terms.get(j);
-						html.append("<div class=\"content\">");
+
+						String curContent = term.getString("content_" + contentLang);
+						while (curContent.contains("@link(")) {
+							int start = curContent.indexOf("@link(");
+							String midContent = curContent.substring(start + 6);
+							curContent = curContent.substring(0, start);
+							int end = midContent.indexOf(")");
+							String endContent = "";
+							if (end >= 0) {
+								endContent = midContent.substring(end + 1);
+								midContent = midContent.substring(0, end);
+							}
+							midContent = "<a href='#" + glossaryKeyToId(midContent) + "'>" + midContent + "</a>";
+							curContent = curContent + midContent + endContent;
+						}
+
+						html.append("<div class=\"content\" id=\"" +
+							glossaryKeyToId(term.getString("name_" + contentLang)) + "\">");
 						html.append("<b>");
 						html.append(term.getString("name_" + contentLang));
 						html.append("</b>");
 						html.append(" .. ");
-						html.append(term.getString("content_" + contentLang));
+						html.append(curContent);
 						html.append("</div>");
 					}
 					html.append("@include(sectionend.php)");
@@ -528,6 +546,12 @@ public class WebTemplateEngine {
 		}
 
 		return content;
+	}
+
+	private String glossaryKeyToId(String key) {
+		key = key.toLowerCase();
+		key = StrUtils.replaceAll(key, " ", "");
+		return key;
 	}
 
 	private String insertIfEndIfs(String content) {
