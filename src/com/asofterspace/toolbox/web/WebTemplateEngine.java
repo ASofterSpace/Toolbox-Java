@@ -493,6 +493,7 @@ public class WebTemplateEngine {
 			try {
 				Record glossaryRec = glossary.getAllContents();
 				Record categories = glossaryRec.get("categories");
+				List<Record> categoriesWithTerms = new ArrayList<>();
 
 				StringBuilder html = new StringBuilder();
 
@@ -503,17 +504,26 @@ public class WebTemplateEngine {
 				for (int i = 0; i < categories.size(); i++) {
 					Record category = categories.get(i);
 					List<Record> terms = category.getArray("terms");
+					boolean addedAKey = false;
 					for (int j = 0; j < terms.size(); j++) {
 						Record term = terms.get(j);
+						// ignore keys which contain no explanation at all
+						if (term.getString("content_" + contentLang).equals("")) {
+							continue;
+						}
 						allKeys.add(term.getString("name_" + contentLang));
+						addedAKey = true;
+					}
+					if (addedAKey) {
+						categoriesWithTerms.add(category);
 					}
 				}
 
 				// second iteration - now we actually add the keys and descriptions and so on, and actually
 				// generate the html
-				for (int i = 0; i < categories.size(); i++) {
+				for (int i = 0; i < categoriesWithTerms.size(); i++) {
 
-					Record category = categories.get(i);
+					Record category = categoriesWithTerms.get(i);
 
 					html.append("@include(sectionstart.php)");
 					html.append("<h1>" + category.getString("name_" + contentLang) + "</h1>");
@@ -531,6 +541,11 @@ public class WebTemplateEngine {
 						Record term = terms.get(j);
 
 						String curContent = term.getString("content_" + contentLang);
+
+						// ignore keys which contain no explanation at all
+						if (curContent.equals("")) {
+							continue;
+						}
 
 						// simplify replacement for adding links on the fly
 						curContent = " " + curContent + " ";
