@@ -537,12 +537,18 @@ public class WebTemplateEngine {
 
 						// add links on the fly
 						for (String onTheFlyLinkKey : allKeys) {
+							// but to not add links to an entry itself in its own description
+							if (onTheFlyLinkKey.equals(term.getString("name_" + contentLang))) {
+								continue;
+							}
 							curContent = StrUtils.replaceAll(curContent, " " + onTheFlyLinkKey + " ",
 								" @link(" + onTheFlyLinkKey + ") ");
 							curContent = StrUtils.replaceAll(curContent, " " + onTheFlyLinkKey + "'s ",
 								" @link(" + onTheFlyLinkKey + ")'s ");
 							curContent = StrUtils.replaceAll(curContent, " " + onTheFlyLinkKey + ")",
 								" @link(" + onTheFlyLinkKey + "))");
+							curContent = StrUtils.replaceAll(curContent, " " + onTheFlyLinkKey + ",",
+								" @link(" + onTheFlyLinkKey + "),");
 						}
 
 						// convert links to actual hyperlinks
