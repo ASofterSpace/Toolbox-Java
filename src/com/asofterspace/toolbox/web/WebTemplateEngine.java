@@ -496,6 +496,21 @@ public class WebTemplateEngine {
 
 				StringBuilder html = new StringBuilder();
 
+				// this one contains the keys in plaintext (not after calling glossaryKeyToId() on them),
+				// and we use them to magically add links that did not previously exist to descriptions
+				List<String> allKeys = new ArrayList<>();
+
+				for (int i = 0; i < categories.size(); i++) {
+					Record category = categories.get(i);
+					List<Record> terms = category.getArray("terms");
+					for (int j = 0; j < terms.size(); j++) {
+						Record term = terms.get(j);
+						allKeys.add(term.getString("name_" + contentLang));
+					}
+				}
+
+				// second iteration - now we actually add the keys and descriptions and so on, and actually
+				// generate the html
 				for (int i = 0; i < categories.size(); i++) {
 
 					Record category = categories.get(i);
@@ -516,6 +531,21 @@ public class WebTemplateEngine {
 						Record term = terms.get(j);
 
 						String curContent = term.getString("content_" + contentLang);
+
+						// simplify replacement for adding links on the fly
+						curContent = " " + curContent + " ";
+
+						// add links on the fly
+						for (String onTheFlyLinkKey : allKeys) {
+							curContent = StrUtils.replaceAll(curContent, " " + onTheFlyLinkKey + " ",
+								" @link(" + onTheFlyLinkKey + ") ");
+							curContent = StrUtils.replaceAll(curContent, " " + onTheFlyLinkKey + "'s ",
+								" @link(" + onTheFlyLinkKey + ")'s ");
+							curContent = StrUtils.replaceAll(curContent, " " + onTheFlyLinkKey + ")",
+								" @link(" + onTheFlyLinkKey + "))");
+						}
+
+						// convert links to actual hyperlinks
 						while (curContent.contains("@link(")) {
 							int start = curContent.indexOf("@link(");
 							String midContent = curContent.substring(start + 6);
@@ -526,16 +556,18 @@ public class WebTemplateEngine {
 								endContent = midContent.substring(end + 1);
 								midContent = midContent.substring(0, end);
 							}
-							encounteredLinks.add(contentLang + "__" + glossaryKeyToId(midContent));
+							encounteredLinks.add(glossaryKeyToId(midContent));
 							midContent = "<a href='#" + glossaryKeyToId(midContent) + "'>" + midContent + "</a>";
 							curContent = curContent + midContent + endContent;
 						}
+
+						curContent = curContent.trim();
 
 						html.append("<div class=\"content\" id=\"" +
 							glossaryKeyToId(term.getString("name_" + contentLang)) + "\">");
 						html.append("<b>");
 						html.append(term.getString("name_" + contentLang));
-						encounteredKeys.add(contentLang + "__" + glossaryKeyToId(term.getString("name_" + contentLang)));
+						encounteredKeys.add(glossaryKeyToId(term.getString("name_" + contentLang)));
 						html.append("</b>");
 						html.append(" .. ");
 						html.append(curContent);
@@ -566,7 +598,8 @@ public class WebTemplateEngine {
 		}
 		String nonWorkingLinkStr = nonWorkingLinks.toString();
 		if (nonWorkingLinkStr.length() > 0) {
-			System.err.println("Links encountered which did not lead to keys actually present in the glossary:");
+			System.err.println("Links encountered in " + contentLang + " language which did not lead to " +
+				"keys actually present in the glossary:");
 			System.err.println(nonWorkingLinkStr);
 		}
 
