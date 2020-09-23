@@ -12,6 +12,7 @@ import com.asofterspace.toolbox.io.SimpleFile;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.utils.StrUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -471,6 +472,9 @@ public class WebTemplateEngine {
 
 		final String contentLang = contentKindToLang(contentKind);
 
+		List<String> encounteredKeys = new ArrayList<>();
+		List<String> encounteredLinks = new ArrayList<>();
+
 		while (content.contains("@glossary(")) {
 
 			int atIndex = content.indexOf("@glossary(");
@@ -522,6 +526,7 @@ public class WebTemplateEngine {
 								endContent = midContent.substring(end + 1);
 								midContent = midContent.substring(0, end);
 							}
+							encounteredLinks.add(contentLang + "__" + glossaryKeyToId(midContent));
 							midContent = "<a href='#" + glossaryKeyToId(midContent) + "'>" + midContent + "</a>";
 							curContent = curContent + midContent + endContent;
 						}
@@ -530,6 +535,7 @@ public class WebTemplateEngine {
 							glossaryKeyToId(term.getString("name_" + contentLang)) + "\">");
 						html.append("<b>");
 						html.append(term.getString("name_" + contentLang));
+						encounteredKeys.add(contentLang + "__" + glossaryKeyToId(term.getString("name_" + contentLang)));
 						html.append("</b>");
 						html.append(" .. ");
 						html.append(curContent);
@@ -543,6 +549,25 @@ public class WebTemplateEngine {
 			} catch (JsonParseException e) {
 				System.err.println("The contents of " + glossary.getAbsoluteFilename() + " could not be read!");
 			}
+		}
+
+		StringBuilder nonWorkingLinks = new StringBuilder();
+		String sep = "";
+		outerLoop:
+		for (String link : encounteredLinks) {
+			for (String key : encounteredKeys) {
+				if (link.equals(key)) {
+					continue outerLoop;
+				}
+			}
+			nonWorkingLinks.append(sep);
+			sep = ", ";
+			nonWorkingLinks.append(link);
+		}
+		String nonWorkingLinkStr = nonWorkingLinks.toString();
+		if (nonWorkingLinkStr.length() > 0) {
+			System.err.println("Links encountered which did not lead to keys actually present in the glossary:");
+			System.err.println(nonWorkingLinkStr);
 		}
 
 		return content;
