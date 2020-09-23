@@ -511,6 +511,7 @@ public class WebTemplateEngine {
 						if (term.getString("content_" + contentLang).equals("")) {
 							continue;
 						}
+						encounteredKeys.add(glossaryKeyToId(term.getString("name_" + contentLang)));
 						allKeys.add(term.getString("name_" + contentLang));
 						addedAKey = true;
 					}
@@ -577,8 +578,22 @@ public class WebTemplateEngine {
 								endContent = midContent.substring(end + 1);
 								midContent = midContent.substring(0, end);
 							}
-							encounteredLinks.add(glossaryKeyToId(midContent));
-							midContent = "<a href='#" + glossaryKeyToId(midContent) + "'>" + midContent + "</a>";
+
+							String linkId = glossaryKeyToId(midContent);
+
+							// if the link as-is cannot be found...
+							if (!encounteredKeys.contains(linkId)) {
+								// ... and we have a plural form...
+								if (midContent.endsWith("s") || midContent.endsWith("n")) {
+									// ... and the singular does exist...
+									if (encounteredKeys.contains(linkId.substring(0, linkId.length() - 1))) {
+										// ... link to that one instead!
+										linkId = linkId.substring(0, linkId.length() - 1);
+									}
+								}
+							}
+							encounteredLinks.add(linkId);
+							midContent = "<a href='#" + linkId + "'>" + midContent + "</a>";
 							curContent = curContent + midContent + endContent;
 						}
 
@@ -588,7 +603,6 @@ public class WebTemplateEngine {
 							glossaryKeyToId(term.getString("name_" + contentLang)) + "\">");
 						html.append("<b>");
 						html.append(term.getString("name_" + contentLang));
-						encounteredKeys.add(glossaryKeyToId(term.getString("name_" + contentLang)));
 						html.append("</b>");
 						html.append(" .. ");
 						html.append(curContent);
