@@ -527,6 +527,10 @@ public class Record {
 			}
 		}
 
+		if (kind == RecordKind.STRING) {
+			result.add(this);
+		}
+
 		return result;
 	}
 
@@ -548,17 +552,37 @@ public class Record {
 	 */
 	public Record get(Object key) {
 
+		// garbage in, garbage out
 		if (key == null) {
 			return null;
 		}
 
-		if ((key instanceof Integer) && (arrContents != null)) {
-			return arrContents.get((Integer) key);
+		// array-access
+		if (key instanceof Integer) {
+
+			if (arrContents != null) {
+
+				// regular array
+				return arrContents.get((Integer) key);
+
+			} else {
+
+				// array-access for a single string, which we interpret as array with one entry
+				if (kind == RecordKind.STRING) {
+					if (key.equals(0)) {
+						return this;
+					}
+					return null;
+				}
+			}
 		}
 
+		// are we an object?
 		if (objContents == null) {
 			return null;
 		}
+
+		// oh we are an object!
 		return objContents.get(key.toString());
 	}
 
@@ -602,8 +626,16 @@ public class Record {
 
 		Record result = get(key);
 
-		if ((result == null) || (result.arrContents == null)) {
+		if (result == null) {
 			return new ArrayList<>();
+		}
+
+		if (result.arrContents == null) {
+			List<Record> resultList = new ArrayList<>();
+			if (result.kind == RecordKind.STRING) {
+				resultList.add(result);
+			}
+			return resultList;
 		}
 
 		return result.arrContents;
@@ -622,7 +654,14 @@ public class Record {
 
 		List<String> resultList = new ArrayList<>();
 
-		if ((result == null) || (result.arrContents == null)) {
+		if (result == null) {
+			return resultList;
+		}
+
+		if (result.arrContents == null) {
+			if (result.kind == RecordKind.STRING) {
+				resultList.add(result.simpleContents.toString());
+			}
 			return resultList;
 		}
 
@@ -1044,11 +1083,14 @@ public class Record {
 	 */
 	public void makeArray() {
 
-		kind = RecordKind.ARRAY;
-
 		if (arrContents == null) {
 			arrContents = new ArrayList<Record>();
+			if (kind == RecordKind.STRING) {
+				arrContents.add(new Record(this));
+			}
 		}
+
+		kind = RecordKind.ARRAY;
 	}
 
 	public void reverse() {
