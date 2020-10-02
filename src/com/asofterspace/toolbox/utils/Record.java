@@ -548,7 +548,7 @@ public class Record {
 	 * in a Record object or to a specific index in a Record
 	 * array
 	 * @param key the key to search for
-	 * @return the Record object
+	 * @return the Record value
 	 */
 	public Record get(Object key) {
 
@@ -559,22 +559,7 @@ public class Record {
 
 		// array-access
 		if (key instanceof Integer) {
-
-			if (arrContents != null) {
-
-				// regular array
-				return arrContents.get((Integer) key);
-
-			} else {
-
-				// array-access for a single string, which we interpret as array with one entry
-				if (kind == RecordKind.STRING) {
-					if (key.equals(0)) {
-						return this;
-					}
-					return null;
-				}
-			}
+			return get((int) key);
 		}
 
 		// are we an object?
@@ -584,6 +569,34 @@ public class Record {
 
 		// oh we are an object!
 		return objContents.get(key.toString());
+	}
+
+	/**
+	 * Get the Record-value corresponding to a specific index
+	 * in a Record array
+	 * @param key the key to search for
+	 * @return the Record value
+	 */
+	public Record get(int key) {
+
+		if (arrContents != null) {
+
+			// regular array
+			if (arrContents.size() > key) {
+				return arrContents.get(key);
+			}
+
+		} else {
+
+			// array-access for a single string, which we interpret as array with one entry
+			if (kind == RecordKind.STRING) {
+				if (key == 0) {
+					return this;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -1107,6 +1120,12 @@ public class Record {
 	public void set(int index, Object value) {
 
 		makeArray();
+
+		// if our array only contains two entries, and now someone wants to set at index 5,
+		// actually add the remaining ones as null in between!
+		while (arrContents.size() <= index) {
+			arrContents.add(null);
+		}
 
 		arrContents.set(index, fromAnything(value));
 	}
