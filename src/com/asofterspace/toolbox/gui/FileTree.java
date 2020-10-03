@@ -6,10 +6,7 @@ package com.asofterspace.toolbox.gui;
 
 import java.awt.Color;
 
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeWillExpandListener;
 import javax.swing.JTree;
-import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
@@ -26,7 +23,8 @@ public class FileTree extends JTree {
 
 		this.setCellRenderer(new FileTreeCellRenderer());
 
-		// prevent the tree from being collapsed by user input
+		/*
+		// we could use this to prevent the tree from being collapsed by user input
 		TreeWillExpandListener willExpand = new TreeWillExpandListener() {
 			@Override
 			public void treeWillExpand(TreeExpansionEvent event) {
@@ -40,6 +38,7 @@ public class FileTree extends JTree {
 			}
 		};
 		this.addTreeWillExpandListener(willExpand);
+		*/
 	}
 
 	public void setScheme(String scheme) {
