@@ -92,4 +92,12 @@ public class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 
 		return this;
 	}
+
+	/*
+	@Override
+	public Dimension getPreferredSize() {
+		Dimension result = super.getPreferredSize();
+		return new Dimension(result.width + 24, result.height);
+	}
+	*/
 }
