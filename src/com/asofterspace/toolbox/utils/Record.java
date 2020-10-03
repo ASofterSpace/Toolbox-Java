@@ -527,6 +527,10 @@ public class Record {
 			}
 		}
 
+		if (kind == RecordKind.STRING) {
+			result.add(this);
+		}
+
 		return result;
 	}
 
@@ -544,22 +548,55 @@ public class Record {
 	 * in a Record object or to a specific index in a Record
 	 * array
 	 * @param key the key to search for
-	 * @return the Record object
+	 * @return the Record value
 	 */
 	public Record get(Object key) {
 
+		// garbage in, garbage out
 		if (key == null) {
 			return null;
 		}
 
-		if ((key instanceof Integer) && (arrContents != null)) {
-			return arrContents.get((Integer) key);
+		// array-access
+		if (key instanceof Integer) {
+			return get((int) key);
 		}
 
+		// are we an object?
 		if (objContents == null) {
 			return null;
 		}
+
+		// oh we are an object!
 		return objContents.get(key.toString());
+	}
+
+	/**
+	 * Get the Record-value corresponding to a specific index
+	 * in a Record array
+	 * @param key the key to search for
+	 * @return the Record value
+	 */
+	public Record get(int key) {
+
+		if (arrContents != null) {
+
+			// regular array
+			if (arrContents.size() > key) {
+				return arrContents.get(key);
+			}
+
+		} else {
+
+			// array-access for a single string, which we interpret as array with one entry
+			if (kind == RecordKind.STRING) {
+				if (key == 0) {
+					return this;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -602,8 +639,16 @@ public class Record {
 
 		Record result = get(key);
 
-		if ((result == null) || (result.arrContents == null)) {
+		if (result == null) {
 			return new ArrayList<>();
+		}
+
+		if (result.arrContents == null) {
+			List<Record> resultList = new ArrayList<>();
+			if (result.kind == RecordKind.STRING) {
+				resultList.add(result);
+			}
+			return resultList;
 		}
 
 		return result.arrContents;
@@ -622,7 +667,14 @@ public class Record {
 
 		List<String> resultList = new ArrayList<>();
 
-		if ((result == null) || (result.arrContents == null)) {
+		if (result == null) {
+			return resultList;
+		}
+
+		if (result.arrContents == null) {
+			if (result.kind == RecordKind.STRING) {
+				resultList.add(result.simpleContents.toString());
+			}
 			return resultList;
 		}
 
@@ -1044,11 +1096,14 @@ public class Record {
 	 */
 	public void makeArray() {
 
-		kind = RecordKind.ARRAY;
-
 		if (arrContents == null) {
 			arrContents = new ArrayList<Record>();
+			if (kind == RecordKind.STRING) {
+				arrContents.add(new Record(this));
+			}
 		}
+
+		kind = RecordKind.ARRAY;
 	}
 
 	public void reverse() {
@@ -1065,6 +1120,12 @@ public class Record {
 	public void set(int index, Object value) {
 
 		makeArray();
+
+		// if our array only contains two entries, and now someone wants to set at index 5,
+		// actually add the remaining ones as null in between!
+		while (arrContents.size() <= index) {
+			arrContents.add(null);
+		}
 
 		arrContents.set(index, fromAnything(value));
 	}

@@ -248,6 +248,23 @@ public class WavFile extends BinaryFile {
 		return monoData;
 	}
 
+	public void adjustVolume(double factor) {
+
+		initialize();
+
+		for (int i = 0; i < leftData.length; i++) {
+			leftData[i] = (int) (leftData[i] * factor);
+		}
+
+		if (numberOfChannels < 2) {
+			return;
+		}
+
+		for (int i = 0; i < rightData.length; i++) {
+			rightData[i] = (int) (rightData[i] * factor);
+		}
+	}
+
 	public Integer getNumberOfChannels() {
 		initialize();
 		return numberOfChannels;

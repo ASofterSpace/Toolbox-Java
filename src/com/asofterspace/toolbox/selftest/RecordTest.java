@@ -16,9 +16,11 @@ public class RecordTest implements Test {
 	public void runAll() throws JsonParseException {
 
 		incDecTest();
+
+		advancedListAccessTest();
 	}
 
-	public void incDecTest() throws JsonParseException {
+	private void incDecTest() throws JsonParseException {
 
 		TestUtils.start("Record inc/dec");
 
@@ -63,6 +65,53 @@ public class RecordTest implements Test {
 		if (!"blobb".equals(rec.getString("blubb"))) {
 			TestUtils.fail("We stored a text, increased it, and it changed to " + rec.getString("blubb") + "!");
 			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void advancedListAccessTest() {
+
+		TestUtils.start("Record Advanced List Access");
+
+		Record rec = Record.emptyObject();
+
+		Record arr1 = Record.emptyArray();
+		rec.set("foo", arr1);
+
+		Record str = new Record("test");
+		rec.set("bar", str);
+
+		Record str0 = new Record("test0");
+		arr1.set(0, str0);
+
+		Record str1 = new Record("test1");
+		arr1.set(1, str1);
+
+		if (!rec.get("foo").getString(0).equals("test0")) {
+			TestUtils.fail("rec.get(\"foo\").getString(0) did not give test0!");
+		}
+
+		if (!rec.get("foo").getString(1).equals("test1")) {
+			TestUtils.fail("rec.get(\"foo\").getString(1) did not give test1!");
+		}
+
+		if (rec.get("foo").getString(2) != null) {
+			TestUtils.fail("rec.get(\"foo\").getString(2) did not give null");
+		}
+
+		if (!rec.getString("bar").equals("test")) {
+			TestUtils.fail("rec.getString(\"bar\") did not give test!");
+		}
+
+		// check array-access for single string member, in which case we pretend to have an array
+		// with exactly one element when actually we have just a string
+		if (!rec.get("bar").getString(0).equals("test")) {
+			TestUtils.fail("rec.get(\"bar\").getString(0) did not give test!");
+		}
+
+		if (rec.get("bar").getString(1) != null) {
+			TestUtils.fail("rec.get(\"bar\").getString(1) did not give null!");
 		}
 
 		TestUtils.succeed();

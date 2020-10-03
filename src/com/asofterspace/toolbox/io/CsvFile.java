@@ -168,7 +168,6 @@ public class CsvFile extends SimpleFile {
 		String strVal = val.toString();
 		strVal = strVal.trim();
 		strVal = strVal.replaceAll(",", "");
-		strVal = strVal.replaceAll(";", "");
 		strVal = strVal.replaceAll("\n", "");
 		strVal = strVal.replaceAll("\r", "");
 		strVal = strVal.replaceAll("\t", " ");
