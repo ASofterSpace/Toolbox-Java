@@ -16,7 +16,7 @@ public class MorseEncoder {
 	 * @param textToTranslate the text that is to be translated
 	 * @return a representation of the text in Morse code
 	 */
-	public static String translateToMorseCode(String textToTranslate) {
+	public static String encode(String textToTranslate) {
 
 		String input = textToTranslate.toUpperCase();
 

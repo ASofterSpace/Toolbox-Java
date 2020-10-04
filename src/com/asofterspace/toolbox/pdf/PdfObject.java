@@ -193,7 +193,7 @@ public class PdfObject {
 
 		if ("/ASCIIHexDecode".equals(this.dictContent.getAsString("/Filter"))) {
 
-			byte[] decodedData = HexDecoder.decodeBytesFromHex(streamContent);
+			byte[] decodedData = HexDecoder.decodeBytes(streamContent);
 
 			return new String(decodedData, PdfFile.PDF_CHARSET);
 		}

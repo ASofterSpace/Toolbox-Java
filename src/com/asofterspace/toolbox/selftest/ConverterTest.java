@@ -45,13 +45,13 @@ public class ConverterTest implements Test {
 			origString += ".";
 		}
 
-		String input = Base64Encoder.encodeIntoBase64(origString);
+		String input = Base64Encoder.encode(origString);
 
-		String inTobase64ToHex = Base64Decoder.decodeFromBase64ToHexStr(input);
+		String inTobase64ToHex = Base64Decoder.decodeToHexStr(input);
 
-		String inToBase64 = Base64Decoder.decodeFromBase64(input);
+		String inToBase64 = Base64Decoder.decode(input);
 
-		String base64ToHex = HexEncoder.encodeStringToHex(inToBase64);
+		String base64ToHex = HexEncoder.encode(inToBase64);
 
 		if (!inTobase64ToHex.equals(base64ToHex)) {
 			TestUtils.fail("We tried to decode the same base64 text directly to hex and via base64 decoding to string and from there to hex, but the result was different!");
@@ -67,7 +67,7 @@ public class ConverterTest implements Test {
 
 		String input = "0x57 0x65 20 77 61 6E 74 20 74 6F 20 67 6F 20 74 6F204D61727321203A29";
 
-		String output = HexDecoder.decodeStringFromHex(input);
+		String output = HexDecoder.decode(input);
 
 		if (!output.equals("We want to go to Mars! :)")) {
 			TestUtils.fail("We tried to decode a well-known hex string but got \"" + output + "\"!");
@@ -83,7 +83,7 @@ public class ConverterTest implements Test {
 
 		String input = "6B06";
 
-		BigInteger output = HexDecoder.decodeNumberFromHex(input);
+		BigInteger output = HexDecoder.decodeNumber(input);
 
 		int intOutput = output.intValue();
 
@@ -101,7 +101,7 @@ public class ConverterTest implements Test {
 
 		String input = "1A34";
 
-		int output = HexDecoder.decodeIntFromHex(input);
+		int output = HexDecoder.decodeInt(input);
 
 		String encOutput = HexEncoder.encodeNumberToHex(output);
 
@@ -120,7 +120,7 @@ public class ConverterTest implements Test {
 
 		String input = "This is the 1. A Softer Space Morse test text.";
 
-		String output = MorseEncoder.translateToMorseCode(input);
+		String output = MorseEncoder.encode(input);
 
 		output = MorseEncoder.simplifyMorseCode(output);
 
@@ -142,7 +142,7 @@ public class ConverterTest implements Test {
 						".-     ... --- ..-. - . .-.     ... .--. .- -.-. .     -- --- .-. ... .     " +
 						"- . ... -     - . -..- - .-.-.-";
 
-		String output = MorseDecoder.translateFromMorseCode(input);
+		String output = MorseDecoder.decode(input);
 
 		if (!output.equals("Aaand this is the 2. A Softer Space Morse test text.".toUpperCase())) {
 			TestUtils.fail("We tried to decode a well-known string but got " + output + "!");
@@ -158,9 +158,9 @@ public class ConverterTest implements Test {
 
 		String input = "Finally, this is the 3. A Softer Space Morse test text!";
 
-		String middleput = MorseEncoder.translateToMorseCode(input);
+		String middleput = MorseEncoder.encode(input);
 
-		String output = MorseDecoder.translateFromMorseCode(middleput);
+		String output = MorseDecoder.decode(middleput);
 
 		if (!output.equals(input.toUpperCase())) {
 			TestUtils.fail("We tried to encode and decode a well-known string but got " + output + "!");

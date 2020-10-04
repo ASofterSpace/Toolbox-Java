@@ -66,7 +66,7 @@ public class HexEncoder {
 		return StrUtils.leftPad(encodeNumberToHex(num), '0', digits);
 	}
 
-	public static String encodeStringToHex(String text) {
+	public static String encode(String text) {
 
 		StringBuilder result = new StringBuilder();
 

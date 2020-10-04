@@ -76,7 +76,7 @@ public class HexDecoder {
 		return hexStr;
 	}
 
-	public static byte[] decodeBytesFromHex(String hexStr) {
+	public static byte[] decodeBytes(String hexStr) {
 
 		hexStr = cleanUpInputStr(hexStr);
 
@@ -98,12 +98,12 @@ public class HexDecoder {
 		return result;
 	}
 
-	public static String decodeStringFromHex(String hexStr) {
+	public static String decode(String hexStr) {
 
-		return new String(decodeBytesFromHex(hexStr));
+		return new String(decodeBytes(hexStr));
 	}
 
-	public static int decodeIntFromHex(String hexStr) {
+	public static int decodeInt(String hexStr) {
 
 		hexStr = cleanUpInputStr(hexStr);
 
@@ -120,7 +120,7 @@ public class HexDecoder {
 		return result;
 	}
 
-	public static BigInteger decodeNumberFromHex(String hexStr) {
+	public static BigInteger decodeNumber(String hexStr) {
 
 		hexStr = cleanUpInputStr(hexStr);
 

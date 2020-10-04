@@ -4,7 +4,6 @@
  */
 package com.asofterspace.toolbox.coders;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -149,7 +148,7 @@ public class UuidEncoderDecoder {
 		String base64UUID = Base64.getUrlEncoder().withoutPadding().encodeToString(sourceBytes);
 		*/
 
-		String base64UUID = Base64Encoder.encodeIntoBase64(sourceBytes, ECORE_UUID_LETTERS);
+		String base64UUID = Base64Encoder.encode(sourceBytes, ECORE_UUID_LETTERS);
 
 		// add starting underscore and remove trailing == if it was there (shouldn't be though)
 		// we could instead also call prettifyEcoreUUID, but this line here is probably a tiny bit quicker :)
@@ -182,7 +181,7 @@ public class UuidEncoderDecoder {
 		String result = resBuilder.toString();
 		*/
 
-		String result = Base64Decoder.decodeFromBase64ToHexStr(sourceUUID, ECORE_UUID_LETTERS, JAVA_UUID_LETTERS);
+		String result = Base64Decoder.decodeToHexStr(sourceUUID, ECORE_UUID_LETTERS, JAVA_UUID_LETTERS);
 
 		return prettifyJavaUUID(result);
 	}

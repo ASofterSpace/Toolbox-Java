@@ -11,42 +11,42 @@ package com.asofterspace.toolbox.coders;
  */
 public class BinaryDecoder {
 
-    /**
-     * Decodes a (whole) number from a string containing itself represented in binary, ignoring all
-     * characters in the input string except 1 and 0, and returning its result as a string
-     * @param binaryStr  A string containing a representation of the (whole) number in binary
-     * @return The integer which was encoded in binary in the string, represented within a string
-     */
-    public static String decodeFromBinaryIntoStr(String binaryStr) {
-        return "" + decodeFromBinary(binaryStr);
-    }
+	/**
+	 * Decodes a (whole) number from a string containing itself represented in binary, ignoring all
+	 * characters in the input string except 1 and 0, and returning its result as a string
+	 * @param binaryStr  A string containing a representation of the (whole) number in binary
+	 * @return The integer which was encoded in binary in the string, represented within a string
+	 */
+	public static String decode(String binaryStr) {
+		return "" + decodeToInt(binaryStr);
+	}
 
-    /**
-     * Decodes a (whole) number from a string containing itself represented in binary, ignoring all
-     * characters in the input string except 1 and 0
-     * @param binaryStr  A string containing a representation of the (whole) number in binary
-     * @return The integer which was encoded in binary in the string
-     */
+	/**
+	 * Decodes a (whole) number from a string containing itself represented in binary, ignoring all
+	 * characters in the input string except 1 and 0
+	 * @param binaryStr  A string containing a representation of the (whole) number in binary
+	 * @return The integer which was encoded in binary in the string
+	 */
 	@SuppressWarnings("fallthrough")
-    public static int decodeFromBinary(String binaryStr) {
+	public static int decodeToInt(String binaryStr) {
 
-        int result = 0;
-        int currentTwoPower = 1;
+		int result = 0;
+		int currentTwoPower = 1;
 
-        for (int i = binaryStr.length() - 1; i >= 0; i--) {
+		for (int i = binaryStr.length() - 1; i >= 0; i--) {
 
-            // ignore every character in the input that is not 1 or 0
-            switch (binaryStr.charAt(i)) {
-                case '1':
-                    result += currentTwoPower;
-                    // we are so cool that we actually want to fall through to the next staatement;
-                    // therefore, NO BREAK HERE
-                case '0':
-                    currentTwoPower *= 2;
-            }
-        }
+			// ignore every character in the input that is not 1 or 0
+			switch (binaryStr.charAt(i)) {
+				case '1':
+					result += currentTwoPower;
+					// we are so cool that we actually want to fall through to the next staatement;
+					// therefore, NO BREAK HERE
+				case '0':
+					currentTwoPower *= 2;
+			}
+		}
 
-        return result;
-    }
+		return result;
+	}
 
 }

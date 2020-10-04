@@ -600,7 +600,7 @@ public class ColorRGB {
 			String rStr = "" + str.charAt(1) + str.charAt(2);
 			String gStr = "" + str.charAt(3) + str.charAt(4);
 			String bStr = "" + str.charAt(5) + str.charAt(6);
-			return new ColorRGB(HexDecoder.decodeIntFromHex(rStr), HexDecoder.decodeIntFromHex(gStr), HexDecoder.decodeIntFromHex(bStr));
+			return new ColorRGB(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
 		}
 
 		System.err.println("The color string '" + str + "' could not be parsed!");
