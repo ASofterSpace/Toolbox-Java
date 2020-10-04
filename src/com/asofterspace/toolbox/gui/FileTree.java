@@ -66,4 +66,14 @@ public class FileTree extends JTree {
 		return path.getLastPathComponent() instanceof FileTreeFile;
 	}
 
+	public void fullyExpand() {
+
+		// expand every row, from top to bottom, which conveniently is actually recursive,
+		// as expanded folders immediately add new rows underneath which we also iterate
+		// over
+		for (int i = 0; i < getRowCount(); i++) {
+			expandRow(i);
+		}
+	}
+
 }
