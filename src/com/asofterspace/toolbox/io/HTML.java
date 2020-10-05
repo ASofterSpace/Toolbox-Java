@@ -18,4 +18,12 @@ public class HTML {
 	public static String escapeHTMLstr(Object strToEscape) {
 		return XML.escapeXMLstr(strToEscape);
 	}
+
+	public static String unescapeHTMLstr(String strToUnescape) {
+		return XML.unescapeXMLstr(strToUnescape);
+	}
+
+	public static String removeXmlTagsFromText(String str) {
+		return XML.removeXmlTagsFromText(str);
+	}
 }
