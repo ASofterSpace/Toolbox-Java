@@ -23,7 +23,7 @@ public class HTML {
 		return XML.unescapeXMLstr(strToUnescape);
 	}
 
-	public static String removeXmlTagsFromText(String str) {
+	public static String removeHtmlTagsFromText(String str) {
 		return XML.removeXmlTagsFromText(str);
 	}
 }
