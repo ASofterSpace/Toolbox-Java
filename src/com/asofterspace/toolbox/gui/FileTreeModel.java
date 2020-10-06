@@ -145,10 +145,31 @@ public class FileTreeModel implements TreeModel {
 		listeners.remove(listener);
 	}
 
+	/**
+	 * Call this to indicate that the node at the given path is being renamed
+	 */
 	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
 		for (TreeModelListener listener : listeners) {
 			TreeModelEvent ev = new TreeModelEvent(this, path);
+			if (listener instanceof FileTreeModelListener) {
+				FileTreeModelListener fileListener = (FileTreeModelListener) listener;
+				fileListener.treeNodesRenamed(ev);
+			}
+			listener.treeNodesChanged(ev);
+		}
+	}
+
+	/**
+	 * Call this to indicate that the node at the given path is being resized
+	 */
+	public void resizeNode(TreePath path) {
+		for (TreeModelListener listener : listeners) {
+			TreeModelEvent ev = new TreeModelEvent(this, path);
+			if (listener instanceof FileTreeModelListener) {
+				FileTreeModelListener fileListener = (FileTreeModelListener) listener;
+				fileListener.treeNodesResized(ev);
+			}
 			listener.treeNodesChanged(ev);
 		}
 	}
