@@ -935,6 +935,37 @@ public class StrUtils {
 		return result.toString();
 	}
 
+	/**
+	 * replaces all except if a match is immediately preceded by a > sign, in which case this
+	 * match is not replaced
+	 */
+	public static String replaceAllIfNotInsideTag(String origStr, String findThis, String replaceWith) {
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		if (replaceWith == null) {
+			replaceWith = "";
+		}
+		StringBuilder result = new StringBuilder();
+		int index = origStr.indexOf(findThis);
+		while (index >= 0) {
+			result.append(origStr.substring(0, index));
+			if ((index > 0) && origStr.charAt(index - 1) == '>') {
+				result.append(findThis);
+			} else {
+				result.append(replaceWith);
+			}
+			// TODO :: improve speed by not calling substring but keeping track of start!
+			origStr = origStr.substring(index + findThis.length());
+			index = origStr.indexOf(findThis);
+		}
+		result.append(origStr);
+		return result.toString();
+	}
+
 	public static String replaceAllRepeatedly(String origStr, String findThis, String replaceWith) {
 		if (origStr == null) {
 			return null;
