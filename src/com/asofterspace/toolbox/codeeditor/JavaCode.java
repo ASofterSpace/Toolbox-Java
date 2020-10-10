@@ -593,25 +593,27 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				// NOT for any words (as we e.g. want to jump around function names within the file - if we did not
 				// check this, then for every time we Ctrl+click on a function name here we would search half the
 				// disk for non-existant java files...)
-				if (Character.isUpperCase(curWord.charAt(0))) {
-					for (String curLine : lines) {
-						curLine = curLine.trim();
-						if (curLine.startsWith("import ") && curLine.endsWith("." + curWord + ";")) {
-							// the user clicked on Object somewhere in the code and we found a line like
-							// import foo.bar.nonsense.Object; at the top
-							importLine = curLine;
-							break;
+				if (curWord.length() > 0) {
+					if (Character.isUpperCase(curWord.charAt(0))) {
+						for (String curLine : lines) {
+							curLine = curLine.trim();
+							if (curLine.startsWith("import ") && curLine.endsWith("." + curWord + ";")) {
+								// the user clicked on Object somewhere in the code and we found a line like
+								// import foo.bar.nonsense.Object; at the top
+								importLine = curLine;
+								break;
+							}
 						}
-					}
 
-					// if there was no import line for the current word...
-					if (importLine == null) {
-						// ... then attempt to open the file directly in the same folder (as it might be a direct sibling)
-						List<String> filesToOpen = new ArrayList<>();
-						filesToOpen.add(curWord + ".java");
-						filesToOpen.add(curWord + ".groovy");
-						if (openFileRelativeToThis("", filesToOpen, CodeLanguage.JAVA, null)) {
-							return;
+						// if there was no import line for the current word...
+						if (importLine == null) {
+							// ... then attempt to open the file directly in the same folder (as it might be a direct sibling)
+							List<String> filesToOpen = new ArrayList<>();
+							filesToOpen.add(curWord + ".java");
+							filesToOpen.add(curWord + ".groovy");
+							if (openFileRelativeToThis("", filesToOpen, CodeLanguage.JAVA, null)) {
+								return;
+							}
 						}
 					}
 				}
