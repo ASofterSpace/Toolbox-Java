@@ -19,7 +19,9 @@ public class SearchUtils {
 			List<String> searchfors = new ArrayList<>();
 			if (searchfor.startsWith("\"") && searchfor.endsWith("\"")) {
 				// "foo bar"   searches for foo[SPACE]bar exactly
-				searchfor = searchfor.substring(1, searchfor.length() - 1);
+				if (searchfor.length > 1) {
+					searchfor = searchfor.substring(1, searchfor.length() - 1);
+				}
 				searchfors.add(searchfor);
 			} else {
 				// foo bar   searches for entries containing foo and bar
