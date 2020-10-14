@@ -219,6 +219,10 @@ public class WebAccessor {
 		try {
 			WebAccessor.lastUrl = url;
 
+			if (url.startsWith("//")) {
+				url = "https://" + url.substring(2);
+			}
+
 			URL urlAsURL = new URL(url);
 
 			HttpURLConnection connection = (HttpURLConnection) urlAsURL.openConnection();
