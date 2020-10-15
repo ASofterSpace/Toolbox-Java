@@ -476,4 +476,9 @@ public class Directory {
 		dir.delete();
 	}
 
+	@Override
+	public String toString() {
+		return "Directory: " + dirname;
+	}
+
 }

@@ -477,7 +477,7 @@ public class File {
 	 */
 	@Override
 	public String toString() {
-		return "com.asofterspace.toolbox.io.File: " + filename;
+		return "File: " + filename;
 	}
 
 	@Override
