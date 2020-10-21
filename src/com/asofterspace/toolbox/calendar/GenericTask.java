@@ -206,21 +206,81 @@ public class GenericTask {
 		return false;
 	}
 
+	/**
+	 * Checks if the task instances are the same, so the same task released on different days
+	 * will get false
+	 */
 	@Override
 	public boolean equals(Object other) {
+
+		// If the other one does not even exist, we are not the same - because we exist!
 		if (other == null) {
 			return false;
 		}
+
 		if (other instanceof GenericTask) {
-			GenericTask otherTask = (GenericTask) other;
-			if (this.title.equals(otherTask.title) &&
-				this.done.equals(otherTask.done) &&
-				this.releasedOnDay.equals(otherTask.releasedOnDay) &&
-				this.releasedInMonth.equals(otherTask.releasedInMonth) &&
-				this.releasedInYear.equals(otherTask.releasedInYear)) {
-				return true;
+			GenericTask otherGenericTask = (GenericTask) other;
+
+			// If our values for title are different...
+			if (this.title == null) {
+				if (otherGenericTask.title != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.title.equals(otherGenericTask.title)) {
+				// ... then we are not the same!
+				return false;
 			}
+
+			// If our values for done are different...
+			if (this.done == null) {
+				if (otherGenericTask.done != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.done.equals(otherGenericTask.done)) {
+				// ... then we are not the same!
+				return false;
+			}
+
+			// If our values for releasedOnDay are different...
+			if (this.releasedOnDay == null) {
+				if (otherGenericTask.releasedOnDay != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.releasedOnDay.equals(otherGenericTask.releasedOnDay)) {
+				// ... then we are not the same!
+				return false;
+			}
+
+			// If our values for releasedInMonth are different...
+			if (this.releasedInMonth == null) {
+				if (otherGenericTask.releasedInMonth != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.releasedInMonth.equals(otherGenericTask.releasedInMonth)) {
+				// ... then we are not the same!
+				return false;
+			}
+
+			// If our values for releasedInYear are different...
+			if (this.releasedInYear == null) {
+				if (otherGenericTask.releasedInYear != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.releasedInYear.equals(otherGenericTask.releasedInYear)) {
+				// ... then we are not the same!
+				return false;
+			}
+
+			// We have no reason to assume that we are not the same
+			return true;
 		}
+
+		// If the other one cannot even be cast to us, then we are not the same!
 		return false;
 	}
 
@@ -229,7 +289,9 @@ public class GenericTask {
 		if ((done == null) || done.equals(false)) {
 			return -1;
 		}
-		return this.releasedOnDay + 64 * this.releasedInMonth + 1024 * this.releasedInYear;
+		return (this.releasedOnDay == null ? 0 : this.releasedOnDay) +
+				64 * (this.releasedInMonth == null ? 0 : this.releasedInMonth) +
+				1024 * (this.releasedInYear == null ? 0 : this.releasedInYear);
 	}
 
 }
