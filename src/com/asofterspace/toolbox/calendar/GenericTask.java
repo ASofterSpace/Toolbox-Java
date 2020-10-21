@@ -4,7 +4,6 @@
  */
 package com.asofterspace.toolbox.calendar;
 
-import com.asofterspace.accountant.tasks.Task;
 import com.asofterspace.toolbox.utils.DateUtils;
 
 import java.util.Calendar;
@@ -212,8 +211,8 @@ public class GenericTask {
 		if (other == null) {
 			return false;
 		}
-		if (other instanceof Task) {
-			Task otherTask = (Task) other;
+		if (other instanceof GenericTask) {
+			GenericTask otherTask = (GenericTask) other;
 			if (this.title.equals(otherTask.title) &&
 				this.done.equals(otherTask.done) &&
 				this.releasedOnDay.equals(otherTask.releasedOnDay) &&
