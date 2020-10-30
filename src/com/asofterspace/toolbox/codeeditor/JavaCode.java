@@ -170,16 +170,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		// and if we are a regular java file with a package name...
 		// (necessary because we want to avoid importing files from our own package ^^)
-		String ourPackageStr = null;
-		for (String line : removeCommentsAndStrings(decoratedEditor.getText()).split("\n")) {
-			if (line.startsWith("package ")) {
-				ourPackageStr = line.substring(8).trim();
-				if (ourPackageStr.endsWith(";")) {
-					ourPackageStr = ourPackageStr.substring(0, ourPackageStr.length() - 1).trim();
-				}
-				break;
-			}
-		}
+		String ourPackageStr = getPackage(removeCommentsAndStrings(decoratedEditor.getText()));
 
 		// ... then we add missing imports based on all the open java files
 		if (ourPackageStr != null) {
@@ -294,6 +285,23 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		insertStringJavalike(offset, insertedString, attrs);
 	}
 
+	public String getPackage(String commentFreeContent) {
+
+		String ourPackageStr = null;
+
+		for (String line : commentFreeContent.split("\n")) {
+			if (line.startsWith("package ")) {
+				ourPackageStr = line.substring(8).trim();
+				if (ourPackageStr.endsWith(";")) {
+					ourPackageStr = ourPackageStr.substring(0, ourPackageStr.length() - 1).trim();
+				}
+				break;
+			}
+		}
+
+		return ourPackageStr;
+	}
+
 	@Override
 	public String removeCommentsAndStrings(String content) {
 
@@ -363,7 +371,12 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		nextEncounteredTokens = new ArrayList<>();
 
 		// add a few strings which we want to get proposed all the time, even if they have not been encountered yet
-		nextEncounteredTokens.add("System.out.println");
+		nextEncounteredTokens.add("System.out.println();");
+		nextEncounteredTokens.add("ArrayList<>();");
+		nextEncounteredTokens.add("@Override");
+		nextEncounteredTokens.add("private");
+		nextEncounteredTokens.add("public");
+		nextEncounteredTokens.add("protected");
 		nextEncounteredTokens.add("return result;");
 
 		try {

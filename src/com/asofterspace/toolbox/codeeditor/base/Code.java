@@ -344,6 +344,10 @@ public abstract class Code extends DefaultStyledDocument {
 						String txt = decoratedEditor.getText();
 						String token = propTokens.get(((CodeEditor) decoratedEditor).getProposedTokenSelection());
 						int nextSelStart = selStart + token.length();
+						// e.g. for System.out.println(); put the cursor inside the brackets
+						if (token.equals("System.out.println();")) {
+							nextSelStart -= 2;
+						}
 						decoratedEditor.setText(
 							txt.substring(0, selStart) +
 							token +
