@@ -8,5 +8,6 @@ package com.asofterspace.toolbox.utils;
 public enum SortOrder  {
 
 	ALPHABETICAL,
-	NUMERICAL
+	NUMERICAL,
+	REVERSE
 }

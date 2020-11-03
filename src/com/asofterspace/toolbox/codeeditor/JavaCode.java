@@ -540,23 +540,28 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 			} else if (isAnnotation(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
-			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
-				if (!"new".equals(lastCouldBeKeyword)) {
-					this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
-					if ((start > 0) && (content.charAt(start-1) == ' ')) {
-						// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
-						if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
-							// now get the entire line that we found!
-							// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
-							String functionName = StrUtils.getLineFromPosition(start, content);
-							this.functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
-						}
+			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(') &&
+				!"new".equals(lastCouldBeKeyword)) {
+
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
+				if ((start > 0) && (content.charAt(start-1) == ' ')) {
+					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
+					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
+						// now get the entire line that we found!
+						// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+						String functionName = StrUtils.getLineFromPosition(start, content);
+						this.functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 					}
-				} else {
-					encounteredVariableName(couldBeKeyword, start, prevChar != '.');
 				}
 			} else {
-				encounteredVariableName(couldBeKeyword, start, prevChar != '.');
+				boolean complainIfMissing = true;
+				if (prevChar == '.') {
+					complainIfMissing = false;
+				}
+				if ((prevChar == ' ') && ("package".equals(lastCouldBeKeyword) || "import".equals(lastCouldBeKeyword))) {
+					complainIfMissing = false;
+				}
+				encounteredVariableName(couldBeKeyword, start, complainIfMissing);
 			}
 		}
 

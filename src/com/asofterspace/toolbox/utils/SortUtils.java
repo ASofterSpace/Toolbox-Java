@@ -62,6 +62,8 @@ public class SortUtils  {
 		switch (sortOrder) {
 			case NUMERICAL:
 				return sortNumerically(listToSort, stringifier);
+			case REVERSE:
+				return reverse(listToSort);
 			default:
 				return sortAlphabetically(listToSort, stringifier);
 		}
