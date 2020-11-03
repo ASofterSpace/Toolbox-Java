@@ -43,7 +43,7 @@ public class GroovyCode extends JavaCode {
 					endOfString = content.length();
 				}
 
-				this.setCharacterAttributes(start, endOfString - start + 3, attrString, false);
+				this.setCharacterAttributes(start, endOfString - start + 3, this.attrString, false);
 
 				return endOfString;
 			}

@@ -134,7 +134,7 @@ public class DelphiCode extends Code {
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 						}
 					}
 
@@ -182,7 +182,7 @@ public class DelphiCode extends Code {
 			}
 
 			// apply single line comment highlighting
-			getMe().setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+			getMe().setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 			return commentEnd;
 		}
@@ -199,7 +199,7 @@ public class DelphiCode extends Code {
 		}
 
 		// apply multiline comment highlighting
-		getMe().setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		getMe().setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
@@ -220,16 +220,16 @@ public class DelphiCode extends Code {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isKeyword(couldBeKeyword)) {
-			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
-			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 		} else if (isAdvancedType(couldBeKeyword)) {
-			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
-			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
 			if (!"new".equals(lastCouldBeKeyword)) {
-				getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+				getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 			}
 		}
 

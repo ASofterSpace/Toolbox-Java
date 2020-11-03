@@ -88,7 +88,7 @@ public class MarkdownCode extends Code {
 					if (boldStart == null) {
 						boldStart = cur;
 					} else {
-						this.setCharacterAttributes(boldStart, cur - boldStart + 1, attrBold, false);
+						this.setCharacterAttributes(boldStart, cur - boldStart + 1, this.attrBold, false);
 						boldStart = null;
 					}
 				}

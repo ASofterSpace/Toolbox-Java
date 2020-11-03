@@ -65,7 +65,7 @@ public class TypeScriptCode extends JavaCode {
 	}
 
 	@Override
-	protected int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions) {
+	protected int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions, char prevChar) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -80,21 +80,21 @@ public class TypeScriptCode extends JavaCode {
 
 		if (setAttributesAndDetectFunctions) {
 			if (isKeyword(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 			} else if (isImportKeyword(couldBeKeyword) && StrUtils.getLineFromPosition(start, content).trim().startsWith("import ")) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 			} else if (isPrimitiveType(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 			} else if (isAdvancedType(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 			} else if (isAnnotation(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
 				if (!"new".equals(lastCouldBeKeyword)) {
-					this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+					this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 					if ((start > 0) && (content.charAt(start-1) == ' ')) {
 						// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
-						if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
+						if ((this.curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 							// get the entire line that we found!
 							String functionName = StrUtils.getLineFromPosition(start, content).trim();
 							// so far this is like in Java, but we also have calls like next() directly on the four-spaces-indent,
@@ -107,7 +107,11 @@ public class TypeScriptCode extends JavaCode {
 							}
 						}
 					}
+				} else {
+					encounteredVariableName(couldBeKeyword, start, prevChar != '.');
 				}
+			} else {
+				encounteredVariableName(couldBeKeyword, start, prevChar != '.');
 			}
 		}
 

@@ -51,9 +51,6 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 	// end of multiline comments in the Java language
 	private static final String END_MULTILINE_COMMENT = "*/";
 
-	// are we currently in a multiline comment?
-	private boolean curMultilineComment;
-
 	private int curLineStartingWhitespace = 0;
 
 	private boolean startingWhitespace = false;
@@ -135,7 +132,7 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 						}
 					}
 
@@ -226,14 +223,14 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 		} else if (isAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(') &&
 					!"new".equals(lastCouldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 			if ((start > 0) && (content.charAt(start-1) == ' ')) {
 				// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 				if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
@@ -243,7 +240,7 @@ public class CSharpCode extends PublicPrivateFunctionSupplyingCode {
 				}
 			}
 		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 		}
 
 		lastCouldBeKeyword = couldBeKeyword;

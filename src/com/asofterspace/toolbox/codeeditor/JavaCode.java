@@ -56,9 +56,6 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	// end of multiline comments in the Java language
 	protected static final String END_MULTILINE_COMMENT = "*/";
 
-	// are we currently in a multiline comment?
-	protected boolean curMultilineComment;
-
 	protected int curLineStartingWhitespace = 0;
 
 	protected boolean startingWhitespace = false;
@@ -351,7 +348,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 			// or any other token instead?
 			prev = start;
-			start = highlightOther(content, start, end, false);
+			start = highlightOther(content, start, end, false, ' ');
 			result.append(content.substring(prev, start));
 		}
 
@@ -367,7 +364,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		String content = "";
 
-		encounteredTokens = nextEncounteredTokens;
+		this.encounteredTokens = nextEncounteredTokens;
 		nextEncounteredTokens = new ArrayList<>();
 
 		// add a few strings which we want to get proposed all the time, even if they have not been encountered yet
@@ -393,6 +390,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 				// while we have a delimiter...
 				char curChar = content.charAt(start);
+				char prevChar = ' ';
 
 				startingWhitespace = false;
 
@@ -432,7 +430,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 							// we are checking this because otherwise we are getting exceptions... but... why?
 							// at this point, this should always be the case o.o
 							if (start <= end) {
-								this.setCharacterAttributes(start, 1, attrReservedChar, false);
+								this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 							}
 						}
 					}
@@ -447,11 +445,12 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						return;
 					}
 
+					prevChar = curChar;
 					curChar = content.charAt(start);
 				}
 
 				// or any other token instead?
-				start = highlightOther(content, start, end, true);
+				start = highlightOther(content, start, end, true, prevChar);
 			}
 
 			postHighlight(content);
@@ -464,7 +463,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		postHighlight(content);
 	}
 
+	@Override
 	protected void postHighlight(String content) {
+		super.postHighlight(content);
+
 		updateFunctionList();
 	}
 
@@ -493,7 +495,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 			}
 
 			// apply single line comment highlighting
-			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+			this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 			return commentEnd;
 		}
@@ -510,12 +512,12 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
 
-	protected int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions) {
+	protected int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions, char prevChar) {
 
 		int couldBeKeywordEnd = start + 1;
 
@@ -531,26 +533,30 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		if (setAttributesAndDetectFunctions) {
 			nextEncounteredTokens.add(couldBeKeyword);
 			if (isKeyword(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 			} else if (isPrimitiveType(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 			} else if (isAdvancedType(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 			} else if (isAnnotation(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
 				if (!"new".equals(lastCouldBeKeyword)) {
-					this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+					this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 					if ((start > 0) && (content.charAt(start-1) == ' ')) {
 						// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 						if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
 							// now get the entire line that we found!
 							// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
 							String functionName = StrUtils.getLineFromPosition(start, content);
-							functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+							this.functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 						}
 					}
+				} else {
+					encounteredVariableName(couldBeKeyword, start, prevChar != '.');
 				}
+			} else {
+				encounteredVariableName(couldBeKeyword, start, prevChar != '.');
 			}
 		}
 

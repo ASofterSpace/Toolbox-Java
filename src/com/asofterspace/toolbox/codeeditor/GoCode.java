@@ -245,7 +245,7 @@ public class GoCode extends FunctionSupplyingCode {
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 						}
 					}
 
@@ -298,7 +298,7 @@ public class GoCode extends FunctionSupplyingCode {
 			}
 
 			// apply single line comment highlighting
-			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+			this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 			return commentEnd;
 		}
@@ -315,7 +315,7 @@ public class GoCode extends FunctionSupplyingCode {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
@@ -334,16 +334,16 @@ public class GoCode extends FunctionSupplyingCode {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 		} else if (isAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
 			if (!"new".equals(lastCouldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
 					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {

@@ -175,14 +175,14 @@ public class CssCode extends Code {
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 						}
 					}
 				} else {
 					int keyEnd = content.indexOf(":", start);
 					int markLength = keyEnd - start;
 					if (markLength > 0) {
-						this.setCharacterAttributes(start, markLength, attrFunction, false);
+						this.setCharacterAttributes(start, markLength, this.attrFunction, false);
 					}
 					if (keyEnd > 0) {
 						keyEnd = content.indexOf(";", keyEnd);
@@ -235,7 +235,7 @@ public class CssCode extends Code {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
@@ -254,13 +254,13 @@ public class CssCode extends Code {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (lastDelimiter == '#') {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (lastDelimiter == '.') {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 		} else if (lastDelimiter == ':') {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 		}
 
 		return couldBeKeywordEnd;

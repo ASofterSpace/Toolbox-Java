@@ -76,7 +76,7 @@ public class PhpCode extends HtmlCode {
 		if ((start > 0) && (start + PHP_START.length() < end)) {
 			if (PHP_START.equals(content.substring(start - 1, start - 1 + PHP_START.length()))) {
 
-				this.setCharacterAttributes(start - 1, PHP_START.length(), attrKeyword, false);
+				this.setCharacterAttributes(start - 1, PHP_START.length(), this.attrKeyword, false);
 
 				return highlightPhp(content, start, end);
 			}
@@ -130,7 +130,7 @@ public class PhpCode extends HtmlCode {
 				} else {
 					// please highlight the delimiter in the process ;)
 					if (!Character.isWhitespace(curChar)) {
-						this.setCharacterAttributes(start, 1, attrReservedChar, false);
+						this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 					}
 				}
 
@@ -167,7 +167,7 @@ public class PhpCode extends HtmlCode {
 
 	private int highlightPhpEnd(String content, int start, int end) {
 
-		this.setCharacterAttributes(start, 2, attrKeyword, false);
+		this.setCharacterAttributes(start, 2, this.attrKeyword, false);
 
 		return start + 2;
 	}
@@ -197,7 +197,7 @@ public class PhpCode extends HtmlCode {
 			}
 
 			// apply single line comment highlighting
-			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+			this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 			return commentEnd;
 		}
@@ -214,7 +214,7 @@ public class PhpCode extends HtmlCode {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
@@ -237,16 +237,16 @@ public class PhpCode extends HtmlCode {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isPhpKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (isPhpPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 		} else if (isPhpAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 		} else if (isPhpAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 		} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(')) {
 			if (!"new".equals(lastCouldBeKeywordPhp)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
 					// ignore lines with more than 1 tab indent / 4 regular indents and line without "function" name
 					if ((curLineStartingWhitespacePhp < 5) && "function".equals(lastCouldBeKeywordPhp)) {

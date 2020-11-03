@@ -107,6 +107,7 @@ public abstract class Code extends DefaultStyledDocument {
 	protected MutableAttributeSet attrFunction; // blubb()
 	protected MutableAttributeSet attrData; // <![CDATA[...]]>
 	protected MutableAttributeSet attrMatchingBrackets; // ( ... )
+	protected MutableAttributeSet attrSuspicious; // mark unused things as suspicious
 
 	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
@@ -159,6 +160,11 @@ public abstract class Code extends DefaultStyledDocument {
 
 	protected List<String> nextEncounteredTokens = null;
 	protected List<String> encounteredTokens = null;
+
+	// keep track of variable names and when a variable name has been encountered just once,
+	// highlight it as suspicious
+	protected Set<String> variableNamesSeveralTimes;
+	protected Map<String, Integer> variableNamesOnce;
 
 
 	public Code(JTextPane editor) {
@@ -1745,6 +1751,9 @@ public abstract class Code extends DefaultStyledDocument {
 		attrMatchingBrackets = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrMatchingBrackets, new Color(255, 0, 0));
 
+		attrSuspicious = new SimpleAttributeSet();
+		StyleConstants.setStrikeThrough(attrSuspicious, true);
+
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
 		decoratedEditor.setCaretColor(schemeForegroundColor);
@@ -1816,6 +1825,9 @@ public abstract class Code extends DefaultStyledDocument {
 		attrMatchingBrackets = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrMatchingBrackets, new Color(255, 0, 0));
 
+		attrSuspicious = new SimpleAttributeSet();
+		StyleConstants.setStrikeThrough(attrSuspicious, true);
+
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
 		decoratedEditor.setCaretColor(schemeForegroundColor);
@@ -1850,6 +1862,7 @@ public abstract class Code extends DefaultStyledDocument {
 		attrReservedChar = parentEditor.attrReservedChar;
 		attrFunction = parentEditor.attrFunction;
 		attrData = parentEditor.attrData;
+		attrSuspicious = parentEditor.attrSuspicious;
 	}
 
 	public Color getForegroundColor() {
@@ -2439,6 +2452,50 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// set the entire document back to regular
 		this.setCharacterAttributes(0, end, attrRegular, true);
+
+		variableNamesSeveralTimes = new HashSet<>();
+		variableNamesOnce = new HashMap<>();
+	}
+
+	protected void encounteredVariableName(String couldBeKeyword, int start, boolean complainIfMissing) {
+
+		// the token we are looking at is the name of a variable... we want to track them,
+		// and if a variable name only appears once in a file, highlight it as suspicious
+		// due to it being unused
+		if (!variableNamesSeveralTimes.contains(couldBeKeyword)) {
+
+			// if we are not supposed to complain, or if we encountered the key before...
+			if ((!complainIfMissing) || variableNamesOnce.containsKey(couldBeKeyword)) {
+
+				// ... then remove it from the list of keys to complain about!
+				variableNamesSeveralTimes.add(couldBeKeyword);
+				variableNamesOnce.remove(couldBeKeyword);
+			} else {
+
+				// ... elsewise, add it to the naughty list!
+				variableNamesOnce.put(couldBeKeyword, start);
+			}
+		}
+	}
+
+	protected void postHighlight(String content) {
+
+		for (Map.Entry<String, Integer> entry : variableNamesOnce.entrySet()) {
+			String variableName = entry.getKey();
+			if (!variableNameIsANumber(variableName)) {
+				int start = entry.getValue();
+				this.setCharacterAttributes(start, variableName.length(), attrSuspicious, false);
+			}
+		}
+	}
+
+	private static boolean variableNameIsANumber(String variableName) {
+		try {
+			Double.parseDouble(variableName);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	// highlight for search - which is called by the highlighting thread always

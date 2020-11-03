@@ -129,7 +129,7 @@ public class JsonCode extends Code {
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 						}
 					}
 
@@ -179,7 +179,7 @@ public class JsonCode extends Code {
 			}
 
 			// apply single line comment highlighting
-			this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+			this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 			return commentEnd;
 		}
@@ -196,7 +196,7 @@ public class JsonCode extends Code {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
@@ -217,13 +217,13 @@ public class JsonCode extends Code {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isKeyword(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 		} else if (isAdvancedType(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 		}
 
 		lastCouldBeKeyword = couldBeKeyword;

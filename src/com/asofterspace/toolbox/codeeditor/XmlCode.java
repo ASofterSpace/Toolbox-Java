@@ -42,12 +42,6 @@ public class XmlCode extends Code {
 	// end of CDATA fields in the XML language
 	private static final String END_CDATA = "]]>";
 
-	// are we currently in a multiline comment?
-	private boolean curMultilineComment;
-
-	// are we currently in a CDATA section?
-	private boolean curCDATA;
-
 
 	public XmlCode(JTextPane editor) {
 
@@ -128,7 +122,7 @@ public class XmlCode extends Code {
 					} else {
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 						}
 					}
 
@@ -178,7 +172,7 @@ public class XmlCode extends Code {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
@@ -208,7 +202,7 @@ public class XmlCode extends Code {
 		}
 
 		// apply multiline comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrData, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrData, false);
 
 		return commentEnd;
 	}
@@ -251,11 +245,11 @@ public class XmlCode extends Code {
 		}
 
 		if (isKeyword) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (isKey) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 		} else if (isAnnotation(couldBeKeyword)) {
-			this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+			this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 		}
 
 		lastCouldBeKeyword = couldBeKeyword;

@@ -129,7 +129,7 @@ public class ShellCode extends FunctionSupplyingCode {
 
 						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							this.setCharacterAttributes(start, 1, attrReservedChar, false);
+							this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 						}
 					}
 
@@ -184,7 +184,7 @@ public class ShellCode extends FunctionSupplyingCode {
 		}
 
 		// apply single line comment highlighting
-		this.setCharacterAttributes(start, commentEnd - start + 1, attrComment, false);
+		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
 	}
@@ -204,16 +204,16 @@ public class ShellCode extends FunctionSupplyingCode {
 
 		if (setAttributesAndDetectFunctions) {
 			if (isKeyword(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrKeyword, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 			} else if (isPrimitiveType(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrPrimitiveType, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 			} else if (isAdvancedType(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAdvancedType, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 			} else if (isAnnotation(couldBeKeyword)) {
-				this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrAnnotation, false);
+				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
 			} else if ((couldBeKeywordEnd+1 <= end) && (content.charAt(couldBeKeywordEnd) == ' ') && (content.charAt(couldBeKeywordEnd+1) == '{')) {
 				if ("function".equals(lastCouldBeKeyword)) {
-					this.setCharacterAttributes(start, couldBeKeywordEnd - start, attrFunction, false);
+					this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 					// now get the entire line that we found!
 					String functionName = StrUtils.getLineFromPosition(start, content).trim();
 					// get rid of the opening {
