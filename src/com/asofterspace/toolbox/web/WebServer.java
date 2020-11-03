@@ -38,7 +38,7 @@ public class WebServer implements Runnable {
 	// (otherwise it just runs on the main thread)
 	private Thread serverThread;
 
-	// a list of all handler threads that have been strated so far for handling requests
+	// a list of all handler threads that have been created so far for handling requests
 	private List<Thread> currentHandlerThreads;
 
 

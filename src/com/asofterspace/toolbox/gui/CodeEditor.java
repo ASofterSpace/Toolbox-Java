@@ -150,42 +150,12 @@ public class CodeEditor extends JTextPane {
 		boolean doRepaint = false;
 
 		if (showStartLine) {
-			char chr = ' ';
-			while (pos < len) {
-				chr = text.charAt(pos);
-				if ((chr != ' ') && (chr != '\t')) {
-					break;
-				}
-				pos++;
-			}
-			if (chr == '\n') {
-				pos--;
-			}
-			while (pos >= len) {
-				pos--;
-			}
-			while (pos > 0) {
-				chr = text.charAt(pos);
-				if (chr == '\n') {
-					break;
-				}
-				if ((chr != ' ') && (chr != '\t')) {
-					firstLetter = pos;
-				}
-				pos--;
-			}
 
-			try {
-				// in the future, modelToView2D is used instead, but we want to be backwards compatible...
-				int x = ((int) modelToView(firstLetter).getX()) - 1;
+			int x = getLineStartInPxFromCursorPosContextAware(pos, len, text) - 1;
 
-				if (prevStartLinePos != x) {
-					prevStartLinePos = x;
-					doRepaint = true;
-				}
-
-			} catch (BadLocationException e) {
-				// whoops!
+			if (prevStartLinePos != x) {
+				prevStartLinePos = x;
+				doRepaint = true;
 			}
 		}
 
@@ -194,7 +164,7 @@ public class CodeEditor extends JTextPane {
 			g.setColor(startLineColor);
 			try {
 				// in the future, modelToView2D is used instead, but we want to be backwards compatible...
-				int y = ((int) modelToView(firstLetter).getY());
+				int y = ((int) modelToView(pos).getY());
 
 				if (prevHorzLinePos != y) {
 					prevHorzLinePos = y;
@@ -276,4 +246,104 @@ public class CodeEditor extends JTextPane {
 		return tokenSelStart;
 	}
 
+	/**
+	 * Returns the indentation in px of a particular line, based on either its own indentation
+	 * or, if it is empty, based on the indentation of the lines around it
+	 */
+	private int getLineStartInPxFromCursorPosContextAware(int pos, int len, String text) {
+
+		// get the line start position at the current cursor pos
+		Integer textPos = getLineStartInPxFromCursorPos(pos, len, text);
+
+		// the line is completely empty?
+		if (textPos == null) {
+
+			// then let's go above and below the current line...
+			// (getting 0 in case of above or below being out of text bounds)
+			int posBefore = 1;
+			int posAfter = 1;
+			Integer textPosBefore = getLineStartInPxFromCursorPos(pos - posBefore, len, text);
+			Integer textPosAfter = getLineStartInPxFromCursorPos(pos + posAfter, len, text);
+			while (textPosBefore == null) {
+				posBefore++;
+				textPosBefore = getLineStartInPxFromCursorPos(pos - posBefore, len, text);
+			}
+			while (textPosAfter == null) {
+				posAfter++;
+				textPosAfter = getLineStartInPxFromCursorPos(pos + posAfter, len, text);
+			}
+			// ... and take the maximum indentation of the two!
+			textPos = Math.max(textPosBefore, textPosAfter);
+		}
+
+		return textPos;
+	}
+
+	/**
+	 * Returns the indentation in px of a particular line itself
+	 */
+	@SuppressWarnings("deprecation")
+	private Integer getLineStartInPxFromCursorPos(int pos, int len, String text) {
+
+		char chr = ' ';
+
+		// if we are asked for a line out of the bounds of the text, report 0 as indentation in px
+		if (pos < 0) {
+			return 0;
+		}
+		if (pos > len) {
+			return 0;
+		}
+
+		// start at the current cursor position, and go forward, until
+		// anything else than space or tab is encountered
+		while (pos < len) {
+			chr = text.charAt(pos);
+			if ((chr != ' ') && (chr != '\t')) {
+				break;
+			}
+			pos++;
+		}
+
+		// now that we are at the right-most location in this line at which it makes sense that the
+		// indentation could be, slowly go back again...
+		int firstLetter = pos;
+
+		// go one back if we are at the end of the line
+		if (chr == '\n') {
+			pos--;
+		}
+
+		// go back inside the text, if we have shot too far out
+		while (pos >= len) {
+			pos--;
+		}
+
+		// go back until we encounter the start of this line, keeping track of
+		// the left-most non-space, non-tab character
+		boolean lineIsEmpty = true;
+		while (pos > -1) {
+			chr = text.charAt(pos);
+			if (chr == '\n') {
+				if (lineIsEmpty) {
+					return null;
+				}
+				break;
+			}
+			if ((chr != ' ') && (chr != '\t')) {
+				firstLetter = pos;
+			}
+			pos--;
+			lineIsEmpty = false;
+		}
+
+		try {
+			// in the future, modelToView2D is used instead, but we want to be backwards compatible...
+			return ((int) modelToView(firstLetter).getX());
+
+		} catch (BadLocationException e) {
+			// whoops!
+			return 0;
+		}
+	}
 }

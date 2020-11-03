@@ -380,7 +380,7 @@ public class StrUtils {
 		}
 
 		if (lineEnd < lineStart) {
-			return "";
+			return content.substring(lineStart);
 		}
 
 		return content.substring(lineStart, lineEnd);
