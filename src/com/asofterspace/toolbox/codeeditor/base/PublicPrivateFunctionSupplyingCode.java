@@ -66,6 +66,9 @@ public abstract class PublicPrivateFunctionSupplyingCode extends FunctionSupplyi
 			if (trimmedLine.endsWith("{")) {
 				trimmedLine = trimmedLine.substring(0, trimmedLine.length() - 1).trim();
 			}
+			if (trimmedLine.contains("synchronized ")) {
+				trimmedLine = trimmedLine.replace("synchronized ", "");
+			}
 			if (trimmedLine.contains("static ")) {
 				trimmedLine = trimmedLine.replace("static ", "");
 				if (trimmedLine.contains("public ")) {
