@@ -856,6 +856,13 @@ public abstract class Code extends DefaultStyledDocument {
 		return null;
 	}
 
+	/**
+	 * Highlight the function in which the cursor currently happens to be
+	 */
+	protected void highlightCurrentFunction() {
+		// implemented in FunctionSupplyingCode
+	}
+
 	public void startFunctionHighlighting() {
 		this.doFunctionHighlighting = true;
 	}
@@ -1593,6 +1600,7 @@ public abstract class Code extends DefaultStyledDocument {
 								}
 								if (instance.activityDetected) {
 									instance.highlightMatchingBrackets();
+									instance.highlightCurrentFunction();
 									instance.activityDetected = false;
 								}
 							}

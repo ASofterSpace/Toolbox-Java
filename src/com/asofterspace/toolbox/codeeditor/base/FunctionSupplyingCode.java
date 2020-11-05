@@ -230,11 +230,12 @@ public abstract class FunctionSupplyingCode extends Code {
 	/**
 	 * When the user mouse-clicks somewhere or uses the arrow keys, highlight the function we are currently in...
 	 */
-	private void highlightCurrentFunction() {
+	@Override
+	protected void highlightCurrentFunction() {
 
-		if (doFunctionHighlighting && (functionPane != null) && (functionPaneStyle != null)) {
+		if (this.doFunctionHighlighting && (functionPane != null) && (functionPaneStyle != null)) {
 
-			int curCaretPos = decoratedEditor.getCaretPosition();
+			int curCaretPos = this.decoratedEditor.getCaretPosition();
 			int bestFuncCaretPos = 0;
 			CodeSnippetWithLocation bestFunc = null;
 
@@ -266,7 +267,7 @@ public abstract class FunctionSupplyingCode extends Code {
 				}
 
 				// ... highlight that one!
-				functionPaneStyle.setCharacterAttributes(start, end - start, attrSearchSelected, true);
+				functionPaneStyle.setCharacterAttributes(start, end - start, this.attrSearchSelected, true);
 			}
 		}
 	}
