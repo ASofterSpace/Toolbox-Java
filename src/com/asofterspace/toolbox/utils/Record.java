@@ -111,7 +111,7 @@ public class Record {
 		}
 
 		if (recordOrWhatever instanceof Date) {
-			return new Record(DateUtils.serializeDate((Date) recordOrWhatever));
+			return new Record(DateUtils.serializeDateTime((Date) recordOrWhatever));
 		}
 
 		return Record.nullRecord();
@@ -742,7 +742,25 @@ public class Record {
 
 		String str = getString(key);
 
+		if (str == null) {
+			return null;
+		}
+
 		return DateUtils.parseDate(str);
+	}
+
+	/**
+	 * Gets a date-time value stored in a key
+	 */
+	public Date getDateTime(Object key) {
+
+		String str = getString(key);
+
+		if (str == null) {
+			return null;
+		}
+
+		return DateUtils.parseDateTime(str);
 	}
 
 	/**
