@@ -2137,11 +2137,74 @@ public abstract class Code extends DefaultStyledDocument {
 				overrideCaretPos = 1;
 				break;
 			case " ":
-				// in case of if (blubb) && <- that last space being entered,
-				// add a bracket after the if and close it after the cursor:
-				// if ((blubb) && )
 				if (offset > 5) {
 					content = decoratedEditor.getText();
+
+					// in case of "for " <- that last space being entered,
+					// check the previous line... if it contains "Map<" (might be "HashMap<" too),
+					// then automagically write:
+					// for (Map.Entry<String, Object> entry : map.entrySet()) {
+					//     String key = entry.getKey();
+					//     Object value = entry.getValue();
+					// }
+					char char4 = content.charAt(offset - 4);
+					boolean char4White = (char4 == ' ') || (char4 == '\t') || (char4 == '\n') || (char4 == '\r');
+					if (char4White && (content.charAt(offset - 3) == 'f') &&
+						(content.charAt(offset - 2) == 'o') && (content.charAt(offset - 1) == 'r')) {
+
+						// get the two newlines before the for, nl1 is just before the for, nl2 is the one
+						// just before that one
+						int nl1 = content.lastIndexOf("\n", offset - 3);
+
+						if (nl1 >= 0) {
+							// keep going back with nl2 until between nl1 and nl2 we have *something* after trim()
+							int nl2 = nl1;
+							nl2 = content.lastIndexOf("\n", nl2 - 1);
+							if (nl2 >= 0) {
+								while ("".equals(content.substring(nl2, nl1).trim())) {
+									nl2 = content.lastIndexOf("\n", nl2 - 1);
+									if (nl2 < 0) {
+										break;
+									}
+								}
+
+								if (nl2 >= 0) {
+									// check if there is a "Map<" in there, and if so...
+									if (content.substring(nl2, nl1).contains("Map<")) {
+
+										// ... automagically add the for command for maps! :D
+
+										String contentStart = content.substring(0, offset);
+										String contentEnd = content.substring(offset);
+
+										String indentation = content.substring(nl1 + 1, offset - 3);
+
+										String forStuff =
+											" (Map.Entry<String, Object> entry : map.entrySet()) {\n" +
+											indentation + "\tString key = entry.getKey();\n" +
+											indentation + "\tObject value = entry.getValue();\n" +
+											indentation + "\t";
+
+										String forEnd = "\n" +
+											indentation + "}";
+
+										String newContent = contentStart + forStuff + forEnd + contentEnd;
+
+										int origCaretPos = decoratedEditor.getCaretPosition();
+										decoratedEditor.setText(newContent);
+										decoratedEditor.setCaretPosition(origCaretPos + forStuff.length());
+
+										// we do NOT bubble up the chain, as we already set the text explicitly!
+										return;
+									}
+								}
+							}
+						}
+					}
+
+					// in case of "if (blubb) && "<- that last space being entered,
+					// add a bracket after the if and close it after the cursor:
+					// if ((blubb) && )
 					if (offset > 10) {
 						if ((content.charAt(offset - 6) == ' ') && (content.charAt(offset - 5) == '=') &&
 							(content.charAt(offset - 4) == ' ') && (content.charAt(offset - 3) == 'n') &&
