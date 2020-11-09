@@ -147,7 +147,7 @@ public class DateUtils {
 	}
 
 	/**
-	 * Serializes a date as e.g. 10. May 2020
+	 * Serializes a date as e.g. 12. October 2020
 	 */
 	public static String serializeDateLong(Date date) {
 
@@ -159,8 +159,8 @@ public class DateUtils {
 		// standard serialization from MMM in the format string but instead serialize the month
 		// part ourselves...
 		String result = FALLBACK_DATE_FORMAT.format(date);
-		for (int i = 0; i < MONTH_NAMES_SHORT.length; i++) {
-			result = result.replaceAll("\\." + StrUtils.leftPad0(i+1, 2) + "\\.", ". " + MONTH_NAMES_SHORT[i] + " ");
+		for (int i = 0; i < MONTH_NAMES.length; i++) {
+			result = result.replaceAll("\\." + StrUtils.leftPad0(i+1, 2) + "\\.", ". " + MONTH_NAMES[i] + " ");
 		}
 		return result;
 	}

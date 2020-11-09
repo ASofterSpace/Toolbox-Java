@@ -107,6 +107,42 @@ public class DefaultImageFile extends RasterImageFile {
 		}
 	}
 
+	public void saveTransparently() {
+		try {
+			if (img == null) {
+				loadImageContents();
+			}
+
+			File file = new File(this.filename);
+
+			BufferedImage javaImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+
+			ColorRGB[][] data = img.getDataSafely();
+
+			for (int y = 0; y < img.getHeight(); y++) {
+				for (int x = 0; x < img.getWidth(); x++) {
+					ColorRGB c = data[y][x];
+					int rgb = c.getR() << 24;
+					rgb |= c.getG() << 16;
+					rgb |= c.getB() << 8;
+					rgb |= c.getA();
+					javaImg.setRGB(x, y, rgb);
+				}
+			}
+
+			if (filename.toLowerCase().endsWith(".bmp")) {
+				ImageIO.write(javaImg, "bmp", file.getJavaFile());
+			} else if (filename.toLowerCase().endsWith(".png")) {
+				ImageIO.write(javaImg, "png", file.getJavaFile());
+			} else {
+				ImageIO.write(javaImg, "jpeg", file.getJavaFile());
+			}
+
+		} catch (IOException e) {
+			System.err.println("[ERROR] Trying to save the default image file " + filename + ", but there was an exception - inconceivable!\n" + e);
+		}
+	}
+
 	/**
 	 * Gives back a string representation of the default image file object
 	 */
