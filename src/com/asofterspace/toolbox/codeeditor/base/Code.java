@@ -3232,4 +3232,12 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	public int getSelStart() {
+		return selStart;
+	}
+
+	public int getSelEnd() {
+		return selEnd;
+	}
+
 }
