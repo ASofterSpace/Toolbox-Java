@@ -15,11 +15,14 @@ public class CodeField {
 
 	private String type;
 
+	private boolean isStatic;
+
 
 	public CodeField(String name, String type) {
 		this.name = name;
 		this.nameUpcase = name.substring(0, 1).toUpperCase() + name.substring(1);
 		this.type = type;
+		this.isStatic = false;
 	}
 
 	public String getName() {
@@ -33,4 +36,13 @@ public class CodeField {
 	public String getType() {
 		return type;
 	}
+
+	public boolean getIsStatic() {
+		return isStatic;
+	}
+
+	public void setIsStatic(boolean isStatic) {
+		this.isStatic = isStatic;
+	}
+
 }

@@ -2832,8 +2832,10 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 			if (line.contains(" ")) {
 				lineType = line.substring(line.lastIndexOf(" ") + 1);
+				line = line.substring(0, line.lastIndexOf(" "));
 			} else {
 				lineType = line;
+				line = "";
 			}
 
 			// the lineType could look like:
@@ -2859,7 +2861,14 @@ public abstract class Code extends DefaultStyledDocument {
 			// Map<Foo, Bar>
 			// Object
 
-			fields.add(new CodeField(lineName, lineType));
+			CodeField newField = new CodeField(lineName, lineType);
+			fields.add(newField);
+
+			line = " " + line + " ";
+
+			if (line.contains(" static ")) {
+				newField.setIsStatic(true);
+			}
 		}
 
 		return fields;
@@ -2980,6 +2989,9 @@ public abstract class Code extends DefaultStyledDocument {
 			if (addGetters) {
 				newCode.append(sep);
 				newCode.append("\tpublic ");
+				if (field.getIsStatic()) {
+					newCode.append("static ");
+				}
 				newCode.append(field.getType());
 				newCode.append(" get");
 				newCode.append(field.getNameUpcase());
@@ -2993,17 +3005,30 @@ public abstract class Code extends DefaultStyledDocument {
 
 			if (addSetters) {
 				newCode.append(sep);
-				newCode.append("\tpublic void set");
+				newCode.append("\tpublic ");
+				if (field.getIsStatic()) {
+					newCode.append("static ");
+				}
+				newCode.append("void set");
 				newCode.append(field.getNameUpcase());
 				newCode.append("(");
 				newCode.append(field.getType());
 				newCode.append(" ");
 				newCode.append(field.getName());
+				if (field.getIsStatic()) {
+					newCode.append("Arg");
+				}
 				newCode.append(") {\n");
-				newCode.append("\t\tthis.");
+				newCode.append("\t\t");
+				if (!field.getIsStatic()) {
+					newCode.append("this.");
+				}
 				newCode.append(field.getName());
 				newCode.append(" = ");
 				newCode.append(field.getName());
+				if (field.getIsStatic()) {
+					newCode.append("Arg");
+				}
 				newCode.append(";\n");
 				newCode.append("\t}\n");
 				sep = "\n";
@@ -3239,5 +3264,4 @@ public abstract class Code extends DefaultStyledDocument {
 	public int getSelEnd() {
 		return selEnd;
 	}
-
 }
