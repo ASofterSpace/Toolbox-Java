@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.TextEncoding;
 
 
 /**
@@ -20,6 +21,7 @@ public class CsvFileGerman extends CsvFile {
 		super(fullyQualifiedFileName);
 
 		setEntrySeparator(';');
+		setEncoding(TextEncoding.UTF8_WITH_BOM);
 	}
 
 	/**
@@ -30,6 +32,7 @@ public class CsvFileGerman extends CsvFile {
 		super(regularFile);
 
 		setEntrySeparator(';');
+		setEncoding(TextEncoding.UTF8_WITH_BOM);
 	}
 
 	/**
@@ -43,13 +46,14 @@ public class CsvFileGerman extends CsvFile {
 		super(directory, filename);
 
 		setEntrySeparator(';');
+		setEncoding(TextEncoding.UTF8_WITH_BOM);
 	}
 
 	public static String sanitizeForCsv(Object val) {
 		if (val == null) {
 			return "";
 		}
-		if (val instanceof Double) {
+		if ((val instanceof Double) || (val instanceof Float)) {
 			return val.toString().replace(".", ",");
 		}
 		String strVal = val.toString();

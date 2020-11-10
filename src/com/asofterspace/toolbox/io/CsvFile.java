@@ -162,7 +162,7 @@ public class CsvFile extends SimpleFile {
 		if (val == null) {
 			return "";
 		}
-		if (val instanceof Double) {
+		if ((val instanceof Double) || (val instanceof Float)) {
 			return val.toString().replace(",", ".");
 		}
 		String strVal = val.toString();
