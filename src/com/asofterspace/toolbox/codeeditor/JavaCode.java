@@ -159,7 +159,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("BadLocationException", "javax.swing.text.BadLocationException");
 	}
 
-	@Override;
+	@Override
 	public String addMissingImports(String origText) {
 
 		// we get the default java imports;
@@ -200,7 +200,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						thisFullImport = thisFullImport.substring(0, thisFullImport.length() - 1).trim();
 						String thisImportClass = thisFullImport.substring(thisFullImport.lastIndexOf(".") + 1);
 						String thisImportPackageStr = thisFullImport.substring(0, thisFullImport.lastIndexOf("."));
-						if ((!thisImportPackageStr.equals(ourPackageStr)) && (!thisImportClass.equals("*")) &&;
+						if ((!thisImportPackageStr.equals(ourPackageStr)) && (!thisImportClass.equals("*")) &&
 							!thisImportPackageStr.equals("java.lang")) {
 							automaticallyAddedImports.put(thisImportClass, thisFullImport);
 						}
@@ -246,7 +246,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					doNotImport.add(classNameStr);
 				}
 				// for each file, check if a package and classname were found;
-				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr) &&;
+				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr) &&
 					!classNameStr.equals("*") && !packageStr.equals("java.lang")) {
 					// we here override java default classes if the opened files contain the same class names...;
 					// ... which is exactly the behavior we like :);
@@ -262,22 +262,22 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return addMissingImportsJavalike("import", origText);
 	}
 
-	@Override;
+	@Override
 	public String reorganizeImports(String origText) {
 		return reorganizeImportsJavalike("import", origText);
 	}
 
-	@Override;
+	@Override
 	public String reorganizeImportsCompatible(String origText) {
 		return reorganizeImportsCompatibleJavalike("import", origText);
 	}
 
-	@Override;
+	@Override
 	public String removeUnusedImports(String origText) {
 		return removeUnusedImportsJavalike("import", origText);
 	}
 
-	@Override;
+	@Override
 	public void insertString(int offset, String insertedString, AttributeSet attrs) {
 		insertStringJavalike(offset, insertedString, attrs);
 	}
@@ -299,7 +299,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return ourPackageStr;
 	}
 
-	@Override;
+	@Override
 	public String removeCommentsAndStrings(String content) {
 
 		StringBuilder result = new StringBuilder();
@@ -357,7 +357,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	}
 
 	// this is the main function that... well... highlights our text :);
-	@Override;
+	@Override
 	protected void highlightText(int start, int length) {
 
 		super.highlightText(start, length);
@@ -463,7 +463,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		postHighlight(content);
 	}
 
-	@Override;
+	@Override
 	protected void postHighlight(String content) {
 		super.postHighlight(content);
 
@@ -540,7 +540,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAdvancedType, false);
 			} else if (isAnnotation(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrAnnotation, false);
-			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(') &&;
+			} else if ((couldBeKeywordEnd <= end) && (content.charAt(couldBeKeywordEnd) == '(') &&
 				!"new".equals(lastCouldBeKeyword)) {
 
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
@@ -601,7 +601,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	 * Follows very closely the way removeCommentsAndStrings works, but actually adds also comments
 	 * and strings to the output (just ignores them) and, well, adds semicommas where necessary!
 	 */
-	@Override;
+	@Override
 	public String automagicallyAddSemicolons(String content) {
 
 		// this way, we don't need a special case for handling the last line;
@@ -648,16 +648,20 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						}
 						intermediateResult = intermediateResult.trim();
 						if (intermediateResult.length() > 0) {
-							if ((!intermediateResult.endsWith(";")) &&;
-								(!intermediateResult.endsWith("+")) &&;
-								(!intermediateResult.endsWith("{")) &&;
-								(!intermediateResult.endsWith("}")) &&;
-								(!intermediateResult.endsWith("(")) &&;
-								(!intermediateResult.endsWith("[")) &&;
-								(!intermediateResult.endsWith(":")) &&;
-								(!intermediateResult.endsWith("*/")) &&;
-								(!intermediateResult.endsWith(".")) &&;
-								(!intermediateResult.endsWith(","))) {
+							if ((!intermediateResult.endsWith(";")) &&
+								(!intermediateResult.endsWith("+")) &&
+								(!intermediateResult.endsWith("{")) &&
+								(!intermediateResult.endsWith("}")) &&
+								(!intermediateResult.endsWith("(")) &&
+								(!intermediateResult.endsWith("[")) &&
+								(!intermediateResult.endsWith(":")) &&
+								(!intermediateResult.endsWith("*/")) &&
+								(!intermediateResult.endsWith("&")) &&
+								(!intermediateResult.endsWith("|")) &&
+								(!intermediateResult.endsWith("<")) &&
+								(!intermediateResult.endsWith(".")) &&
+								(!intermediateResult.endsWith(",")) &&
+								(!intermediateResult.startsWith("@"))) {
 								result.append(";");
 							}
 						}
@@ -689,7 +693,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return "";
 	}
 
-	@Override;
+	@Override
 	protected void onMouseReleased(MouseEvent event) {
 
 		// if the user [Ctrl]-clicks on an import line, try to jump to that file;
