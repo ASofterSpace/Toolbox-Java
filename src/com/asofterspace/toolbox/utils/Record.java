@@ -511,6 +511,14 @@ public class Record {
 		return objContents.keySet();
 	}
 
+	public List<Record> getValues(String key) {
+		Record rec = get(key);
+		if (rec == null) {
+			return new ArrayList<>();
+		}
+		return rec.getValues();
+	}
+
 	/**
 	 * Get a list of all values stored in this Record object
 	 * (if it is an array, then getting all values in the array
@@ -543,6 +551,14 @@ public class Record {
 		return result;
 	}
 
+	public Map<String, Record> getValueMap(String key) {
+		Record rec = get(key);
+		if (rec == null) {
+			return new TreeMap<String, Record>();
+		}
+		return rec.getValueMap();
+	}
+
 	public Map<String, Record> getValueMap() {
 
 		if (objContents == null) {
@@ -550,6 +566,14 @@ public class Record {
 		}
 
 		return objContents;
+	}
+
+	public Map<String, Object> getObjectMap(String key) {
+		Record rec = get(key);
+		if (rec == null) {
+			return new TreeMap<String, Object>();
+		}
+		return rec.getObjectMap();
 	}
 
 	public Map<String, Object> getObjectMap() {
