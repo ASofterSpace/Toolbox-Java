@@ -27,33 +27,33 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the Java language;
+	// all keywords of the Java language
 	protected static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
 		new String[] { "abstract", "as", "assert", "break", "case", "catch", "const", "continue", "default", "do", "else", "extends", "final", "finally", "for", "goto", "if", "implements", "import", "in", "instanceof", "native", "new", "package", "private", "protected", "public", "return", "static", "switch", "synchronized", "throw", "throws", "trait", "try", "while", "volatile"}
 	));
 
-	// all primitive types of the Java language and other stuff that looks that way;
+	// all primitive types of the Java language and other stuff that looks that way
 	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
 		new String[] {"boolean", "byte", "char", "class", "double", "enum", "false", "float", "int", "interface", "long", "null", "short", "super", "this", "true", "void"}
 	));
 
-	// all string delimiters of the Java language;
+	// all string delimiters of the Java language
 	protected static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the Java language;
+	// operand characters in the Java language
 	protected static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
 		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '?', '&', '|', '^', '~', '*'}
 	));
 
-	// start of single line comments in the Java language;
+	// start of single line comments in the Java language
 	protected static final String START_SINGLELINE_COMMENT = "//";
 
-	// start of multiline comments in the Java language;
+	// start of multiline comments in the Java language
 	protected static final String START_MULTILINE_COMMENT = "/*";
 
-	// end of multiline comments in the Java language;
+	// end of multiline comments in the Java language
 	protected static final String END_MULTILINE_COMMENT = "*/";
 
 	protected int curLineStartingWhitespace = 0;
@@ -162,20 +162,20 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	@Override
 	public String addMissingImports(String origText) {
 
-		// we get the default java imports;
+		// we get the default java imports
 		clearAutomaticallyAddedImports();
 
-		// and if we are a regular java file with a package name...;
-		// (necessary because we want to avoid importing files from our own package ^^);
+		// and if we are a regular java file with a package name...
+		// (necessary because we want to avoid importing files from our own package ^^)
 		String ourPackageStr = getPackage(removeCommentsAndStrings(decoratedEditor.getText()));
 
-		// ... then we add missing imports based on all the open java files;
+		// ... then we add missing imports based on all the open java files
 		if (ourPackageStr != null) {
 
-			// we explicitly do not want to import e.g. java.io.File if we already have;
-			// com.asofterspace.toolbox.io.File, even if we are inside com.asofterspace.;
-			// toolbox.io ourselves, such that the ass io File is not actually present;
-			// in the final import block!;
+			// we explicitly do not want to import e.g. java.io.File if we already have
+			// com.asofterspace.toolbox.io.File, even if we are inside com.asofterspace.
+			// toolbox.io ourselves, such that the ass io File is not actually present
+			// in the final import block!
 			List<String> doNotImport = new ArrayList<>();
 
 			List<String> filesToOpen = new ArrayList<>();
@@ -193,8 +193,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				content = removeCommentsAndStrings(content);
 				for (String line : content.split("\n")) {
 					line = line.trim();
-					// add imports of other files also as possible imports, but guard against;
-					// multi-line ones;
+					// add imports of other files also as possible imports, but guard against
+					// multi-line ones
 					if ((line.startsWith("import ") && line.contains(".") && line.endsWith(";"))) {
 						String thisFullImport = line.substring(7);
 						thisFullImport = thisFullImport.substring(0, thisFullImport.length() - 1).trim();
@@ -205,7 +205,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 							automaticallyAddedImports.put(thisImportClass, thisFullImport);
 						}
 					}
-					// add other source files directly as possible imports;
+					// add other source files directly as possible imports
 					if (line.startsWith("package ")) {
 						packageStr = line.substring(8).trim();
 						if (packageStr.endsWith(";")) {
@@ -230,8 +230,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					if (line.startsWith("enum ")) {
 						classNameStr = line.substring(5);
 					}
-					// once a class name has been found, interrupt - as there will be no further;
-					// class name or import;
+					// once a class name has been found, interrupt - as there will be no further
+					// class name or import
 					if (classNameStr != null) {
 						if (classNameStr.contains(" ")) {
 							classNameStr = classNameStr.substring(0, classNameStr.indexOf(" "));
@@ -245,11 +245,11 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				if ((packageStr != null) && (classNameStr != null) && packageStr.equals(ourPackageStr)) {
 					doNotImport.add(classNameStr);
 				}
-				// for each file, check if a package and classname were found;
+				// for each file, check if a package and classname were found
 				if ((packageStr != null) && (classNameStr != null) && !packageStr.equals(ourPackageStr) &&
 					!classNameStr.equals("*") && !packageStr.equals("java.lang")) {
-					// we here override java default classes if the opened files contain the same class names...;
-					// ... which is exactly the behavior we like :);
+					// we here override java default classes if the opened files contain the same class names...
+					// ... which is exactly the behavior we like :)
 					automaticallyAddedImports.put(classNameStr, packageStr + "." + classNameStr);
 				}
 			}
@@ -312,21 +312,21 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		while (start <= end) {
 
-			// while we have a delimiter...;
+			// while we have a delimiter...
 			char curChar = content.charAt(start);
 
 			startingWhitespace = false;
 
 			while (isDelimiter(curChar)) {
 
-				// ... check for a comment (which starts with a delimiter);
+				// ... check for a comment (which starts with a delimiter)
 				if (isCommentStart(content, start, end)) {
 					start = highlightComment(content, start, end);
 
-				// ... and check for a quoted string;
+				// ... and check for a quoted string
 				} else if (isStringDelimiter(content.charAt(start))) {
 
-					// then let's get that string!;
+					// then let's get that string!
 					start = highlightString(content, start, end);
 
 				} else {
@@ -335,7 +335,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 				if (start < end) {
 
-					// jump forward and try again!;
+					// jump forward and try again!
 					start++;
 
 				} else {
@@ -346,7 +346,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				curChar = content.charAt(start);
 			}
 
-			// or any other token instead?;
+			// or any other token instead?
 			prev = start;
 			start = highlightOther(content, start, end, false, ' ');
 			result.append(content.substring(prev, start));
@@ -356,7 +356,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return "";
 	}
 
-	// this is the main function that... well... highlights our text :);
+	// this is the main function that... well... highlights our text :)
 	@Override
 	protected void highlightText(int start, int length) {
 
@@ -367,7 +367,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		this.encounteredTokens = nextEncounteredTokens;
 		nextEncounteredTokens = new ArrayList<>();
 
-		// add a few strings which we want to get proposed all the time, even if they have not been encountered yet;
+		// add a few strings which we want to get proposed all the time, even if they have not been encountered yet
 		nextEncounteredTokens.add("System.out.println();");
 		nextEncounteredTokens.add("ArrayList<>();");
 		nextEncounteredTokens.add("@Override");
@@ -381,14 +381,14 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 			content = this.getText(0, end);
 
-			// TODO :: actually use the start and length passed in as arguments!;
-			// (currently, they are just being ignored...);
+			// TODO :: actually use the start and length passed in as arguments!
+			// (currently, they are just being ignored...)
 			start = 0;
 			end -= 1;
 
 			while (start <= end) {
 
-				// while we have a delimiter...;
+				// while we have a delimiter...
 				char curChar = content.charAt(start);
 				char prevChar = ' ';
 
@@ -396,7 +396,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 				while (isDelimiter(curChar)) {
 
-					// prevent stuff like blubb = foo() from ending up in the function overview list;
+					// prevent stuff like blubb = foo() from ending up in the function overview list
 					if (curChar == '=') {
 						lastCouldBeKeyword = "";
 					}
@@ -414,21 +414,21 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						}
 					}
 
-					// ... check for a comment (which starts with a delimiter);
+					// ... check for a comment (which starts with a delimiter)
 					if (isCommentStart(content, start, end)) {
 						start = highlightComment(content, start, end);
 
-					// ... and check for a quoted string;
+					// ... and check for a quoted string
 					} else if (isStringDelimiter(content.charAt(start))) {
 
-						// then let's get that string!;
+						// then let's get that string!
 						start = highlightString(content, start, end);
 
 					} else {
-						// please highlight the delimiter in the process ;);
+						// please highlight the delimiter in the process ;)
 						if (!Character.isWhitespace(curChar)) {
-							// we are checking this because otherwise we are getting exceptions... but... why?;
-							// at this point, this should always be the case o.o;
+							// we are checking this because otherwise we are getting exceptions... but... why?
+							// at this point, this should always be the case o.o
 							if (start <= end) {
 								this.setCharacterAttributes(start, 1, this.attrReservedChar, false);
 							}
@@ -437,7 +437,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 					if (start < end) {
 
-						// jump forward and try again!;
+						// jump forward and try again!
 						start++;
 
 					} else {
@@ -449,7 +449,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					curChar = content.charAt(start);
 				}
 
-				// or any other token instead?;
+				// or any other token instead?
 				start = highlightOther(content, start, end, true, prevChar);
 			}
 
@@ -457,7 +457,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 			return;
 
 		} catch (BadLocationException e) {
-			// oops!;
+			// oops!
 		}
 
 		postHighlight(content);
@@ -489,29 +489,29 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 			int commentEnd = content.indexOf(EOL, start + 2) - 1;
 
-			// this is the last line;
+			// this is the last line
 			if (commentEnd == -2) {
 				commentEnd = end;
 			}
 
-			// apply single line comment highlighting;
+			// apply single line comment highlighting
 			this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 			return commentEnd;
 		}
 
-		// apply multiline comment highlighting;
+		// apply multiline comment highlighting
 		int commentEnd = content.indexOf(END_MULTILINE_COMMENT, start + 2);
 
-		// the multiline comment has not been closed - let's comment out the rest of the document!;
+		// the multiline comment has not been closed - let's comment out the rest of the document!
 		if (commentEnd == -1) {
 			commentEnd = end;
 		} else {
-			// +1 because of the length of END_MULTILINE_COMMENT itself;
+			// +1 because of the length of END_MULTILINE_COMMENT itself
 			commentEnd += 1;
 		}
 
-		// apply multiline comment highlighting;
+		// apply multiline comment highlighting
 		this.setCharacterAttributes(start, commentEnd - start + 1, this.attrComment, false);
 
 		return commentEnd;
@@ -545,10 +545,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
-					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type;
+					// ignore lines with more than 1 tab indent / 4 regular indents and line without the return type
 					if ((curLineStartingWhitespace < 5) && !"".equals(lastCouldBeKeyword)) {
-						// now get the entire line that we found!;
-						// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+						// now get the entire line that we found!
+						// String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()"
 						String functionName = StrUtils.getLineFromPosition(start, content);
 						this.functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 					}
@@ -604,7 +604,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	@Override
 	public String automagicallyAddSemicolons(String content) {
 
-		// this way, we don't need a special case for handling the last line;
+		// this way, we don't need a special case for handling the last line
 		content += "\n";
 
 		StringBuilder result = new StringBuilder();
@@ -617,51 +617,76 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 		while (start <= end) {
 
-			// while we have a delimiter...;
+			// while we have a delimiter...
 			char curChar = content.charAt(start);
 
 			startingWhitespace = false;
 
 			while (isDelimiter(curChar)) {
 
-				// ... check for a comment (which starts with a delimiter);
+				// ... check for a comment (which starts with a delimiter)
 				if (isCommentStart(content, start, end)) {
 					int newStart = highlightComment(content, start, end);
 					result.append(content.substring(start, newStart+1));
 					start = newStart;
 
-				// ... and check for a quoted string;
+					// jump over the line end of a comment line
+					if (start < end) {
+						if (content.charAt(start + 1) == '\n') {
+							result.append('\n');
+							start++;
+						}
+					}
+
+				// ... and check for a quoted string
 				} else if (isStringDelimiter(content.charAt(start))) {
 
-					// then let's get that string!;
+					// then let's get that string!
 					int newStart = highlightString(content, start, end);
 					result.append(content.substring(start, newStart+1));
 					start = newStart;
 
 				} else {
 					if (curChar == '\n') {
-						// actually do the adding of the missing semicommas!;
-						String intermediateResult = result.toString();
-						// get just the last line that we are currently looking at;
-						if (intermediateResult.contains("\n")) {
-							intermediateResult = intermediateResult.substring(intermediateResult.lastIndexOf("\n") + 1);
+						// actually do the adding of the missing semicommas!
+						String thisLine = result.toString();
+						// get just the last line that we are currently looking at
+						if (thisLine.contains("\n")) {
+							thisLine = thisLine.substring(thisLine.lastIndexOf("\n") + 1);
 						}
-						intermediateResult = intermediateResult.trim();
-						if (intermediateResult.length() > 0) {
-							if ((!intermediateResult.endsWith(";")) &&
-								(!intermediateResult.endsWith("+")) &&
-								(!intermediateResult.endsWith("{")) &&
-								(!intermediateResult.endsWith("}")) &&
-								(!intermediateResult.endsWith("(")) &&
-								(!intermediateResult.endsWith("[")) &&
-								(!intermediateResult.endsWith(":")) &&
-								(!intermediateResult.endsWith("*/")) &&
-								(!intermediateResult.endsWith("&")) &&
-								(!intermediateResult.endsWith("|")) &&
-								(!intermediateResult.endsWith("<")) &&
-								(!intermediateResult.endsWith(".")) &&
-								(!intermediateResult.endsWith(",")) &&
-								(!intermediateResult.startsWith("@"))) {
+
+						// oh and get the next line too!
+						String nextLine = "";
+						if (start < end) {
+							nextLine = content.substring(start + 1);
+							if (nextLine.contains("\n")) {
+								nextLine = nextLine.substring(0, nextLine.indexOf("\n"));
+							}
+							nextLine = nextLine.trim();
+						}
+
+						thisLine = thisLine.trim();
+						if (thisLine.length() > 0) {
+							if ((!thisLine.endsWith(";")) &&
+								// i++ should get a semicomma, but i + should not (as we expect more on the next line)
+								(thisLine.endsWith("++") || !thisLine.endsWith("+")) &&
+								(!thisLine.endsWith("{")) &&
+								(!thisLine.endsWith("}")) &&
+								(!thisLine.endsWith("(")) &&
+								(!thisLine.endsWith("[")) &&
+								(!thisLine.endsWith(":")) &&
+								(!thisLine.endsWith("*/")) &&
+								(!thisLine.endsWith("&")) &&
+								(!thisLine.endsWith("|")) &&
+								(!thisLine.endsWith("<")) &&
+								(!thisLine.endsWith(".")) &&
+								(!thisLine.endsWith(",")) &&
+								// annotations
+								(!thisLine.startsWith("@")) &&
+								// in case of chaining several object methods
+								(!nextLine.startsWith(".")) &&
+								// in case of writing if (...) { with a newline before {
+								(!(thisLine.endsWith(")") && nextLine.startsWith("{")))) {
 								result.append(";");
 							}
 						}
@@ -671,7 +696,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 
 				if (start < end) {
 
-					// jump forward and try again!;
+					// jump forward and try again!
 					start++;
 
 				} else {
@@ -683,7 +708,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				curChar = content.charAt(start);
 			}
 
-			// or any other token instead?;
+			// or any other token instead?
 			prev = start;
 			start = highlightOther(content, start, end, false, ' ');
 			result.append(content.substring(prev, start));
@@ -696,7 +721,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 	@Override
 	protected void onMouseReleased(MouseEvent event) {
 
-		// if the user [Ctrl]-clicks on an import line, try to jump to that file;
+		// if the user [Ctrl]-clicks on an import line, try to jump to that file
 		if (event.isControlDown()) {
 			int caretPos = decoratedEditor.getCaretPosition();
 			String content = decoratedEditor.getText();
@@ -705,29 +730,29 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 			String importLine = null;
 
 			if ((line != null) && line.startsWith("import ") && line.endsWith(";")) {
-				// the user clicked on a line like import foo.bar.nonsense.Object;
+				// the user clicked on a line like import foo.bar.nonsense.Object
 				importLine = line;
 			} else {
 				String curWord = StrUtils.getWordFromPosition(caretPos, content);
 				// perform the following only for words starting with upper-case characters (so, in Java, classnames),
-				// NOT for any words (as we e.g. want to jump around function names within the file - if we did not;
-				// check this, then for every time we Ctrl+click on a function name here we would search half the;
-				// disk for non-existant java files...);
+				// NOT for any words (as we e.g. want to jump around function names within the file - if we did not
+				// check this, then for every time we Ctrl+click on a function name here we would search half the
+				// disk for non-existant java files...)
 				if (curWord.length() > 0) {
 					if (Character.isUpperCase(curWord.charAt(0))) {
 						for (String curLine : lines) {
 							curLine = curLine.trim();
 							if (curLine.startsWith("import ") && curLine.endsWith("." + curWord + ";")) {
-								// the user clicked on Object somewhere in the code and we found a line like;
-								// import foo.bar.nonsense.Object; at the top;
+								// the user clicked on Object somewhere in the code and we found a line like
+								// import foo.bar.nonsense.Object; at the top
 								importLine = curLine;
 								break;
 							}
 						}
 
-						// if there was no import line for the current word...;
+						// if there was no import line for the current word...
 						if (importLine == null) {
-							// ... then attempt to open the file directly in the same folder (as it might be a direct sibling);
+							// ... then attempt to open the file directly in the same folder (as it might be a direct sibling)
 							List<String> filesToOpen = new ArrayList<>();
 							filesToOpen.add(curWord + ".java");
 							filesToOpen.add(curWord + ".groovy");
@@ -749,7 +774,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				openFilePaths.add(importLine.replaceAll("\\.", "/") + ".groovy");
 				String basePath = "";
 
-				// get own package name;
+				// get own package name
 				int packageAmount = 0;
 				for (String curLine : lines) {
 					if (curLine.startsWith("package ")) {
@@ -757,19 +782,19 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 					}
 				}
 
-				// go up packageAmount+1 (so for package foo.bar.nonsense;, go up three);
+				// go up packageAmount+1 (so for package foo.bar.nonsense;, go up three)
 				for (int i = 0; i < packageAmount+1; i++) {
 					basePath = "../" + basePath;
 				}
 
-				// now that the path has been resolved, attempt to open that file!;
+				// now that the path has been resolved, attempt to open that file!
 				if (openFileRelativeToThis(basePath, openFilePaths, CodeLanguage.JAVA, importLine)) {
 					return;
 				}
 			}
 		}
 
-		// elsewise, do the regular thing (on [Ctrl]-click, jump to next occurrence of the word);
+		// elsewise, do the regular thing (on [Ctrl]-click, jump to next occurrence of the word)
 		super.onMouseReleased(event);
 	}
 }

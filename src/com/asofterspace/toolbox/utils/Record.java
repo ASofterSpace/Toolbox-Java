@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -473,6 +474,14 @@ public class Record {
 	}
 
 	/**
+	 * Returns the value of this Record object as Object - which could be a String, Integer, etc.
+	 */
+	public Object asObject() {
+
+		return simpleContents;
+	}
+
+	/**
 	 * Returns true if the given key exists in this record object,
 	 * and false otherwise (as well as when this record is no object)
 	 */
@@ -541,6 +550,27 @@ public class Record {
 		}
 
 		return objContents;
+	}
+
+	public Map<String, Object> getObjectMap() {
+
+		if (objContents == null) {
+			return new TreeMap<String, Object>();
+		}
+
+		Map<String, Object> result = new HashMap<>();
+
+		for (Map.Entry<String, Record> entry : objContents.entrySet()) {
+			String key = entry.getKey();
+			Record recValue = entry.getValue();
+			if (recValue == null) {
+				result.put(key, null);
+			} else {
+				result.put(key, recValue.asObject());
+			}
+		}
+
+		return result;
 	}
 
 	/**
