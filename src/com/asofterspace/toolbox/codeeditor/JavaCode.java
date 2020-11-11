@@ -597,6 +597,97 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return token.startsWith("@");
 	}
 
+	/**
+	 * Follows very closely the way removeCommentsAndStrings works, but actually adds also comments
+	 * and strings to the output (just ignores them) and, well, adds semicommas where necessary!
+	 */
+	@Override
+	public String automagicallyAddSemicolons(String content) {
+
+		// this way, we don't need a special case for handling the last line
+		content += "\n";
+
+		StringBuilder result = new StringBuilder();
+
+		attributeSetting = false;
+
+		int start = 0;
+		int prev = 0;
+		int end = content.length() - 1;
+
+		while (start <= end) {
+
+			// while we have a delimiter...
+			char curChar = content.charAt(start);
+
+			startingWhitespace = false;
+
+			while (isDelimiter(curChar)) {
+
+				// ... check for a comment (which starts with a delimiter)
+				if (isCommentStart(content, start, end)) {
+					int newStart = highlightComment(content, start, end);
+					result.append(content.substring(start, newStart+1));
+					start = newStart;
+
+				// ... and check for a quoted string
+				} else if (isStringDelimiter(content.charAt(start))) {
+
+					// then let's get that string!
+					int newStart = highlightString(content, start, end);
+					result.append(content.substring(start, newStart+1));
+					start = newStart;
+
+				} else {
+					if (curChar == '\n') {
+						// actually do the adding of the missing semicommas!
+						String intermediateResult = result.toString();
+						// get just the last line that we are currently looking at
+						if (intermediateResult.contains("\n")) {
+							intermediateResult = intermediateResult.substring(intermediateResult.lastIndexOf("\n") + 1);
+						}
+						intermediateResult = intermediateResult.trim();
+						if (intermediateResult.length() > 0) {
+							if ((!intermediateResult.endsWith(";")) &&
+								(!intermediateResult.endsWith("+")) &&
+								(!intermediateResult.endsWith("{")) &&
+								(!intermediateResult.endsWith("}")) &&
+								(!intermediateResult.endsWith("(")) &&
+								(!intermediateResult.endsWith("[")) &&
+								(!intermediateResult.endsWith(":")) &&
+								(!intermediateResult.endsWith("*/")) &&
+								(!intermediateResult.endsWith(","))) {
+								result.append(";");
+							}
+						}
+					}
+					result.append(curChar);
+				}
+
+				if (start < end) {
+
+					// jump forward and try again!
+					start++;
+
+				} else {
+					attributeSetting = true;
+					String resStr = result.toString();
+					return resStr.substring(0, resStr.length() - 1);
+				}
+
+				curChar = content.charAt(start);
+			}
+
+			// or any other token instead?
+			prev = start;
+			start = highlightOther(content, start, end, false, ' ');
+			result.append(content.substring(prev, start));
+		}
+
+		attributeSetting = true;
+		return "";
+	}
+
 	@Override
 	protected void onMouseReleased(MouseEvent event) {
 

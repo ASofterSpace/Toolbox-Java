@@ -1576,6 +1576,23 @@ public abstract class Code extends DefaultStyledDocument {
 		return output.toString() + secondOutput.toString();
 	}
 
+	public void automagicallyAddSemicolons() {
+
+		int origCaretPos = decoratedEditor.getCaretPosition();
+		String origText = decoratedEditor.getText();
+
+		String newText = automagicallyAddSemicolons(origText);
+
+		decoratedEditor.setText(newText);
+		decoratedEditor.setCaretPosition(origCaretPos);
+	}
+
+	public String automagicallyAddSemicolons(String origText) {
+
+		// just do nothing :)
+		return origText;
+	}
+
 	private synchronized void startHighlightThread() {
 
 		if (highlightThread == null) {
