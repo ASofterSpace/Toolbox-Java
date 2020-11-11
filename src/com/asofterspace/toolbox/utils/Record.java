@@ -63,6 +63,7 @@ public class Record {
 	 * hand this method a Record, it will simply
 	 * be returned)
 	 */
+	@SuppressWarnings("rawtypes")
 	public static Record fromAnything(Object recordOrWhatever) {
 
 		if (recordOrWhatever == null) {
@@ -105,6 +106,19 @@ public class Record {
 			}
 			arrRecord.arrContents = valList;
 			return arrRecord;
+		}
+
+		if (recordOrWhatever instanceof Map) {
+			Record mapRecord = Record.emptyObject();
+			Map<String, Record> valMap = new HashMap<>();
+			for (Object entryObj : ((Map) recordOrWhatever).entrySet()) {
+				Map.Entry entry = (Map.Entry) entryObj;
+				Object key = entry.getKey();
+				Object value = entry.getValue();
+				valMap.put(""+key, fromAnything(value));
+			}
+			mapRecord.objContents = valMap;
+			return mapRecord;
 		}
 
 		if (recordOrWhatever instanceof Enum<?>) {
