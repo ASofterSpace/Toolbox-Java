@@ -670,6 +670,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 							if ((!thisLine.endsWith(";")) &&
 								// i++ should get a semicomma, but i + should not (as we expect more on the next line)
 								(thisLine.endsWith("++") || !thisLine.endsWith("+")) &&
+								(thisLine.endsWith("--") || !thisLine.endsWith("-")) &&
+								(!thisLine.endsWith("=")) &&
 								(!thisLine.endsWith("{")) &&
 								(!thisLine.endsWith("}")) &&
 								(!thisLine.endsWith("(")) &&
@@ -686,8 +688,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 								// in case of chaining several object methods
 								(!nextLine.startsWith(".")) &&
 								(!nextLine.startsWith(")")) &&
-								// in case of writing if (...) { with a newline before {
-								(!(thisLine.endsWith(")") && nextLine.startsWith("{")))) {
+								(!nextLine.startsWith("{")) &&
+								(!(thisLine.endsWith(")") && nextLine.startsWith("throws ")))) {
 								result.append(";");
 							}
 						}

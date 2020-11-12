@@ -34,11 +34,13 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 		this.data = binaryFile.loadContent();
 	}
 
+	@Override
 	public long getContentLength() {
 
 		return data.length;
 	}
 
+	@Override
 	public String getPreferredCacheParadigm() {
 
 		String lowFilename = filename.toLowerCase();
@@ -56,11 +58,13 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 		return "no-store";
 	}
 
+	@Override
 	public String getContentType() {
 
 		return contentType;
 	}
 
+	@Override
 	public byte[] getBinaryContent() {
 
 		return data;

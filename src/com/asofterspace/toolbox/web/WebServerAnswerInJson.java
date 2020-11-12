@@ -37,22 +37,26 @@ public class WebServerAnswerInJson implements WebServerAnswer {
 		this.data = jsonData.getBytes(StandardCharsets.UTF_8);
 	}
 
+	@Override
 	public long getContentLength() {
 
 		return data.length;
 	}
 
+	@Override
 	public String getPreferredCacheParadigm() {
 
 		// never keep json data as it might change all the time
 		return "no-store";
 	}
 
+	@Override
 	public String getContentType() {
 
 		return "application/json";
 	}
 
+	@Override
 	public byte[] getBinaryContent() {
 
 		return data;
