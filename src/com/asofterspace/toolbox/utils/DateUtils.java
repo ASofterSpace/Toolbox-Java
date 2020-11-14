@@ -208,7 +208,7 @@ public class DateUtils {
 		result.append(" ");
 		result.append(getYear(datetime));
 
-		return result.toString() + ", " + SHORT_TIME_FORMAT.format(datetime);
+		return result.toString() + ", " + serializeTimeShort(datetime);
 	}
 
 	/**
@@ -240,6 +240,24 @@ public class DateUtils {
 		}
 
 		return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
+	}
+
+	public static String serializeTime(Date time) {
+
+		if (time == null) {
+			return null;
+		}
+
+		return DEFAULT_TIME_FORMAT.format(time);
+	}
+
+	public static String serializeTimeShort(Date time) {
+
+		if (time == null) {
+			return null;
+		}
+
+		return SHORT_TIME_FORMAT.format(time);
 	}
 
 	public static String dateTimeStampNow() {
@@ -391,6 +409,9 @@ public class DateUtils {
 		return DAY_NAMES[val];
 	}
 
+	/**
+	 * Gets the month number, January is 1
+	 */
 	public static Integer getMonth(Date someDate) {
 		if (someDate == null) {
 			return null;
