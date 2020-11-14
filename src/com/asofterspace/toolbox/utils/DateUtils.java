@@ -33,6 +33,8 @@ public class DateUtils {
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
 	public static final SimpleDateFormat SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
 
+	private static final String[] DAY_NAMES = new String[]{"Saturday", "Sunday", "Monday",
+		"Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 	private static final String[] MONTH_NAMES = new String[]{"January", "February", "March",
 		"April", "May", "June", "July", "August", "September", "October", "November", "December"};
 	private static final String[] MONTH_NAMES_GERMAN = new String[]{"Januar", "Februar", "März",
@@ -149,16 +151,64 @@ public class DateUtils {
 	}
 
 	/**
-	 * Serializes a date-time as e.g. 12. October 2020, 15:37
+	 * Serializes a date-time as e.g. 12th of October 2020, 15:37
 	 * (when we are unsure about the date, we probably don't need the seconds and milliseconds!)
 	 */
 	public static String serializeDateTimeLong(Date datetime) {
+		return serializeDateTimeLong(datetime, null, null);
+	}
+
+	/**
+	 * Serializes a date-time as e.g. 12<span class="sup">th</span> of October 2020, 15:37
+	 */
+	public static String serializeDateTimeLong(Date datetime, String beforeUp, String afterUp) {
 
 		if (datetime == null) {
 			return null;
 		}
 
-		return serializeDateLong(datetime) + ", " + SHORT_TIME_FORMAT.format(datetime);
+		int day = getDayOfMonth(datetime);
+
+		StringBuilder result = new StringBuilder();
+
+		result.append(day);
+
+		if (beforeUp != null) {
+			result.append(beforeUp);
+		}
+
+		switch (day) {
+			case 1:
+			case 21:
+			case 31:
+				result.append("st");
+				break;
+			case 2:
+			case 22:
+			case 32:
+				result.append("nd");
+				break;
+			case 3:
+			case 23:
+			case 33:
+				result.append("rd");
+				break;
+			default:
+				result.append("th");
+				break;
+		}
+
+		if (afterUp != null) {
+			result.append(afterUp);
+		}
+
+		result.append(" of ");
+
+		result.append(getMonthNameEN(datetime));
+		result.append(" ");
+		result.append(getYear(datetime));
+
+		return result.toString() + ", " + SHORT_TIME_FORMAT.format(datetime);
 	}
 
 	/**
@@ -315,6 +365,32 @@ public class DateUtils {
 		return serializeDate(someDate).equals(serializeDate(otherDate));
 	}
 
+	public static Integer getDayOfMonth(Date someDate) {
+		if (someDate == null) {
+			return null;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(someDate);
+		return cal.get(Calendar.DAY_OF_MONTH);
+	}
+
+	public static Integer getDayOfWeek(Date someDate) {
+		if (someDate == null) {
+			return null;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(someDate);
+		return cal.get(Calendar.DAY_OF_WEEK);
+	}
+
+	public static String getDayOfWeekNameEN(Date someDate) {
+		Integer val = getDayOfWeek(someDate);
+		if (val == null) {
+			return "Nonday";
+		}
+		return DAY_NAMES[val];
+	}
+
 	public static Integer getMonth(Date someDate) {
 		if (someDate == null) {
 			return null;
@@ -322,6 +398,14 @@ public class DateUtils {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(someDate);
 		return cal.get(Calendar.MONTH) + 1;
+	}
+
+	public static String getMonthNameEN(Date someDate) {
+		Integer val = getMonth(someDate);
+		if (val == null) {
+			return "Nonuary";
+		}
+		return MONTH_NAMES[val - 1];
 	}
 
 	public static Integer getYear(Date someDate) {
