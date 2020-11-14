@@ -24,12 +24,14 @@ public class DateUtils {
 	private static final String DEFAULT_DATE_TIME_FORMAT_STR = "yyyy-MM-dd HH:mm:ss.SSS";
 	private static final String NUMERICAL_DATE_TIME_FORMAT_STR = "yyyyMMddHHmmssSSS";
 	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
+	private static final String SHORT_TIME_FORMAT_STR = "HH:mm";
 
 	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
 	public static final SimpleDateFormat FALLBACK_DATE_FORMAT = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
+	public static final SimpleDateFormat SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
 
 	private static final String[] MONTH_NAMES = new String[]{"January", "February", "March",
 		"April", "May", "June", "July", "August", "September", "October", "November", "December"};
@@ -144,6 +146,19 @@ public class DateUtils {
 		}
 
 		return DEFAULT_DATE_FORMAT.format(date);
+	}
+
+	/**
+	 * Serializes a date-time as e.g. 12. October 2020, 15:37
+	 * (when we are unsure about the date, we probably don't need the seconds and milliseconds!)
+	 */
+	public static String serializeDateTimeLong(Date datetime) {
+
+		if (datetime == null) {
+			return null;
+		}
+
+		return serializeDateLong(datetime) + ", " + SHORT_TIME_FORMAT.format(datetime);
 	}
 
 	/**
