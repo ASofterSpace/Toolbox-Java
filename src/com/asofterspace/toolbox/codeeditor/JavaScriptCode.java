@@ -254,6 +254,12 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
 		if (isKeyword(couldBeKeyword)) {
+			if ("function".equals(couldBeKeyword)) {
+				String functionName = getFunctionNameFromLine(StrUtils.getLineFromPosition(start, content));
+				if (functionName.length() > 0) {
+					functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+				}
+			}
 			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
 		} else if (isPrimitiveType(couldBeKeyword)) {
 			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
@@ -274,6 +280,52 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		lastCouldBeKeyword = couldBeKeyword;
 
 		return couldBeKeywordEnd;
+	}
+
+	/**
+	 * Takes a line containing the word "function" like
+	 *   function foobar(arg1, arg2) {
+	 *   foobar: function(arg1, arg2) {
+	 * and returns foobar(arg1, arg2) - the name of the function followed by the arguments
+	 */
+	private String getFunctionNameFromLine(String line) {
+
+		String args = "";
+		line = line.trim();
+
+		if (line.contains("{")) {
+			line = line.substring(0, line.indexOf("{")).trim();
+		}
+
+		// in case of (function () {, trim off the first (
+		while (line.startsWith("(")) {
+			line = line.substring(1);
+		}
+
+		if (line.contains("(")) {
+			args = line.substring(line.indexOf("(") + 1);
+			if (args.contains(")")) {
+				args = args.substring(0, args.indexOf(")"));
+			}
+			line = line.substring(0, line.indexOf("(")).trim();
+		}
+
+		// we now have the args, and the line contains:
+		//   function foobar
+		//   foobar: function
+		// soooo let's just...
+		if (line.startsWith("function")) {
+			line = line.substring("function".length()).trim();
+		}
+		if (line.contains(":")) {
+			line = line.substring(0, line.indexOf(":")).trim();
+		}
+
+		if ("".equals(line)) {
+			line = "anonymous function";
+		}
+
+		return line + "(" + args + ")";
 	}
 
 	private boolean isDelimiter(char character) {
