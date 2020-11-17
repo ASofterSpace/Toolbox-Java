@@ -21,4 +21,9 @@ public interface WebAccessedCallback {
 	 * @param content  The content that was requested
 	 */
 	void gotContent(String content);
+
+	/**
+	 * We got a response code from the web resource
+	 */
+	void gotResponseCode(Integer code);
 }

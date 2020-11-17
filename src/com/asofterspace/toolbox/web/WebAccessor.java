@@ -51,13 +51,7 @@ public class WebAccessor {
 
 		Thread t = new Thread(new Runnable() { public void run() {
 
-			String content = get(url);
-
-			if ((content == null) || (content.length() < 1)) {
-				callback.gotError();
-			} else {
-				callback.gotContent(content);
-			}
+			get(url, null, null, callback);
 		}});
 
 		t.start();
@@ -80,7 +74,15 @@ public class WebAccessor {
 	 * @param url  The url of the web resource
 	 */
 	public static byte[] getBytes(String url) {
-		return getPutPost(url, "", "GET", null);
+		return getPutPost(url, "", "GET", null, null);
+	}
+
+	/**
+	 * Get a web resource in bytes synchronously (not assuming any encoding therefore!)
+	 * @param url  The url of the web resource
+	 */
+	public static byte[] getBytes(String url, WebAccessedCallback callback) {
+		return getPutPost(url, "", "GET", null, callback);
 	}
 
 	/**
@@ -89,7 +91,7 @@ public class WebAccessor {
 	 * @param parameters  The parameters that should be appended to the url
 	 */
 	public static String get(String url, Map<String, String> parameters) {
-		return bytesToString(getPutPost(url + mapToUrlSuffix(parameters), "", "GET", null));
+		return bytesToString(getPutPost(url + mapToUrlSuffix(parameters), "", "GET", null, null));
 	}
 
 	/**
@@ -99,7 +101,30 @@ public class WebAccessor {
 	 * @param extraHeaders  Extra header fields (and their values) that should be sent with the request
 	 */
 	public static String get(String url, Map<String, String> parameters, Map<String, String> extraHeaders) {
-		return bytesToString(getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders));
+		return bytesToString(getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders, null));
+	}
+
+	/**
+	 * Get a web resource synchronously, assuming that it is in UTF-8
+	 * @param url  The base url of the web resource (without parameters)
+	 * @param parameters  The parameters that should be appended to the url
+	 * @param extraHeaders  Extra header fields (and their values) that should be sent with the request
+	 * @param callback  A callback which will receive information about the result of the call
+	 */
+	public static String get(String url, Map<String, String> parameters, Map<String, String> extraHeaders,
+		WebAccessedCallback callback) {
+
+		String content = bytesToString(getPutPost(url + mapToUrlSuffix(parameters), "", "GET", extraHeaders, callback));
+
+		if (callback != null) {
+			if ((content == null) || (content.length() < 1)) {
+				callback.gotError();
+			} else {
+				callback.gotContent(content);
+			}
+		}
+
+		return content;
 	}
 
 	/**
@@ -108,7 +133,7 @@ public class WebAccessor {
 	 * @param messageBody The message body to be sent
 	 */
 	public static String put(String url, String messageBody) {
-		return bytesToString(getPutPost(url, messageBody, "PUT", null));
+		return bytesToString(getPutPost(url, messageBody, "PUT", null, null));
 	}
 
 	/**
@@ -117,7 +142,7 @@ public class WebAccessor {
 	 * @param parameters The parameters to be sent as message body
 	 */
 	public static String put(String url, Map<String, String> parameters) {
-		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "PUT", null));
+		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "PUT", null, null));
 	}
 
 	/**
@@ -126,7 +151,7 @@ public class WebAccessor {
 	 * @param messageBody The message body to be sent
 	 */
 	public static String post(String url, String messageBody) {
-		return bytesToString(getPutPost(url, messageBody, "POST", null));
+		return bytesToString(getPutPost(url, messageBody, "POST", null, null));
 	}
 
 	/**
@@ -135,13 +160,13 @@ public class WebAccessor {
 	 * @param parameters  The parameters to be sent as message body
 	 */
 	public static String post(String url, Map<String, String> parameters) {
-		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "POST", null));
+		return bytesToString(getPutPost(url, mapToMessageBody(parameters), "POST", null, null));
 	}
 
 	public static String postJson(String url, String messageBody) {
 		Map<String, String> extraHeaders = new HashMap<>();
 		extraHeaders.put("Content-Type", "application/json; charset=utf-8");
-		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders));
+		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders, null));
 	}
 
 	/**
@@ -151,7 +176,7 @@ public class WebAccessor {
 	 * @param extraHeaders  Further headers and their data to be sent
 	 */
 	public static String post(String url, String messageBody, Map<String, String> extraHeaders) {
-		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders));
+		return bytesToString(getPutPost(url, messageBody, "POST", extraHeaders, null));
 	}
 
 	/**
@@ -214,7 +239,8 @@ public class WebAccessor {
 		return result.toString();
 	}
 
-	private static byte[] getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders) {
+	private static byte[] getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders,
+		WebAccessedCallback callback) {
 
 		try {
 			WebAccessor.lastUrl = url;
@@ -265,6 +291,10 @@ public class WebAccessor {
 			}
 
 			connection.connect();
+
+			if (callback != null) {
+				callback.gotResponseCode(connection.getResponseCode());
+			}
 
 			BufferedInputStream reader = new BufferedInputStream(connection.getInputStream());
 
