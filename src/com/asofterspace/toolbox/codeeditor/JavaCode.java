@@ -681,6 +681,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 								(!thisLine.endsWith("&")) &&
 								(!thisLine.endsWith("|")) &&
 								(!thisLine.endsWith("<")) &&
+								// both in case of List<Blubb> being at the end, and -> being at the end of the line
+								(!thisLine.endsWith(">")) &&
 								(!thisLine.endsWith(".")) &&
 								(!thisLine.endsWith(",")) &&
 								// annotations
