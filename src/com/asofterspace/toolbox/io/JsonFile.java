@@ -9,7 +9,7 @@ import com.asofterspace.toolbox.utils.Record;
 import java.util.List;
 
 
-public class JsonFile extends SimpleFile {
+public class JsonFile extends TextFile {
 
 	protected JSON jsonContent = null;
 
