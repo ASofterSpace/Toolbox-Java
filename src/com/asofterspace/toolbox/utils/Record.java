@@ -758,6 +758,43 @@ public class Record {
 	}
 
 	/**
+	 * Get a list of integers corresponding to a Record array
+	 * filled with integers stored in a particular key of a
+	 * Record object (entries that are not numbers will be ignored!)
+	 * @param key the key to search for
+	 * @return the list of integers stored in the array at the key
+	 */
+	public List<Integer> getArrayAsIntegerList(Object key) {
+
+		Record result = get(key);
+
+		List<Integer> resultList = new ArrayList<>();
+
+		if (result == null) {
+			return resultList;
+		}
+
+		if (result.arrContents == null) {
+			Integer val = getIntegerFromRecord(result);
+			if (val != null) {
+				resultList.add(val);
+			}
+			return resultList;
+		}
+
+		for (Record entry : result.arrContents) {
+			if (entry != null) {
+				Integer val = getIntegerFromRecord(entry);
+				if (val != null) {
+					resultList.add(val);
+				}
+			}
+		}
+
+		return resultList;
+	}
+
+	/**
 	 * Gets a string value stored in a key (which will
 	 * just return a string as string if the value is
 	 * already a string, but if the value is a complex
@@ -878,6 +915,11 @@ public class Record {
 	public Integer getInteger(Object key) {
 
 		Record result = get(key);
+
+		return getIntegerFromRecord(result);
+	}
+
+	private Integer getIntegerFromRecord(Record result) {
 
 		if (result == null) {
 			return null;

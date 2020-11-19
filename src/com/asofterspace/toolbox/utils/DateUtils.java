@@ -33,7 +33,7 @@ public class DateUtils {
 	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
 	public static final SimpleDateFormat SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
 
-	private static final String[] DAY_NAMES = new String[]{"Saturday", "Sunday", "Monday",
+	public static final String[] DAY_NAMES = new String[]{"Saturday", "Sunday", "Monday",
 		"Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 	private static final String[] MONTH_NAMES = new String[]{"January", "February", "March",
 		"April", "May", "June", "July", "August", "September", "October", "November", "December"};

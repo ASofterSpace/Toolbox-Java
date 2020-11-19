@@ -24,8 +24,11 @@ public class TaskCtrlBase {
 	protected final String KIND = "kind";
 	protected final String TITLE = "title";
 	protected final String DAY = "day";
+	protected final String DAYS_OF_WEEK = "daysOfWeek";
 	protected final String MONTH = "month";
 	protected final String MONTHS = "months";
+	protected final String YEAR = "year";
+	protected final String YEARS = "years";
 	protected final String DETAILS = "details";
 	protected final String ON_DONE = "onDone";
 	protected final String DONE = "done";
@@ -96,7 +99,38 @@ public class TaskCtrlBase {
 		}
 	}
 
-	protected void releaseTaskOn(GenericTask task, Date day) {
+	public GenericTask addAdHocTask(String title, String details, Date scheduleDate) {
+
+		if (scheduleDate == null) {
+			return null;
+		}
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(scheduleDate);
+
+		List<String> detailsList = new ArrayList<>();
+		for (String detail : details.split("\n")) {
+			detailsList.add(detail);
+		}
+
+		List<String> onDone = new ArrayList<>();
+
+		// this is an ad-hoc task which is not scheduled ever
+		Integer scheduledOnDay = null;
+		List<String> scheduledOnDaysOfWeek = null;
+		List<Integer> scheduledInMonths = null;
+		List<Integer> scheduledInYears = null;
+
+		GenericTask newTask = createTask(title, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
+			scheduledInYears, detailsList, onDone);
+
+		return releaseTaskOn(newTask, scheduleDate);
+	}
+
+	/**
+	 * Releases a task by copying it as an instance and returning the new task instance
+	 */
+	protected GenericTask releaseTaskOn(GenericTask task, Date day) {
 		GenericTask taskInstance = task.getNewInstance();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(day);
@@ -106,9 +140,12 @@ public class TaskCtrlBase {
 		taskInstance.setReleasedInYear(cal.get(Calendar.YEAR));
 		taskInstance.setDoneDate(null);
 		taskInstances.add(taskInstance);
+		return taskInstance;
 	}
 
 	protected GenericTask taskFromRecord(Record recordTask) {
+
+		List<String> daysOfWeek = recordTask.getArrayAsStringList(DAYS_OF_WEEK);
 
 		List<Integer> months = new ArrayList<>();
 		List<String> monthNames = recordTask.getArrayAsStringList(MONTHS);
@@ -123,13 +160,30 @@ public class TaskCtrlBase {
 			}
 		}
 
-		return new GenericTask(
+		List<Integer> years = recordTask.getArrayAsIntegerList(YEARS);
+		if (years.size() < 1) {
+			Integer yearVal = recordTask.getInteger(YEAR);
+			if (yearVal != null) {
+				years.add(yearVal);
+			}
+		}
+
+		return createTask(
 			recordTask.getString(TITLE),
 			recordTask.getInteger(DAY),
+			daysOfWeek,
 			months,
+			years,
 			recordTask.getArrayAsStringList(DETAILS),
 			recordTask.getArrayAsStringList(ON_DONE)
 		);
+	}
+
+	protected GenericTask createTask(String title, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek,
+		List<Integer> scheduledInMonths, List<Integer> scheduledInYears, List<String> details, List<String> onDone) {
+
+		return new GenericTask(title, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
+			scheduledInYears, details, onDone);
 	}
 
 	protected GenericTask taskInstanceFromRecord(Record recordTask) {
@@ -146,6 +200,10 @@ public class TaskCtrlBase {
 		return result;
 	}
 
+	/**
+	 * Get all the tasks that have ever been released (both ad-hoc tasks and scheduled tasks which have
+	 * been released when their scheduled date arrived)
+	 */
 	public List<GenericTask> getTaskInstances() {
 
 		Collections.sort(taskInstances, new Comparator<GenericTask>() {
@@ -166,16 +224,85 @@ public class TaskCtrlBase {
 		return taskInstances;
 	}
 
+	/**
+	 * Get all the tasks that have ever been released and which are not yet done
+	 * (both ad-hoc tasks and scheduled tasks which have been released when their scheduled date arrived)
+	 */
+	public List<GenericTask> getCurrentTaskInstances(boolean ordered) {
+
+		List<GenericTask> result = new ArrayList<>();
+
+		List<GenericTask> tasks = null;
+
+		if (ordered) {
+			tasks = getTaskInstances();
+		} else {
+			tasks = taskInstances;
+		}
+
+		for (GenericTask task : tasks) {
+			if ((task.hasBeenDone() == null) || !task.hasBeenDone()) {
+				result.add(task);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Get all the tasks that have ever been released and which are not yet done
+	 * (both ad-hoc tasks and scheduled tasks which have been released when their scheduled date arrived)
+	 */
+	public List<GenericTask> getCurrentTaskInstances() {
+		boolean ordered = true;
+		return getCurrentTaskInstances(ordered);
+	}
+
+	public List<GenericTask> getUpcomingTaskInstances(int upcomingDays) {
+
+		List<GenericTask> results = new ArrayList<>();
+
+		List<GenericTask> origTasks = new ArrayList<>(taskInstances);
+		Date origLastTaskGeneration = lastTaskGeneration;
+
+		// generate future instances, but do not save them!
+		generateNewInstances(DateUtils.addDays(DateUtils.now(), upcomingDays));
+
+		List<GenericTask> tasks = getTaskInstances();
+
+		for (GenericTask task : tasks) {
+			// if needs to be done...
+			if ((task.hasBeenDone() == null) || !task.hasBeenDone()) {
+				// ... and has not been a task instance before
+				if (!origTasks.contains(task)) {
+					results.add(task);
+				}
+			}
+		}
+
+		taskInstances = origTasks;
+		lastTaskGeneration = origLastTaskGeneration;
+
+		return results;
+	}
+
 	protected Record taskToRecord(GenericTask task) {
 		Record taskRecord = Record.emptyObject();
 		taskRecord.set(KIND, GENERIC);
 		taskRecord.set(TITLE, task.getTitle());
 		taskRecord.set(DAY, task.getScheduledOnDay());
+		if ((task.getScheduledOnDaysOfWeek() == null) || (task.getScheduledOnDaysOfWeek().size() == 0)) {
+			taskRecord.remove(DAYS_OF_WEEK);
+		} else {
+			taskRecord.set(DAYS_OF_WEEK, task.getScheduledOnDaysOfWeek());
+		}
 
 		List<Integer> months = task.getScheduledInMonths();
-		taskRecord.set(MONTH, null);
+		taskRecord.remove(MONTH);
 		taskRecord.remove(MONTHS);
-		if (months != null) {
+		if (months == null) {
+			taskRecord.set(MONTHS, null);
+		} else {
 			if (months.size() == 1) {
 				taskRecord.set(MONTH, DateUtils.monthNumToName(months.get(0)));
 			} else {
@@ -183,8 +310,20 @@ public class TaskCtrlBase {
 				for (Integer month : months) {
 					monthNames.add(DateUtils.monthNumToName(month));
 				}
-				taskRecord.remove(MONTH);
 				taskRecord.set(MONTHS, monthNames);
+			}
+		}
+
+		List<Integer> years = task.getScheduledInYears();
+		taskRecord.remove(YEAR);
+		taskRecord.remove(YEARS);
+		if (years == null) {
+			taskRecord.set(YEARS, null);
+		} else {
+			if (years.size() == 1) {
+				taskRecord.set(YEAR, years.get(0));
+			} else {
+				taskRecord.set(YEARS, years);
 			}
 		}
 
@@ -215,6 +354,12 @@ public class TaskCtrlBase {
 			base.append(taskRecord);
 		}
 		return base;
+	}
+
+	public void saveIntoRecord(Record root) {
+		root.set(TASKS, getTasksAsRecord());
+		root.set(TASK_INSTANCES, getTaskInstancesAsRecord());
+		root.set(LAST_TASK_GENERATION, DateUtils.serializeDate(lastTaskGeneration));
 	}
 
 }

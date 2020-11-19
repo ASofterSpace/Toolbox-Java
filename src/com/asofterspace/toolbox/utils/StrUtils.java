@@ -1021,6 +1021,77 @@ public class StrUtils {
 	}
 
 	/**
+	 * Searches through the origStr, and whenever findThis is found, adds addThat after the end of the line
+	 * (if you let addThat end with a newline character, then it will be on its own line after the line
+	 * containing findThis)
+	 */
+	public static String addAfterLinesContaining(String origStr, String findThis, String addThat) {
+		return addAfterLinesContainingEx(origStr, findThis, addThat, "\n", false);
+	}
+
+	/**
+	 * Searches through the origStr, and whenever findThis is found, adds addThat after the end of the line
+	 * where the end of line is indicated not by \n, but by whatever eol marker you passed in
+	 */
+	public static String addAfterLinesContaining(String origStr, String findThis, String addThat, String eolMarker) {
+		return addAfterLinesContainingEx(origStr, findThis, addThat, eolMarker, false);
+	}
+
+	/**
+	 * Searches through the origStr, and whenever findThis is found without being inside a tag adds,
+	 * addThat after the end of the line
+	 * (if you let addThat end with a newline character, then it will be on its own line after the line
+	 * containing findThis)
+	 */
+	public static String addAfterLinesContainingNotInsideTag(String origStr, String findThis, String addThat) {
+		return addAfterLinesContainingEx(origStr, findThis, addThat, "\n", true);
+	}
+
+	private static String addAfterLinesContainingEx(String origStr, String findThis, String addThat,
+		String eolMarker, boolean notInsideTag) {
+
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		if ((addThat == null) || "".equals(addThat)) {
+			return origStr;
+		}
+		if ((eolMarker == null) || "".equals(eolMarker)) {
+			return origStr;
+		}
+		if ("".equals(findThis)) {
+			return replaceAll(origStr, "\n", "\n" + addThat) + "\n" + addThat;
+		}
+		StringBuilder result = new StringBuilder();
+		int index = origStr.indexOf(findThis);
+		while (index >= 0) {
+			if (notInsideTag) {
+				if ((index > 0) && origStr.charAt(index - 1) == '>') {
+					index = origStr.indexOf(findThis, index + 1);
+					continue;
+				}
+			}
+			int eol = origStr.indexOf(eolMarker, index);
+			if (eol < 0) {
+				result.append(origStr);
+				result.append(eolMarker);
+				origStr = "";
+			} else {
+				result.append(origStr.substring(0, eol + eolMarker.length()));
+				// TODO :: improve speed by not calling substring but keeping track of start!
+				origStr = origStr.substring(eol + eolMarker.length());
+			}
+			result.append(addThat);
+			index = origStr.indexOf(findThis);
+		}
+		result.append(origStr);
+		return result.toString();
+	}
+
+	/**
 	 * Trims whitespace and ensures that internal whitespaces are only the " " character (no newlines,
 	 * no tabs), and that there is never more than one space, so e.g.:
 	 * " foo    bar   " turns to "foo bar"

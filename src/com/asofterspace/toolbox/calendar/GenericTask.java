@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.calendar;
 
 import com.asofterspace.toolbox.utils.DateUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -18,8 +19,16 @@ public class GenericTask {
 	// on which day of the month is this task scheduled?
 	protected Integer scheduledOnDay;
 
+	// on which days of the week is this task scheduled?
+	protected List<String> scheduledOnDaysOfWeek;
+
 	// in which months is this task scheduled?
+	// (if null / empty list: every month)
 	protected List<Integer> scheduledInMonths;
+
+	// in which years is this task scheduled?
+	// (if null / empty list: every year)
+	protected List<Integer> scheduledInYears;
 
 	protected List<String> details;
 
@@ -45,12 +54,14 @@ public class GenericTask {
 	protected String doneLog;
 
 
-	public GenericTask(String title, Integer scheduledOnDay, List<Integer> scheduledInMonths,
-		List<String> details, List<String> onDone) {
+	public GenericTask(String title, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek, List<Integer> scheduledInMonths,
+		List<Integer> scheduledInYears, List<String> details, List<String> onDone) {
 
 		this.title = title;
 		this.scheduledOnDay = scheduledOnDay;
+		this.scheduledOnDaysOfWeek = scheduledOnDaysOfWeek;
 		this.scheduledInMonths = scheduledInMonths;
+		this.scheduledInYears = scheduledInYears;
 		this.details = details;
 		this.onDone = onDone;
 	}
@@ -62,13 +73,44 @@ public class GenericTask {
 	public GenericTask(GenericTask other) {
 		this.title = other.title;
 		this.scheduledOnDay = other.scheduledOnDay;
+		this.scheduledOnDaysOfWeek = other.scheduledOnDaysOfWeek;
 		this.scheduledInMonths = other.scheduledInMonths;
+		this.scheduledInYears = other.scheduledInYears;
 		this.details = other.details;
 		this.onDone = other.onDone;
 	}
 
 	public GenericTask getNewInstance() {
 		return new GenericTask(this);
+	}
+
+	private static String toWeekDay(String weekDay) {
+		if (weekDay == null) {
+			return null;
+		}
+		weekDay = weekDay.toLowerCase().trim();
+		if (weekDay.startsWith("su") || weekDay.startsWith("so")) {
+			return DateUtils.DAY_NAMES[1];
+		}
+		if (weekDay.startsWith("mo")) {
+			return DateUtils.DAY_NAMES[2];
+		}
+		if (weekDay.startsWith("tu") || weekDay.startsWith("di")) {
+			return DateUtils.DAY_NAMES[3];
+		}
+		if (weekDay.startsWith("we") || weekDay.startsWith("mi")) {
+			return DateUtils.DAY_NAMES[4];
+		}
+		if (weekDay.startsWith("th") || weekDay.startsWith("do")) {
+			return DateUtils.DAY_NAMES[5];
+		}
+		if (weekDay.startsWith("fr")) {
+			return DateUtils.DAY_NAMES[6];
+		}
+		if (weekDay.startsWith("sa")) {
+			return DateUtils.DAY_NAMES[7];
+		}
+		return null;
 	}
 
 	public boolean isScheduledOn(Date date) {
@@ -81,15 +123,47 @@ public class GenericTask {
 			}
 		}
 
+		if (scheduledOnDaysOfWeek != null) {
+			if (scheduledOnDaysOfWeek.size() > 0) {
+				boolean foundDay = false;
+				String dayName = DateUtils.DAY_NAMES[cal.get(Calendar.DAY_OF_WEEK)];
+				for (String weekDay : scheduledOnDaysOfWeek) {
+					if (dayName.equals(toWeekDay(weekDay))) {
+						foundDay = true;
+						break;
+					}
+				}
+				if (!foundDay) {
+					return false;
+				}
+			}
+		}
+
 		if (scheduledInMonths != null) {
 			if (scheduledInMonths.size() > 0) {
 				boolean foundMonth = false;
 				for (Integer month : scheduledInMonths) {
 					if (month.equals(cal.get(Calendar.MONTH))) {
 						foundMonth = true;
+						break;
 					}
 				}
 				if (!foundMonth) {
+					return false;
+				}
+			}
+		}
+
+		if (scheduledInYears != null) {
+			if (scheduledInYears.size() > 0) {
+				boolean foundYear = false;
+				for (Integer year : scheduledInYears) {
+					if (year.equals(cal.get(Calendar.YEAR))) {
+						foundYear = true;
+						break;
+					}
+				}
+				if (!foundYear) {
 					return false;
 				}
 			}
@@ -106,8 +180,23 @@ public class GenericTask {
 		return scheduledOnDay;
 	}
 
+	public List<String> getScheduledOnDaysOfWeek() {
+		if (scheduledOnDaysOfWeek == null) {
+			return null;
+		}
+		List<String> result = new ArrayList<>();
+		for (String dayOfWeek : scheduledOnDaysOfWeek) {
+			result.add(toWeekDay(dayOfWeek));
+		}
+		return result;
+	}
+
 	public List<Integer> getScheduledInMonths() {
 		return scheduledInMonths;
+	}
+
+	public List<Integer> getScheduledInYears() {
+		return scheduledInYears;
 	}
 
 	/**
