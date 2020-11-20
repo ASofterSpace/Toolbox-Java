@@ -428,8 +428,8 @@ public abstract class Code extends DefaultStyledDocument {
 							});
 							ArrayList<String> proposedTokens = new ArrayList<>();
 							for (String encounteredToken : ourEncounteredTokens) {
-								if ((encounteredToken != null) && encounteredToken.startsWith(curTokenStr)
-									&& !encounteredToken.equals(curTokenStr)) {
+								if ((encounteredToken != null) && encounteredToken.startsWith(curTokenStr) &&
+									!encounteredToken.equals(curTokenStr)) {
 									proposedTokens.add(encounteredToken.substring(curTokenStr.length()));
 								}
 							}
@@ -1067,6 +1067,15 @@ public abstract class Code extends DefaultStyledDocument {
 		for (String alreadyImportedStr : alreadyImported) {
 			if (alreadyImportedStr.endsWith("." + utility) || alreadyImportedStr.endsWith("." + utility + ";")) {
 				return;
+			}
+		}
+
+		// do not import nio Path if javax.ws.rs.* is already imported
+		if ("Path".equals(utility)) {
+			for (String alreadyImportedStr : alreadyImported) {
+				if (alreadyImportedStr.equals("import javax.ws.rs.*") || alreadyImportedStr.equals("import javax.ws.rs.*;")) {
+					return;
+				}
 			}
 		}
 

@@ -689,8 +689,13 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 								(!thisLine.startsWith("@")) &&
 								// in case of chaining several object methods
 								(!nextLine.startsWith(".")) &&
+								(!nextLine.startsWith("+\"")) &&
+								(!nextLine.startsWith("+ ")) &&
+								(!nextLine.startsWith("- ")) &&
 								(!nextLine.startsWith(")")) &&
 								(!nextLine.startsWith("{")) &&
+								(!nextLine.startsWith("&&")) &&
+								(!nextLine.startsWith("||")) &&
 								(!(thisLine.endsWith(")") && nextLine.startsWith("throws ")))) {
 								result.append(";");
 							}

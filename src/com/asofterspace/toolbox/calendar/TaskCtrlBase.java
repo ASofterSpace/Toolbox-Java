@@ -8,7 +8,6 @@ import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.Record;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -105,9 +104,6 @@ public class TaskCtrlBase {
 			return null;
 		}
 
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(scheduleDate);
-
 		List<String> detailsList = new ArrayList<>();
 		for (String detail : details.split("\n")) {
 			detailsList.add(detail);
@@ -132,12 +128,8 @@ public class TaskCtrlBase {
 	 */
 	protected GenericTask releaseTaskOn(GenericTask task, Date day) {
 		GenericTask taskInstance = task.getNewInstance();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(day);
 		taskInstance.setDone(false);
-		taskInstance.setReleasedOnDay(cal.get(Calendar.DAY_OF_MONTH));
-		taskInstance.setReleasedInMonth(cal.get(Calendar.MONTH));
-		taskInstance.setReleasedInYear(cal.get(Calendar.YEAR));
+		taskInstance.setReleasedDate(day);
 		taskInstance.setDoneDate(null);
 		taskInstances.add(taskInstance);
 		return taskInstance;

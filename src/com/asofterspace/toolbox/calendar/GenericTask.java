@@ -172,6 +172,10 @@ public class GenericTask {
 		return true;
 	}
 
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
 	public String getTitle() {
 		return title;
 	}
@@ -208,6 +212,21 @@ public class GenericTask {
 
 	public void setDetails(List<String> newDetails) {
 		this.details = newDetails;
+	}
+
+	public void setDetailsStr(String newDetails) {
+
+		if (newDetails == null) {
+			this.details = null;
+			return;
+		}
+
+		List<String> detailsList = new ArrayList<>();
+		for (String detail : newDetails.split("\n")) {
+			detailsList.add(detail);
+		}
+
+		this.details = detailsList;
 	}
 
 	public List<String> getOnDone() {
@@ -260,6 +279,43 @@ public class GenericTask {
 			month = "0" + month;
 		}
 		return getReleasedInYear() + "-" + month + "-" + day;
+	}
+
+	public void setReleasedDate(Date day) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(day);
+		setReleasedOnDay(cal.get(Calendar.DAY_OF_MONTH));
+		setReleasedInMonth(cal.get(Calendar.MONTH));
+		setReleasedInYear(cal.get(Calendar.YEAR));
+	}
+
+	/**
+	 * Has this task been released in the future?
+	 * (only makes sense for task instances - tasks that are not instances have not been released, period)
+	 */
+	public boolean releasedInTheFuture() {
+
+		if ((getReleasedInYear() == null) || (getReleasedInMonth() == null) || (getReleasedOnDay() == null)) {
+			// not released at all!
+			return false;
+		}
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+
+		if (cal.get(Calendar.YEAR) < getReleasedInYear()) {
+			return true;
+		}
+
+		if (cal.get(Calendar.MONTH) < getReleasedInMonth()) {
+			return true;
+		}
+
+		if (cal.get(Calendar.DAY_OF_MONTH) < getReleasedOnDay()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public Date getDoneDate() {
