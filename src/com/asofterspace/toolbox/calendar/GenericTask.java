@@ -237,12 +237,19 @@ public class GenericTask {
 		return DateUtils.parseDate(getReleasedInYear() + "-" + (getReleasedInMonth() + 1) + "-" + getReleasedOnDay());
 	}
 
-	public Boolean hasBeenDone() {
+	public boolean hasBeenDone() {
+		if (done == null) {
+			return false;
+		}
 		return done;
 	}
 
 	public void setDone(Boolean done) {
 		this.done = done;
+	}
+
+	public boolean isInstance() {
+		return releasedOnDay != null;
 	}
 
 	public Integer getReleasedOnDay() {

@@ -233,7 +233,7 @@ public class TaskCtrlBase {
 		}
 
 		for (GenericTask task : tasks) {
-			if ((task.hasBeenDone() == null) || !task.hasBeenDone()) {
+			if (!task.hasBeenDone()) {
 				result.add(task);
 			}
 		}
@@ -264,7 +264,7 @@ public class TaskCtrlBase {
 
 		for (GenericTask task : tasks) {
 			// if needs to be done...
-			if ((task.hasBeenDone() == null) || !task.hasBeenDone()) {
+			if (!task.hasBeenDone()) {
 				// ... and has not been a task instance before
 				if (!origTasks.contains(task)) {
 					results.add(task);
@@ -362,6 +362,10 @@ public class TaskCtrlBase {
 		root.set(TASKS, getTasksAsRecord());
 		root.set(TASK_INSTANCES, getTaskInstancesAsRecord());
 		root.set(LAST_TASK_GENERATION, DateUtils.serializeDate(lastTaskGeneration));
+	}
+
+	public List<GenericTask> getTasks() {
+		return tasks;
 	}
 
 }
