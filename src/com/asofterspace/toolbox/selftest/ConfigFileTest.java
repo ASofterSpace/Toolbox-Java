@@ -8,6 +8,7 @@ import com.asofterspace.toolbox.configuration.ConfigFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
+import com.asofterspace.toolbox.utils.Record;
 
 
 public class ConfigFileTest implements Test {
@@ -31,10 +32,12 @@ public class ConfigFileTest implements Test {
 		String testkey = "test";
 		String testvalue = "somevalue";
 
-		ConfigFile confFile1 = new ConfigFile(testfile);
+		// save a new ConfigFile where no file was before
+		ConfigFile confFile1 = new ConfigFile(testfile, false, Record.emptyObject());
 
 		confFile1.set(testkey, testvalue);
 
+		// open an existing config file
 		ConfigFile confFile2 = new ConfigFile(testfile);
 
 		if (testvalue.equals(confFile2.getValue(testkey))) {

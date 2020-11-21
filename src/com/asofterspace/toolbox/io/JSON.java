@@ -75,6 +75,10 @@ public class JSON extends Record {
 
 	private int init(String jsonString, int pos) throws JsonParseException {
 
+		if (jsonString == null) {
+			throw new JsonParseException("No content given at all!");
+		}
+
 		pos = jumpOverWhitespaces(jsonString, pos);
 
 		if (pos >= jsonString.length()) {
@@ -344,6 +348,9 @@ public class JSON extends Record {
 	}
 
 	private int jumpOverWhitespaces(String jsonString, int pos) {
+		if (jsonString == null) {
+			return pos;
+		}
 		while (pos < jsonString.length()) {
 			char c = jsonString.charAt(pos);
 			if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
