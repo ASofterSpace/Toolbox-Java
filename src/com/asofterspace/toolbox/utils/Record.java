@@ -1175,6 +1175,19 @@ public class Record {
 	}
 
 	/**
+	 * Sets a key of the Record object to the Record value, or removes the key is null is passed in as value
+	 * @param key
+	 * @param value
+	 */
+	public void setOrRemove(Object key, Object value) {
+		if (value == null) {
+			remove(key);
+		} else {
+			set(key, value);
+		}
+	}
+
+	/**
 	 * Sets a key to the string value
 	 * @param key
 	 * @param value

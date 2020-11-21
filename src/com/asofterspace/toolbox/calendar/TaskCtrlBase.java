@@ -280,9 +280,9 @@ public class TaskCtrlBase {
 
 	protected Record taskToRecord(GenericTask task) {
 		Record taskRecord = Record.emptyObject();
-		taskRecord.set(KIND, GENERIC);
-		taskRecord.set(TITLE, task.getTitle());
-		taskRecord.set(DAY, task.getScheduledOnDay());
+		taskRecord.setOrRemove(KIND, GENERIC);
+		taskRecord.setOrRemove(TITLE, task.getTitle());
+		taskRecord.setOrRemove(DAY, task.getScheduledOnDay());
 		if ((task.getScheduledOnDaysOfWeek() == null) || (task.getScheduledOnDaysOfWeek().size() == 0)) {
 			taskRecord.remove(DAYS_OF_WEEK);
 		} else {
@@ -292,9 +292,7 @@ public class TaskCtrlBase {
 		List<Integer> months = task.getScheduledInMonths();
 		taskRecord.remove(MONTH);
 		taskRecord.remove(MONTHS);
-		if (months == null) {
-			taskRecord.set(MONTHS, null);
-		} else {
+		if (months != null) {
 			if (months.size() == 1) {
 				taskRecord.set(MONTH, DateUtils.monthNumToName(months.get(0)));
 			} else {
@@ -309,9 +307,7 @@ public class TaskCtrlBase {
 		List<Integer> years = task.getScheduledInYears();
 		taskRecord.remove(YEAR);
 		taskRecord.remove(YEARS);
-		if (years == null) {
-			taskRecord.set(YEARS, null);
-		} else {
+		if (years != null) {
 			if (years.size() == 1) {
 				taskRecord.set(YEAR, years.get(0));
 			} else {
@@ -319,8 +315,8 @@ public class TaskCtrlBase {
 			}
 		}
 
-		taskRecord.set(DETAILS, task.getDetails());
-		taskRecord.set(ON_DONE, task.getOnDone());
+		taskRecord.setOrRemove(DETAILS, task.getDetails());
+		taskRecord.setOrRemove(ON_DONE, task.getOnDone());
 		return taskRecord;
 	}
 
