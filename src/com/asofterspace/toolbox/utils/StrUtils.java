@@ -529,6 +529,30 @@ public class StrUtils {
 		return lineStart;
 	}
 
+	public static int getLinkEndFromPosition(int start, String contentStr) {
+		int result = Integer.MAX_VALUE;
+		int space = contentStr.indexOf(" ", start);
+		int langle = contentStr.indexOf("<", start);
+		int newline = contentStr.indexOf("\n", start);
+		int nbsp = contentStr.indexOf("&nbsp;", start);
+		if ((space >= 0) && (space < result)) {
+			result = space;
+		}
+		if ((langle >= 0) && (langle < result)) {
+			result = langle;
+		}
+		if ((newline >= 0) && (newline < result)) {
+			result = newline;
+		}
+		if ((nbsp >= 0) && (nbsp < result)) {
+			result = nbsp;
+		}
+		if (result == Integer.MAX_VALUE) {
+			return -1;
+		}
+		return result;
+	}
+
 	public static int getWordEndFromPosition(int pos, String content, boolean splitWordClusters) {
 
 		int lineEndSpace = content.indexOf(" ", pos);

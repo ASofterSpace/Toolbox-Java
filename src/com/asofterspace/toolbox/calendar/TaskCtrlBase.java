@@ -293,14 +293,16 @@ public class TaskCtrlBase {
 		taskRecord.remove(MONTH);
 		taskRecord.remove(MONTHS);
 		if (months != null) {
-			if (months.size() == 1) {
-				taskRecord.set(MONTH, DateUtils.monthNumToName(months.get(0)));
-			} else {
-				List<String> monthNames = new ArrayList<>();
-				for (Integer month : months) {
-					monthNames.add(DateUtils.monthNumToName(month));
+			if (months.size() > 0) {
+				if (months.size() == 1) {
+					taskRecord.set(MONTH, DateUtils.monthNumToName(months.get(0)));
+				} else {
+					List<String> monthNames = new ArrayList<>();
+					for (Integer month : months) {
+						monthNames.add(DateUtils.monthNumToName(month));
+					}
+					taskRecord.set(MONTHS, monthNames);
 				}
-				taskRecord.set(MONTHS, monthNames);
 			}
 		}
 
@@ -308,15 +310,27 @@ public class TaskCtrlBase {
 		taskRecord.remove(YEAR);
 		taskRecord.remove(YEARS);
 		if (years != null) {
-			if (years.size() == 1) {
-				taskRecord.set(YEAR, years.get(0));
-			} else {
-				taskRecord.set(YEARS, years);
+			if (years.size() > 0) {
+				if (years.size() == 1) {
+					taskRecord.set(YEAR, years.get(0));
+				} else {
+					taskRecord.set(YEARS, years);
+				}
 			}
 		}
 
-		taskRecord.setOrRemove(DETAILS, task.getDetails());
-		taskRecord.setOrRemove(ON_DONE, task.getOnDone());
+		List<String> details = task.getDetails();
+		if ((details == null) || (details.size() == 0) || ((details.size() == 1) && ("".equals(details.get(0))))) {
+			taskRecord.remove(DETAILS);
+		} else {
+			taskRecord.set(DETAILS, details);
+		}
+		List<String> onDone = task.getOnDone();
+		if ((onDone == null) || (onDone.size() == 0)) {
+			taskRecord.remove(ON_DONE);
+		} else {
+			taskRecord.set(ON_DONE, onDone);
+		}
 		return taskRecord;
 	}
 
@@ -337,8 +351,8 @@ public class TaskCtrlBase {
 			taskRecord.set(RELEASED_ON_DAY, task.getReleasedOnDay());
 			taskRecord.set(RELEASED_IN_MONTH, task.getReleasedInMonth());
 			taskRecord.set(RELEASED_IN_YEAR, task.getReleasedInYear());
-			taskRecord.set(DONE_DATE, DateUtils.serializeDate(task.getDoneDate()));
-			taskRecord.set(DONE_LOG, task.getDoneLog());
+			taskRecord.setOrRemove(DONE_DATE, DateUtils.serializeDate(task.getDoneDate()));
+			taskRecord.setOrRemove(DONE_LOG, task.getDoneLog());
 			base.append(taskRecord);
 		}
 		return base;
