@@ -126,7 +126,7 @@ public class TaskCtrlBase {
 	/**
 	 * Releases a task by copying it as an instance and returning the new task instance
 	 */
-	protected GenericTask releaseTaskOn(GenericTask task, Date day) {
+	public GenericTask releaseTaskOn(GenericTask task, Date day) {
 		GenericTask taskInstance = task.getNewInstance();
 		taskInstance.setDone(false);
 		taskInstance.setReleasedDate(day);
