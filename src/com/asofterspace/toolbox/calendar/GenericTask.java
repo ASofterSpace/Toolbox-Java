@@ -314,8 +314,16 @@ public class GenericTask {
 			return true;
 		}
 
+		if (cal.get(Calendar.YEAR) > getReleasedInYear()) {
+			return false;
+		}
+
 		if (cal.get(Calendar.MONTH) < getReleasedInMonth()) {
 			return true;
+		}
+
+		if (cal.get(Calendar.MONTH) > getReleasedInMonth()) {
+			return false;
 		}
 
 		if (cal.get(Calendar.DAY_OF_MONTH) < getReleasedOnDay()) {
