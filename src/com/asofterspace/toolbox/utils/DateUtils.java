@@ -317,7 +317,7 @@ public class DateUtils {
 		Date curDate = weekStart;
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(curDate);
-		for (var i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			result.add(curDate);
 			cal.add(Calendar.DATE, 1);
 			curDate = cal.getTime();
