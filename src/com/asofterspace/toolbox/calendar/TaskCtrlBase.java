@@ -88,14 +88,19 @@ public class TaskCtrlBase {
 
 			Date day = daysToGenerate.get(i);
 
-			for (GenericTask task : tasks) {
-				if (task.isScheduledOn(day)) {
-					releaseTaskOn(task, day);
-				}
-			}
-
-			lastTaskGeneration = day;
+			generateNewInstancesOnDay(day);
 		}
+	}
+
+	protected void generateNewInstancesOnDay(Date day) {
+
+		for (GenericTask task : tasks) {
+			if (task.isScheduledOn(day)) {
+				releaseTaskOn(task, day);
+			}
+		}
+
+		lastTaskGeneration = day;
 	}
 
 	public GenericTask addAdHocTask(String title, String details, Date scheduleDate) {
