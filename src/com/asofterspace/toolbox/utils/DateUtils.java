@@ -454,6 +454,14 @@ public class DateUtils {
 		return MONTH_NAMES[val - 1];
 	}
 
+	public static String getMonthNameShortEN(Date someDate) {
+		Integer val = getMonth(someDate);
+		if (val == null) {
+			return "Non";
+		}
+		return MONTH_NAMES_SHORT[val - 1];
+	}
+
 	public static Integer getYear(Date someDate) {
 		if (someDate == null) {
 			return null;
