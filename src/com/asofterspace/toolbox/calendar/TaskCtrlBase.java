@@ -16,30 +16,30 @@ import java.util.List;
 
 public class TaskCtrlBase {
 
-	protected final String TASKS = "tasks";
-	protected final String TASK_INSTANCES = "taskInstances";
-	protected final String LAST_TASK_GENERATION = "lastTaskGeneration";
-	protected final String GENERIC = "generic";
-	protected final String KIND = "kind";
-	protected final String TITLE = "title";
-	protected final String DAY = "day";
-	protected final String DAYS_OF_WEEK = "daysOfWeek";
-	protected final String MONTH = "month";
-	protected final String MONTHS = "months";
-	protected final String YEAR = "year";
-	protected final String YEARS = "years";
-	protected final String DETAILS = "details";
-	protected final String ON_DONE = "onDone";
-	protected final String DONE = "done";
-	protected final String RELEASED_ON_DAY = "releasedOnDay";
-	protected final String RELEASED_IN_MONTH = "releasedInMonth";
-	protected final String RELEASED_IN_YEAR = "releasedInYear";
-	protected final String DONE_DATE = "doneDate";
-	protected final String DONE_LOG = "doneLog";
-	protected final String DATE = "date";
-	protected final String ROWS = "rows";
-	protected final String AMOUNT = "amount";
-	protected final String ACCOUNT = "account";
+	protected final static String TASKS = "tasks";
+	protected final static String TASK_INSTANCES = "taskInstances";
+	protected final static String LAST_TASK_GENERATION = "lastTaskGeneration";
+	protected final static String GENERIC = "generic";
+	protected final static String KIND = "kind";
+	protected final static String TITLE = "title";
+	protected final static String DAY = "day";
+	protected final static String DAYS_OF_WEEK = "daysOfWeek";
+	protected final static String MONTH = "month";
+	protected final static String MONTHS = "months";
+	protected final static String YEAR = "year";
+	protected final static String YEARS = "years";
+	protected final static String DETAILS = "details";
+	protected final static String ON_DONE = "onDone";
+	protected final static String DONE = "done";
+	public final static String RELEASED_ON_DAY = "releasedOnDay";
+	protected final static String RELEASED_IN_MONTH = "releasedInMonth";
+	protected final static String RELEASED_IN_YEAR = "releasedInYear";
+	protected final static String DONE_DATE = "doneDate";
+	protected final static String DONE_LOG = "doneLog";
+	protected final static String DATE = "date";
+	protected final static String ROWS = "rows";
+	protected final static String AMOUNT = "amount";
+	protected final static String ACCOUNT = "account";
 
 	// contains one instance of each task, such that for a given day we can check which of
 	// these potential tasks actually occurs on that day
@@ -336,6 +336,16 @@ public class TaskCtrlBase {
 		} else {
 			taskRecord.set(ON_DONE, onDone);
 		}
+
+		if (task.isInstance()) {
+			taskRecord.set(DONE, task.hasBeenDone());
+			taskRecord.set(RELEASED_ON_DAY, task.getReleasedOnDay());
+			taskRecord.set(RELEASED_IN_MONTH, task.getReleasedInMonth());
+			taskRecord.set(RELEASED_IN_YEAR, task.getReleasedInYear());
+			taskRecord.setOrRemove(DONE_DATE, DateUtils.serializeDate(task.getDoneDate()));
+			taskRecord.setOrRemove(DONE_LOG, task.getDoneLog());
+		}
+
 		return taskRecord;
 	}
 
@@ -352,12 +362,6 @@ public class TaskCtrlBase {
 		Record base = Record.emptyArray();
 		for (GenericTask task : taskInstances) {
 			Record taskRecord = taskToRecord(task);
-			taskRecord.set(DONE, task.hasBeenDone());
-			taskRecord.set(RELEASED_ON_DAY, task.getReleasedOnDay());
-			taskRecord.set(RELEASED_IN_MONTH, task.getReleasedInMonth());
-			taskRecord.set(RELEASED_IN_YEAR, task.getReleasedInYear());
-			taskRecord.setOrRemove(DONE_DATE, DateUtils.serializeDate(task.getDoneDate()));
-			taskRecord.setOrRemove(DONE_LOG, task.getDoneLog());
 			base.append(taskRecord);
 		}
 		return base;

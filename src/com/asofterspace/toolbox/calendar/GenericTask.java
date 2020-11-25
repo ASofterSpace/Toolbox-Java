@@ -366,6 +366,64 @@ public class GenericTask {
 		return false;
 	}
 
+	public boolean appliesTo(Date from, Date to) {
+
+		if ((from == null) && (to == null)) {
+			return true;
+		}
+
+		boolean fromResult = true;
+		boolean toResult = true;
+
+		// entries which are done apply to the date on which they were done
+		if (hasBeenDone()) {
+			Date done = getDoneDate();
+			if (from != null) {
+				fromResult = done.after(from) || DateUtils.isSameDay(from, done);
+			}
+			if (to != null) {
+				toResult = done.before(to) || DateUtils.isSameDay(to, done);
+			}
+			return toResult || fromResult;
+		}
+
+		// entries which are not yet done apply to their release date...
+		Date displayDate = getReleaseDate();
+		Date today = DateUtils.now();
+
+		// ... or, if they were released before today, they apply to today
+		if (displayDate.before(today)) {
+			displayDate = today;
+		}
+
+		if (from != null) {
+			fromResult = displayDate.after(from) || DateUtils.isSameDay(from, displayDate);
+		}
+		if (to != null) {
+			toResult = displayDate.before(to) || DateUtils.isSameDay(to, displayDate);
+		}
+		return toResult || fromResult;
+	}
+
+	public boolean appliesTo(Date day) {
+
+		// entries which are done apply to the date on which they were done
+		if (hasBeenDone()) {
+			return DateUtils.isSameDay(day, getDoneDate());
+		}
+
+		// entries which are not yet done apply to their release date...
+		Date displayDate = getReleaseDate();
+		Date today = DateUtils.now();
+
+		// ... or, if they were released before today, they apply to today
+		if (displayDate.before(today)) {
+			displayDate = today;
+		}
+
+		return DateUtils.isSameDay(day, displayDate);
+	}
+
 	/**
 	 * Checks if the task instances are the same, so the same task released on different days
 	 * will get false
