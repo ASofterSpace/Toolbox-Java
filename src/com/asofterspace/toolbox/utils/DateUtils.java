@@ -52,7 +52,7 @@ public class DateUtils {
 	 */
 	public static Date parseDate(String dateStr) {
 
-		if (dateStr == null) {
+		if ((dateStr == null) || "".equals(dateStr)) {
 			return null;
 		}
 
@@ -121,7 +121,7 @@ public class DateUtils {
 	 */
 	public static Date parseDateTime(String dateTimeStr) {
 
-		if (dateTimeStr == null) {
+		if ((dateTimeStr == null) || "".equals(dateTimeStr)) {
 			return null;
 		}
 
