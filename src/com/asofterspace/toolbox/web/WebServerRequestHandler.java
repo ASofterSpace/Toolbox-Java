@@ -487,7 +487,7 @@ public class WebServerRequestHandler implements Runnable {
 			return answer;
 		}
 
-		WebServerAnswer answer = answerGet(location, arguments);
+		answer = answerGet(location, arguments);
 		if (answer != null) {
 			return answer;
 		}
