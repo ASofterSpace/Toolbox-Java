@@ -16,7 +16,9 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -189,6 +191,16 @@ public class WebServerRequestHandler implements Runnable {
 	/**
 	 * Overwrite this to answer GETs without (necessarily) returning a file for them;
 	 * if you return null, the fall-through is to look for a file to answer the GET request
+	 * (Here, foobar?arg=val&foo=bar would be passed to you as Map{"arg": "val", "foo": "bar"})
+	 */
+	protected WebServerAnswer answerGet(String location, Map<String, String> arguments) {
+		return null;
+	}
+
+	/**
+	 * Overwrite this to answer GETs without (necessarily) returning a file for them;
+	 * if you return null, the fall-through is to look for a file to answer the GET request
+	 * (Here, foobar?arg=val&foo=bar would be passed to you as ["arg=val", "foo=bar"])
 	 */
 	protected WebServerAnswer answerGet(String location, String[] arguments) {
 		return null;
@@ -450,11 +462,19 @@ public class WebServerRequestHandler implements Runnable {
 		}
 
 		String[] arguments = new String[0];
+		Map<String, String> argumentMap = new HashMap<>();
 
 		if (location.contains("?")) {
 			String[] locations = location.split("\\?");
 			location = locations[0];
 			arguments = locations[1].split("&");
+			for (String arg : arguments) {
+				if (arg.contains("=")) {
+					String key = arg.substring(0, arg.indexOf("="));
+					String value = arg.substring(arg.indexOf("=") + 1);
+					argumentMap.put(key, value);
+				}
+			}
 		}
 
 		if (location.equals("/")) {
@@ -462,6 +482,11 @@ public class WebServerRequestHandler implements Runnable {
 		}
 
 		// check if our behavior was overwritten
+		WebServerAnswer answer = answerGet(location, argumentMap);
+		if (answer != null) {
+			return answer;
+		}
+
 		WebServerAnswer answer = answerGet(location, arguments);
 		if (answer != null) {
 			return answer;
