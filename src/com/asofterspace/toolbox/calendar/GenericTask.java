@@ -382,6 +382,66 @@ public class GenericTask {
 		return false;
 	}
 
+	/**
+	 * Returns a string representation of the times on which this base task is scheduled
+	 */
+	public String getScheduleDateStr() {
+
+		String result = "";
+
+		List<String> daysOfWeek = getScheduledOnDaysOfWeek();
+		if (daysOfWeek != null) {
+			for (String day : daysOfWeek) {
+				day = toWeekDay(day);
+				if (day != null) {
+					result += day.substring(0, 2);
+					result += ", ";
+				}
+			}
+		}
+
+		Integer schedDay = getScheduledOnDay();
+		if (schedDay != null) {
+			result += schedDay + ". ";
+		}
+
+		List<Integer> schedMonths = getScheduledInMonths();
+		if (schedMonths != null) {
+			String sep = "";
+			for (Integer month : schedMonths) {
+				String monthName = DateUtils.monthNumToName(month);
+				if (monthName != null) {
+					result += sep;
+					result += monthName.substring(0, 3);
+					sep = ", ";
+				}
+			}
+		}
+
+		List<Integer> schedYears = getScheduledInYears();
+		if (schedYears != null) {
+			String sep = "";
+			for (Integer year : schedYears) {
+				if (year != null) {
+					result += sep;
+					result += year;
+					sep = ", ";
+				}
+			}
+		}
+
+		if (result.endsWith(", ")) {
+			result = result.substring(0, result.length() - 2);
+		}
+
+		result = result.trim();
+
+		if ("".equals(result)) {
+			result = "always";
+		}
+		return result;
+	}
+
 	public boolean appliesTo(Date from, Date to) {
 
 		if ((from == null) && (to == null)) {
