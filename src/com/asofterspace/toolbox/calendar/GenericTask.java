@@ -84,7 +84,7 @@ public class GenericTask {
 		return new GenericTask(this);
 	}
 
-	private static String toWeekDay(String weekDay) {
+	public static String toWeekDay(String weekDay) {
 		if (weekDay == null) {
 			return null;
 		}
@@ -178,6 +178,22 @@ public class GenericTask {
 
 	public String getTitle() {
 		return title;
+	}
+
+	public void setScheduledOnDay(Integer scheduledOnDay) {
+		this.scheduledOnDay = scheduledOnDay;
+	}
+
+	public void setScheduledOnDaysOfWeek(List<String> scheduledOnDaysOfWeek) {
+		this.scheduledOnDaysOfWeek = scheduledOnDaysOfWeek;
+	}
+
+	public void setScheduledInMonths(List<Integer> scheduledInMonths) {
+		this.scheduledInMonths = scheduledInMonths;
+	}
+
+	public void setScheduledInYears(List<Integer> scheduledInYears) {
+		this.scheduledInYears = scheduledInYears;
 	}
 
 	public Integer getScheduledOnDay() {

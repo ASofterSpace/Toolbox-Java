@@ -103,6 +103,10 @@ public class TaskCtrlBase {
 		lastTaskGeneration = day;
 	}
 
+	public void addNewRepeatingTask(GenericTask newTask) {
+		tasks.add(newTask);
+	}
+
 	public GenericTask addAdHocTask(String title, String details, Date scheduleDate) {
 
 		if (scheduleDate == null) {
@@ -125,7 +129,7 @@ public class TaskCtrlBase {
 		GenericTask newTask = createTask(title, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
 			scheduledInYears, detailsList, onDone);
 
-		return releaseTaskOn(newTask, scheduleDate);
+		return releaseTaskInstanceOn(newTask, scheduleDate);
 	}
 
 	/**
@@ -133,6 +137,14 @@ public class TaskCtrlBase {
 	 */
 	public GenericTask releaseTaskOn(GenericTask task, Date day) {
 		GenericTask taskInstance = task.getNewInstance();
+		return releaseTaskInstanceOn(taskInstance, day);
+	}
+
+	/**
+	 * Sets the release date of an existing task instance to a certain date, and adds it
+	 * the list of existing taskInstances
+	 */
+	private GenericTask releaseTaskInstanceOn(GenericTask taskInstance, Date day) {
 		taskInstance.setDone(false);
 		taskInstance.setReleasedDate(day);
 		taskInstance.setDoneDate(null);
