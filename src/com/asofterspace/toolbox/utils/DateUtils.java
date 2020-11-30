@@ -489,4 +489,19 @@ public class DateUtils {
 		return diffDays < x;
 	}
 
+	/**
+	 * Does this year contain a February the 29th?
+	 */
+	public static boolean isLeapYear(Integer year) {
+		if (year == null) {
+			return false;
+		}
+		Date feb28 = parseDate(year + "-02-28");
+		Date feb29 = addDays(feb28, 1);
+		if (getDayOfMonth(feb29) == 1) {
+			return false;
+		}
+		return true;
+	}
+
 }

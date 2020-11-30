@@ -117,12 +117,7 @@ public class GenericTask {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 
-		if (scheduledOnDay != null) {
-			if (!scheduledOnDay.equals(cal.get(Calendar.DAY_OF_MONTH))) {
-				return false;
-			}
-		}
-
+		// handle weekdays before day of month and month (as they have special 29th-Feb-code)
 		if (scheduledOnDaysOfWeek != null) {
 			if (scheduledOnDaysOfWeek.size() > 0) {
 				boolean foundDay = false;
@@ -139,21 +134,7 @@ public class GenericTask {
 			}
 		}
 
-		if (scheduledInMonths != null) {
-			if (scheduledInMonths.size() > 0) {
-				boolean foundMonth = false;
-				for (Integer month : scheduledInMonths) {
-					if (month.equals(cal.get(Calendar.MONTH))) {
-						foundMonth = true;
-						break;
-					}
-				}
-				if (!foundMonth) {
-					return false;
-				}
-			}
-		}
-
+		// handle years before day of month and month (as they have special 29th-Feb-code)
 		if (scheduledInYears != null) {
 			if (scheduledInYears.size() > 0) {
 				boolean foundYear = false;
@@ -164,6 +145,64 @@ public class GenericTask {
 					}
 				}
 				if (!foundYear) {
+					return false;
+				}
+			}
+		}
+
+		// day of month before month (as day of month includes special 29th-Feb-code which
+		// also checks the month and returns true for both together)
+		if (scheduledOnDay != null) {
+			if (!scheduledOnDay.equals(cal.get(Calendar.DAY_OF_MONTH))) {
+
+				// extra case: if this is scheduled on the 29th, ...
+				if (scheduledOnDay == 29) {
+					// ... and it is right now the 1st...
+					if (cal.get(Calendar.DAY_OF_MONTH) == 1) {
+						// ... and it is March right now ...
+						if (cal.get(Calendar.MONTH) == 2) {
+							// ... and it is scheduled for February ...
+							boolean scheduledForFebruary = true;
+							if (scheduledInMonths != null) {
+								if (scheduledInMonths.size() > 0) {
+									scheduledForFebruary = false;
+									for (Integer month : scheduledInMonths) {
+										if (month != null) {
+											if (month == 1) {
+												scheduledForFebruary = true;
+												break;
+											}
+										}
+									}
+								}
+							}
+							if (scheduledForFebruary) {
+								// ... and this year does not have a February the 29th...
+								if (!DateUtils.isLeapYear(cal.get(Calendar.YEAR))) {
+									// ... then actually this IS scheduled for today!
+									return true;
+								}
+							}
+						}
+					}
+				}
+
+				return false;
+			}
+		}
+
+		// handle months after day of month (as that one has special 29th Feb code handling day AND month,
+		// just for that one day)
+		if (scheduledInMonths != null) {
+			if (scheduledInMonths.size() > 0) {
+				boolean foundMonth = false;
+				for (Integer month : scheduledInMonths) {
+					if (month.equals(cal.get(Calendar.MONTH))) {
+						foundMonth = true;
+						break;
+					}
+				}
+				if (!foundMonth) {
 					return false;
 				}
 			}
