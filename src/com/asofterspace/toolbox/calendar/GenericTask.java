@@ -47,6 +47,9 @@ public class GenericTask {
 	protected Integer releasedInMonth;
 	protected Integer releasedInYear;
 
+	// purely for speeding up the function getReleaseDate(), we also have:
+	private Date releasedDate;
+
 	// when was this task done?
 	protected Date doneDate;
 
@@ -289,7 +292,11 @@ public class GenericTask {
 	}
 
 	public Date getReleaseDate() {
-		return DateUtils.parseDate(getReleasedInYear() + "-" + (getReleasedInMonth() + 1) + "-" + getReleasedOnDay());
+		if (releasedDate != null) {
+			return releasedDate;
+		}
+		releasedDate = DateUtils.parseDate(getReleasedInYear() + "-" + (getReleasedInMonth() + 1) + "-" + getReleasedOnDay());
+		return releasedDate;
 	}
 
 	public boolean hasBeenDone() {
@@ -312,6 +319,7 @@ public class GenericTask {
 	}
 
 	public void setReleasedOnDay(Integer releasedOnDay) {
+		releasedDate = null;
 		this.releasedOnDay = releasedOnDay;
 	}
 
@@ -320,6 +328,7 @@ public class GenericTask {
 	}
 
 	public void setReleasedInMonth(Integer releasedInMonth) {
+		releasedDate = null;
 		this.releasedInMonth = releasedInMonth;
 	}
 
@@ -328,6 +337,7 @@ public class GenericTask {
 	}
 
 	public void setReleasedInYear(Integer releasedInYear) {
+		releasedDate = null;
 		this.releasedInYear = releasedInYear;
 	}
 
@@ -344,6 +354,7 @@ public class GenericTask {
 	}
 
 	public void setReleasedDate(Date day) {
+		releasedDate = null;
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(day);
 		setReleasedOnDay(cal.get(Calendar.DAY_OF_MONTH));

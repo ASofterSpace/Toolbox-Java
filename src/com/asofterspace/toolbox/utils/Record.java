@@ -108,6 +108,16 @@ public class Record {
 			return arrRecord;
 		}
 
+		if (recordOrWhatever instanceof Object[]) {
+			Record arrRecord = Record.emptyArray();
+			List<Record> valList = new ArrayList<>();
+			for (Object obj : (Object[]) recordOrWhatever) {
+				valList.add(fromAnything(obj));
+			}
+			arrRecord.arrContents = valList;
+			return arrRecord;
+		}
+
 		if (recordOrWhatever instanceof Map) {
 			Record mapRecord = Record.emptyObject();
 			Map<String, Record> valMap = new HashMap<>();
