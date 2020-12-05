@@ -381,7 +381,7 @@ public abstract class Code extends DefaultStyledDocument {
 						}
 
 						if (event.isControlDown() || event.isShiftDown()) {
-							unindentSelection(1, false);
+							unindentSelection(1, false, null);
 						} else {
 							indentSelection("\t");
 						}
@@ -698,9 +698,9 @@ public abstract class Code extends DefaultStyledDocument {
 		indentOrUnindent(true, indentWithWhat, 0, false);
 	}
 
-	public void unindentSelection(int levelAmount, boolean forceUnindent) {
+	public void unindentSelection(int levelAmount, boolean forceUnindent, String unindentWithWhat) {
 
-		indentOrUnindent(false, "", levelAmount, forceUnindent);
+		indentOrUnindent(false, unindentWithWhat, levelAmount, forceUnindent);
 	}
 
 	private void indentOrUnindent(boolean doIndent, String indentWithWhat, int levelAmount, boolean forceUnindent) {
@@ -744,30 +744,42 @@ public abstract class Code extends DefaultStyledDocument {
 
 					boolean replacedSomeInThisLine = true;
 
-					if (forceUnindent || line.startsWith("\t")) {
-						// line might be empty in case of forceUnindent,
-						// so we have to check...
-						if (line.length() > 0) {
+					if (" ".equals(indentWithWhat)) {
+
+						if (line.startsWith(" ")) {
 							line = line.substring(1);
-							replaceAmount--;
-							if (curLine == 0) {
-								selStartOffset--;
-							}
+							replaceAmount -= 1;
+						} else {
+							replacedSomeInThisLine = false;
 						}
-					} else if (line.startsWith("    ")) {
-						line = line.substring(4);
-						replaceAmount -= 4;
-					} else if (line.startsWith("   ")) {
-						line = line.substring(3);
-						replaceAmount -= 3;
-					} else if (line.startsWith("  ")) {
-						line = line.substring(2);
-						replaceAmount -= 2;
-					} else if (line.startsWith(" ")) {
-						line = line.substring(1);
-						replaceAmount -= 1;
+
 					} else {
-						replacedSomeInThisLine = false;
+
+						if (forceUnindent || line.startsWith("\t")) {
+							// line might be empty in case of forceUnindent,
+							// so we have to check...
+							if (line.length() > 0) {
+								line = line.substring(1);
+								replaceAmount--;
+								if (curLine == 0) {
+									selStartOffset--;
+								}
+							}
+						} else if (line.startsWith("    ")) {
+							line = line.substring(4);
+							replaceAmount -= 4;
+						} else if (line.startsWith("   ")) {
+							line = line.substring(3);
+							replaceAmount -= 3;
+						} else if (line.startsWith("  ")) {
+							line = line.substring(2);
+							replaceAmount -= 2;
+						} else if (line.startsWith(" ")) {
+							line = line.substring(1);
+							replaceAmount -= 1;
+						} else {
+							replacedSomeInThisLine = false;
+						}
 					}
 
 					if (replacedSomeInThisLine) {
