@@ -693,6 +693,63 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	public void extractString() {
+
+		String content = decoratedEditor.getText();
+		int strStart = selStart;
+		int strEnd = selStart + 1;
+		char strDel = '"';
+		// go left to the start
+		while (strStart >= 0) {
+			strDel = content.charAt(strStart);
+			if ((strDel == '"') || (strDel == '\'') || (strDel == '`')) {
+				break;
+			}
+			strStart--;
+		}
+		// go right to the end
+		int len = content.length();
+		while (strEnd < len) {
+			char cur = content.charAt(strEnd);
+			if (cur == strDel) {
+				break;
+			}
+			strEnd++;
+		}
+
+		// "fooBar"
+		String origStrWithDel = content.substring(strStart, strEnd + 1);
+
+		// fooBar
+		String origStr = content.substring(strStart + 1, strEnd);
+
+		// FOO_BAR
+		String fieldName = "";
+		for (int i = 0; i < origStr.length(); i++) {
+			char c = origStr.charAt(i);
+			if (c == Character.toUpperCase(c)) {
+				if (fieldName.length() > 0) {
+					fieldName += "_";
+				}
+			}
+			fieldName += Character.toUpperCase(c);
+		}
+
+		content = StrUtils.replaceAll(content, origStrWithDel, fieldName);
+
+		if (content.contains("{")) {
+			// Java-ish language
+			int pos = content.indexOf("{");
+			content = content.substring(0, pos + 1) + "\n\n" + "\tprivate final static String " + fieldName +
+				" = " + origStrWithDel + ";" + content.substring(pos + 1);
+		} else {
+			// generic other language
+			content = "const " + fieldName + " = " + origStrWithDel + ";\n\n" + content;
+		}
+
+		decoratedEditor.setText(content);
+	}
+
 	public void indentSelection(String indentWithWhat) {
 
 		indentOrUnindent(true, indentWithWhat, 0, false);
