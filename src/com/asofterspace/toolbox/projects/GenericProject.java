@@ -19,6 +19,8 @@ public class GenericProject {
 
 	private ColorRGB color;
 
+	private Boolean onShortlist;
+
 	private Directory projectDir;
 
 
@@ -50,6 +52,7 @@ public class GenericProject {
 
 	protected void readRecord(Record projectConfRec) {
 		this.color = ColorRGB.fromString(projectConfRec.getString("color"));
+		this.onShortlist = projectConfRec.getBoolean("onShortlist");
 	}
 
 	protected Record createRecord() {
@@ -61,6 +64,10 @@ public class GenericProject {
 	private String nameToShortName(String name) {
 
 		String result = name;
+
+		if (result.equals("Polyamorous Pirates & Curious Cephalopods")) {
+			result = "ppcc";
+		}
 
 		result = result.toLowerCase();
 		result = result.replace(" ", "");
@@ -82,6 +89,13 @@ public class GenericProject {
 
 	public ColorRGB getColor() {
 		return color;
+	}
+
+	public boolean isOnShortlist() {
+		if (onShortlist == null) {
+			return false;
+		}
+		return onShortlist;
 	}
 
 	public Directory getProjectDir() {
