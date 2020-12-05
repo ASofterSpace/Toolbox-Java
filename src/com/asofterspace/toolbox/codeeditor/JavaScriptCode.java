@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.utils.StrUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -105,11 +106,32 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		super.insertString(offset, insertedString, attrs, overrideCaretPos);
 	}
 
+	protected List<String> getBaseTokens() {
+		return getBaseTokensStatically();
+	}
+
+	protected static List<String> getBaseTokensStatically() {
+
+		List<String> nextEncounteredTokens = new ArrayList<>();
+
+		// add a few strings which we want to get proposed all the time, even if they have not been encountered yet
+		nextEncounteredTokens.add("console.log();");
+		nextEncounteredTokens.add("private");
+		nextEncounteredTokens.add("public");
+		nextEncounteredTokens.add("protected");
+		nextEncounteredTokens.add("return result;");
+
+		return nextEncounteredTokens;
+	}
+
 	// this is the main function that... well... highlights our text :)
 	@Override
 	protected void highlightText(int start, int length) {
 
 		super.highlightText(start, length);
+
+		this.encounteredTokens = nextEncounteredTokens;
+		nextEncounteredTokens = getBaseTokens();
 
 		try {
 			int end = this.getLength();
@@ -253,10 +275,14 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
+		nextEncounteredTokens.add(couldBeKeyword);
+
 		if (isKeyword(couldBeKeyword)) {
 			if ("function".equals(couldBeKeyword)) {
 				String functionName = getFunctionNameFromLine(StrUtils.getLineFromPosition(start, content));
 				if (functionName.length() > 0) {
+					// add any line that contain the "function" keyword as a function
+					// (later on lines with indentation > 4 will be removed from that list though!)
 					functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 				}
 			}
@@ -272,6 +298,8 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 				getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrFunction, false);
 				if ((start > 0) && (content.charAt(start-1) == ' ')) {
 					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
+					// add any line that contains " foo(" as a function
+					// (later on lines with indentation > 4 will be removed from that list though!)
 					functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
 				}
 			}

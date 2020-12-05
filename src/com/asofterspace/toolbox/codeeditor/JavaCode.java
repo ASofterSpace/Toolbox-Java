@@ -356,16 +356,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		return "";
 	}
 
-	// this is the main function that... well... highlights our text :)
-	@Override
-	protected void highlightText(int start, int length) {
+	protected List<String> getBaseTokens() {
 
-		super.highlightText(start, length);
-
-		String content = "";
-
-		this.encounteredTokens = nextEncounteredTokens;
-		nextEncounteredTokens = new ArrayList<>();
+		List<String> nextEncounteredTokens = new ArrayList<>();
 
 		// add a few strings which we want to get proposed all the time, even if they have not been encountered yet
 		nextEncounteredTokens.add("System.out.println();");
@@ -375,6 +368,20 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		nextEncounteredTokens.add("public");
 		nextEncounteredTokens.add("protected");
 		nextEncounteredTokens.add("return result;");
+
+		return nextEncounteredTokens;
+	}
+
+	// this is the main function that... well... highlights our text :)
+	@Override
+	protected void highlightText(int start, int length) {
+
+		super.highlightText(start, length);
+
+		String content = "";
+
+		this.encounteredTokens = nextEncounteredTokens;
+		nextEncounteredTokens = getBaseTokens();
 
 		try {
 			int end = this.getLength();

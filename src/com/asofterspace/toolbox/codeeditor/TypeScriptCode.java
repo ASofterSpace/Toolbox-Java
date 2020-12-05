@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JTextPane;
@@ -65,6 +66,11 @@ public class TypeScriptCode extends JavaCode {
 	}
 
 	@Override
+	protected List<String> getBaseTokens() {
+		return JavaScriptCode.getBaseTokensStatically();
+	}
+
+	@Override
 	protected int highlightOther(String content, int start, int end, boolean setAttributesAndDetectFunctions, char prevChar) {
 
 		int couldBeKeywordEnd = start + 1;
@@ -77,6 +83,8 @@ public class TypeScriptCode extends JavaCode {
 		}
 
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
+
+		nextEncounteredTokens.add(couldBeKeyword);
 
 		if (setAttributesAndDetectFunctions) {
 			if (isKeyword(couldBeKeyword)) {

@@ -350,9 +350,9 @@ public abstract class Code extends DefaultStyledDocument {
 						String txt = decoratedEditor.getText();
 						String token = propTokens.get(((CodeEditor) decoratedEditor).getProposedTokenSelection());
 						int nextSelStart = selStart + token.length();
-						// e.g. for System.out.println(); put the cursor inside the brackets,
+						// e.g. for System.out.println(); and console.log(); put the cursor inside the brackets,
 						// but not for new ArrayList<>();
-						if (token.endsWith("ln();")) {
+						if (token.endsWith(".println();") || token.endsWith(".log();")) {
 							nextSelStart -= 2;
 						}
 						decoratedEditor.setText(
