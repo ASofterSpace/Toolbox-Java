@@ -707,6 +707,10 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 			strStart--;
 		}
+		// if no string delimiter cannot be found, return entirely
+		if (strStart == 0) {
+			return;
+		}
 		// go right to the end
 		int len = content.length();
 		while (strEnd < len) {
@@ -725,12 +729,16 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// FOO_BAR
 		String fieldName = "";
+		boolean justencounteredupcase = true;
 		for (int i = 0; i < origStr.length(); i++) {
 			char c = origStr.charAt(i);
 			if (c == Character.toUpperCase(c)) {
-				if (fieldName.length() > 0) {
+				if (!justencounteredupcase) {
 					fieldName += "_";
 				}
+				justencounteredupcase = true;
+			} else {
+				justencounteredupcase = false;
 			}
 			fieldName += Character.toUpperCase(c);
 		}
