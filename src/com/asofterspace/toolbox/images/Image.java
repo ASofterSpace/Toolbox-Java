@@ -8,6 +8,7 @@ import com.asofterspace.toolbox.utils.MathUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -111,6 +112,39 @@ public class Image {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Copy this image, giving back a new image that contains the same pixel values
+	 * but with a certain part cut out
+	 */
+	public Image copy(int top, int right, int bottom, int left) {
+
+		int newWidth = 1 + right - left;
+		int newHeight = 1 + bottom - top;
+
+		if ((newWidth < 0) || (newHeight < 0)) {
+			return new Image(0, 0, false);
+		}
+
+		Image result = new Image(newWidth, newHeight, false);
+
+		for (int y = top; y <= bottom; y++) {
+			for (int x = left; x <= right; x++) {
+				result.data[y-top][x-left] = this.data[y][x];
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Copy to clipboard, for paste from clipboard see createFromClipboard()
+	 */
+	public void copyToClipboard() {
+		ClipboardTransferImage clipContent = new ClipboardTransferImage(this);
+		Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clip.setContents(clipContent, null);
 	}
 
 	/**
@@ -555,6 +589,9 @@ public class Image {
 		return result;
 	}
 
+	/**
+	 * Paste from clipboard, for copy to clipboard see copyToClipboard()
+	 */
 	public static Image createFromClipboard() {
 
 		Transferable clipContent = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
