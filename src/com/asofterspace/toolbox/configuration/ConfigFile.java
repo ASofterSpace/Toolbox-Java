@@ -89,13 +89,31 @@ public class ConfigFile extends JsonFile {
 	 */
 	public ConfigFile(String name, Boolean baseOnClasspath, Record newContent) {
 
+		this(name, baseOnClasspath, newContent, false);
+	}
+
+	/**
+	 * Creates a config file with the given name, absolute or not, and directly filled with
+	 * new content - so NO content will be read from the disk, but it will be written immediately!
+	 */
+	public ConfigFile(String name, Boolean baseOnClasspath, Record defaultContent, boolean onlyUseDefaultIfBroken) {
+
 		super(getConfigFilename(name, baseOnClasspath));
 
 		createParentDirectory();
 
-		// EVERY ConfigFile constructor MUST call ensureContent() . except for this one,
+		if (onlyUseDefaultIfBroken) {
+			try {
+				ensureContent();
+				return;
+			} catch (JsonParseException e) {
+				// fallthrough to setting the content
+			}
+		}
+
+		// EVERY ConfigFile constructor MUST call ensureContent() - except for this one,
 		// as we ensure there is content by setting it directly!
-		super.setAllContents(newContent);
+		super.setAllContents(defaultContent);
 
 		create();
 	}
