@@ -4,26 +4,19 @@
  */
 package com.asofterspace.toolbox.gui;
 
-import java.awt.Dimension;
-
-import javax.swing.JButton;
+import javax.swing.JLabel;
 
 
 /**
  * This is a simple clickable item right inside the main menu :)
  */
-public class MenuItemForMainMenu extends JButton {
+public class MenuItemForMainMenu extends JLabel {
 
-	public static final long serialVersionUID = 56456349390653297l;
+	public static final long serialVersionUID = 5645634939065497l;
 
 
 	public MenuItemForMainMenu(String labelText) {
-		super(labelText);
-
-		setOpaque(true);
-		setContentAreaFilled(false);
-		setBorderPainted(false);
-		setFocusable(false);
+		super(" " + labelText + " ");
 	}
 
 	/*
@@ -31,6 +24,7 @@ public class MenuItemForMainMenu extends JButton {
 		return new Dimension(
 			super.getPreferredSize().width,
 			super.getMaximumSize().height);
-	}*/
+	}
+	*/
 
 }
