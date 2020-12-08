@@ -19,6 +19,10 @@ public class MenuItemForMainMenu extends JLabel {
 		super(" " + labelText + " ");
 	}
 
+	public void setText(String text) {
+		super.setText(" " + text + " ");
+	}
+
 	/*
 	public Dimension getMaximumSize() {
 		return new Dimension(
