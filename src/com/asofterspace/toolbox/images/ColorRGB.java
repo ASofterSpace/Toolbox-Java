@@ -282,27 +282,54 @@ public class ColorRGB {
 
 	public boolean fastSimilar(ColorRGB other) {
 
-		int diffR = (int) this.r - (int) other.r;
+		int diffR = (((int) this.r) & 0xFF) - (((int) other.r) & 0xFF);
 		if ((diffR > 16) || (diffR < -16)) {
 			return false;
 		}
 
-		int diffG = (int) this.g - (int) other.g;
+		int diffG = (((int) this.g) & 0xFF) - (((int) other.g) & 0xFF);
 		if ((diffG > 16) || (diffG < -16)) {
 			return false;
 		}
 
-		int diffB = (int) this.b - (int) other.b;
+		int diffB = (((int) this.b) & 0xFF) - (((int) other.b) & 0xFF);
 		if ((diffB > 16) || (diffB < -16)) {
 			return false;
 		}
 
-		int diffA = (int) this.a - (int) other.a;
+		int diffA = (((int) this.a) & 0xFF) - (((int) other.a) & 0xFF);
 		if ((diffA > 16) || (diffA < -16)) {
 			return false;
 		}
 
 		return true;
+	}
+
+	public boolean fastVaguelySimilar(ColorRGB other) {
+
+		int different = 0;
+
+		int diffR = (((int) this.r) & 0xFF) - (((int) other.r) & 0xFF);
+		if ((diffR > 16) || (diffR < -16)) {
+			different++;
+		}
+
+		int diffG = (((int) this.g) & 0xFF) - (((int) other.g) & 0xFF);
+		if ((diffG > 16) || (diffG < -16)) {
+			different++;
+		}
+
+		int diffB = (((int) this.b) & 0xFF) - (((int) other.b) & 0xFF);
+		if ((diffB > 16) || (diffB < -16)) {
+			different++;
+		}
+
+		int diffA = (((int) this.a) & 0xFF) - (((int) other.a) & 0xFF);
+		if ((diffA > 16) || (diffA < -16)) {
+			different++;
+		}
+
+		return different < 2;
 	}
 
 	/**
