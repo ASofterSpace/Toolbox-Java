@@ -2069,9 +2069,12 @@ public abstract class Code extends DefaultStyledDocument {
 			try {
 				String content = this.getText(0, offset);
 
+				boolean encounteredSomething = false;
+
 				int startOfThisLine = content.lastIndexOf("\n") + 1;
 
 				String line = content.substring(startOfThisLine, offset);
+				String trimLine = line.trim();
 
 				StringBuilder curLineWhitespace = new StringBuilder();
 
@@ -2087,16 +2090,9 @@ public abstract class Code extends DefaultStyledDocument {
 				String origWhitespace = curLineWhitespace.toString();
 
 				// in case of case "blubb":, indent with extra whitespace
-				if (content.endsWith(":") && (line.trim().startsWith("case ") || line.trim().equals("default:"))) {
-					if (defaultIndentationStr == null) {
-						if (origWhitespace.endsWith(" ")) {
-							curLineWhitespace.append("    ");
-						} else {
-							curLineWhitespace.append("\t");
-						}
-					} else {
-						curLineWhitespace.append(defaultIndentationStr);
-					}
+				if (content.endsWith(":") && (trimLine.startsWith("case ") || trimLine.equals("default:"))) {
+					appendWhitespace(curLineWhitespace, defaultIndentationStr, origWhitespace);
+					encounteredSomething = true;
 				}
 
 				// in case of {, add indent, and in case of }, remove it
@@ -2106,15 +2102,8 @@ public abstract class Code extends DefaultStyledDocument {
 					content.endsWith("(") ||
 					content.endsWith("begin") ||
 					content.endsWith("then")) {
-					if (defaultIndentationStr == null) {
-						if (origWhitespace.endsWith(" ")) {
-							curLineWhitespace.append("    ");
-						} else {
-							curLineWhitespace.append("\t");
-						}
-					} else {
-						curLineWhitespace.append(defaultIndentationStr);
-					}
+					appendWhitespace(curLineWhitespace, defaultIndentationStr, origWhitespace);
+					encounteredSomething = true;
 				}
 				/*
 				if (content.endsWith("}") ||
@@ -2128,6 +2117,26 @@ public abstract class Code extends DefaultStyledDocument {
 					}
 				}
 				*/
+
+				// if we are not already do something funny, check if the line starts with return or throw,
+				// and if yes, add closed curly brace on the next line
+				if (!encounteredSomething) {
+					if (trimLine.startsWith("return ") || trimLine.startsWith("throw ")) {
+						// remove one level of indentation
+						if (curLineWhitespace.length() >= 1) {
+							if (curLineWhitespace.substring(curLineWhitespace.length() - 1).equals("\t")) {
+								curLineWhitespace.delete(curLineWhitespace.length() - 1, curLineWhitespace.length());
+							} else {
+								if (curLineWhitespace.length() >= 4) {
+									if (curLineWhitespace.substring(curLineWhitespace.length() - 4).equals("    ")) {
+										curLineWhitespace.delete(curLineWhitespace.length() - 4, curLineWhitespace.length());
+									}
+								}
+							}
+						}
+						curLineWhitespace.append("}");
+					}
+				}
 
 				insertedString += curLineWhitespace.toString();
 				overrideCaretPos += curLineWhitespace.length();
@@ -2181,6 +2190,18 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
+	private void appendWhitespace(StringBuilder curLineWhitespace, String defaultIndentationStr, String origWhitespace) {
+		if (defaultIndentationStr == null) {
+			if (origWhitespace.endsWith(" ")) {
+				curLineWhitespace.append("    ");
+			} else {
+				curLineWhitespace.append("\t");
+			}
+		} else {
+			curLineWhitespace.append(defaultIndentationStr);
+		}
+	}
+
 	protected void insertStringJavalike(int offset, String insertedString, AttributeSet attrs) {
 
 		int overrideCaretPos = insertedString.length();
@@ -2215,22 +2236,27 @@ public abstract class Code extends DefaultStyledDocument {
 				insertedString = "{}";
 				overrideCaretPos = 1;
 				break;
+
 			case "(":
 				insertedString = "()";
 				overrideCaretPos = 1;
 				break;
+
 			case "[":
 				insertedString = "[]";
 				overrideCaretPos = 1;
 				break;
+
 			case "<":
 				insertedString = "<>";
 				overrideCaretPos = 1;
 				break;
+
 			case "\"":
 				insertedString = "\"\"";
 				overrideCaretPos = 1;
 				break;
+
 			case "'":
 				// replace ' with '' in code - but not in comment mode!
 				if (attrComment.equals(attrs)) {
@@ -2239,185 +2265,93 @@ public abstract class Code extends DefaultStyledDocument {
 				insertedString = "''";
 				overrideCaretPos = 1;
 				break;
+
 			case " ":
-				if (offset > 5) {
-					content = decoratedEditor.getText();
+				if (offset < 2) {
+					break;
+				}
+				content = decoratedEditor.getText();
 
-					// in case of "for " <- that last space being entered,
-					// check the previous line... if it contains "Map<" (might be "HashMap<" too),
-					// then automagically write:
-					// for (Map.Entry<String, Object> entry : map.entrySet()) {
-					//     String key = entry.getKey();
-					//     Object value = entry.getValue();
-					// }
-					char char4 = content.charAt(offset - 4);
-					boolean char4White = (char4 == ' ') || (char4 == '\t') || (char4 == '\n') || (char4 == '\r');
-					if (char4White && (content.charAt(offset - 3) == 'f') &&
-						(content.charAt(offset - 2) == 'o') && (content.charAt(offset - 1) == 'r')) {
-
-						// get the two newlines before the for, nl1 is just before the for, nl2 is the one
-						// just before that one
-						int nl1 = content.lastIndexOf("\n", offset - 3);
-
-						if (nl1 >= 0) {
-							// keep going back with nl2 until between nl1 and nl2 we have *something* after trim()
-							int nl2 = nl1;
-							nl2 = content.lastIndexOf("\n", nl2 - 1);
-							if (nl2 >= 0) {
-								while ("".equals(content.substring(nl2, nl1).trim())) {
-									nl2 = content.lastIndexOf("\n", nl2 - 1);
-									if (nl2 < 0) {
-										break;
-									}
-								}
-
-								if (nl2 >= 0) {
-									// check if there is a "Map<" in there, and if so...
-									if (content.substring(nl2, nl1).contains("Map<")) {
-
-										// ... automagically add the for command for maps! :D
-
-										String contentStart = content.substring(0, offset);
-										String contentEnd = content.substring(offset);
-
-										String indentation = content.substring(nl1 + 1, offset - 3);
-
-										String forStuff =
-											" (Map.Entry<String, Object> entry : map.entrySet()) {\n" +
-											indentation + "\tString key = entry.getKey();\n" +
-											indentation + "\tObject value = entry.getValue();\n" +
-											indentation + "\t";
-
-										String forEnd = "\n" +
-											indentation + "}";
-
-										String newContent = contentStart + forStuff + forEnd + contentEnd;
-
-										int origCaretPos = decoratedEditor.getCaretPosition();
-										decoratedEditor.setText(newContent);
-										decoratedEditor.setCaretPosition(origCaretPos + forStuff.length());
-
-										// we do NOT bubble up the chain, as we already set the text explicitly!
-										return;
-									}
-								}
-							}
+				// in case of "  " <- that last space being entered,
+				// check the rest of the current line left-wards,
+				// and if there is something non-whitespacey until the next \n,
+				// actually put in an equals sign to get " = "
+				if (content.charAt(offset - 1) == ' ') {
+					boolean encounteredSomething = false;
+					for (int pos = offset - 2; pos >= 0; pos++) {
+						char c = content.charAt(pos);
+						if (c == '\n') {
+							break;
+						}
+						if (!((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r'))) {
+							encounteredSomething = true;
+							break;
 						}
 					}
+					if (encounteredSomething) {
+						insertedString = "= ";
+						overrideCaretPos = 2;
+						break;
+					}
+				}
 
-					// in case of "if (blubb) && "<- that last space being entered,
-					// add a bracket after the if and close it after the cursor:
-					// if ((blubb) && )
-					if (offset > 10) {
-						if ((content.charAt(offset - 6) == ' ') && (content.charAt(offset - 5) == '=') &&
-							(content.charAt(offset - 4) == ' ') && (content.charAt(offset - 3) == 'n') &&
-							(content.charAt(offset - 2) == 'e') && (content.charAt(offset - 1) == 'w')) {
+				if (offset < 6) {
+					break;
+				}
 
-							lineStart = StrUtils.getLineStartFromPosition(offset, content);
-							lineEnd = StrUtils.getLineEndFromPosition(offset, content);
-							int lineOffset = offset - lineStart;
+				// in case of "for " <- that last space being entered,
+				// check the previous line... if it contains "Map<" (might be "HashMap<" too),
+				// then automagically write:
+				// for (Map.Entry<String, Object> entry : map.entrySet()) {
+				//     String key = entry.getKey();
+				//     Object value = entry.getValue();
+				// }
+				char char4 = content.charAt(offset - 4);
+				boolean char4White = (char4 == ' ') || (char4 == '\t') || (char4 == '\n') || (char4 == '\r');
+				if (char4White && (content.charAt(offset - 3) == 'f') &&
+					(content.charAt(offset - 2) == 'o') && (content.charAt(offset - 1) == 'r')) {
 
-							String contentStart = content.substring(0, lineStart);
-							line = content.substring(lineStart, lineEnd);
-							String contentEnd = content.substring(lineEnd, content.length());
-							String lineFollowing = line.substring(lineOffset);
+					// get the two newlines before the for, nl1 is just before the for, nl2 is the one
+					// just before that one
+					int nl1 = content.lastIndexOf("\n", offset - 3);
 
-							if ("".equals(lineFollowing.trim()) || ";".equals(lineFollowing.trim())) {
-
-								line = line.substring(0, lineOffset);
-
-								int tabAt = line.indexOf("\tList<");
-								int spaceAt = line.indexOf(" List<");
-
-								if (line.substring(lineOffset).equals("")) {
-									if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-										((spaceAt >= 0) && (spaceAt < lineOffset))) {
-
-										line = line + " ArrayList<>();";
-										String newContent = contentStart + line + contentEnd;
-
-										int origCaretPos = decoratedEditor.getCaretPosition();
-										decoratedEditor.setText(newContent);
-										decoratedEditor.setCaretPosition(origCaretPos + 15);
-
-										// we do NOT bubble up the chain, as we already set the text explicitly!
-										return;
-									}
+					if (nl1 >= 0) {
+						// keep going back with nl2 until between nl1 and nl2 we have *something* after trim()
+						int nl2 = nl1;
+						nl2 = content.lastIndexOf("\n", nl2 - 1);
+						if (nl2 >= 0) {
+							while ("".equals(content.substring(nl2, nl1).trim())) {
+								nl2 = content.lastIndexOf("\n", nl2 - 1);
+								if (nl2 < 0) {
+									break;
 								}
+							}
 
-								tabAt = line.indexOf("\tSet<");
-								spaceAt = line.indexOf(" Set<");
+							if (nl2 >= 0) {
+								// check if there is a "Map<" in there, and if so...
+								if (content.substring(nl2, nl1).contains("Map<")) {
 
-								if (line.substring(lineOffset).equals("")) {
-									if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-										((spaceAt >= 0) && (spaceAt < lineOffset))) {
+									// ... automagically add the for command for maps! :D
 
-										line = line + " HashSet<>();";
-										String newContent = contentStart + line + contentEnd;
+									String contentStart = content.substring(0, offset);
+									String contentEnd = content.substring(offset);
 
-										int origCaretPos = decoratedEditor.getCaretPosition();
-										decoratedEditor.setText(newContent);
-										decoratedEditor.setCaretPosition(origCaretPos + 13);
+									String indentation = content.substring(nl1 + 1, offset - 3);
 
-										// we do NOT bubble up the chain, as we already set the text explicitly!
-										return;
-									}
-								}
+									String forStuff =
+										" (Map.Entry<String, Object> entry : map.entrySet()) {\n" +
+										indentation + "\tString key = entry.getKey();\n" +
+										indentation + "\tObject value = entry.getValue();\n" +
+										indentation + "\t";
 
-								tabAt = line.indexOf("\tMap<");
-								spaceAt = line.indexOf(" Map<");
+									String forEnd = "\n" +
+										indentation + "}";
 
-								if (line.substring(lineOffset).equals("")) {
-									if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-										((spaceAt >= 0) && (spaceAt < lineOffset))) {
-
-										line = line + " HashMap<>();";
-										String newContent = contentStart + line + contentEnd;
-
-										int origCaretPos = decoratedEditor.getCaretPosition();
-										decoratedEditor.setText(newContent);
-										decoratedEditor.setCaretPosition(origCaretPos + 13);
-
-										// we do NOT bubble up the chain, as we already set the text explicitly!
-										return;
-									}
-								}
-
-								// for all others, if we have Foo bar = new, then actually automagically add:
-								// Foo bar = new Foo();
-								String newClazz = line.trim();
-								String genericClazz = "";
-								if (newClazz.contains("<")) {
-									genericClazz = newClazz.substring(newClazz.indexOf("<"));
-									newClazz = newClazz.substring(0, newClazz.indexOf("<"));
-								}
-								if (newClazz.contains(" ")) {
-									newClazz = newClazz.substring(0, newClazz.indexOf(" "));
-								}
-
-								// buuut do not do it if the string contains a dot, or does not start with a
-								// capital letter - so do not do it for Foo.blubb = new or bar = new
-								if ((newClazz.length() > 0) &&
-									(!newClazz.contains(".")) &&
-									(Character.isUpperCase(newClazz.charAt(0)) || newClazz.endsWith("[]"))) {
-
-									int caretOffset = 2;
-									if (newClazz.endsWith("[]")) {
-										line = line + " " + newClazz + ";";
-										caretOffset = 0;
-									} else {
-										if (!"".equals(genericClazz)) {
-											line = line + " " + newClazz + "<>();";
-											caretOffset = 4;
-										} else {
-											line = line + " " + newClazz + "();";
-										}
-									}
-									String newContent = contentStart + line + contentEnd;
+									String newContent = contentStart + forStuff + forEnd + contentEnd;
 
 									int origCaretPos = decoratedEditor.getCaretPosition();
 									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + caretOffset);
+									decoratedEditor.setCaretPosition(origCaretPos + forStuff.length());
 
 									// we do NOT bubble up the chain, as we already set the text explicitly!
 									return;
@@ -2425,8 +2359,15 @@ public abstract class Code extends DefaultStyledDocument {
 							}
 						}
 					}
-					if (((content.charAt(offset - 1) == '&') && (content.charAt(offset - 2) == '&')) ||
-						((content.charAt(offset - 1) == '|') && (content.charAt(offset - 2) == '|'))) {
+				}
+
+				// in case of "if (blubb) && "<- that last space being entered,
+				// add a bracket after the if and close it after the cursor:
+				// if ((blubb) && )
+				if (offset > 10) {
+					if ((content.charAt(offset - 6) == ' ') && (content.charAt(offset - 5) == '=') &&
+						(content.charAt(offset - 4) == ' ') && (content.charAt(offset - 3) == 'n') &&
+						(content.charAt(offset - 2) == 'e') && (content.charAt(offset - 1) == 'w')) {
 
 						lineStart = StrUtils.getLineStartFromPosition(offset, content);
 						lineEnd = StrUtils.getLineEndFromPosition(offset, content);
@@ -2435,43 +2376,157 @@ public abstract class Code extends DefaultStyledDocument {
 						String contentStart = content.substring(0, lineStart);
 						line = content.substring(lineStart, lineEnd);
 						String contentEnd = content.substring(lineEnd, content.length());
+						String lineFollowing = line.substring(lineOffset);
 
-						int ifAt = line.indexOf("if (");
+						if ("".equals(lineFollowing.trim()) || ";".equals(lineFollowing.trim())) {
 
-						if ((ifAt >= 0) && (ifAt < lineOffset)) {
-							// if we have:          if (blubb = foo) && |
-							// or if we have:       if (blubb = foo && |)
-							// but NOT if we have:  if (blubb(foo) && |)
-							if (line.indexOf("(", ifAt + 4) < 0) {
-								int foundEndAt = line.indexOf(")", ifAt + 4);
-								int insertedAmount = 0;
+							line = line.substring(0, lineOffset);
 
-								line = line.substring(0, ifAt + 4) + "(" + line.substring(ifAt + 4);
-								String newContent = contentStart + line + contentEnd;
+							int tabAt = line.indexOf("\tList<");
+							int spaceAt = line.indexOf(" List<");
 
-								if ((foundEndAt >= 0) && (foundEndAt < lineOffset)) {
-									// we have:       if (blubb = foo) && |
-									// we insert:     if ((blubb = foo) && |)
+							if (line.substring(lineOffset).equals("")) {
+								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+									((spaceAt >= 0) && (spaceAt < lineOffset))) {
 
-									newContent = newContent.substring(0, offset + 1) + " )" + newContent.substring(offset + 1);
-									insertedAmount = 2;
+									line = line + " ArrayList<>();";
+									String newContent = contentStart + line + contentEnd;
 
-								} else {
-									// we have:       if (blubb = foo && |)
-									// we insert:     if ((blubb = foo) && |)
+									int origCaretPos = decoratedEditor.getCaretPosition();
+									decoratedEditor.setText(newContent);
+									decoratedEditor.setCaretPosition(origCaretPos + 15);
 
-									newContent = newContent.substring(0, offset - 2) + ")" +
-										newContent.substring(offset - 2, offset + 1) + " " + newContent.substring(offset + 1);
-									insertedAmount = 3;
+									// we do NOT bubble up the chain, as we already set the text explicitly!
+									return;
 								}
+							}
+
+							tabAt = line.indexOf("\tSet<");
+							spaceAt = line.indexOf(" Set<");
+
+							if (line.substring(lineOffset).equals("")) {
+								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+									((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+									line = line + " HashSet<>();";
+									String newContent = contentStart + line + contentEnd;
+
+									int origCaretPos = decoratedEditor.getCaretPosition();
+									decoratedEditor.setText(newContent);
+									decoratedEditor.setCaretPosition(origCaretPos + 13);
+
+									// we do NOT bubble up the chain, as we already set the text explicitly!
+									return;
+								}
+							}
+
+							tabAt = line.indexOf("\tMap<");
+							spaceAt = line.indexOf(" Map<");
+
+							if (line.substring(lineOffset).equals("")) {
+								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+									((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+									line = line + " HashMap<>();";
+									String newContent = contentStart + line + contentEnd;
+
+									int origCaretPos = decoratedEditor.getCaretPosition();
+									decoratedEditor.setText(newContent);
+									decoratedEditor.setCaretPosition(origCaretPos + 13);
+
+									// we do NOT bubble up the chain, as we already set the text explicitly!
+									return;
+								}
+							}
+
+							// for all others, if we have Foo bar = new, then actually automagically add:
+							// Foo bar = new Foo();
+							String newClazz = line.trim();
+							String genericClazz = "";
+							if (newClazz.contains("<")) {
+								genericClazz = newClazz.substring(newClazz.indexOf("<"));
+								newClazz = newClazz.substring(0, newClazz.indexOf("<"));
+							}
+							if (newClazz.contains(" ")) {
+								newClazz = newClazz.substring(0, newClazz.indexOf(" "));
+							}
+
+							// buuut do not do it if the string contains a dot, or does not start with a
+							// capital letter - so do not do it for Foo.blubb = new or bar = new
+							if ((newClazz.length() > 0) &&
+								(!newClazz.contains(".")) &&
+								(Character.isUpperCase(newClazz.charAt(0)) || newClazz.endsWith("[]"))) {
+
+								int caretOffset = 2;
+								if (newClazz.endsWith("[]")) {
+									line = line + " " + newClazz + ";";
+									caretOffset = 0;
+								} else {
+									if (!"".equals(genericClazz)) {
+										line = line + " " + newClazz + "<>();";
+										caretOffset = 4;
+									} else {
+										line = line + " " + newClazz + "();";
+									}
+								}
+								String newContent = contentStart + line + contentEnd;
 
 								int origCaretPos = decoratedEditor.getCaretPosition();
 								decoratedEditor.setText(newContent);
-								decoratedEditor.setCaretPosition(origCaretPos + insertedAmount);
+								decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + caretOffset);
 
 								// we do NOT bubble up the chain, as we already set the text explicitly!
 								return;
 							}
+						}
+					}
+				}
+				if (((content.charAt(offset - 1) == '&') && (content.charAt(offset - 2) == '&')) ||
+					((content.charAt(offset - 1) == '|') && (content.charAt(offset - 2) == '|'))) {
+
+					lineStart = StrUtils.getLineStartFromPosition(offset, content);
+					lineEnd = StrUtils.getLineEndFromPosition(offset, content);
+					int lineOffset = offset - lineStart;
+
+					String contentStart = content.substring(0, lineStart);
+					line = content.substring(lineStart, lineEnd);
+					String contentEnd = content.substring(lineEnd, content.length());
+
+					int ifAt = line.indexOf("if (");
+
+					if ((ifAt >= 0) && (ifAt < lineOffset)) {
+						// if we have:          if (blubb = foo) && |
+						// or if we have:       if (blubb = foo && |)
+						// but NOT if we have:  if (blubb(foo) && |)
+						if (line.indexOf("(", ifAt + 4) < 0) {
+							int foundEndAt = line.indexOf(")", ifAt + 4);
+							int insertedAmount = 0;
+
+							line = line.substring(0, ifAt + 4) + "(" + line.substring(ifAt + 4);
+							String newContent = contentStart + line + contentEnd;
+
+							if ((foundEndAt >= 0) && (foundEndAt < lineOffset)) {
+								// we have:       if (blubb = foo) && |
+								// we insert:     if ((blubb = foo) && |)
+
+								newContent = newContent.substring(0, offset + 1) + " )" + newContent.substring(offset + 1);
+								insertedAmount = 2;
+
+							} else {
+								// we have:       if (blubb = foo && |)
+								// we insert:     if ((blubb = foo) && |)
+
+								newContent = newContent.substring(0, offset - 2) + ")" +
+									newContent.substring(offset - 2, offset + 1) + " " + newContent.substring(offset + 1);
+								insertedAmount = 3;
+							}
+
+							int origCaretPos = decoratedEditor.getCaretPosition();
+							decoratedEditor.setText(newContent);
+							decoratedEditor.setCaretPosition(origCaretPos + insertedAmount);
+
+							// we do NOT bubble up the chain, as we already set the text explicitly!
+							return;
 						}
 					}
 				}
