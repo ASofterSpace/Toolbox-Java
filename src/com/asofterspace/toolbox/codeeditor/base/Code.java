@@ -2279,6 +2279,21 @@ public abstract class Code extends DefaultStyledDocument {
 				int matchLength = 0;
 				if (content.charAt(offset - 1) == ' ') {
 					matchLength = 1;
+					if ((content.charAt(offset - 2) == '=') || (content.charAt(offset - 2) == '!') ||
+						(content.charAt(offset - 2) == '+') || (content.charAt(offset - 2) == '-')) {
+
+						String contentStart = content.substring(0, offset - 1);
+						String contentEnd = content.substring(offset);
+
+						String newContent = contentStart + "= " + contentEnd;
+
+						int origCaretPos = decoratedEditor.getCaretPosition();
+						decoratedEditor.setText(newContent);
+						decoratedEditor.setCaretPosition(origCaretPos + 1);
+
+						// we do NOT bubble up the chain, as we already set the text explicitly!
+						return;
+					}
 				} else if ((content.charAt(offset - 2) == ' ') && (content.charAt(offset - 1) == '!')) {
 					matchLength = 2;
 				}
