@@ -2276,9 +2276,15 @@ public abstract class Code extends DefaultStyledDocument {
 				// check the rest of the current line left-wards,
 				// and if there is something non-whitespacey until the next \n,
 				// actually put in an equals sign to get " = "
+				int matchLength = 0;
 				if (content.charAt(offset - 1) == ' ') {
+					matchLength = 1;
+				} else if ((content.charAt(offset - 2) == ' ') && (content.charAt(offset - 1) == '!')) {
+					matchLength = 2;
+				}
+				if (matchLength > 0) {
 					boolean encounteredSomething = false;
-					for (int pos = offset - 2; pos >= 0; pos++) {
+					for (int pos = offset - (matchLength + 1); pos >= 0; pos++) {
 						char c = content.charAt(pos);
 						if (c == '\n') {
 							break;
