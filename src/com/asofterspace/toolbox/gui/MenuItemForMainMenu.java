@@ -19,8 +19,20 @@ public class MenuItemForMainMenu extends JLabel {
 		super(" " + labelText + " ");
 	}
 
+	@Override
 	public void setText(String text) {
 		super.setText(" " + text + " ");
+	}
+
+	public String getTextContent() {
+		String result = getText();
+		if (result.startsWith(" ")) {
+			result = result.substring(1);
+		}
+		if (result.endsWith(" ")) {
+			result = result.substring(0, result.length() - 1);
+		}
+		return result;
 	}
 
 	/*

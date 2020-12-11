@@ -2121,7 +2121,8 @@ public abstract class Code extends DefaultStyledDocument {
 				// if we are not already do something funny, check if the line starts with return or throw,
 				// and if yes, add closed curly brace on the next line
 				if (!encounteredSomething) {
-					if (trimLine.startsWith("return ") || trimLine.startsWith("throw ")) {
+					if (trimLine.startsWith("return ") || trimLine.startsWith("return;") ||
+						trimLine.equals("return") || trimLine.startsWith("throw ")) {
 						// remove one level of indentation
 						if (curLineWhitespace.length() >= 1) {
 							if (curLineWhitespace.substring(curLineWhitespace.length() - 1).equals("\t")) {
@@ -2280,7 +2281,7 @@ public abstract class Code extends DefaultStyledDocument {
 				if (content.charAt(offset - 1) == ' ') {
 					matchLength = 1;
 					if ((content.charAt(offset - 2) == '=') || (content.charAt(offset - 2) == '!') ||
-						(content.charAt(offset - 2) == '+') || (content.charAt(offset - 2) == '-')) {
+						  (content.charAt(offset - 2) == '+') || (content.charAt(offset - 2) == '-')) {
 
 						String contentStart = content.substring(0, offset - 1);
 						String contentEnd = content.substring(offset);
@@ -2299,7 +2300,7 @@ public abstract class Code extends DefaultStyledDocument {
 				}
 				if (matchLength > 0) {
 					boolean encounteredSomething = false;
-					for (int pos = offset - (matchLength + 1); pos >= 0; pos++) {
+					for (int pos = offset - (matchLength + 1); pos >= 0; pos--) {
 						char c = content.charAt(pos);
 						if (c == '\n') {
 							break;
