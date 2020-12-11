@@ -2267,6 +2267,18 @@ public abstract class Code extends DefaultStyledDocument {
 				overrideCaretPos = 1;
 				break;
 
+			case ",":
+				if (offset < 1) {
+					break;
+				}
+				// when you enter "(," actually put "(0,"
+				content = decoratedEditor.getText();
+				if (content.charAt(offset - 1) == '(') {
+					insertedString = "0,";
+					overrideCaretPos = 2;
+				}
+				break;
+
 			case " ":
 				if (offset < 2) {
 					break;
