@@ -455,9 +455,10 @@ public class GenericTask {
 			result += schedDay + ". ";
 		}
 
+		String sep = "";
+
 		List<Integer> schedMonths = getScheduledInMonths();
 		if (schedMonths != null) {
-			String sep = "";
 			for (Integer month : schedMonths) {
 				String monthName = DateUtils.monthNumToName(month);
 				if (monthName != null) {
@@ -470,7 +471,6 @@ public class GenericTask {
 
 		List<Integer> schedYears = getScheduledInYears();
 		if (schedYears != null) {
-			String sep = "";
 			for (Integer year : schedYears) {
 				if (year != null) {
 					result += sep;
