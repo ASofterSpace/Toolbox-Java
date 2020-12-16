@@ -275,7 +275,9 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 		String couldBeKeyword = content.substring(start, couldBeKeywordEnd);
 
-		nextEncounteredTokens.add(couldBeKeyword);
+		if (nextEncounteredTokens != null) {
+			nextEncounteredTokens.add(couldBeKeyword);
+		}
 
 		if (isKeyword(couldBeKeyword)) {
 			if ("function".equals(couldBeKeyword)) {
