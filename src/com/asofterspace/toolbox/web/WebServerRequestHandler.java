@@ -472,6 +472,8 @@ public class WebServerRequestHandler implements Runnable {
 				if (arg.contains("=")) {
 					String key = arg.substring(0, arg.indexOf("="));
 					String value = arg.substring(arg.indexOf("=") + 1);
+					key = UrlDecoder.decode(key);
+					value = UrlDecoder.decode(value);
 					argumentMap.put(key, value);
 				}
 			}
