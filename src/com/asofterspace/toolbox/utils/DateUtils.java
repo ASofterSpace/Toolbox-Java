@@ -57,18 +57,8 @@ public class DateUtils {
 		}
 
 		// also parse months that are written out in English or German
+		dateStr = strContainingMonthNameToStrContainingMonthNum1IsJan(dateStr);
 		dateStr = dateStr.toLowerCase();
-		for (int i = 0; i < 12; i++) {
-			String num = "" + (i+1);
-			if (num.length() < 2) {
-				num = "0" + num;
-			}
-			dateStr = dateStr.replaceAll(MONTH_NAMES[i].toLowerCase(), num);
-			dateStr = dateStr.replaceAll(MONTH_NAMES_GERMAN[i].toLowerCase(), num);
-			dateStr = dateStr.replaceAll(MONTH_NAMES_HALF_SHORT[i].toLowerCase(), num);
-			dateStr = dateStr.replaceAll(MONTH_NAMES_SHORT[i].toLowerCase(), num);
-			dateStr = dateStr.replaceAll(MONTH_NAMES_SHORT_GERMAN[i].toLowerCase(), num);
-		}
 
 		// handle date time string by omitting the timestamp such that we only get a date
 		if (dateStr.length() > DEFAULT_DATE_TIME_FORMAT_STR.length()) {
@@ -469,6 +459,57 @@ public class DateUtils {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(someDate);
 		return cal.get(Calendar.YEAR);
+	}
+
+	public static Date getFirstDateInMonth(String monthName, int year) {
+		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
+		try {
+			return DEFAULT_DATE_FORMAT.parse(StrUtils.leftPad0(year, 4) + "-" + monthName + "-01");
+		} catch (ParseException | NumberFormatException ex) {
+			return null;
+		}
+	}
+
+	public static Date getDateInMonth(String monthName, int year) {
+		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
+		try {
+			return DEFAULT_DATE_FORMAT.parse(StrUtils.leftPad0(year, 4) + "-" + monthName + "-15");
+		} catch (ParseException | NumberFormatException ex) {
+			return null;
+		}
+	}
+
+	public static Date getLastDateInMonth(String monthName, int year) {
+		int day = 32;
+		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
+		while (day > 25) {
+			try {
+				String dateStr = StrUtils.leftPad0(year, 4) + "-" + monthName + "-" + day;
+				return DEFAULT_DATE_FORMAT.parse(dateStr);
+			} catch (ParseException | NumberFormatException ex) {
+				day--;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * parse months that are written out in English or German from "January" to "01" etc.
+	 */
+	private static String strContainingMonthNameToStrContainingMonthNum1IsJan(String dateStr) {
+		dateStr = dateStr.toLowerCase();
+		for (int i = 0; i < 12; i++) {
+			String num = "" + (i+1);
+			if (num.length() < 2) {
+				num = "0" + num;
+			}
+			dateStr = dateStr.replaceAll(MONTH_NAMES[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_GERMAN[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_HALF_SHORT[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_SHORT[i].toLowerCase(), num);
+			dateStr = dateStr.replaceAll(MONTH_NAMES_SHORT_GERMAN[i].toLowerCase(), num);
+		}
+		return dateStr;
 	}
 
 	public static boolean isLessThanXDaysInTheFuture(Date date, int x) {
