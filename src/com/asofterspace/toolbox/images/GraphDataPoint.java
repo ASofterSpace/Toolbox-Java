@@ -31,6 +31,12 @@ public class GraphDataPoint {
 		this.annotation = annotation;
 	}
 
+	public GraphDataPoint(GraphDataPoint other) {
+		this.position = other.position;
+		this.value = other.value;
+		this.annotation = other.annotation;
+	}
+
 	public double getPosition() {
 		return position;
 	}

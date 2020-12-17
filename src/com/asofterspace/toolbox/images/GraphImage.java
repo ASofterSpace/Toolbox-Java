@@ -70,18 +70,22 @@ public class GraphImage extends Image {
 		init(newWidth + (2 * BORDER_WIDTH), newHeight + (2 * BORDER_WIDTH));
 	}
 
+	private void sort() {
+		Collections.sort(this.data, new Comparator<GraphDataPoint>() {
+			public int compare(GraphDataPoint a, GraphDataPoint b) {
+				return (int) (a.getPosition() - b.getPosition());
+			}
+		});
+	}
+
 	/**
 	 * Set absolute data points
 	 */
 	public void setAbsoluteDataPoints(List<GraphDataPoint> newData) {
 
-		Collections.sort(newData, new Comparator<GraphDataPoint>() {
-			public int compare(GraphDataPoint a, GraphDataPoint b) {
-				return (int) (a.getPosition() - b.getPosition());
-			}
-		});
-
 		this.data = newData;
+
+		sort();
 
 		redraw();
 	}
@@ -178,6 +182,51 @@ public class GraphImage extends Image {
 		for (GraphDataPoint dataPoint : data) {
 			dataPoint.setValue(dataPoint.getValue() + shiftBy);
 		}
+	}
+
+	/**
+	 * Smoothen every data point by adding the values before and the values after it, and dividing by n
+	 * (for n == 1, no smoothening happens; for n == 2, the values just before and just after are added;
+	 * for n == 30, about a month before and after is added if this graph shows days)
+	 */
+	public void smoothen(int n) {
+
+		if ((data == null) || (data.size() < 1)) {
+			return;
+		}
+
+		sort();
+
+		List<GraphDataPoint> newData = new ArrayList<>();
+
+		for (int i = 0; i < data.size(); i++) {
+
+			GraphDataPoint newPoint = new GraphDataPoint(data.get(i));
+
+			double val = newPoint.getValue();
+
+			for (int prev = 1; prev < n; prev++) {
+				double nextVal = data.get(0).getValue();
+				if (i - prev >= 0) {
+					nextVal = data.get(i - prev).getValue();
+				}
+				val += nextVal * (n - prev) / n;
+			}
+
+			for (int next = 1; next < n; next++) {
+				double nextVal = data.get(data.size() - 1).getValue();
+				if (i + next < data.size()) {
+					nextVal = data.get(i + next).getValue();
+				}
+				val += nextVal * (n - next) / n;
+			}
+
+			newPoint.setValue(val / ((2*n) - 1));
+
+			newData.add(newPoint);
+		}
+
+		setAbsoluteDataPoints(newData);
 	}
 
 	public ColorRGB getBackgroundColor() {
