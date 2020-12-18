@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.virtualEmployees;
 
+import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.projects.GenericProject;
 import com.asofterspace.toolbox.projects.GenericProjectCtrl;
 
@@ -28,16 +29,20 @@ public class SideBarCtrl {
 
 		StringBuilder html = new StringBuilder();
 
+		int top = 10;
+
 		if (!leaveOut.contains(SideBarEntry.HUGO)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3012/\">");
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">");
 			html.append("<img class=\"avatar\" src=\"/pics/hugo.jpg\" />");
 			html.append("</a>");
+			top += 82;
 		}
 
 		if (!leaveOut.contains(SideBarEntry.MARI)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3011/\" style=\"top: 92pt;\">");
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt;\">");
 			html.append("<img class=\"avatar\" src=\"/pics/mari.jpg\" />");
 			html.append("</a>");
+			top += 82;
 		}
 
 		if (!leaveOut.contains(SideBarEntry.WORKBENCH)) {
@@ -61,4 +66,36 @@ public class SideBarCtrl {
 
 		return html.toString();
 	}
+
+	/**
+	 * Returns an image file from the side bar as answer to a GET request, if the GET request has
+	 * such an image as target, and null otherwise
+	 */
+	public static File getSideBarImageFile(String location) {
+
+		File result = null;
+
+		String basePath = System.getProperty("java.class.path") + "/../../";
+
+		if (location.equals("/pics/hugo.jpg")) {
+			result = new File(basePath + "assSecretary/server/pics/hugo.jpg");
+		}
+
+		if (location.equals("/pics/mari.jpg")) {
+			result = new File(basePath + "assAccountant/server/pics/mari.jpg");
+		}
+
+		// get project logo files from assWorkbench
+		if (location.startsWith("/projectlogos/") && location.endsWith(".png") && !location.contains("..")) {
+			String filename = location.substring("/projectlogos/".length());
+			filename = basePath + "assWorkbench/server/projects/" + filename;
+			result = new File(filename);
+		}
+
+		if ((result != null) && result.exists()) {
+			return result;
+		}
+		return null;
+	}
+
 }
