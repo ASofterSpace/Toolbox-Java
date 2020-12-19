@@ -349,6 +349,19 @@ public class DateUtils {
 		return (int) Math.round((to.getTime() - from.getTime()) / (1000.0 * 60.0 * 60.0 * 24.0));
 	}
 
+	/**
+	 * Returns true if date a is after date b (JUST speaking about days here!),
+	 * false otherwise or in case of nulls
+	 */
+	public static boolean dateAAfterDateB(Date a, Date b) {
+		a = parseDate(serializeDate(a));
+		b = parseDate(serializeDate(b));
+		if ((a == null) || (b == null)) {
+			return false;
+		}
+		return a.getTime() > b.getTime();
+	}
+
 	public static Integer monthNameToNum(String name) {
 		if (name == null) {
 			return null;
