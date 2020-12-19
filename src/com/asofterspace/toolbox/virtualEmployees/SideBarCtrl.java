@@ -166,14 +166,12 @@ public class SideBarCtrl {
 			result = new File(basePath + "assEditor/res/ico.png");
 		}
 
-		/*
 		// get project logo files from assWorkbench
 		if (location.startsWith("/projectlogos/") && location.endsWith(".png") && !location.contains("..")) {
 			String filename = location.substring("/projectlogos/".length());
 			filename = basePath + "assWorkbench/server/projects/" + filename;
 			result = new File(filename);
 		}
-		*/
 
 		if ((result != null) && result.exists()) {
 			return result;
