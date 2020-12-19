@@ -2293,7 +2293,8 @@ public abstract class Code extends DefaultStyledDocument {
 				if (content.charAt(offset - 1) == ' ') {
 					matchLength = 1;
 					if ((content.charAt(offset - 2) == '=') || (content.charAt(offset - 2) == '!') ||
-						  (content.charAt(offset - 2) == '+') || (content.charAt(offset - 2) == '-')) {
+						(content.charAt(offset - 2) == '+') || (content.charAt(offset - 2) == '-') ||
+						(content.charAt(offset - 2) == '>') || (content.charAt(offset - 2) == '<')) {
 
 						String contentStart = content.substring(0, offset - 1);
 						String contentEnd = content.substring(offset);
