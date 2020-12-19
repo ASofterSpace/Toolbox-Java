@@ -5,6 +5,11 @@
 package com.asofterspace.toolbox.virtualEmployees;
 
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.IoUtils;
+import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonParseException;
+import com.asofterspace.toolbox.web.WebServerAnswer;
+import com.asofterspace.toolbox.web.WebServerAnswerInJson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,25 +35,25 @@ public class SideBarCtrl {
 		int top = 10;
 
 		if (!leaveOut.contains(SideBarEntry.HUGO)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">");
-			html.append("<img class=\"avatar\" src=\"/pics/hugo.jpg\" />");
-			html.append("</a>");
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">\n");
+			html.append("<img class=\"avatar\" src=\"/pics/hugo.jpg\" />\n");
+			html.append("</a>\n");
 			top += 82;
 		}
 
 		if (!leaveOut.contains(SideBarEntry.MARI)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">");
-			html.append("<img class=\"avatar\" src=\"/pics/mari.jpg\" />");
-			html.append("</a>");
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
+			html.append("<img class=\"avatar\" src=\"/pics/mari.jpg\" />\n");
+			html.append("</a>\n");
 			top += 82;
 		}
 
 		int bottom = 10;
 
 		if (!leaveOut.contains(SideBarEntry.WORKBENCH)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt; top: unset;\">");
-			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/workbench.png\" />");
-			html.append("</a>");
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
+			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/workbench.png\" />\n");
+			html.append("</a>\n");
 			/*
 			html.append("<div class=\"projectbar\">");
 
@@ -70,23 +75,37 @@ public class SideBarCtrl {
 			bottom += 45;
 		}
 
-		if (!leaveOut.contains(SideBarEntry.BROWSER)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3013/\" target=\"_blank\" style=\"bottom: " + bottom + "pt; top: unset;\">");
-			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />");
-			html.append("</a>");
-			bottom += 45;
+		html.append("<a class=\"sidebar\" href=\"http://localhost:3013/\" ");
+		// when we are currently on the browser page, instead of leaving it out, we change the default behavior
+		// to opening another one in a new tab when clicked
+		if (leaveOut.contains(SideBarEntry.BROWSER)) {
+			html.append("target=\"_blank\" ");
 		}
+		html.append("style=\"bottom: " + bottom + "pt;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
+		html.append("</a>\n");
+		bottom += 45;
 
-		/*
 		if (!leaveOut.contains(SideBarEntry.EDITOR)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3013/\" style=\"bottom: " + bottom + "pt; top: unset;\">");
-			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />");
-			html.append("</a>");
+			html.append("\n<script>\n");
+			html.append("window._ve_openLocally = function(whatToOpen) {\n");
+			html.append("    var request = new XMLHttpRequest();\n");
+			html.append("    request.open(\"POST\", \"_ve_openLocally\", true);\n");
+			html.append("    request.setRequestHeader(\"Content-Type\", \"application/json\");\n");
+			html.append("    request.send('{\"whatToOpen\": \"' + whatToOpen + '\"}');\n");
+			html.append("}\n");
+			html.append("</script>\n");
+			html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"bottom: " + bottom + "pt; top: unset;\">\n");
+			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
+			html.append("</div>\n");
 			bottom += 45;
 		}
-		*/
 
 		return html.toString();
+	}
+
+	private static String getBasePath() {
+		return System.getProperty("java.class.path") + "/../../";
 	}
 
 	/**
@@ -97,7 +116,7 @@ public class SideBarCtrl {
 
 		File result = null;
 
-		String basePath = System.getProperty("java.class.path") + "/../../";
+		String basePath = getBasePath();
 
 		if (location.equals("/pics/hugo.jpg")) {
 			result = new File(basePath + "assSecretary/server/pics/hugo.jpg");
@@ -131,6 +150,34 @@ public class SideBarCtrl {
 		if ((result != null) && result.exists()) {
 			return result;
 		}
+		return null;
+	}
+
+	public static WebServerAnswer handlePost(String fileLocation, String jsonData) {
+
+		if ((fileLocation == null) || (jsonData == null)) {
+			return null;
+		}
+
+		if (!fileLocation.startsWith("/")) {
+			fileLocation = "/" + fileLocation;
+		}
+
+		String basePath = getBasePath();
+
+		try {
+			switch (fileLocation) {
+				case "/_ve_openLocally":
+					JSON json = new JSON(jsonData);
+					if ("editor".equals(json.getString("whatToOpen"))) {
+						IoUtils.execute(basePath + "assEditor/assEditor.bat");
+					}
+					return new WebServerAnswerInJson("{\"success\": true}");
+			}
+		} catch (JsonParseException e) {
+			// whoops
+		}
+
 		return null;
 	}
 
