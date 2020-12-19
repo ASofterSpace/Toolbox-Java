@@ -32,6 +32,7 @@ public class SideBarCtrl {
 
 		StringBuilder html = new StringBuilder();
 
+
 		int top = 10;
 
 		if (!leaveOut.contains(SideBarEntry.HUGO)) {
@@ -47,6 +48,14 @@ public class SideBarCtrl {
 			html.append("</a>\n");
 			top += 82;
 		}
+
+		if (!leaveOut.contains(SideBarEntry.ZARA)) {
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3014/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
+			html.append("<img class=\"avatar\" src=\"/pics/zara.jpg\" />\n");
+			html.append("</a>\n");
+			top += 82;
+		}
+
 
 		int bottom = 10;
 
@@ -131,7 +140,7 @@ public class SideBarCtrl {
 		}
 
 		if (location.equals("/pics/browser.png")) {
-			result = new File(basePath + "assBrowser/server/pics/browser.png");
+			result = new File(basePath + "assTrainer/server/pics/browser.png");
 		}
 
 		if (location.equals("/pics/editor.png")) {
