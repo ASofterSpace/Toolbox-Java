@@ -31,38 +31,50 @@ public class SideBarCtrl {
 	public static String getSidebarHtmlStr(List<SideBarEntry> leaveOut) {
 
 		StringBuilder html = new StringBuilder();
-
+		StringBuilder script = new StringBuilder();
+		script.append("\n<script>\n");
 
 		int top = 10;
+		int topDistance = 82;
+		int entry = 1;
 
 		if (!leaveOut.contains(SideBarEntry.HUGO)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/hugo.jpg\" />\n");
 			html.append("</a>\n");
-			top += 82;
+			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3012/\";\n");
+			entry++;
+			top += topDistance;
 		}
 
 		if (!leaveOut.contains(SideBarEntry.MARI)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/mari.jpg\" />\n");
 			html.append("</a>\n");
-			top += 82;
+			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3011/\";\n");
+			entry++;
+			top += topDistance;
 		}
 
 		if (!leaveOut.contains(SideBarEntry.ZARA)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3014/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3014/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/zara.jpg\" />\n");
 			html.append("</a>\n");
-			top += 82;
+			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3014/\";\n");
+			entry++;
+			top += topDistance;
 		}
 
 
 		int bottom = 10;
+		int bottomDistance = 46;
 
 		if (!leaveOut.contains(SideBarEntry.WORKBENCH)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
 			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/workbench.png\" />\n");
 			html.append("</a>\n");
+			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3010/\";\n");
+			entry++;
 			/*
 			html.append("<div class=\"projectbar\">");
 
@@ -81,10 +93,10 @@ public class SideBarCtrl {
 
 			html.append("</div>");
 			*/
-			bottom += 45;
+			bottom += bottomDistance;
 		}
 
-		html.append("<a class=\"sidebar\" href=\"http://localhost:3013/\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3013/\" ");
 		// when we are currently on the browser page, instead of leaving it out, we change the default behavior
 		// to opening another one in a new tab when clicked
 		if (leaveOut.contains(SideBarEntry.BROWSER)) {
@@ -93,22 +105,25 @@ public class SideBarCtrl {
 		html.append("style=\"bottom: " + bottom + "pt;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
 		html.append("</a>\n");
-		bottom += 45;
+		script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/\";\n");
+		entry++;
+		bottom += bottomDistance;
 
 		if (!leaveOut.contains(SideBarEntry.EDITOR)) {
-			html.append("\n<script>\n");
-			html.append("window._ve_openLocally = function(whatToOpen) {\n");
-			html.append("    var request = new XMLHttpRequest();\n");
-			html.append("    request.open(\"POST\", \"_ve_openLocally\", true);\n");
-			html.append("    request.setRequestHeader(\"Content-Type\", \"application/json\");\n");
-			html.append("    request.send('{\"whatToOpen\": \"' + whatToOpen + '\"}');\n");
-			html.append("}\n");
-			html.append("</script>\n");
+			script.append("window._ve_openLocally = function(whatToOpen) {\n");
+			script.append("    var request = new XMLHttpRequest();\n");
+			script.append("    request.open(\"POST\", \"_ve_openLocally\", true);\n");
+			script.append("    request.setRequestHeader(\"Content-Type\", \"application/json\");\n");
+			script.append("    request.send('{\"whatToOpen\": \"' + whatToOpen + '\"}');\n");
+			script.append("}\n");
 			html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"bottom: " + bottom + "pt; top: unset;\">\n");
 			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
 			html.append("</div>\n");
-			bottom += 45;
+			bottom += bottomDistance;
 		}
+
+		script.append("</script>\n");
+		html.append(script);
 
 		return html.toString();
 	}
@@ -135,12 +150,16 @@ public class SideBarCtrl {
 			result = new File(basePath + "assAccountant/server/pics/mari.jpg");
 		}
 
+		if (location.equals("/pics/zara.jpg")) {
+			result = new File(basePath + "assTrainer/server/pics/zara.jpg");
+		}
+
 		if (location.equals("/pics/workbench.png")) {
 			result = new File(basePath + "assWorkbench/server/pics/workbench.png");
 		}
 
 		if (location.equals("/pics/browser.png")) {
-			result = new File(basePath + "assTrainer/server/pics/browser.png");
+			result = new File(basePath + "assBrowser/server/pics/browser.png");
 		}
 
 		if (location.equals("/pics/editor.png")) {
