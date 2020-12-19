@@ -14,5 +14,6 @@ public enum SideBarEntry {
 	ZARA,
 	BROWSER,
 	WORKBENCH,
+	EDITOR,
 
 }

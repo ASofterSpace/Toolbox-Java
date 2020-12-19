@@ -5,8 +5,6 @@
 package com.asofterspace.toolbox.virtualEmployees;
 
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.projects.GenericProject;
-import com.asofterspace.toolbox.projects.GenericProjectCtrl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +37,19 @@ public class SideBarCtrl {
 		}
 
 		if (!leaveOut.contains(SideBarEntry.MARI)) {
-			html.append("<a class=\"sidebar\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt;\">");
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">");
 			html.append("<img class=\"avatar\" src=\"/pics/mari.jpg\" />");
 			html.append("</a>");
 			top += 82;
 		}
 
+		int bottom = 10;
+
 		if (!leaveOut.contains(SideBarEntry.WORKBENCH)) {
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt; top: unset;\">");
+			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/workbench.png\" />");
+			html.append("</a>");
+			/*
 			html.append("<div class=\"projectbar\">");
 
 			GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
@@ -62,7 +66,25 @@ public class SideBarCtrl {
 			}
 
 			html.append("</div>");
+			*/
+			bottom += 45;
 		}
+
+		if (!leaveOut.contains(SideBarEntry.BROWSER)) {
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3013/\" target=\"_blank\" style=\"bottom: " + bottom + "pt; top: unset;\">");
+			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />");
+			html.append("</a>");
+			bottom += 45;
+		}
+
+		/*
+		if (!leaveOut.contains(SideBarEntry.EDITOR)) {
+			html.append("<a class=\"sidebar\" href=\"http://localhost:3013/\" style=\"bottom: " + bottom + "pt; top: unset;\">");
+			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />");
+			html.append("</a>");
+			bottom += 45;
+		}
+		*/
 
 		return html.toString();
 	}
@@ -85,12 +107,26 @@ public class SideBarCtrl {
 			result = new File(basePath + "assAccountant/server/pics/mari.jpg");
 		}
 
+		if (location.equals("/pics/workbench.png")) {
+			result = new File(basePath + "assWorkbench/server/pics/workbench.png");
+		}
+
+		if (location.equals("/pics/browser.png")) {
+			result = new File(basePath + "assBrowser/server/pics/browser.png");
+		}
+
+		if (location.equals("/pics/editor.png")) {
+			result = new File(basePath + "assEditor/res/ico.png");
+		}
+
+		/*
 		// get project logo files from assWorkbench
 		if (location.startsWith("/projectlogos/") && location.endsWith(".png") && !location.contains("..")) {
 			String filename = location.substring("/projectlogos/".length());
 			filename = basePath + "assWorkbench/server/projects/" + filename;
 			result = new File(filename);
 		}
+		*/
 
 		if ((result != null) && result.exists()) {
 			return result;
