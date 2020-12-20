@@ -2097,11 +2097,11 @@ public abstract class Code extends DefaultStyledDocument {
 
 				// in case of {, add indent, and in case of }, remove it
 				// TODO ::put this into the individual programming languages
-				if (content.endsWith("{") ||
-					content.endsWith("[") ||
-					content.endsWith("(") ||
-					content.endsWith("begin") ||
-					content.endsWith("then")) {
+				if (trimLine.endsWith("{") ||
+					trimLine.endsWith("[") ||
+					trimLine.endsWith("(") ||
+					trimLine.endsWith("begin") ||
+					trimLine.endsWith("then")) {
 					appendWhitespace(curLineWhitespace, defaultIndentationStr, origWhitespace);
 					encounteredSomething = true;
 				}
@@ -2117,6 +2117,25 @@ public abstract class Code extends DefaultStyledDocument {
 					}
 				}
 				*/
+
+				// if we are pressing enter after "Foo bar = " or "Foo bar =" (without even typing new!)...
+				if (trimLine.endsWith("=")) {
+					if (offset > 0) {
+						String fullContent = decoratedEditor.getText();
+						String additionalStr = "new";
+						if (line.endsWith("=")) {
+							additionalStr = " new";
+						}
+						// ... potentially enter new Foo(); fully automatically after it!
+						int instOffset = addNewObjectInstantiation(fullContent, offset, additionalStr, false);
+						if (instOffset > 0) {
+							offset += instOffset;
+							decoratedEditor.setCaretPosition(offset + curLineWhitespace.toString().length());
+							offset += 2;
+							encounteredSomething = true;
+						}
+					}
+				}
 
 				// if we are not already do something funny, check if the line starts with return or throw,
 				// and if yes, add closed curly brace on the next line
@@ -2148,11 +2167,11 @@ public abstract class Code extends DefaultStyledDocument {
 				//		 |
 				//	 }
 
-				if (content.endsWith("{") ||
-					content.endsWith("[") ||
-					content.endsWith("(") ||
-					content.endsWith("begin") ||
-					content.endsWith("then")) {
+				if (trimLine.endsWith("{") ||
+					trimLine.endsWith("[") ||
+					trimLine.endsWith("(") ||
+					trimLine.endsWith("begin") ||
+					trimLine.endsWith("then")) {
 					int len = "end;".length();
 					len = Math.min(len, this.getLength() - offset);
 					if (len > 0) {
@@ -2404,115 +2423,8 @@ public abstract class Code extends DefaultStyledDocument {
 						(content.charAt(offset - 4) == ' ') && (content.charAt(offset - 3) == 'n') &&
 						(content.charAt(offset - 2) == 'e') && (content.charAt(offset - 1) == 'w')) {
 
-						lineStart = StrUtils.getLineStartFromPosition(offset, content);
-						lineEnd = StrUtils.getLineEndFromPosition(offset, content);
-						int lineOffset = offset - lineStart;
-
-						String contentStart = content.substring(0, lineStart);
-						line = content.substring(lineStart, lineEnd);
-						String contentEnd = content.substring(lineEnd, content.length());
-						String lineFollowing = line.substring(lineOffset);
-
-						if ("".equals(lineFollowing.trim()) || ";".equals(lineFollowing.trim())) {
-
-							line = line.substring(0, lineOffset);
-
-							int tabAt = line.indexOf("\tList<");
-							int spaceAt = line.indexOf(" List<");
-
-							if (line.substring(lineOffset).equals("")) {
-								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-									((spaceAt >= 0) && (spaceAt < lineOffset))) {
-
-									line = line + " ArrayList<>();";
-									String newContent = contentStart + line + contentEnd;
-
-									int origCaretPos = decoratedEditor.getCaretPosition();
-									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + 15);
-
-									// we do NOT bubble up the chain, as we already set the text explicitly!
-									return;
-								}
-							}
-
-							tabAt = line.indexOf("\tSet<");
-							spaceAt = line.indexOf(" Set<");
-
-							if (line.substring(lineOffset).equals("")) {
-								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-									((spaceAt >= 0) && (spaceAt < lineOffset))) {
-
-									line = line + " HashSet<>();";
-									String newContent = contentStart + line + contentEnd;
-
-									int origCaretPos = decoratedEditor.getCaretPosition();
-									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + 13);
-
-									// we do NOT bubble up the chain, as we already set the text explicitly!
-									return;
-								}
-							}
-
-							tabAt = line.indexOf("\tMap<");
-							spaceAt = line.indexOf(" Map<");
-
-							if (line.substring(lineOffset).equals("")) {
-								if (((tabAt >= 0) && (tabAt < lineOffset)) ||
-									((spaceAt >= 0) && (spaceAt < lineOffset))) {
-
-									line = line + " HashMap<>();";
-									String newContent = contentStart + line + contentEnd;
-
-									int origCaretPos = decoratedEditor.getCaretPosition();
-									decoratedEditor.setText(newContent);
-									decoratedEditor.setCaretPosition(origCaretPos + 13);
-
-									// we do NOT bubble up the chain, as we already set the text explicitly!
-									return;
-								}
-							}
-
-							// for all others, if we have Foo bar = new, then actually automagically add:
-							// Foo bar = new Foo();
-							String newClazz = line.trim();
-							String genericClazz = "";
-							if (newClazz.contains("<")) {
-								genericClazz = newClazz.substring(newClazz.indexOf("<"));
-								newClazz = newClazz.substring(0, newClazz.indexOf("<"));
-							}
-							if (newClazz.contains(" ")) {
-								newClazz = newClazz.substring(0, newClazz.indexOf(" "));
-							}
-
-							// buuut do not do it if the string contains a dot, or does not start with a
-							// capital letter - so do not do it for Foo.blubb = new or bar = new
-							if ((newClazz.length() > 0) &&
-								(!newClazz.contains(".")) &&
-								(Character.isUpperCase(newClazz.charAt(0)) || newClazz.endsWith("[]"))) {
-
-								int caretOffset = 2;
-								if (newClazz.endsWith("[]")) {
-									line = line + " " + newClazz + ";";
-									caretOffset = 0;
-								} else {
-									if (!"".equals(genericClazz)) {
-										line = line + " " + newClazz + "<>();";
-										caretOffset = 4;
-									} else {
-										line = line + " " + newClazz + "();";
-									}
-								}
-								String newContent = contentStart + line + contentEnd;
-
-								int origCaretPos = decoratedEditor.getCaretPosition();
-								decoratedEditor.setText(newContent);
-								decoratedEditor.setCaretPosition(origCaretPos + newClazz.length() + caretOffset);
-
-								// we do NOT bubble up the chain, as we already set the text explicitly!
-								return;
-							}
+						if (addNewObjectInstantiation(content, offset, "", true) > 0) {
+							return;
 						}
 					}
 				}
@@ -3456,5 +3368,137 @@ public abstract class Code extends DefaultStyledDocument {
 
 	public int getSelEnd() {
 		return selEnd;
+	}
+
+	/**
+	 * Returns the amount of characters that were added
+	 */
+	private int addNewObjectInstantiation(String content, int offset, String insertAdditionally, boolean setCaretPos) {
+
+		int result = 0;
+		int lineStart = StrUtils.getLineStartFromPosition(offset, content);
+		int lineEnd = StrUtils.getLineEndFromPosition(offset, content);
+		int lineOffset = offset - lineStart;
+
+		String contentStart = content.substring(0, lineStart);
+		String line = content.substring(lineStart, lineEnd);
+		String contentEnd = content.substring(lineEnd, content.length());
+		String lineFollowing = line.substring(lineOffset);
+
+		if ("".equals(lineFollowing.trim()) || ";".equals(lineFollowing.trim())) {
+
+			line = line.substring(0, lineOffset);
+
+			int tabAt = line.indexOf("\tList<");
+			int spaceAt = line.indexOf(" List<");
+
+			if (line.substring(lineOffset).equals("")) {
+				if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+					((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+					line = line + insertAdditionally + " ArrayList<>();";
+					String newContent = contentStart + line + contentEnd;
+
+					int origCaretPos = decoratedEditor.getCaretPosition();
+					decoratedEditor.setText(newContent);
+					result = 15 + insertAdditionally.length();
+					if (setCaretPos) {
+						decoratedEditor.setCaretPosition(origCaretPos + result);
+					}
+
+					// we do NOT bubble up the chain, as we already set the text explicitly!
+					return result;
+				}
+			}
+
+			tabAt = line.indexOf("\tSet<");
+			spaceAt = line.indexOf(" Set<");
+
+			if (line.substring(lineOffset).equals("")) {
+				if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+					((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+					line = line + insertAdditionally + " HashSet<>();";
+					String newContent = contentStart + line + contentEnd;
+
+					int origCaretPos = decoratedEditor.getCaretPosition();
+					decoratedEditor.setText(newContent);
+					result = 13 + insertAdditionally.length();
+					if (setCaretPos) {
+						decoratedEditor.setCaretPosition(origCaretPos + result);
+					}
+
+					// we do NOT bubble up the chain, as we already set the text explicitly!
+					return result;
+				}
+			}
+
+			tabAt = line.indexOf("\tMap<");
+			spaceAt = line.indexOf(" Map<");
+
+			if (line.substring(lineOffset).equals("")) {
+				if (((tabAt >= 0) && (tabAt < lineOffset)) ||
+					((spaceAt >= 0) && (spaceAt < lineOffset))) {
+
+					line = line + insertAdditionally + " HashMap<>();";
+					String newContent = contentStart + line + contentEnd;
+
+					int origCaretPos = decoratedEditor.getCaretPosition();
+					decoratedEditor.setText(newContent);
+					result = 13 + insertAdditionally.length();
+					if (setCaretPos) {
+						decoratedEditor.setCaretPosition(origCaretPos + result);
+					}
+
+					// we do NOT bubble up the chain, as we already set the text explicitly!
+					return result;
+				}
+			}
+
+			// for all others, if we have Foo bar = new, then actually automagically add:
+			// Foo bar = new Foo();
+			String newClazz = line.trim();
+			String genericClazz = "";
+			if (newClazz.contains("<")) {
+				genericClazz = newClazz.substring(newClazz.indexOf("<"));
+				newClazz = newClazz.substring(0, newClazz.indexOf("<"));
+			}
+			if (newClazz.contains(" ")) {
+				newClazz = newClazz.substring(0, newClazz.indexOf(" "));
+			}
+
+			// buuut do not do it if the string contains a dot, or does not start with a
+			// capital letter - so do not do it for Foo.blubb = new or bar = new
+			if ((newClazz.length() > 0) &&
+				(!newClazz.contains(".")) &&
+				(Character.isUpperCase(newClazz.charAt(0)) || newClazz.endsWith("[]"))) {
+
+				int caretOffset = 2;
+				if (newClazz.endsWith("[]")) {
+					line = line + insertAdditionally + " " + newClazz + ";";
+					caretOffset = 0;
+				} else {
+					if (!"".equals(genericClazz)) {
+						line = line + insertAdditionally + " " + newClazz + "<>();";
+						caretOffset = 4;
+					} else {
+						line = line + insertAdditionally + " " + newClazz + "();";
+					}
+				}
+				String newContent = contentStart + line + contentEnd;
+
+				int origCaretPos = decoratedEditor.getCaretPosition();
+				decoratedEditor.setText(newContent);
+				result = newClazz.length() + insertAdditionally.length() + caretOffset;
+				if (setCaretPos) {
+					decoratedEditor.setCaretPosition(origCaretPos + result);
+				}
+
+				// we do NOT bubble up the chain, as we already set the text explicitly!
+				return result;
+			}
+		}
+
+		return result;
 	}
 }
