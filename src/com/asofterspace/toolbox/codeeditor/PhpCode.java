@@ -26,7 +26,7 @@ public class PhpCode extends HtmlCode {
 
 	// all keywords of the PHP language
 	private static final Set<String> PHP_KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"abstract", "and", "as", "assert", "break", "case", "catch", "continue", "count", "def", "default", "do", "else", "elseif", "extends", "final", "finally", "for", "foreach", "goto", "if", "implements", "import", "in", "instanceof", "interface", "isset", "new", "or", "package", "private", "protected", "public", "require_once", "return", "static", "substr", "switch", "synchronized", "throw", "throws", "trait", "try", "use", "volatile", "while"}
+		new String[] {"abstract", "and", "as", "assert", "break", "case", "catch", "continue", "count", "def", "default", "do", "else", "elseif", "extends", "final", "finally", "for", "foreach", "goto", "if", "implements", "import", "in", "instanceof", "interface", "isset", "namespace", "new", "or", "package", "private", "protected", "public", "require_once", "return", "static", "substr", "switch", "synchronized", "throw", "throws", "trait", "try", "use", "volatile", "while"}
 	));
 
 	// all primitive types of the PHP language and other stuff that looks that way
