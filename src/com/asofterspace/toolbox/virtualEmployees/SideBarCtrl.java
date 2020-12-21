@@ -84,7 +84,7 @@ public class SideBarCtrl {
 			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3010/\";\n");
 			entry++;
 
-			html.append("<div class=\"projectbar\" id=\"_ve_projectbar\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" style=\"display:none; bottom:53pt; padding:0pt 4pt 5pt 0pt; z-index:100; background-color: rgba(0, 0, 0, 0.7);\">");
+			html.append("<div class=\"projectbar\" id=\"_ve_projectbar\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" style=\"display:none; bottom:53pt; right:8pt; padding:0pt 4pt 5pt 0pt; z-index:100; background-color: rgba(0, 0, 0, 0.7);\">");
 
 			GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
 				System.getProperty("java.class.path") + "/../../assWorkbench/server/projects");
