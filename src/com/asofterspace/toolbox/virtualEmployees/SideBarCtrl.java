@@ -8,6 +8,8 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonParseException;
+import com.asofterspace.toolbox.projects.GenericProject;
+import com.asofterspace.toolbox.projects.GenericProjectCtrl;
 import com.asofterspace.toolbox.web.WebServerAnswer;
 import com.asofterspace.toolbox.web.WebServerAnswerInJson;
 
@@ -70,13 +72,19 @@ public class SideBarCtrl {
 		int bottomDistance = 46;
 
 		if (!leaveOut.contains(SideBarEntry.WORKBENCH)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
 			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/workbench.png\" />\n");
 			html.append("</a>\n");
+			script.append("window._ve_showProjects = function() {\n");
+			script.append("    document.getElementById('_ve_projectbar').style.display = 'block';\n");
+			script.append("}\n");
+			script.append("window._ve_hideProjects = function() {\n");
+			script.append("    document.getElementById('_ve_projectbar').style.display = 'none';\n");
+			script.append("}\n");
 			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3010/\";\n");
 			entry++;
-			/*
-			html.append("<div class=\"projectbar\">");
+
+			html.append("<div class=\"projectbar\" id=\"_ve_projectbar\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" style=\"display:none; bottom:53pt; padding:0pt 4pt 5pt 0pt; z-index:100; background-color: rgba(0, 0, 0, 0.7);\">");
 
 			GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
 				System.getProperty("java.class.path") + "/../../assWorkbench/server/projects");
@@ -92,7 +100,7 @@ public class SideBarCtrl {
 			}
 
 			html.append("</div>");
-			*/
+
 			bottom += bottomDistance;
 		}
 
