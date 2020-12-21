@@ -41,7 +41,7 @@ public class SideBarCtrl {
 		int entry = 1;
 
 		if (!leaveOut.contains(SideBarEntry.HUGO)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"Hugo\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/hugo.jpg\" />\n");
 			html.append("</a>\n");
 			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3012/\";\n");
@@ -50,7 +50,7 @@ public class SideBarCtrl {
 		}
 
 		if (!leaveOut.contains(SideBarEntry.MARI)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"Mari\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/mari.jpg\" />\n");
 			html.append("</a>\n");
 			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3011/\";\n");
@@ -59,7 +59,7 @@ public class SideBarCtrl {
 		}
 
 		if (!leaveOut.contains(SideBarEntry.ZARA)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3014/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"Zara\" href=\"http://localhost:3014/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/zara.jpg\" />\n");
 			html.append("</a>\n");
 			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3014/\";\n");
