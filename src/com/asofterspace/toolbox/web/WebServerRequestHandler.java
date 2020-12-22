@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -270,8 +271,12 @@ public class WebServerRequestHandler implements Runnable {
 	}
 
 	protected WebRequestFormData receiveFormDataContent() throws IOException {
+		return receiveFormDataContent(StandardCharsets.UTF_8);
+	}
 
-		WebRequestContent content = receiveArbitraryContent();
+	protected WebRequestFormData receiveFormDataContent(Charset charset) throws IOException {
+
+		WebRequestContent content = receiveArbitraryContent(charset);
 
 		if (content == null) {
 			return null;
@@ -301,6 +306,10 @@ public class WebServerRequestHandler implements Runnable {
 	}
 
 	protected WebRequestContent receiveArbitraryContent() throws IOException {
+		return receiveArbitraryContent(StandardCharsets.UTF_8);
+	}
+
+	protected WebRequestContent receiveArbitraryContent(Charset charset) throws IOException {
 
 		WebRequestContent result = new WebRequestContent();
 
@@ -348,8 +357,9 @@ public class WebServerRequestHandler implements Runnable {
 						readData.append((byte) iread);
 					}
 
-					// and now that all the bytes have been gathered, we can (once) interpret this as UTF-8!
-					String strContent = readData.toString(StandardCharsets.UTF_8);
+					// and now that all the bytes have been gathered, we can (once) interpret this as UTF-8,
+					// or whatever it should be interpreted as!
+					String strContent = readData.toString(charset);
 					result.setContent(strContent);
 					return result;
 				}

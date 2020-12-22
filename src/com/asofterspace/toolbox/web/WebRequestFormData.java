@@ -6,6 +6,7 @@ package com.asofterspace.toolbox.web;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -34,6 +35,10 @@ public class WebRequestFormData {
 	public WebRequestFormDataBlock getByName(String name) {
 
 		return data.get(name);
+	}
+
+	public Set<String> getNames() {
+		return data.keySet();
 	}
 
 }
