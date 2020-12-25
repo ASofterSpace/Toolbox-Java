@@ -7,9 +7,11 @@ package com.asofterspace.toolbox.virtualEmployees;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.projects.GenericProject;
 import com.asofterspace.toolbox.projects.GenericProjectCtrl;
+import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.web.WebServerAnswer;
 import com.asofterspace.toolbox.web.WebServerAnswerInJson;
 
@@ -18,6 +20,11 @@ import java.util.List;
 
 
 public class SideBarCtrl {
+
+	private static Record rootRecord = null;
+
+	private static List<Record> virtualEmployeeRecords = null;
+
 
 	public static String getSidebarHtmlStr() {
 		List<SideBarEntry> leaveOut = new ArrayList<>();
@@ -40,38 +47,26 @@ public class SideBarCtrl {
 		int topDistance = 82;
 		int entry = 1;
 
-		if (!leaveOut.contains(SideBarEntry.HUGO)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"Hugo\" href=\"http://localhost:3012/\" style=\"top: " + top + "pt;\">\n");
-			html.append("<img class=\"avatar\" src=\"/pics/hugo.jpg\" />\n");
-			html.append("</a>\n");
-			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3012/\";\n");
-			entry++;
-			top += topDistance;
-		}
+		List<Record> veRecords = getVirtualEmployeeRecords();
 
-		if (!leaveOut.contains(SideBarEntry.MARI)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"Mari\" href=\"http://localhost:3011/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
-			html.append("<img class=\"avatar\" src=\"/pics/mari.jpg\" />\n");
-			html.append("</a>\n");
-			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3011/\";\n");
-			entry++;
-			top += topDistance;
-		}
-
-		if (!leaveOut.contains(SideBarEntry.ZARA)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"Zara\" href=\"http://localhost:3014/\" style=\"top: " + top + "pt; transform: scaleX(-1);\">\n");
-			html.append("<img class=\"avatar\" src=\"/pics/zara.jpg\" />\n");
-			html.append("</a>\n");
-			script.append("document.getElementById('sidebar_" + entry + "').href = \"http://\" + window.location.hostname + \":3014/\";\n");
-			entry++;
-			top += topDistance;
+		for (Record veRec : veRecords) {
+			if (!leaveOut.contains(new SideBarEntryForEmployee(veRec.getString("name")))) {
+				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
+				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"top: " + top + "pt;\">\n");
+				html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString("name").toLowerCase() + ".jpg\" />\n");
+				html.append("</a>\n");
+				script.append("document.getElementById('sidebar_" + entry + "').href = ");
+				script.append("\"http://\" + window.location.hostname + \":" + veRec.getInteger("port") + "/\";\n");
+				entry++;
+				top += topDistance;
+			}
 		}
 
 
 		int bottom = 10;
 		int bottomDistance = 46;
 
-		if (!leaveOut.contains(SideBarEntry.WORKBENCH)) {
+		if (!leaveOut.contains(SideBarEntryForTool.WORKBENCH)) {
 			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
 			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/workbench.png\" />\n");
 			html.append("</a>\n");
@@ -107,7 +102,7 @@ public class SideBarCtrl {
 		html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3013/\" ");
 		// when we are currently on the browser page, instead of leaving it out, we change the default behavior
 		// to opening another one in a new tab when clicked
-		if (leaveOut.contains(SideBarEntry.BROWSER)) {
+		if (leaveOut.contains(SideBarEntryForTool.BROWSER)) {
 			html.append("target=\"_blank\" ");
 		}
 		html.append("style=\"bottom: " + bottom + "pt;\">\n");
@@ -117,7 +112,7 @@ public class SideBarCtrl {
 		entry++;
 		bottom += bottomDistance;
 
-		if (!leaveOut.contains(SideBarEntry.EDITOR)) {
+		if (!leaveOut.contains(SideBarEntryForTool.EDITOR)) {
 			script.append("window._ve_openLocally = function(whatToOpen) {\n");
 			script.append("    var request = new XMLHttpRequest();\n");
 			script.append("    request.open(\"POST\", \"_ve_openLocally\", true);\n");
@@ -150,16 +145,12 @@ public class SideBarCtrl {
 
 		String basePath = getBasePath();
 
-		if (location.equals("/pics/hugo.jpg")) {
-			result = new File(basePath + "assSecretary/server/pics/hugo.jpg");
-		}
+		List<Record> veRecords = getVirtualEmployeeRecords();
 
-		if (location.equals("/pics/mari.jpg")) {
-			result = new File(basePath + "assAccountant/server/pics/mari.jpg");
-		}
-
-		if (location.equals("/pics/zara.jpg")) {
-			result = new File(basePath + "assTrainer/server/pics/zara.jpg");
+		for (Record veRec : veRecords) {
+			if (location.equals("/pics/" + veRec.getString("name").toLowerCase() + ".jpg")) {
+				result = new File(basePath + veRec.getString("avatar"));
+			}
 		}
 
 		if (location.equals("/pics/workbench.png")) {
@@ -213,6 +204,26 @@ public class SideBarCtrl {
 		}
 
 		return null;
+	}
+
+	private static List<Record> getVirtualEmployeeRecords() {
+
+		if (virtualEmployeeRecords == null) {
+
+			String basePath = getBasePath();
+
+			String dbFilePath = basePath + "virtualEmployees/database.json";
+
+			try {
+				JsonFile dbFile = new JsonFile(dbFilePath);
+				rootRecord = dbFile.getAllContents();
+				virtualEmployeeRecords = rootRecord.getArray("virtualEmployees");
+			} catch (JsonParseException e) {
+				System.out.println("Sorry, the file '" + basePath + "' cannot be loaded!");
+			}
+		}
+
+		return virtualEmployeeRecords;
 	}
 
 }

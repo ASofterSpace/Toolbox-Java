@@ -5,7 +5,10 @@
 package com.asofterspace.toolbox.virtualEmployees;
 
 
-public interface SideBarEntry {
+public enum SideBarEntryForTool implements SideBarEntry {
 
-	public boolean equals(Object other);
+	BROWSER,
+	WORKBENCH,
+	EDITOR,
+
 }
