@@ -53,7 +53,7 @@ public class SideBarCtrl {
 			if (!leaveOut.contains(new SideBarEntryForEmployee(veRec.getString("name")))) {
 				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
 				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"top: " + top + "pt;");
-				if (veRec.getBoolean("inverted", false)) {
+				if (veRec.getBoolean("flip", false)) {
 					html.append(" transform: scaleX(-1);");
 				}
 				html.append("\">\n");
