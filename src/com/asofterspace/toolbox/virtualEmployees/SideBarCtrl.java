@@ -52,7 +52,11 @@ public class SideBarCtrl {
 		for (Record veRec : veRecords) {
 			if (!leaveOut.contains(new SideBarEntryForEmployee(veRec.getString("name")))) {
 				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
-				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"top: " + top + "pt;\">\n");
+				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"top: " + top + "pt;");
+				if (veRec.getBoolean("inverted", false)) {
+					html.append(" transform: scaleX(-1);");
+				}
+				html.append("\">\n");
 				html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString("name").toLowerCase() + ".jpg\" />\n");
 				html.append("</a>\n");
 				script.append("document.getElementById('sidebar_" + entry + "').href = ");
