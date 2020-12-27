@@ -263,6 +263,38 @@ public class DateUtils {
 	}
 
 	/**
+	 * The month here should start at 1, so January is 1, February is 2, etc.
+	 */
+	public static Date parseDateNumbers(Integer day, Integer month, Integer year) {
+
+		if (day == null) {
+			return null;
+		}
+		if (month == null) {
+			return null;
+		}
+		if (year == null) {
+			return null;
+		}
+
+		String dayStr = "" + day;
+		String monthStr = "" + month;
+		String yearStr = "" + year;
+
+		while (dayStr.length() < 2) {
+			dayStr = "0" + dayStr;
+		}
+		while (monthStr.length() < 2) {
+			monthStr = "0" + monthStr;
+		}
+		while (yearStr.length() < 4) {
+			yearStr = "0" + yearStr;
+		}
+
+		return parseDate(yearStr + "-" + monthStr + "-" + dayStr);
+	}
+
+	/**
 	 * Returns a date is that is the current date time plus howMany days
 	 * (negative values are also allowed)
 	 */
