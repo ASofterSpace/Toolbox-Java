@@ -66,6 +66,15 @@ public class GraphImage extends Image {
 		super();
 	}
 
+	public GraphImage copyGraph() {
+		GraphImage result = new GraphImage(getWidth(), getHeight());
+		result.data = new ArrayList<>(data);
+		result.backgroundColor = backgroundColor;
+		result.foregroundColor = foregroundColor;
+		result.dataColor = dataColor;
+		return result;
+	}
+
 	public void setInnerWidthAndHeight(int newWidth, int newHeight) {
 		init(newWidth + (2 * BORDER_WIDTH), newHeight + (2 * BORDER_WIDTH));
 	}
