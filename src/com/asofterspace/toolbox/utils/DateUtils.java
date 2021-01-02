@@ -35,7 +35,7 @@ public class DateUtils {
 
 	public static final String[] DAY_NAMES = new String[]{"Saturday", "Sunday", "Monday",
 		"Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-	private static final String[] MONTH_NAMES = new String[]{"January", "February", "March",
+	public static final String[] MONTH_NAMES = new String[]{"January", "February", "March",
 		"April", "May", "June", "July", "August", "September", "October", "November", "December"};
 	private static final String[] MONTH_NAMES_GERMAN = new String[]{"Januar", "Februar", "März",
 		"April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"};
