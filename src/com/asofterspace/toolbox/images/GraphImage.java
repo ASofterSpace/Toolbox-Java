@@ -330,6 +330,22 @@ public class GraphImage extends Image {
 		);
 	}
 
+	/**
+	 * Draws a vertical dotted line inside the graph (it will vanish again when redraw() is called!)
+	 */
+	public void drawVerticalDottedLineAt(int position, ColorRGB col) {
+
+		int newX = (int) (xMultiplier * position);
+
+		drawDottedLine(
+			newX + offsetX,
+			BORDER_WIDTH,
+			newX + offsetX,
+			getHeight() - BORDER_WIDTH,
+			col
+		);
+	}
+
 	private void calculateNumerics() {
 
 		outerWidth = getWidth();

@@ -375,6 +375,14 @@ public class Image {
 	}
 
 	public void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
+		drawLine(startX, startY, endX, endY, lineColor, false);
+	}
+
+	public void drawDottedLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
+		drawLine(startX, startY, endX, endY, lineColor, true);
+	}
+
+	private void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor, boolean dotted) {
 
 		boolean invertDirection = false;
 
@@ -412,6 +420,11 @@ public class Image {
 		// actually do the drawing - mainly horizontally or mainly vertically
 		if (lineWidth > lineHeight) {
 			for (int x = startX; x <= endX; x++) {
+				if (dotted) {
+					if ((x % 6 == 3) || (x % 6 == 4) || (x % 6 == 5)) {
+						continue;
+					}
+				}
 				int y;
 				if (invertDirection) {
 					y = startY + MathUtils.divideInts((endX - x) * lineHeight, lineWidth);
@@ -422,6 +435,11 @@ public class Image {
 			}
 		} else {
 			for (int y = startY; y <= endY; y++) {
+				if (dotted) {
+					if ((y % 6 == 3) || (y % 6 == 4) || (y % 6 == 5)) {
+						continue;
+					}
+				}
 				int x;
 				if (invertDirection) {
 					x = startX + MathUtils.divideInts((endY - y) * lineWidth, lineHeight);
