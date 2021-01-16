@@ -434,6 +434,38 @@ public class DateUtils {
 	}
 
 	/**
+	 * Takes in something like "Tuesday", "tue", "Dienstag" and returns "Tuesday" in each case
+	 */
+	public static String toDayOfWeekNameEN(String weekDay) {
+		if (weekDay == null) {
+			return null;
+		}
+		weekDay = weekDay.toLowerCase().trim();
+		if (weekDay.startsWith("su") || weekDay.startsWith("so")) {
+			return DateUtils.DAY_NAMES[1];
+		}
+		if (weekDay.startsWith("mo")) {
+			return DateUtils.DAY_NAMES[2];
+		}
+		if (weekDay.startsWith("tu") || weekDay.startsWith("di")) {
+			return DateUtils.DAY_NAMES[3];
+		}
+		if (weekDay.startsWith("we") || weekDay.startsWith("mi")) {
+			return DateUtils.DAY_NAMES[4];
+		}
+		if (weekDay.startsWith("th") || weekDay.startsWith("do")) {
+			return DateUtils.DAY_NAMES[5];
+		}
+		if (weekDay.startsWith("fr")) {
+			return DateUtils.DAY_NAMES[6];
+		}
+		if (weekDay.startsWith("sa")) {
+			return DateUtils.DAY_NAMES[7];
+		}
+		return null;
+	}
+
+	/**
 	 * Checks if these dates represent they same day, ignoring the time
 	 */
 	public static boolean isSameDay(Date someDate, Date otherDate) {

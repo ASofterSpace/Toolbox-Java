@@ -87,35 +87,6 @@ public class GenericTask {
 		return new GenericTask(this);
 	}
 
-	public static String toWeekDay(String weekDay) {
-		if (weekDay == null) {
-			return null;
-		}
-		weekDay = weekDay.toLowerCase().trim();
-		if (weekDay.startsWith("su") || weekDay.startsWith("so")) {
-			return DateUtils.DAY_NAMES[1];
-		}
-		if (weekDay.startsWith("mo")) {
-			return DateUtils.DAY_NAMES[2];
-		}
-		if (weekDay.startsWith("tu") || weekDay.startsWith("di")) {
-			return DateUtils.DAY_NAMES[3];
-		}
-		if (weekDay.startsWith("we") || weekDay.startsWith("mi")) {
-			return DateUtils.DAY_NAMES[4];
-		}
-		if (weekDay.startsWith("th") || weekDay.startsWith("do")) {
-			return DateUtils.DAY_NAMES[5];
-		}
-		if (weekDay.startsWith("fr")) {
-			return DateUtils.DAY_NAMES[6];
-		}
-		if (weekDay.startsWith("sa")) {
-			return DateUtils.DAY_NAMES[7];
-		}
-		return null;
-	}
-
 	public boolean isScheduledOn(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
@@ -126,7 +97,7 @@ public class GenericTask {
 				boolean foundDay = false;
 				String dayName = DateUtils.DAY_NAMES[cal.get(Calendar.DAY_OF_WEEK)];
 				for (String weekDay : scheduledOnDaysOfWeek) {
-					if (dayName.equals(toWeekDay(weekDay))) {
+					if (dayName.equals(DateUtils.toDayOfWeekNameEN(weekDay))) {
 						foundDay = true;
 						break;
 					}
@@ -248,7 +219,7 @@ public class GenericTask {
 		}
 		List<String> result = new ArrayList<>();
 		for (String dayOfWeek : scheduledOnDaysOfWeek) {
-			result.add(toWeekDay(dayOfWeek));
+			result.add(DateUtils.toDayOfWeekNameEN(dayOfWeek));
 		}
 		return result;
 	}
@@ -442,7 +413,7 @@ public class GenericTask {
 		List<String> daysOfWeek = getScheduledOnDaysOfWeek();
 		if (daysOfWeek != null) {
 			for (String day : daysOfWeek) {
-				day = toWeekDay(day);
+				day = DateUtils.toDayOfWeekNameEN(day);
 				if (day != null) {
 					result += day.substring(0, 2);
 					result += ", ";

@@ -743,20 +743,30 @@ public class Record {
 
 		Record result = get(key);
 
-		List<String> resultList = new ArrayList<>();
-
 		if (result == null) {
-			return resultList;
+			return new ArrayList<>();
 		}
 
-		if (result.arrContents == null) {
-			if (result.kind == RecordKind.STRING) {
-				resultList.add(result.simpleContents.toString());
+		return result.getStringValues();
+	}
+
+	/**
+	 * Get a list of strings corresponding to the contents of a Record array
+	 * filled with strings
+	 * @return the list of strings stored in the array
+	 */
+	public List<String> getStringValues() {
+
+		List<String> resultList = new ArrayList<>();
+
+		if (arrContents == null) {
+			if (kind == RecordKind.STRING) {
+				resultList.add(simpleContents.toString());
 			}
 			return resultList;
 		}
 
-		for (Record entry : result.arrContents) {
+		for (Record entry : arrContents) {
 			if (entry != null) {
 				if (entry.kind == RecordKind.STRING) {
 					resultList.add(entry.simpleContents.toString());

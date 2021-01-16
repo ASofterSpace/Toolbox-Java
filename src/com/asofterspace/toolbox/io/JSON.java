@@ -320,7 +320,13 @@ public class JSON extends Record {
 		// are starting with something VERY unexpected, and cannot parse this...
 		// in which case we should fail, and NOT silently, but very very loudly!
 		if (charPos == pos) {
-			throw new JsonParseException("Invalid JSON found", pos, jsonString);
+			String weirdChar = jsonString.substring(pos, pos + 1);
+			String extraStr = "";
+			if (weirdChar.equals(":")) {
+				extraStr = " outside of object";
+			}
+			throw new JsonParseException("Invalid JSON found, character \"" + weirdChar + "\" is unexpected" +
+				extraStr, pos, jsonString);
 		}
 
 		pos = charPos;
