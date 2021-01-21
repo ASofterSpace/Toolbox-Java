@@ -122,10 +122,10 @@ public class DefaultImageFile extends RasterImageFile {
 			for (int y = 0; y < img.getHeight(); y++) {
 				for (int x = 0; x < img.getWidth(); x++) {
 					ColorRGB c = data[y][x];
-					int rgb = c.getR() << 24;
-					rgb |= c.getG() << 16;
-					rgb |= c.getB() << 8;
-					rgb |= c.getA();
+					int rgb = c.getA() << 24;
+					rgb |= c.getR() << 16;
+					rgb |= c.getG() << 8;
+					rgb |= c.getB();
 					javaImg.setRGB(x, y, rgb);
 				}
 			}
