@@ -49,6 +49,8 @@ public class WebServerRequestHandler implements Runnable {
 
 	private List<Thread> threadList;
 
+	private boolean responded = false;
+
 
 	public WebServerRequestHandler(WebServer server, Socket request, Directory webRoot) {
 
@@ -378,6 +380,12 @@ public class WebServerRequestHandler implements Runnable {
 	}
 
 	protected void respond(String status, WebServerAnswer answer) throws IOException {
+
+		if (responded) {
+			return;
+		}
+
+		responded = true;
 
 		// System.out.println("Sending a " + status + " response for request #" + socketNum + "...");
 

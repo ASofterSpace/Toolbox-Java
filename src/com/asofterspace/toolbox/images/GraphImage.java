@@ -24,6 +24,8 @@ public class GraphImage extends Image {
 	private int BORDER_WIDTH = 10;
 
 	private List<GraphDataPoint> data;
+	private List<List<GraphDataPoint>> extraData = new ArrayList<>();
+	private List<ColorRGB> extraDataColors = new ArrayList<>();
 
 	private ColorRGB backgroundColor;
 	private ColorRGB foregroundColor;
@@ -72,6 +74,8 @@ public class GraphImage extends Image {
 		result.backgroundColor = backgroundColor;
 		result.foregroundColor = foregroundColor;
 		result.dataColor = dataColor;
+		result.extraData = new ArrayList<>(extraData);
+		result.extraDataColors = new ArrayList<>(extraDataColors);
 		return result;
 	}
 
@@ -80,7 +84,17 @@ public class GraphImage extends Image {
 	}
 
 	private void sort() {
-		Collections.sort(this.data, new Comparator<GraphDataPoint>() {
+		sort(this.data);
+		for (List<GraphDataPoint> list : extraData) {
+			sort(list);
+		}
+	}
+
+	private void sort(List<GraphDataPoint> cur) {
+		if (cur == null) {
+			return;
+		}
+		Collections.sort(cur, new Comparator<GraphDataPoint>() {
 			public int compare(GraphDataPoint a, GraphDataPoint b) {
 				return (int) (a.getPosition() - b.getPosition());
 			}
@@ -93,6 +107,19 @@ public class GraphImage extends Image {
 	public void setAbsoluteDataPoints(List<GraphDataPoint> newData) {
 
 		this.data = newData;
+
+		sort();
+
+		redraw();
+	}
+
+	/**
+	 * Add additional absolute data points
+	 */
+	public void addAbsoluteDataPoints(List<GraphDataPoint> newData, ColorRGB color) {
+
+		this.extraData.add(newData);
+		this.extraDataColors.add(color);
 
 		sort();
 
@@ -353,14 +380,18 @@ public class GraphImage extends Image {
 		innerWidth = outerWidth - 2 * BORDER_WIDTH;
 		innerHeight = outerHeight - 2 * BORDER_WIDTH;
 
-		if (data == null) {
-			return;
-		}
-		if (data.size() < 1) {
-			return;
+		List<GraphDataPoint> cur = data;
+
+		if ((cur == null) || (cur.size() < 1)) {
+			if (extraData.size() > 0) {
+				cur = extraData.get(0);
+				if ((cur == null) || (cur.size() < 1)) {
+					return;
+				}
+			}
 		}
 
-		xMin = data.get(0).getPosition();
+		xMin = cur.get(0).getPosition();
 		if (baseXmin != null) {
 			xMin = baseXmin;
 		}
@@ -377,7 +408,7 @@ public class GraphImage extends Image {
 			yMax = baseYmax;
 		}
 
-		for (GraphDataPoint dataPoint : data) {
+		for (GraphDataPoint dataPoint : cur) {
 			if (dataPoint.getPosition() < xMin) {
 				xMin = dataPoint.getPosition();
 			}
@@ -405,9 +436,6 @@ public class GraphImage extends Image {
 		xMultiplier = innerWidth / xRange;
 		yMultiplier = innerHeight / yRange;
 
-		prevX = (int) (xMultiplier * data.get(0).getPosition());
-		prevY = (int) (yMultiplier * data.get(0).getValue());
-
 		minX = (int) (xMultiplier * xMin);
 		minY = (int) (yMultiplier * yMin);
 
@@ -434,16 +462,27 @@ public class GraphImage extends Image {
 		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight - 4, black);
 		drawLine(BORDER_WIDTH + innerWidth, BORDER_WIDTH + innerHeight, BORDER_WIDTH + innerWidth - 9, BORDER_WIDTH + innerHeight + 4, black);
 
-		if (data == null) {
-			return;
-		}
-		if (data.size() < 1) {
-			return;
+		for (int i = 0; i < extraData.size(); i++) {
+			drawData(extraData.get(i), extraDataColors.get(i));
 		}
 
 		ColorRGB dataColor = getDataColor();
+		drawData(data, dataColor);
+	}
 
-		for (GraphDataPoint dataPoint : data) {
+	private void drawData(List<GraphDataPoint> curData, ColorRGB curDataColor) {
+
+		if (curData == null) {
+			return;
+		}
+		if (curData.size() < 1) {
+			return;
+		}
+
+		prevX = (int) (xMultiplier * curData.get(0).getPosition());
+		prevY = (int) (yMultiplier * curData.get(0).getValue());
+
+		for (GraphDataPoint dataPoint : curData) {
 
 			int newX = (int) (xMultiplier * dataPoint.getPosition());
 			int newY = (int) (yMultiplier * dataPoint.getValue());
@@ -453,7 +492,7 @@ public class GraphImage extends Image {
 				offsetY - prevY,
 				newX + offsetX,
 				offsetY - newY,
-				dataColor
+				curDataColor
 			);
 
 			prevX = newX;
