@@ -308,6 +308,13 @@ public class StrUtilsTest implements Test {
 				result + " instead of \"FOOrooFOO\"!");
 		}
 
+		result = StrUtils.replaceAll("fOObatrooFobort", "**f*T***", "FOO", true, true);
+
+		if (!"FOOrooFOO".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"fOObatrooFobort\", \"**f*T***\", \"FOO\", true, true) and got " +
+				result + " instead of \"FOOrooFOO\"!");
+		}
+
 		TestUtils.succeed();
 	}
 

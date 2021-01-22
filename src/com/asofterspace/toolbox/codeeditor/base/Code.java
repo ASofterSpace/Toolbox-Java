@@ -139,6 +139,9 @@ public abstract class Code extends DefaultStyledDocument {
 	// when searching, are we ignoring case?
 	private boolean searchIgnoreCase = false;
 
+	// when searching, are we using an asterisk?
+	private boolean searchUseAsterisk = false;
+
 	// all of the text versions we are aware of
 	private List<CodeAtLocation> textVersions = new ArrayList<>();
 
@@ -1993,6 +1996,10 @@ public abstract class Code extends DefaultStyledDocument {
 		this.searchIgnoreCase = value;
 	}
 
+	public void setSearchUseAsterisk(boolean value) {
+		this.searchUseAsterisk = value;
+	}
+
 	public void setSearchStr(String searchFor) {
 
 		this.searchStr = searchFor;
@@ -2706,6 +2713,49 @@ public abstract class Code extends DefaultStyledDocument {
 				curContent = curContent.toLowerCase();
 			}
 
+			// remove leading and trailing asterisks as they have no impact anyway and would lead
+			// to infinite loops later on
+			if (searchUseAsterisk) {
+				while (curSearchStr.startsWith("*")) {
+					curSearchStr = curSearchStr.substring(1);
+				}
+				while (curSearchStr.endsWith("*")) {
+					curSearchStr = curSearchStr.substring(0, curSearchStr.length() - 1);
+				}
+			}
+
+			int asteriskPos = curSearchStr.indexOf("*");
+
+			if (searchUseAsterisk && (asteriskPos >= 0)) {
+				String firstFindThis = curSearchStr.substring(0, asteriskPos);
+				String secondFindThis = curSearchStr.substring(asteriskPos + 1);
+
+				int secondSearchLen = secondFindThis.length();
+
+				int nextFirstPos = curContent.indexOf(firstFindThis);
+
+				if (nextFirstPos >= 0) {
+					int nextSecondPos = curContent.indexOf(secondFindThis, nextFirstPos);
+					while ((nextFirstPos >= 0) && (nextSecondPos >= 0)) {
+
+						if ((caretPos >= nextFirstPos) && (caretPos <= nextSecondPos + secondSearchLen)) {
+							this.setCharacterAttributes(nextFirstPos, nextSecondPos + secondSearchLen - nextFirstPos, attrSearchSelected, true);
+						} else {
+							this.setCharacterAttributes(nextFirstPos, nextSecondPos + secondSearchLen - nextFirstPos, attrSearch, true);
+						}
+
+						nextFirstPos = curContent.indexOf(firstFindThis, nextSecondPos + secondSearchLen);
+						if (nextFirstPos >= 0) {
+							nextSecondPos = curContent.indexOf(secondFindThis, nextFirstPos);
+						} else {
+							nextSecondPos = -1;
+						}
+					}
+				}
+
+				return;
+			}
+
 			int searchLen = curSearchStr.length();
 
 			int nextPos = curContent.indexOf(curSearchStr);
@@ -2718,7 +2768,7 @@ public abstract class Code extends DefaultStyledDocument {
 					this.setCharacterAttributes(nextPos, searchLen, attrSearch, true);
 				}
 
-				nextPos = curContent.indexOf(curSearchStr, nextPos + 1);
+				nextPos = curContent.indexOf(curSearchStr, nextPos + searchLen);
 			}
 
 		} catch (BadLocationException e) {

@@ -971,7 +971,19 @@ public class StrUtils {
 		}
 		StringBuilder result = new StringBuilder();
 
+		// remove leading and trailing asterisks as they have no impact anyway and would lead
+		// to infinite loops later on
+		if (useAsterisk) {
+			while (findThis.startsWith("*")) {
+				findThis = findThis.substring(1);
+			}
+			while (findThis.endsWith("*")) {
+				findThis = findThis.substring(0, findThis.length() - 1);
+			}
+		}
+
 		int asteriskPos = findThis.indexOf("*");
+
 		if (useAsterisk && (asteriskPos >= 0)) {
 			String firstFindThis = findThis.substring(0, asteriskPos);
 			String secondFindThis = findThis.substring(asteriskPos + 1);
