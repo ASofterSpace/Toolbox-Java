@@ -136,6 +136,9 @@ public abstract class Code extends DefaultStyledDocument {
 	// search string - the string that is currently being searched for
 	private String searchStr = null;
 
+	// when searching, are we ignoring case?
+	private boolean searchIgnoreCase = false;
+
 	// all of the text versions we are aware of
 	private List<CodeAtLocation> textVersions = new ArrayList<>();
 
@@ -1986,6 +1989,10 @@ public abstract class Code extends DefaultStyledDocument {
 		return schemeBackgroundColor;
 	}
 
+	public void setSearchIgnoreCase(boolean value) {
+		this.searchIgnoreCase = value;
+	}
+
 	public void setSearchStr(String searchFor) {
 
 		this.searchStr = searchFor;
@@ -2691,9 +2698,17 @@ public abstract class Code extends DefaultStyledDocument {
 
 			int caretPos = decoratedEditor.getCaretPosition();
 
-			int searchLen = searchStr.length();
+			String curSearchStr = searchStr;
+			String curContent = content;
 
-			int nextPos = content.indexOf(searchStr);
+			if (searchIgnoreCase) {
+				curSearchStr = curSearchStr.toLowerCase();
+				curContent = curContent.toLowerCase();
+			}
+
+			int searchLen = curSearchStr.length();
+
+			int nextPos = curContent.indexOf(curSearchStr);
 
 			while (nextPos >= 0) {
 
@@ -2703,7 +2718,7 @@ public abstract class Code extends DefaultStyledDocument {
 					this.setCharacterAttributes(nextPos, searchLen, attrSearch, true);
 				}
 
-				nextPos = content.indexOf(searchStr, nextPos + 1);
+				nextPos = curContent.indexOf(curSearchStr, nextPos + 1);
 			}
 
 		} catch (BadLocationException e) {
