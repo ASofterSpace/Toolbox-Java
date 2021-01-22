@@ -35,6 +35,8 @@ public class StrUtilsTest implements Test {
 
 		replaceAllIgnoreCaseTest();
 
+		replaceAllUseAsteriskTest();
+
 		replaceAllRepeatedlyTest();
 
 		replaceAllInBetweenTest();
@@ -269,6 +271,41 @@ public class StrUtilsTest implements Test {
 		if (!"fobaroo".equals(result)) {
 			TestUtils.fail("We called StrUtils.replaceAllIgnoreCase(\"fOObarooo\", \"oo\", \"o\") and got " +
 				result + " instead of \"fobaroo\"!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void replaceAllUseAsteriskTest() {
+
+		TestUtils.start("replaceAllUseAsterisk");
+
+		String result = StrUtils.replaceAll("foobaro", "o", "oo", false, true);
+
+		if (!"foooobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"foobaro\", \"o\", \"oo\", false, true) and got " +
+				result + " instead of \"foooobaroo\"!");
+		}
+
+		result = StrUtils.replaceAll("ofoObaro", "o", "oo", true, true);
+
+		if (!"oofoooobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"ofoObaro\", \"o\", \"oo\", true, true) and got " +
+				result + " instead of \"oofoooobaroo\"!");
+		}
+
+		result = StrUtils.replaceAll("foobarooo", "oo*r", "o", false, true);
+
+		if (!"foooo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"foobarooo\", \"oo*r\", \"o\", false, true) and got " +
+				result + " instead of \"foooo\"!");
+		}
+
+		result = StrUtils.replaceAll("fOObatrooFobort", "f*T", "FOO", true, true);
+
+		if (!"FOOrooFOO".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"fOObatrooFobort\", \"f*T\", \"FOO\", true, true) and got " +
+				result + " instead of \"FOOrooFOO\"!");
 		}
 
 		TestUtils.succeed();

@@ -937,26 +937,7 @@ public class StrUtils {
 	 * we return "foooobar" instead of looping forever)
 	 */
 	public static String replaceAll(String origStr, String findThis, String replaceWith) {
-		if (origStr == null) {
-			return null;
-		}
-		if (findThis == null) {
-			return origStr;
-		}
-		if (replaceWith == null) {
-			replaceWith = "";
-		}
-		StringBuilder result = new StringBuilder();
-		int index = origStr.indexOf(findThis);
-		int prevEnd = 0;
-		while (index >= 0) {
-			result.append(origStr.substring(prevEnd, index));
-			result.append(replaceWith);
-			prevEnd = index + findThis.length();
-			index = origStr.indexOf(findThis, prevEnd);
-		}
-		result.append(origStr.substring(prevEnd));
-		return result.toString();
+		return replaceAll(origStr, findThis, replaceWith, false, false);
 	}
 
 	/**
@@ -968,6 +949,12 @@ public class StrUtils {
 	 * we return "foooobar" instead of looping forever)
 	 */
 	public static String replaceAllIgnoreCase(String origStr, String findThis, String replaceWith) {
+		return replaceAll(origStr, findThis, replaceWith, true, false);
+	}
+
+	public static String replaceAll(String origStr, String findThis, String replaceWith,
+		boolean ignoreCase, boolean useAsterisk) {
+
 		if (origStr == null) {
 			return null;
 		}
@@ -977,16 +964,44 @@ public class StrUtils {
 		if (replaceWith == null) {
 			replaceWith = "";
 		}
-		findThis = findThis.toLowerCase();
-		String origStrLow = origStr.toLowerCase();
+		String haystack = origStr;
+		if (ignoreCase) {
+			findThis = findThis.toLowerCase();
+			haystack = origStr.toLowerCase();
+		}
 		StringBuilder result = new StringBuilder();
-		int index = origStrLow.indexOf(findThis);
+
+		int asteriskPos = findThis.indexOf("*");
+		if (useAsterisk && (asteriskPos >= 0)) {
+			String firstFindThis = findThis.substring(0, asteriskPos);
+			String secondFindThis = findThis.substring(asteriskPos + 1);
+			int prevEnd = 0;
+			int firstIndex = haystack.indexOf(firstFindThis);
+			if (firstIndex >= 0) {
+				int secondIndex = haystack.indexOf(secondFindThis, firstIndex);
+				while ((firstIndex >= 0) && (secondIndex >= 0)) {
+					result.append(origStr.substring(prevEnd, firstIndex));
+					result.append(replaceWith);
+					prevEnd = secondIndex + secondFindThis.length();
+					firstIndex = haystack.indexOf(firstFindThis, prevEnd);
+					if (firstIndex >= 0) {
+						secondIndex = haystack.indexOf(secondFindThis, firstIndex);
+					} else {
+						secondIndex = -1;
+					}
+				}
+			}
+			result.append(origStr.substring(prevEnd));
+			return result.toString();
+		}
+
+		int index = haystack.indexOf(findThis);
 		int prevEnd = 0;
 		while (index >= 0) {
 			result.append(origStr.substring(prevEnd, index));
 			result.append(replaceWith);
 			prevEnd = index + findThis.length();
-			index = origStrLow.indexOf(findThis, prevEnd);
+			index = haystack.indexOf(findThis, prevEnd);
 		}
 		result.append(origStr.substring(prevEnd));
 		return result.toString();
