@@ -12,6 +12,7 @@ import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
 import com.asofterspace.toolbox.gui.CodeEditor;
 import com.asofterspace.toolbox.utils.Callback;
+import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.SortOrder;
 import com.asofterspace.toolbox.utils.SortUtils;
 import com.asofterspace.toolbox.utils.StrUtils;
@@ -2692,88 +2693,106 @@ public abstract class Code extends DefaultStyledDocument {
 	// AFTER all the other highlightings have been performed!
 	protected void highlightSearch(int start, int length) {
 
-		if (searchStr == null) {
-			return;
-		}
-
-		if ("".equals(searchStr)) {
-			return;
-		}
-
 		try {
+
 			String content = this.getText(0, length);
+
+			List<Pair<Integer, Integer>> foundSites = findSearchSites(content);
 
 			int caretPos = decoratedEditor.getCaretPosition();
 
-			String curSearchStr = searchStr;
-			String curContent = content;
+			for (Pair<Integer, Integer> site : foundSites) {
 
-			if (searchIgnoreCase) {
-				curSearchStr = curSearchStr.toLowerCase();
-				curContent = curContent.toLowerCase();
-			}
+				int pos = site.getLeft();
+				int matchLength = site.getRight();
 
-			// remove leading and trailing asterisks as they have no impact anyway and would lead
-			// to infinite loops later on
-			if (searchUseAsterisk) {
-				while (curSearchStr.startsWith("*")) {
-					curSearchStr = curSearchStr.substring(1);
-				}
-				while (curSearchStr.endsWith("*")) {
-					curSearchStr = curSearchStr.substring(0, curSearchStr.length() - 1);
-				}
-			}
-
-			int asteriskPos = curSearchStr.indexOf("*");
-
-			if (searchUseAsterisk && (asteriskPos >= 0)) {
-				String firstFindThis = curSearchStr.substring(0, asteriskPos);
-				String secondFindThis = curSearchStr.substring(asteriskPos + 1);
-
-				int secondSearchLen = secondFindThis.length();
-
-				int nextFirstPos = curContent.indexOf(firstFindThis);
-
-				if (nextFirstPos >= 0) {
-					int nextSecondPos = curContent.indexOf(secondFindThis, nextFirstPos);
-					while ((nextFirstPos >= 0) && (nextSecondPos >= 0)) {
-
-						if ((caretPos >= nextFirstPos) && (caretPos <= nextSecondPos + secondSearchLen)) {
-							this.setCharacterAttributes(nextFirstPos, nextSecondPos + secondSearchLen - nextFirstPos, attrSearchSelected, true);
-						} else {
-							this.setCharacterAttributes(nextFirstPos, nextSecondPos + secondSearchLen - nextFirstPos, attrSearch, true);
-						}
-
-						nextFirstPos = curContent.indexOf(firstFindThis, nextSecondPos + secondSearchLen);
-						if (nextFirstPos >= 0) {
-							nextSecondPos = curContent.indexOf(secondFindThis, nextFirstPos);
-						} else {
-							nextSecondPos = -1;
-						}
-					}
-				}
-
-				return;
-			}
-
-			int searchLen = curSearchStr.length();
-
-			int nextPos = curContent.indexOf(curSearchStr);
-
-			while (nextPos >= 0) {
-
-				if ((caretPos >= nextPos) && (caretPos <= nextPos + searchLen)) {
-					this.setCharacterAttributes(nextPos, searchLen, attrSearchSelected, true);
+				if ((caretPos >= pos) && (caretPos <= pos + matchLength)) {
+					this.setCharacterAttributes(pos, matchLength, attrSearchSelected, true);
 				} else {
-					this.setCharacterAttributes(nextPos, searchLen, attrSearch, true);
+					this.setCharacterAttributes(pos, matchLength, attrSearch, true);
 				}
-
-				nextPos = curContent.indexOf(curSearchStr, nextPos + searchLen);
 			}
 
 		} catch (BadLocationException e) {
 			// oops!
 		}
+	}
+
+	/**
+	 * Returns a list of sites in the code which match the current search,
+	 * where each site is a pair of position and length
+	 */
+	public List<Pair<Integer, Integer>> findSearchSites(String content) {
+
+		List<Pair<Integer, Integer>> result = new ArrayList<>();
+
+		if (searchStr == null) {
+			return result;
+		}
+
+		if ("".equals(searchStr)) {
+			return result;
+		}
+
+		String curSearchStr = searchStr;
+		String curContent = content;
+
+		if (searchIgnoreCase) {
+			curSearchStr = curSearchStr.toLowerCase();
+			curContent = curContent.toLowerCase();
+		}
+
+		// remove leading and trailing asterisks as they have no impact anyway and would lead
+		// to infinite loops later on
+		if (searchUseAsterisk) {
+			while (curSearchStr.startsWith("*")) {
+				curSearchStr = curSearchStr.substring(1);
+			}
+			while (curSearchStr.endsWith("*")) {
+				curSearchStr = curSearchStr.substring(0, curSearchStr.length() - 1);
+			}
+		}
+
+		int asteriskPos = curSearchStr.indexOf("*");
+
+		if (searchUseAsterisk && (asteriskPos >= 0)) {
+			String firstFindThis = curSearchStr.substring(0, asteriskPos);
+			String secondFindThis = curSearchStr.substring(asteriskPos + 1);
+
+			int secondSearchLen = secondFindThis.length();
+
+			int nextFirstPos = curContent.indexOf(firstFindThis);
+
+			if (nextFirstPos >= 0) {
+				int nextSecondPos = curContent.indexOf(secondFindThis, nextFirstPos);
+				while ((nextFirstPos >= 0) && (nextSecondPos >= 0)) {
+
+					result.add(new Pair<Integer, Integer>(nextFirstPos, nextSecondPos + secondSearchLen - nextFirstPos));
+
+					nextFirstPos = curContent.indexOf(firstFindThis, nextSecondPos + secondSearchLen);
+					if (nextFirstPos >= 0) {
+						nextSecondPos = curContent.indexOf(secondFindThis, nextFirstPos);
+					} else {
+						nextSecondPos = -1;
+					}
+				}
+			}
+
+			return result;
+		}
+
+		int searchLen = curSearchStr.length();
+
+		int nextPos = curContent.indexOf(curSearchStr);
+
+		while (nextPos >= 0) {
+
+			result.add(new Pair<Integer, Integer>(nextPos, searchLen));
+
+			nextPos = curContent.indexOf(curSearchStr, nextPos + searchLen);
+		}
+
+		return result;
 	}
 
 	protected int highlightString(String content, int start, int end) {
