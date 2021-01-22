@@ -948,14 +948,47 @@ public class StrUtils {
 		}
 		StringBuilder result = new StringBuilder();
 		int index = origStr.indexOf(findThis);
+		int prevEnd = 0;
 		while (index >= 0) {
-			result.append(origStr.substring(0, index));
+			result.append(origStr.substring(prevEnd, index));
 			result.append(replaceWith);
-			// TODO :: improve speed by not calling substring but keeping track of start!
-			origStr = origStr.substring(index + findThis.length());
-			index = origStr.indexOf(findThis);
+			prevEnd = index + findThis.length();
+			index = origStr.indexOf(findThis, prevEnd);
 		}
-		result.append(origStr);
+		result.append(origStr.substring(prevEnd));
+		return result.toString();
+	}
+
+	/**
+	 * Replaces all occurrences of findThis in a string (ignoring case) with replaceWith
+	 * This does NOT use a regex, or any other nonsense - just plain string comparison
+	 * Also, this only replaces all once - call replaceAllRepeatedly if you want to ensure
+	 * that the result does not contain any occurrences of findThis anymore at all
+	 * (With this method, if origStr is "foobar", and findThis is "o" and replaceWith is "oo",
+	 * we return "foooobar" instead of looping forever)
+	 */
+	public static String replaceAllIgnoreCase(String origStr, String findThis, String replaceWith) {
+		if (origStr == null) {
+			return null;
+		}
+		if (findThis == null) {
+			return origStr;
+		}
+		if (replaceWith == null) {
+			replaceWith = "";
+		}
+		findThis = findThis.toLowerCase();
+		String origStrLow = origStr.toLowerCase();
+		StringBuilder result = new StringBuilder();
+		int index = origStrLow.indexOf(findThis);
+		int prevEnd = 0;
+		while (index >= 0) {
+			result.append(origStr.substring(prevEnd, index));
+			result.append(replaceWith);
+			prevEnd = index + findThis.length();
+			index = origStrLow.indexOf(findThis, prevEnd);
+		}
+		result.append(origStr.substring(prevEnd));
 		return result.toString();
 	}
 

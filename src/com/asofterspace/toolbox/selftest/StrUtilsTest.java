@@ -33,6 +33,8 @@ public class StrUtilsTest implements Test {
 
 		replaceAllTest();
 
+		replaceAllIgnoreCaseTest();
+
 		replaceAllRepeatedlyTest();
 
 		replaceAllInBetweenTest();
@@ -224,6 +226,48 @@ public class StrUtilsTest implements Test {
 
 		if (!"fobaroo".equals(result)) {
 			TestUtils.fail("We called StrUtils.replaceAll(\"foobarooo\", \"oo\", \"o\") and got " +
+				result + " instead of \"fobaroo\"!");
+		}
+
+		result = StrUtils.replaceAll("fOObarooo", "oo", "o");
+
+		if (!"fOObaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAll(\"fOObarooo\", \"oo\", \"o\") and got " +
+				result + " instead of \"fOObaroo\"!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void replaceAllIgnoreCaseTest() {
+
+		TestUtils.start("replaceAllIgnoreCase");
+
+		String result = StrUtils.replaceAllIgnoreCase("foobaro", "o", "oo");
+
+		if (!"foooobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAllIgnoreCase(\"foobaro\", \"o\", \"oo\") and got " +
+				result + " instead of \"foooobaroo\"!");
+		}
+
+		result = StrUtils.replaceAllIgnoreCase("ofoObaro", "o", "oo");
+
+		if (!"oofoooobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAllIgnoreCase(\"ofoObaro\", \"o\", \"oo\") and got " +
+				result + " instead of \"oofoooobaroo\"!");
+		}
+
+		result = StrUtils.replaceAllIgnoreCase("foobarooo", "oo", "o");
+
+		if (!"fobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAllIgnoreCase(\"foobarooo\", \"oo\", \"o\") and got " +
+				result + " instead of \"fobaroo\"!");
+		}
+
+		result = StrUtils.replaceAllIgnoreCase("fOObarooo", "oo", "o");
+
+		if (!"fobaroo".equals(result)) {
+			TestUtils.fail("We called StrUtils.replaceAllIgnoreCase(\"fOObarooo\", \"oo\", \"o\") and got " +
 				result + " instead of \"fobaroo\"!");
 		}
 
