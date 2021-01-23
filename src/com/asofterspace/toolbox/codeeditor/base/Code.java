@@ -158,6 +158,11 @@ public abstract class Code extends DefaultStyledDocument {
 	// enable or disable setting attributes
 	protected boolean attributeSetting = true;
 
+	// the filename of the file we are working on, if we are given it
+	protected String filename = null;
+	protected String localFilename = null;
+	protected String localFilenameWithoutExtension = null;
+
 	// keep of track of brackets that have been highlighted before,
 	// so that they do not need to be highlighted again
 	private Integer lastBracketStart = null;
@@ -3585,4 +3590,24 @@ public abstract class Code extends DefaultStyledDocument {
 
 		return result;
 	}
+
+	public void setFilename(String filename) {
+
+		this.filename = filename;
+
+		localFilename = filename;
+		if (localFilename.contains("\\")) {
+			localFilename = localFilename.substring(localFilename.lastIndexOf("\\") + 1);
+		}
+		if (localFilename.contains("/")) {
+			localFilename = localFilename.substring(localFilename.lastIndexOf("/") + 1);
+		}
+
+		localFilenameWithoutExtension = localFilename;
+		if (localFilenameWithoutExtension.contains(".")) {
+			localFilenameWithoutExtension = localFilenameWithoutExtension.substring(0,
+				localFilenameWithoutExtension.lastIndexOf("."));
+		}
+	}
+
 }

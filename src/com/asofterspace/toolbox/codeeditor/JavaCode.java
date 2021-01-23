@@ -368,6 +368,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		nextEncounteredTokens.add("public");
 		nextEncounteredTokens.add("protected");
 		nextEncounteredTokens.add("return result;");
+		if (localFilenameWithoutExtension != null) {
+			nextEncounteredTokens.add(localFilenameWithoutExtension);
+		}
 
 		return nextEncounteredTokens;
 	}

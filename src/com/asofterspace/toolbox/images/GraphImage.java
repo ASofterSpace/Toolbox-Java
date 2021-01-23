@@ -38,6 +38,8 @@ public class GraphImage extends Image {
 
 	private boolean includeTodayInTimeData = false;
 
+	private boolean redrawPrevented = false;
+
 	// all of the following are calculated when calculateNumerics() is called by redraw() and
 	// stay constant until the next redraw()
 	private int outerWidth;
@@ -443,8 +445,20 @@ public class GraphImage extends Image {
 		offsetY = BORDER_WIDTH + innerHeight + minY;
 	}
 
+	public void preventRedraw() {
+		redrawPrevented = true;
+	}
+
+	public void allowRedraw() {
+		redrawPrevented = false;
+	}
+
 	@Override
 	public void redraw() {
+
+		if (redrawPrevented) {
+			return;
+		}
 
 		super.redraw();
 
