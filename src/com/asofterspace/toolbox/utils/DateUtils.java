@@ -56,6 +56,8 @@ public class DateUtils {
 			return null;
 		}
 
+		String origDateStr = dateStr;
+
 		// also parse months that are written out in English or German
 		dateStr = strContainingMonthNameToStrContainingMonthNum1IsJan(dateStr);
 		dateStr = dateStr.toLowerCase();
@@ -73,7 +75,7 @@ public class DateUtils {
 					return DEFAULT_DATE_FORMAT.parse(dateStr);
 				}
 			}
-		} catch (ParseException | NumberFormatException ex) {
+		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			// oh no! fall through to backup approach...
 		}
 
@@ -100,8 +102,8 @@ public class DateUtils {
 
 		try {
 			return FALLBACK_DATE_FORMAT.parse(dateStr);
-		} catch (ParseException | NumberFormatException ex2) {
-			System.err.println("Could not parse the date " + dateStr + " - returning null instead!");
+		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex2) {
+			System.err.println("Could not parse the date '" + origDateStr + "' - returning null instead!");
 			return null;
 		}
 	}
@@ -122,7 +124,7 @@ public class DateUtils {
 
 		try {
 			return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
-		} catch (ParseException | NumberFormatException ex) {
+		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			System.err.println("Could not parse the date time " + dateTimeStr + " - using current time instead!");
 			return new Date();
 		}
@@ -542,7 +544,7 @@ public class DateUtils {
 		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
 		try {
 			return DEFAULT_DATE_FORMAT.parse(StrUtils.leftPad0(year, 4) + "-" + monthName + "-01");
-		} catch (ParseException | NumberFormatException ex) {
+		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			return null;
 		}
 	}
@@ -551,7 +553,7 @@ public class DateUtils {
 		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
 		try {
 			return DEFAULT_DATE_FORMAT.parse(StrUtils.leftPad0(year, 4) + "-" + monthName + "-15");
-		} catch (ParseException | NumberFormatException ex) {
+		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			return null;
 		}
 	}
@@ -563,7 +565,7 @@ public class DateUtils {
 			try {
 				String dateStr = StrUtils.leftPad0(year, 4) + "-" + monthName + "-" + day;
 				return DEFAULT_DATE_FORMAT.parse(dateStr);
-			} catch (ParseException | NumberFormatException ex) {
+			} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 				day--;
 			}
 		}
