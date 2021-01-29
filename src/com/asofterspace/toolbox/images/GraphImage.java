@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -512,6 +514,25 @@ public class GraphImage extends Image {
 			prevX = newX;
 			prevY = newY;
 		}
+	}
+
+	public Map<Integer, Double> getDataInGraph(List<GraphDataPoint> curData) {
+
+		Map<Integer, Double> result = new HashMap<>();
+
+		if (curData == null) {
+			return result;
+		}
+		if (curData.size() < 1) {
+			return result;
+		}
+
+		for (GraphDataPoint dataPoint : curData) {
+			int newX = (int) (xMultiplier * dataPoint.getPosition());
+			result.put(newX + offsetX, dataPoint.getValue());
+		}
+
+		return result;
 	}
 
 }
