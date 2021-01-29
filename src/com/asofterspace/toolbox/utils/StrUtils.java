@@ -833,6 +833,34 @@ public class StrUtils {
 		return ""+value;
 	}
 
+	public static String doubleToStr(double value, int digitsAfterComma) {
+		String result = ""+value;
+		if (result.contains(".")) {
+			if (digitsAfterComma == 0) {
+				result = result.substring(0, result.indexOf("."));
+				return result;
+			}
+			int curlyAfterComma = (result.length() - result.indexOf(".")) - 1;
+			while (curlyAfterComma < digitsAfterComma) {
+				result += "0";
+				curlyAfterComma++;
+			}
+			if (curlyAfterComma > digitsAfterComma) {
+				result = result.substring(0, result.length() + digitsAfterComma - curlyAfterComma);
+			}
+
+		} else {
+			if (digitsAfterComma == 0) {
+				return result;
+			}
+			result += ".";
+			for (int i = 0; i < digitsAfterComma; i++) {
+				result += "0";
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * The numbers we are getting here are German-ly numbers, so 1.546,00...
 	 * so we first replace . with nothing, then , with .

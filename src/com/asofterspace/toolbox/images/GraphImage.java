@@ -527,9 +527,21 @@ public class GraphImage extends Image {
 			return result;
 		}
 
+		int prevX = (int) (xMultiplier * curData.get(0).getPosition());
+		double prevVal = curData.get(0).getValue();
+
 		for (GraphDataPoint dataPoint : curData) {
 			int newX = (int) (xMultiplier * dataPoint.getPosition());
-			result.put(newX + offsetX, dataPoint.getValue());
+			double newVal = dataPoint.getValue();
+			result.put(newX + offsetX, newVal);
+
+			for (int x = prevX + 1; x < newX; x++) {
+				double percNew = (x - prevX) / (double) (newX - prevX);
+				result.put(x + offsetX, ((1 - percNew) * prevVal) + (percNew * newVal));
+			}
+
+			prevX = newX;
+			prevVal = newVal;
 		}
 
 		return result;
