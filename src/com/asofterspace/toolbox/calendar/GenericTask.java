@@ -53,6 +53,10 @@ public class GenericTask {
 	// when was this task done?
 	protected Date doneDate;
 
+	// when was this task set to done? (so e.g. I can today set the task to being done yesterday,
+	// then doneDate will be yesterday - as date - but today, now o'clock, will be the setToDoneDateTime)
+	protected Date setToDoneDateTime;
+
 	// what interesting things did the user encounter while doing this task?
 	protected String doneLog;
 
@@ -279,6 +283,14 @@ public class GenericTask {
 
 	public void setDone(Boolean done) {
 		this.done = done;
+	}
+
+	public Date getSetToDoneDateTime() {
+		return setToDoneDateTime;
+	}
+
+	public void setSetToDoneDateTime(Date setToDoneDateTime) {
+		this.setToDoneDateTime = setToDoneDateTime;
 	}
 
 	public boolean isInstance() {

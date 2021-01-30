@@ -35,6 +35,7 @@ public class TaskCtrlBase {
 	protected final static String RELEASED_IN_MONTH = "releasedInMonth";
 	protected final static String RELEASED_IN_YEAR = "releasedInYear";
 	protected final static String DONE_DATE = "doneDate";
+	protected final static String SET_TO_DONE_DATE_TIME = "setToDoneDateTime";
 	protected final static String DONE_LOG = "doneLog";
 	protected final static String DATE = "date";
 	protected final static String ROWS = "rows";
@@ -205,6 +206,7 @@ public class TaskCtrlBase {
 		result.setReleasedInMonth(recordTask.getInteger(RELEASED_IN_MONTH));
 		result.setReleasedInYear(recordTask.getInteger(RELEASED_IN_YEAR));
 		result.setDoneDate(DateUtils.parseDate(recordTask.getString(DONE_DATE)));
+		result.setSetToDoneDateTime(DateUtils.parseDateTime(recordTask.getString(SET_TO_DONE_DATE_TIME)));
 		result.setDoneLog(recordTask.getString(DONE_LOG));
 		return result;
 	}
@@ -355,6 +357,7 @@ public class TaskCtrlBase {
 			taskRecord.set(RELEASED_IN_MONTH, task.getReleasedInMonth());
 			taskRecord.set(RELEASED_IN_YEAR, task.getReleasedInYear());
 			taskRecord.setOrRemove(DONE_DATE, DateUtils.serializeDate(task.getDoneDate()));
+			taskRecord.setOrRemove(SET_TO_DONE_DATE_TIME, DateUtils.serializeDateTime(task.getSetToDoneDateTime()));
 			taskRecord.setOrRemove(DONE_LOG, task.getDoneLog());
 		}
 
