@@ -21,7 +21,7 @@ public class TaskCtrlBase {
 	protected final static String LAST_TASK_GENERATION = "lastTaskGeneration";
 	protected final static String GENERIC = "generic";
 	protected final static String KIND = "kind";
-	protected final static String TITLE = "title";
+	public final static String TITLE = "title";
 	protected final static String DAY = "day";
 	protected final static String DAYS_OF_WEEK = "daysOfWeek";
 	protected final static String MONTH = "month";
@@ -35,9 +35,9 @@ public class TaskCtrlBase {
 	protected final static String RELEASED_IN_MONTH = "releasedInMonth";
 	protected final static String RELEASED_IN_YEAR = "releasedInYear";
 	protected final static String DONE_DATE = "doneDate";
-	protected final static String SET_TO_DONE_DATE_TIME = "setToDoneDateTime";
+	public final static String SET_TO_DONE_DATE_TIME = "setToDoneDateTime";
 	protected final static String DONE_LOG = "doneLog";
-	protected final static String DATE = "date";
+	public final static String DATE = "date";
 	protected final static String ROWS = "rows";
 	protected final static String AMOUNT = "amount";
 	protected final static String ACCOUNT = "account";

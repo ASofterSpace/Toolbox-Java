@@ -1267,6 +1267,13 @@ public class Record {
 		kind = RecordKind.ARRAY;
 	}
 
+	public void makeSimpleType(RecordKind kind, Object value) {
+
+		this.kind = kind;
+
+		this.simpleContents = value;
+	}
+
 	public void reverse() {
 		if (arrContents != null) {
 			Collections.reverse(arrContents);
