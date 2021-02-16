@@ -8,6 +8,7 @@ package com.asofterspace.toolbox.virtualEmployees;
 public enum SideBarEntryForTool implements SideBarEntry {
 
 	BROWSER,
+	FUNTUBE,
 	WORKBENCH,
 	EDITOR,
 
