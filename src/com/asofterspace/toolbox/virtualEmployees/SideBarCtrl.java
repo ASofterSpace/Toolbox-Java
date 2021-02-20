@@ -47,10 +47,21 @@ public class SideBarCtrl {
 		int topDistance = 82;
 		int entry = 1;
 
+
+		// VIRTUAL EMPLOYEES
+
 		List<Record> veRecords = getVirtualEmployeeRecords();
+
+		int maxVirtualEmployees = 4;
 
 		for (Record veRec : veRecords) {
 			if (!leaveOut.contains(new SideBarEntryForEmployee(veRec.getString("name")))) {
+				maxVirtualEmployees--;
+
+				if (maxVirtualEmployees < 0) {
+					break;
+				}
+
 				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
 				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"top: " + top + "pt;");
 				if (veRec.getBoolean("flip", false)) {
@@ -66,6 +77,89 @@ public class SideBarCtrl {
 			}
 		}
 
+
+		// BUTTON TO SHOW FULL LIST
+
+		html.append("<div class='sidebar' style='top: " + top + "pt; text-align: center; background: rgba(255, 255, 255, 0.3); border-radius: 8pt; height: 10.5pt; font-weight: bold; padding-top: 4pt;' ");
+		html.append("onMouseOver='document.getElementById(\"sidebar_full_list_container\").style.display = \"block\";' ");
+		html.append("onMouseOut='document.getElementById(\"sidebar_full_list_container\").style.display = \"none\";' ");
+		html.append(">");
+		html.append("&lt; &lt; &lt;");
+		html.append("</div>");
+
+		html.append("<div id='sidebar_full_list_container' style='position: fixed; inset: 25pt 55pt 25pt 25pt; display: none;' ");
+		html.append("onMouseOver='document.getElementById(\"sidebar_full_list_container\").style.display = \"block\";' ");
+		html.append("onMouseOut='document.getElementById(\"sidebar_full_list_container\").style.display = \"none\";' ");
+		html.append(">");
+		html.append("<div style='position: fixed; inset: 30pt 90pt 30pt 30pt; background: rgba(255, 255, 255, 0.9); box-shadow: 0px 0px 8px 8px rgba(255, 255, 255, 0.9); border-radius: 16pt;'>");
+
+		int LEFT_OFFSET = 18;
+
+		int left = LEFT_OFFSET;
+
+		for (Record veRec : veRecords) {
+			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
+			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center;\">\n");
+			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString("name").toLowerCase() + ".jpg\" />\n");
+			html.append("<br>\n");
+			html.append(veRec.getString("name") + "\n");
+			html.append("</a>\n");
+			script.append("document.getElementById('sidebar_full_" + entry + "').href = ");
+			script.append("\"http://\" + window.location.hostname + \":" + veRec.getInteger("port") + "/\";\n");
+
+			left += 62+15;
+		}
+
+
+		left = LEFT_OFFSET;
+
+		top = 225;
+
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"_blank\" ");
+		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
+		html.append("<br>\n");
+		html.append("Browser\n");
+		html.append("</a>\n");
+		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/\";\n");
+
+		left += 62;
+
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
+		html.append("<br>\n");
+		html.append("Editor\n");
+		html.append("</div>\n");
+
+
+		left = LEFT_OFFSET;
+
+		GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
+			System.getProperty("java.class.path") + "/../../assWorkbench/server/projects");
+		List<GenericProject> projects = projectCtrl.getGenericProjects();
+
+		html.append("<div class='projectbar' style='right: unset;'>\n");
+
+		for (GenericProject proj : projects) {
+			html.append("\n");
+			html.append("  <a href=\"localhost:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: 25pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
+			html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
+			html.append("  </a>");
+			left += 99;
+		}
+
+		html.append("</div>\n");
+
+		html.append("</div>");
+
+
+		html.append("</div>");
+		html.append("</div>");
+		html.append("</div>");
+		html.append("</div>");
+
+
+		// TOOLS
 
 		int bottom = 10;
 		int bottomDistance = 46;
@@ -84,10 +178,6 @@ public class SideBarCtrl {
 			entry++;
 
 			html.append("<div class=\"projectbar\" id=\"_ve_projectbar\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" style=\"display:none; bottom:53pt; right:8pt; padding:0pt 4pt 5pt 0pt; z-index:100; background-color: rgba(0, 0, 0, 0.7);\">");
-
-			GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
-				System.getProperty("java.class.path") + "/../../assWorkbench/server/projects");
-			List<GenericProject> projects = projectCtrl.getGenericProjects();
 
 			for (GenericProject proj : projects) {
 				if (proj.isOnShortlist()) {
