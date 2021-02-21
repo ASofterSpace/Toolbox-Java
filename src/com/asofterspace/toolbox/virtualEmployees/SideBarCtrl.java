@@ -106,6 +106,7 @@ public class SideBarCtrl {
 			html.append("</a>\n");
 			script.append("document.getElementById('sidebar_full_" + entry + "').href = ");
 			script.append("\"http://\" + window.location.hostname + \":" + veRec.getInteger("port") + "/\";\n");
+			entry++;
 
 			left += 62+15;
 		}
@@ -115,6 +116,15 @@ public class SideBarCtrl {
 
 		top = 225;
 
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
+		html.append("<br>\n");
+		html.append("Editor\n");
+		html.append("</div>\n");
+
+		entry++;
+		left += 62;
+
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"_blank\" ");
 		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
@@ -123,14 +133,19 @@ public class SideBarCtrl {
 		html.append("</a>\n");
 		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/\";\n");
 
+		entry++;
 		left += 62;
 
-		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
-		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" target=\"_blank\" ");
+		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/funtube.png\" />\n");
 		html.append("<br>\n");
-		html.append("Editor\n");
-		html.append("</div>\n");
+		html.append("FunTube\n");
+		html.append("</a>\n");
+		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/funtube\";\n");
 
+		entry++;
+		left += 62;
 
 		left = LEFT_OFFSET;
 
@@ -253,6 +268,10 @@ public class SideBarCtrl {
 
 		if (location.equals("/pics/browser.png")) {
 			result = new File(basePath + "assBrowser/server/pics/browser.png");
+		}
+
+		if (location.equals("/pics/funtube.png")) {
+			result = new File(basePath + "assBrowser/server/pics/funtube.png");
 		}
 
 		if (location.equals("/pics/editor.png")) {
