@@ -497,6 +497,10 @@ public class Record {
 		return simpleContents.toString();
 	}
 
+	public Integer asInteger() {
+		return getIntegerFromRecord(this);
+	}
+
 	/**
 	 * Returns the value of this Record object as Object - which could be a String, Integer, etc.
 	 */
