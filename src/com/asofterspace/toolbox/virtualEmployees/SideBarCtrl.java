@@ -87,7 +87,7 @@ public class SideBarCtrl {
 		html.append("&lt; &lt; &lt;");
 		html.append("</div>");
 
-		html.append("<div id='sidebar_full_list_container' style='position: fixed; inset: 25pt 55pt 25pt 25pt; display: none;' ");
+		html.append("<div id='sidebar_full_list_container' style='position: fixed; inset: 25pt 55pt 25pt 25pt; display: none; z-index: 1000000;' ");
 		html.append("onMouseOver='document.getElementById(\"sidebar_full_list_container\").style.display = \"block\";' ");
 		html.append("onMouseOut='document.getElementById(\"sidebar_full_list_container\").style.display = \"none\";' ");
 		html.append(">");
