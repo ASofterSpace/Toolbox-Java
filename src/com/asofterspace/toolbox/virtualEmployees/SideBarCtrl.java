@@ -125,7 +125,7 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"_blank\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" ");
 		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
 		html.append("<br>\n");
@@ -136,13 +136,22 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" target=\"_blank\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" ");
 		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/funtube.png\" />\n");
 		html.append("<br>\n");
 		html.append("FunTube\n");
 		html.append("</a>\n");
 		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/funtube\";\n");
+
+		entry++;
+		left += 62;
+
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('picturizer')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/picturizer.png\" />\n");
+		html.append("<br>\n");
+		html.append("Picturizer\n");
+		html.append("</div>\n");
 
 		entry++;
 		left += 62;
@@ -278,6 +287,10 @@ public class SideBarCtrl {
 			result = new File(basePath + "assEditor/res/ico.png");
 		}
 
+		if (location.equals("/pics/picturizer.png")) {
+			result = new File(basePath + "Picturizer/res/ico.png");
+		}
+
 		// get project logo files from assWorkbench
 		if (location.startsWith("/projectlogos/") && location.endsWith(".png") && !location.contains("..")) {
 			String filename = location.substring("/projectlogos/".length());
@@ -309,6 +322,9 @@ public class SideBarCtrl {
 					JSON json = new JSON(jsonData);
 					if ("editor".equals(json.getString("whatToOpen"))) {
 						IoUtils.execute(basePath + "assEditor/assEditor.bat");
+					}
+					if ("picturizer".equals(json.getString("whatToOpen"))) {
+						IoUtils.execute(basePath + "Picturizer/run.bat");
 					}
 					return new WebServerAnswerInJson("{\"success\": true}");
 			}
