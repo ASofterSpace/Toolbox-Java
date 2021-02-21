@@ -99,7 +99,7 @@ public class SideBarCtrl {
 
 		for (Record veRec : veRecords) {
 			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
-			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center;\">\n");
+			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center; text-decoration: none;\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString("name").toLowerCase() + ".jpg\" />\n");
 			html.append("<br>\n");
 			html.append(veRec.getString("name") + "\n");
@@ -116,7 +116,7 @@ public class SideBarCtrl {
 
 		top = 225;
 
-		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
 		html.append("<br>\n");
 		html.append("Editor\n");
@@ -126,7 +126,7 @@ public class SideBarCtrl {
 		left += 62;
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"_blank\" ");
-		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
+		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
 		html.append("<br>\n");
 		html.append("Browser\n");
@@ -137,7 +137,7 @@ public class SideBarCtrl {
 		left += 62;
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" target=\"_blank\" ");
-		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center;\">\n");
+		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/funtube.png\" />\n");
 		html.append("<br>\n");
 		html.append("FunTube\n");
