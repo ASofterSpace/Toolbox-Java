@@ -23,12 +23,16 @@ public class UrlDecoder {
 	 */
 	public static String decode(String urlString) {
 
+		if (urlString == null) {
+			return null;
+		}
+
 		try {
-			
+
 			return URLDecoder.decode(urlString, "UTF-8");
-		
+
 		} catch (UnsupportedEncodingException e) {
-		
+
 			return urlString;
 		}
 	}
