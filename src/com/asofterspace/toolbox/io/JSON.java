@@ -118,6 +118,10 @@ public class JSON extends Record {
 						throw new JsonParseException("Encountered an unclosed key", pos, jsonString);
 					}
 					String key = jsonString.substring(pos+1, endIndex).trim();
+					if (key.contains("\n")) {
+						throw new JsonParseException("Encountered a key (\"" + StrUtils.replaceAll(key, "\n", "\\n") +
+							"\") containing a newline", pos, jsonString);
+					}
 					pos = jsonString.indexOf(":", endIndex+1) + 1;
 					if (pos < 1) {
 						throw new JsonParseException("Encountered a key without trailing :", endIndex, jsonString);
@@ -230,12 +234,18 @@ public class JSON extends Record {
 			}
 			pos = endIndex + 1;
 
+			boolean throwEncounteredNewline = false;
+
 			// escape front to back - if we find, e.g., \\, this is a slash, but if we find \n, this is a newline
 			StringBuilder simpleContentBuilder = new StringBuilder();
 			int curPos = 0;
 			int nextPos = simpleContentsStr.indexOf("\\", curPos);
 			while (nextPos > -1) {
-				simpleContentBuilder.append(simpleContentsStr.substring(curPos, nextPos));
+				String valueStr = simpleContentsStr.substring(curPos, nextPos);
+				if (valueStr.contains("\n")) {
+					throwEncounteredNewline = true;
+				}
+				simpleContentBuilder.append(valueStr);
 				curPos = nextPos + 1;
 				if (nextPos+1 >= simpleContentsStr.length()) {
 					break;
@@ -268,9 +278,20 @@ public class JSON extends Record {
 				}
 				nextPos = simpleContentsStr.indexOf("\\", curPos);
 			}
-			simpleContentBuilder.append(simpleContentsStr.substring(curPos, simpleContentsStr.length()));
+			String valueStr = simpleContentsStr.substring(curPos, simpleContentsStr.length());
+			simpleContentBuilder.append(valueStr);
+
+			if (valueStr.contains("\n")) {
+				throwEncounteredNewline = true;
+			}
 
 			simpleContents = simpleContentBuilder.toString();
+
+			if (throwEncounteredNewline) {
+				throw new JsonParseException("Encountered a value (\"" +
+					StrUtils.replaceAll((String) simpleContents, "\n", "\\n") +
+					"\") containing a newline", pos, jsonString);
+			}
 
 			return pos;
 		}
