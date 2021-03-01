@@ -697,6 +697,8 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 								(!thisLine.endsWith(",")) &&
 								// annotations
 								(!thisLine.startsWith("@")) &&
+								// multi-line annotations annoyingly tend to end on "})" on its own separate line
+								(!thisLine.startsWith("})")) &&
 								// in case of chaining several object methods
 								(!nextLine.startsWith(".")) &&
 								(!nextLine.startsWith("+\"")) &&
