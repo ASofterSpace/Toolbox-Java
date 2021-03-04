@@ -503,6 +503,15 @@ public class DateUtils {
 		return DAY_NAMES[val];
 	}
 
+	public static Integer getHour(Date someDate) {
+		if (someDate == null) {
+			return null;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(someDate);
+		return cal.get(Calendar.HOUR_OF_DAY);
+	}
+
 	/**
 	 * Gets the month number, January is 1
 	 */
