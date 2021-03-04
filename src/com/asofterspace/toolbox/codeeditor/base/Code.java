@@ -1152,6 +1152,12 @@ public abstract class Code extends DefaultStyledDocument {
 
 	private void addJavaUtilImport(String origText, List<String> alreadyImported, StringBuilder contentMiddle, String utility, String fullUtility, String importKeyword) {
 
+		// if we somehow ended up with "Foo<Bar>" as utility, replace with just "Foo"
+		if (utility.contains("<") && fullUtility.contains("<")) {
+			utility = utility.substring(0, utility.indexOf("<"));
+			fullUtility = fullUtility.substring(0, fullUtility.indexOf("<"));
+		}
+
 		// if something already imports this, do not import it from a different (wrong!) source again!
 		for (String alreadyImportedStr : alreadyImported) {
 			if (alreadyImportedStr.endsWith("." + utility) || alreadyImportedStr.endsWith("." + utility + ";")) {
