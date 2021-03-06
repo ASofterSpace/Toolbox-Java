@@ -74,7 +74,9 @@ public class FancyCodeEditor extends CodeEditor {
 		Dimension result = super.getMinimumSize();
 		if (backgroundImage != null) {
 			resampleBackgroundIfNeeded();
-			result.height += imageToDraw.getHeight() + 8;
+			if (imageToDraw != null) {
+				result.height += imageToDraw.getHeight() + 8;
+			}
 		}
 		return result;
 	}
@@ -84,21 +86,28 @@ public class FancyCodeEditor extends CodeEditor {
 		Dimension result = super.getPreferredSize();
 		if (backgroundImage != null) {
 			resampleBackgroundIfNeeded();
-			result.height += imageToDraw.getHeight() + 8;
+			if (imageToDraw != null) {
+				result.height += imageToDraw.getHeight() + 8;
+			}
 		}
 		return result;
 	}
 
 	/**
 	 * This checks if the background needs to be resampled, assuming that the background
-	 * is actually shown... don't call this is backgroundImage is actually null ;)
+	 * is actually shown... don't call this if backgroundImage is actually null ;)
 	 */
 	private void resampleBackgroundIfNeeded() {
 		int curResampleWidth = getParent().getParent().getWidth() - (2*BG_OFFSET);
 		if (curResampleWidth < 0) {
 			curResampleWidth = 2*BG_OFFSET;
 		}
-		if (curResampleWidth != lastResampleWidth) {
+
+		// only resample if the width got bigger, but then never resample down again
+		// - at worst, this just means that the sticker image is a bit too big to
+		// entirely fit without scrolling, but at least it does not osciallate big
+		// and small and big and small and so on anymore ;)
+		if ((curResampleWidth > lastResampleWidth) || (imageToDraw == null)) {
 			resampledImg = backgroundImage.copy();
 			resampledImg.resampleToWidth(curResampleWidth);
 			imageToDraw = resampledImg.getAwtImage();
@@ -215,10 +224,14 @@ public class FancyCodeEditor extends CodeEditor {
 
 			if (backgroundImage != null) {
 				resampleBackgroundIfNeeded();
+				int imageToDrawHeight = 0;
+				if (imageToDraw != null) {
+					imageToDrawHeight = imageToDraw.getHeight() + BG_OFFSET;
+				}
 				graphics2d.drawImage(
 					imageToDraw,
 					BG_OFFSET,
-					getHeight() - (imageToDraw.getHeight() + BG_OFFSET),
+					getHeight() - imageToDrawHeight,
 					null
 				);
 			}
