@@ -408,6 +408,26 @@ public class File {
 			return "image/bmp";
 		}
 
+		if (lowFilename.endsWith(".mp4")) {
+			return "video/mp4";
+		}
+
+		if (lowFilename.endsWith(".webm")) {
+			return "video/webm";
+		}
+
+		if (lowFilename.endsWith(".mpg") || lowFilename.endsWith(".mpeg")) {
+			return "video/mpeg";
+		}
+
+		if (lowFilename.endsWith(".wmv")) {
+			return "video/x-ms-wmv";
+		}
+
+		if (lowFilename.endsWith(".avi")) {
+			return "video/x-msvideo";
+		}
+
 		return "text/plain";
 	}
 
