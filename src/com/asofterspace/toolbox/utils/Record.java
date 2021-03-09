@@ -74,6 +74,10 @@ public class Record {
 			return (Record) recordOrWhatever;
 		}
 
+		if (recordOrWhatever instanceof Recordable) {
+			return ((Recordable) recordOrWhatever).toRecord();
+		}
+
 		if (recordOrWhatever instanceof Boolean) {
 			return new Record((Boolean) recordOrWhatever);
 		}
