@@ -2294,6 +2294,13 @@ public abstract class Code extends DefaultStyledDocument {
 				break;
 
 			case "<":
+				// only autocomplete < to <> if there was no space in front of it...
+				// if there was a space in front, it is more likely to be used as a comparison
+				// sign like vari < 27398, and adding > would not be helpful
+				content = decoratedEditor.getText();
+				if ((offset - 1 >= 0) && (offset - 1 < content.length()) && (content.charAt(offset - 1) == ' ')) {
+					break;
+				}
 				insertedString = "<>";
 				overrideCaretPos = 1;
 				break;
