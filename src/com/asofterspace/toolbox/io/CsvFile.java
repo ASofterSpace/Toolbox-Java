@@ -151,7 +151,13 @@ public class CsvFile extends SimpleFile {
 
 		for (String col : columns) {
 			result.append(sep);
-			result.append(col);
+			if ((col != null) && col.contains(sep)) {
+				result.append("\"");
+				result.append(col);
+				result.append("\"");
+			} else {
+				result.append(col);
+			}
 			sep = ""+entrySeparator;
 		}
 
