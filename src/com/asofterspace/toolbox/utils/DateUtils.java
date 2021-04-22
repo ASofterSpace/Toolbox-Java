@@ -159,6 +159,25 @@ public class DateUtils {
 			return null;
 		}
 
+		return serializeDateLong(datetime, beforeUp, afterUp) + ", " + serializeTimeShort(datetime);
+	}
+
+	/**
+	 * Serializes a date as e.g. 12th of October 2020
+	 */
+	public static String serializeDateLong(Date datetime) {
+		return serializeDateLong(datetime, null, null);
+	}
+
+	/**
+	 * Serializes a date as e.g. 12<span class="sup">th</span> of October 2020
+	 */
+	public static String serializeDateLong(Date datetime, String beforeUp, String afterUp) {
+
+		if (datetime == null) {
+			return null;
+		}
+
 		int day = getDayOfMonth(datetime);
 
 		StringBuilder result = new StringBuilder();
@@ -200,26 +219,7 @@ public class DateUtils {
 		result.append(" ");
 		result.append(getYear(datetime));
 
-		return result.toString() + ", " + serializeTimeShort(datetime);
-	}
-
-	/**
-	 * Serializes a date as e.g. 12. October 2020
-	 */
-	public static String serializeDateLong(Date date) {
-
-		if (date == null) {
-			return null;
-		}
-
-		// we explicitly want the result to always be in English, so we do not want to rely on
-		// standard serialization from MMM in the format string but instead serialize the month
-		// part ourselves...
-		String result = FALLBACK_DATE_FORMAT.format(date);
-		for (int i = 0; i < MONTH_NAMES.length; i++) {
-			result = result.replaceAll("\\." + StrUtils.leftPad0(i+1, 2) + "\\.", ". " + MONTH_NAMES[i] + " ");
-		}
-		return result;
+		return result.toString();
 	}
 
 	/**

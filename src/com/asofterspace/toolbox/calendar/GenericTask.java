@@ -270,6 +270,9 @@ public class GenericTask {
 		if (releasedDate != null) {
 			return releasedDate;
 		}
+		if (!isInstance()) {
+			return null;
+		}
 		releasedDate = DateUtils.parseDate(getReleasedInYear() + "-" + (getReleasedInMonth() + 1) + "-" + getReleasedOnDay());
 		return releasedDate;
 	}
@@ -380,6 +383,18 @@ public class GenericTask {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Gets the main date on which a task instance lies, so if it was done already,
+	 * the done date, and if not, the release date.
+	 * If this is a repeating task rather than a single task instance, returns null.
+	 */
+	public Date getMainDateForTaskInstance() {
+		if (doneDate != null) {
+			return doneDate;
+		}
+		return getReleaseDate();
 	}
 
 	public Date getDoneDate() {
