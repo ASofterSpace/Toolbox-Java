@@ -5,20 +5,13 @@
 package com.asofterspace.toolbox.io;
 
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -32,8 +25,6 @@ public class XmlFile extends File {
 	protected XmlMode mode = XmlMode.NONE_LOADED;
 
 	protected XmlElement rootElement = null;
-
-	protected XmlElement currentElement = null;
 
 
 	/**
@@ -89,67 +80,11 @@ public class XmlFile extends File {
 		return mode;
 	}
 
-	private class XmlHandler extends DefaultHandler {
-
-		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			XmlElement newElement = new XmlElement(qName, attributes);
-			if (currentElement == null) {
-				rootElement = newElement;
-			} else {
-				currentElement.addChild(newElement);
-			}
-			currentElement = newElement;
-		}
-
-		@Override
-		public void characters(char ch[], int start, int length) throws SAXException {
-			currentElement.appendInnerText(new String(ch, start, length));
-		}
-
-		@Override
-		public void endElement(String uri, String localName, String qName) throws SAXException {
-			currentElement = currentElement.getXmlParent();
-		}
-	}
-
 	protected void loadXmlContents() {
 
-		parseXml(getJavaFile());
-	}
+		rootElement = XmlParser.parseXml(getJavaFile());
 
-	/**
-	 * The source can be a Java File object or an InputStream
-	 */
-	protected void parseXml(Object source) {
-
-		try {
-			SAXParserFactory factory = SAXParserFactory.newInstance();
-			factory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
-			SAXParser parser = factory.newSAXParser();
-
-			rootElement = null;
-			currentElement = null;
-
-			XmlHandler handler = new XmlHandler();
-
-			if (source instanceof java.io.File) {
-
-				parser.parse((java.io.File) source, handler);
-
-			} else if (source instanceof InputStream) {
-
-				parser.parse((InputStream) source, handler);
-
-			} else {
-				System.err.println("Could not parse XML as the source was neither a File nor an InputStream!");
-			}
-
-			mode = XmlMode.XML_LOADED;
-
-		} catch (SAXException | ParserConfigurationException | IOException e) {
-			e.printStackTrace(System.err);
-		}
+		mode = XmlMode.XML_LOADED;
 	}
 
 	/**

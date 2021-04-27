@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.io;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.utils.RecordKind;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,30 @@ public class XML extends Record {
 	public XML() {
 
 		super();
+	}
+
+	/**
+	 * Parse a string containing XML
+	 */
+	public XML(String xmlString) {
+
+		this(XmlParser.parseXml(xmlString));
+	}
+
+	/**
+	 * Parse the contents of a file containing XML
+	 */
+	public XML(java.io.File xmlFile) {
+
+		this(XmlParser.parseXml(xmlFile));
+	}
+
+	/**
+	 * Parse an inputstream containing XML
+	 */
+	public XML(InputStream xmlStream) {
+
+		this(XmlParser.parseXml(xmlStream));
 	}
 
 	/**

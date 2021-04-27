@@ -18,6 +18,8 @@ public class XmlTest implements Test {
 	@Override
 	public void runAll() throws JsonParseException {
 
+		fromStringTest();
+
 		fromFileTest();
 
 		fromHeaderlessFileTest();
@@ -27,6 +29,32 @@ public class XmlTest implements Test {
 		advancedToJsonAndBackTest();
 
 		restrictedToJsonAndBackTest();
+	}
+
+	public void fromStringTest() {
+
+		TestUtils.start("XML from String");
+
+		String testStr = "<blubb><foo bar='test' /></blubb>";
+
+		XML xml = new XML(testStr);
+
+		System.out.println(xml);
+		System.out.println(new JSON(xml));
+
+		if (!xml.getName().equals("blubb")) {
+			TestUtils.fail("We read <blubb><foo bar='test' /></blubb> as XML - " +
+				"and did not get blubb as name of the outmost element!");
+			return;
+		}
+
+		if (!((XML) xml.get("foo")).getAttributes().get("bar").equals("test")) {
+			TestUtils.fail("We read <blubb><foo bar='test' /></blubb> as XML - " +
+				"and did not get test inside bar inside foo inside blubb!");
+			return;
+		}
+
+		TestUtils.succeed();
 	}
 
 	public void fromFileTest() {
