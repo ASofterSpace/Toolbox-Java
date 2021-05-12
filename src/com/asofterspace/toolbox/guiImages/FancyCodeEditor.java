@@ -116,7 +116,7 @@ public class FancyCodeEditor extends CodeEditor {
 	}
 
 	@Override
-	protected void paintComponent(Graphics graphics) {
+	protected void paintBackground(Graphics graphics) {
 
 		if (graphics instanceof Graphics2D) {
 			Graphics2D graphics2d = (Graphics2D) graphics;
@@ -227,16 +227,20 @@ public class FancyCodeEditor extends CodeEditor {
 				int imageToDrawHeight = 0;
 				if (imageToDraw != null) {
 					imageToDrawHeight = imageToDraw.getHeight() + BG_OFFSET;
+					graphics2d.drawImage(
+						imageToDraw,
+						BG_OFFSET,
+						getHeight() - imageToDrawHeight,
+						null
+					);
 				}
-				graphics2d.drawImage(
-					imageToDraw,
-					BG_OFFSET,
-					getHeight() - imageToDrawHeight,
-					null
-				);
 			}
 		}
-
-		super.paintComponent(graphics);
 	}
+
+	@Override
+	protected void paintForeground(Graphics graphics) {
+		// draw nothing special
+	}
+
 }

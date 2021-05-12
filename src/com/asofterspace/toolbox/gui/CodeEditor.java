@@ -46,6 +46,12 @@ public class CodeEditor extends JTextPane {
 
 	public CodeEditor() {
 		super();
+
+		// we want to definitely draw the background, so we do not draw opaque, such that
+		// we can draw the background ourselves, including making lines gray that have been
+		// changed since startup
+		// (if setOpaque(true) is called, our background is just overwritten with transparency)
+		setOpaque(false);
 	}
 
 	/**
@@ -103,10 +109,37 @@ public class CodeEditor extends JTextPane {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public void paint(Graphics g) {
+	protected void paintComponent(Graphics g) {
 
-		super.paint(g);
+		paintBackground(g);
+
+		super.paintComponent(g);
+
+		paintForeground(g);
+	}
+
+	protected void paintBackground(Graphics g) {
+
+		if (g instanceof Graphics2D) {
+			Graphics2D graphics2d = (Graphics2D) g;
+			graphics2d.setRenderingHint(
+				RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+			int width = getWidth();
+			int height = getHeight();
+			graphics2d.setColor(getBackground());
+			graphics2d.fillRect(0, 0, width, height);
+
+			// TODO:
+			// in here, access the latest diff between the original code and the current code,
+			// and draw the changed lines in gray
+		}
+	}
+
+	// we get deprecation warnings for modelToView, which we are not super interested in at this point...
+	@SuppressWarnings( "deprecation" )
+	protected void paintForeground(Graphics g) {
 
 		if ((proposedTokens != null) && proposedTokens.size() > 0) {
 			try {
@@ -207,19 +240,6 @@ public class CodeEditor extends JTextPane {
 				x += 10;
 			}
 		}
-	}
-
-	@Override
-	protected void paintComponent(Graphics graphics) {
-
-		if (graphics instanceof Graphics2D) {
-			Graphics2D graphics2d = (Graphics2D) graphics;
-			graphics2d.setRenderingHint(
-				RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		}
-
-		super.paintComponent(graphics);
 	}
 
 	public void setProposedTokens(List<String> proposedTokens) {
