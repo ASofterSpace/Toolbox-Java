@@ -39,6 +39,7 @@ public class CodeEditor extends JTextPane {
 	private Color startLineColor = Color.DARK_GRAY;
 	private Color horzLineColor = Color.DARK_GRAY;
 	private Color changedLineBackgroundColor = Color.DARK_GRAY;
+	private Color changedLineHighlightColor = Color.DARK_GRAY;
 
 	private List<String> proposedTokens;
 	private int proposedTokenSelection = 0;
@@ -89,6 +90,14 @@ public class CodeEditor extends JTextPane {
 
 	public void setChangedLineBackgroundColor(Color changedLineBackgroundColor) {
 		this.changedLineBackgroundColor = changedLineBackgroundColor;
+	}
+
+	public Color getChangedLineHighlightColor() {
+		return changedLineHighlightColor;
+	}
+
+	public void setChangedLineHighlightColor(Color changedLineHighlightColor) {
+		this.changedLineHighlightColor = changedLineHighlightColor;
 	}
 
 	@Override
@@ -201,6 +210,10 @@ public class CodeEditor extends JTextPane {
 
 						graphics2d.setColor(getChangedLineBackgroundColor());
 						graphics2d.fillRect(0, firstDiffY, width, lastDiffY - firstDiffY);
+
+						graphics2d.setColor(getChangedLineHighlightColor());
+						graphics2d.fillRect(0, firstDiffY, Math.min(16, width), lastDiffY - firstDiffY);
+
 					} catch (BadLocationException e) {
 						// whoops!
 						System.err.println("BadLocationException in CodeEditor while highlighting changed lines!");
