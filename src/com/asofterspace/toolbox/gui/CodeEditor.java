@@ -180,8 +180,13 @@ public class CodeEditor extends JTextPane {
 					if (origText.charAt(lastDiffAt + origLen - curLen) != curText.charAt(lastDiffAt)) {
 						break;
 					}
-					// apparently there was no difference at all, so there is no need to highlight anything!
+					// apparently there was no difference at all, or at least no difference until we ran
+					// into the first diff position (first checking against the current one, then against
+					// the orig one)
 					if (lastDiffAt < firstDiffAt) {
+						break;
+					}
+					if (lastDiffAt + origLen - curLen < firstDiffAt) {
 						break;
 					}
 				}
