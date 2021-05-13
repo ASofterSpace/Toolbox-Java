@@ -157,24 +157,49 @@ public class CodeEditor extends JTextPane {
 					origText = curText;
 				}
 			} else {
+				int curLen = curText.length();
+				int origLen = origText.length();
+
 				int firstDiffAt = 0;
 				// if both orig and current text are set, iterate over them...
-				for (; firstDiffAt < Math.min(origText.length(), curText.length()); firstDiffAt++) {
+				for (; (firstDiffAt < origLen) && (firstDiffAt < curLen); firstDiffAt++) {
 					// ... until we find the first difference
 					if (origText.charAt(firstDiffAt) != curText.charAt(firstDiffAt)) {
 						break;
 					}
 				}
 
-				try {
-					// in the future, modelToView2D is used instead, but we want to be backwards compatible...
-					int y = ((int) modelToView(firstDiffAt).getY());
+				if (firstDiffAt >= curLen) {
+					firstDiffAt = curLen - 1;
+				}
 
-					graphics2d.setColor(getChangedLineBackgroundColor());
-					graphics2d.fillRect(0, y, width, height);
-				} catch (BadLocationException e) {
-					// whoops!
-					System.err.println("BadLocationException in CodeEditor while highlighting changed lines!");
+				int lastDiffAt = curLen - 1;
+				// iterate again, this time from the back forward...
+				for (; (lastDiffAt >= 0) && (lastDiffAt >= curLen - origLen); lastDiffAt--) {
+					// ... until we find the first difference
+					if (origText.charAt(lastDiffAt + origLen - curLen) != curText.charAt(lastDiffAt)) {
+						break;
+					}
+					// apparently there was no difference at all, so there is no need to highlight anything!
+					if (lastDiffAt < firstDiffAt) {
+						break;
+					}
+				}
+
+				if (lastDiffAt >= firstDiffAt) {
+					try {
+						int lineHeight = getFontMetrics(getFont()).getHeight();
+
+						// in the future, modelToView2D is used instead, but we want to be backwards compatible...
+						int firstDiffY = ((int) modelToView(firstDiffAt).getY());
+						int lastDiffY = ((int) modelToView(lastDiffAt).getY()) + lineHeight;
+
+						graphics2d.setColor(getChangedLineBackgroundColor());
+						graphics2d.fillRect(0, firstDiffY, width, lastDiffY - firstDiffY);
+					} catch (BadLocationException e) {
+						// whoops!
+						System.err.println("BadLocationException in CodeEditor while highlighting changed lines!");
+					}
 				}
 			}
 		}
