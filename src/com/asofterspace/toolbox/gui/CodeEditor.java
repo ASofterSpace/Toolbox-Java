@@ -38,10 +38,15 @@ public class CodeEditor extends JTextPane {
 
 	private Color startLineColor = Color.DARK_GRAY;
 	private Color horzLineColor = Color.DARK_GRAY;
+	private Color changedLineBackgroundColor = Color.DARK_GRAY;
 
 	private List<String> proposedTokens;
 	private int proposedTokenSelection = 0;
 	private int tokenSelStart = 0;
+
+	// the original text that was contained in this CodeEditor at startup, which the current
+	// text is compared against for highlighting changed lines
+	private String origText = null;
 
 
 	public CodeEditor() {
@@ -76,6 +81,14 @@ public class CodeEditor extends JTextPane {
 
 	public void setHorzLineColor(Color horzLineColor) {
 		this.horzLineColor = horzLineColor;
+	}
+
+	public Color getChangedLineBackgroundColor() {
+		return changedLineBackgroundColor;
+	}
+
+	public void setChangedLineBackgroundColor(Color changedLineBackgroundColor) {
+		this.changedLineBackgroundColor = changedLineBackgroundColor;
 	}
 
 	@Override
@@ -118,6 +131,8 @@ public class CodeEditor extends JTextPane {
 		paintForeground(g);
 	}
 
+	// we get deprecation warnings for modelToView, which we are not super interested in at this point...
+	@SuppressWarnings( "deprecation" )
 	protected void paintBackground(Graphics g) {
 
 		if (g instanceof Graphics2D) {
@@ -131,9 +146,37 @@ public class CodeEditor extends JTextPane {
 			graphics2d.setColor(getBackground());
 			graphics2d.fillRect(0, 0, width, height);
 
-			// TODO:
 			// in here, access the latest diff between the original code and the current code,
 			// and draw the changed lines in gray
+			String curText = getText();
+
+			// if the origText is not yet set (or the current one is not)...
+			if ((origText == null) || (curText == null)) {
+				if ((curText != null) && (!"".equals(curText))) {
+					// ... then do set it
+					origText = curText;
+				}
+			} else {
+				int firstDiffAt = 0;
+				// if both orig and current text are set, iterate over them...
+				for (; firstDiffAt < Math.min(origText.length(), curText.length()); firstDiffAt++) {
+					// ... until we find the first difference
+					if (origText.charAt(firstDiffAt) != curText.charAt(firstDiffAt)) {
+						break;
+					}
+				}
+
+				try {
+					// in the future, modelToView2D is used instead, but we want to be backwards compatible...
+					int y = ((int) modelToView(firstDiffAt).getY());
+
+					graphics2d.setColor(getChangedLineBackgroundColor());
+					graphics2d.fillRect(0, y, width, height);
+				} catch (BadLocationException e) {
+					// whoops!
+					System.err.println("BadLocationException in CodeEditor while highlighting changed lines!");
+				}
+			}
 		}
 	}
 
@@ -366,4 +409,5 @@ public class CodeEditor extends JTextPane {
 			return 0;
 		}
 	}
+
 }
