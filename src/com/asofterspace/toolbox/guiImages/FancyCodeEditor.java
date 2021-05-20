@@ -26,6 +26,8 @@ public class FancyCodeEditor extends CodeEditor {
 	private final static long serialVersionUID = 1L;
 
 	private final static int BG_OFFSET = 4;
+	
+	private final static int SCROLL_BAR_SIZE = 16;
 
 	private boolean gradientBackground;
 
@@ -98,7 +100,10 @@ public class FancyCodeEditor extends CodeEditor {
 	 * is actually shown... don't call this if backgroundImage is actually null ;)
 	 */
 	private void resampleBackgroundIfNeeded() {
-		int curResampleWidth = getParent().getParent().getWidth() - (2*BG_OFFSET);
+		// we make space for the scroll bar on the side even if the scroll bar is not currently
+		// visible, because it looks nicer to have a too small sticker that is fully visible than
+		// to have a too big one that is cut off by the scroll bar
+		int curResampleWidth = getParent().getParent().getWidth() - (2*BG_OFFSET) - SCROLL_BAR_SIZE;
 		if (curResampleWidth < 0) {
 			curResampleWidth = 2*BG_OFFSET;
 		}
