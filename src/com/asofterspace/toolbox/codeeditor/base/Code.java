@@ -416,7 +416,7 @@ public abstract class Code extends DefaultStyledDocument {
 				if ((selLength == 0) && (encounteredTokens != null)) {
 					String txt = decoratedEditor.getText();
 					StringBuilder curToken = new StringBuilder();
-
+					
 					for (int i = selStart - 1; i >= 0; i--) {
 						char c = txt.charAt(i);
 						if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r') || (c == '.') || (c == '(') || (c == ')')) {
@@ -426,10 +426,27 @@ public abstract class Code extends DefaultStyledDocument {
 							curToken.reverse();
 							curToken.append(event.getKeyChar());
 							String curTokenStr = curToken.toString();
+							
+							// ensure each token is only proposed once by going to a set
 							Set<String> ourEncounteredTokenSet = new HashSet<>();
 							ourEncounteredTokenSet.addAll(encounteredTokens);
+							
+							/*
+							// add each line within this file - trimmed - as a tab proposal
+							String[] lines = txt.split("\n");
+							for (String line : lines) {
+								ourEncounteredTokenSet.add(line.trim());
+							}
+							// actually, this slows things down a lot and is not helpful,
+							// as it adds too much nonsense that we do not want to select -
+							// better to show fewer suggestions of higher quality than to
+							// show a million suggestions that are... less good :D
+							*/
+							
+							// make tokens sortable by going back to an array
 							ArrayList<String> ourEncounteredTokens = new ArrayList<>();
 							ourEncounteredTokens.addAll(ourEncounteredTokenSet);
+							
 							Collections.sort(ourEncounteredTokens, new Comparator<String>() {
 								public int compare(String a, String b) {
 									if (a.length() == b.length()) {
@@ -438,6 +455,7 @@ public abstract class Code extends DefaultStyledDocument {
 									return b.length() - a.length();
 								}
 							});
+							
 							ArrayList<String> proposedTokens = new ArrayList<>();
 							for (String encounteredToken : ourEncounteredTokens) {
 								if ((encounteredToken != null) && encounteredToken.startsWith(curTokenStr) &&
@@ -445,6 +463,7 @@ public abstract class Code extends DefaultStyledDocument {
 									proposedTokens.add(encounteredToken.substring(curTokenStr.length()));
 								}
 							}
+							
 							((CodeEditor) decoratedEditor).setProposedTokens(proposedTokens);
 							((CodeEditor) decoratedEditor).setTokenSelStart(selStart + 1);
 							((CodeEditor) decoratedEditor).setProposedTokenSelection(0);
