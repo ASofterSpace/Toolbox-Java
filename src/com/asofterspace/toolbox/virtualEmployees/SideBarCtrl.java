@@ -80,16 +80,16 @@ public class SideBarCtrl {
 
 		// BUTTON TO SHOW FULL LIST
 
-		html.append("<div class='sidebar' style='top: " + top + "pt; text-align: center; background: rgba(255, 255, 255, 0.3); border-radius: 8pt; height: 10.5pt; font-weight: bold; padding-top: 4pt;' ");
-		html.append("onMouseOver='document.getElementById(\"sidebar_full_list_container\").style.display = \"block\";' ");
-		html.append("onMouseOut='document.getElementById(\"sidebar_full_list_container\").style.display = \"none\";' ");
+		html.append("<div class='sidebar' id='sidebar_full_list_btn' style='top: " + top + "pt; text-align: center; background: rgba(255, 255, 255, 0.25); border-radius: 8pt; height: 10.5pt; font-weight: bold; padding-top: 4pt;' ");
+		html.append("onMouseOver='document.getElementById(\"sidebar_full_list_container\").style.display = \"block\"; document.getElementById(\"sidebar_full_list_btn\").style.background = \"rgba(255, 255, 255, 0.5)\";' ");
+		html.append("onMouseOut='document.getElementById(\"sidebar_full_list_container\").style.display = \"none\"; document.getElementById(\"sidebar_full_list_btn\").style.background = \"rgba(255, 255, 255, 0.25)\";' ");
 		html.append(">");
 		html.append("&lt; &lt; &lt;");
 		html.append("</div>");
 
 		html.append("<div id='sidebar_full_list_container' style='position: fixed; inset: 25pt 55pt 25pt 25pt; display: none; z-index: 1000000;' ");
-		html.append("onMouseOver='document.getElementById(\"sidebar_full_list_container\").style.display = \"block\";' ");
-		html.append("onMouseOut='document.getElementById(\"sidebar_full_list_container\").style.display = \"none\";' ");
+		html.append("onMouseOver='document.getElementById(\"sidebar_full_list_container\").style.display = \"block\"; document.getElementById(\"sidebar_full_list_btn\").style.background = \"rgba(255, 255, 255, 0.5)\";' ");
+		html.append("onMouseOut='document.getElementById(\"sidebar_full_list_container\").style.display = \"none\"; document.getElementById(\"sidebar_full_list_btn\").style.background = \"rgba(255, 255, 255, 0.25)\";' ");
 		html.append(">");
 		html.append("<div style='position: fixed; inset: 30pt 90pt 30pt 30pt; background: rgba(255, 255, 255, 0.9); box-shadow: 0px 0px 8px 8px rgba(255, 255, 255, 0.9); border-radius: 16pt;'>");
 
