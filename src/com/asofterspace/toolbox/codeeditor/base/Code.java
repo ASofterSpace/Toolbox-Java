@@ -178,6 +178,10 @@ public abstract class Code extends DefaultStyledDocument {
 	protected Set<String> variableNamesSeveralTimes;
 	protected Map<String, Integer> variableNamesOnce;
 
+	// keep track of encountered strings as long as collectStrings is true
+	private boolean collectStrings = false;
+	private List<String> collectedStrings;
+
 
 	public Code(JTextPane editor) {
 
@@ -416,7 +420,7 @@ public abstract class Code extends DefaultStyledDocument {
 				if ((selLength == 0) && (encounteredTokens != null)) {
 					String txt = decoratedEditor.getText();
 					StringBuilder curToken = new StringBuilder();
-					
+
 					for (int i = selStart - 1; i >= 0; i--) {
 						char c = txt.charAt(i);
 						if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r') || (c == '.') || (c == '(') || (c == ')')) {
@@ -426,11 +430,11 @@ public abstract class Code extends DefaultStyledDocument {
 							curToken.reverse();
 							curToken.append(event.getKeyChar());
 							String curTokenStr = curToken.toString();
-							
+
 							// ensure each token is only proposed once by going to a set
 							Set<String> ourEncounteredTokenSet = new HashSet<>();
 							ourEncounteredTokenSet.addAll(encounteredTokens);
-							
+
 							/*
 							// add each line within this file - trimmed - as a tab proposal
 							String[] lines = txt.split("\n");
@@ -442,11 +446,11 @@ public abstract class Code extends DefaultStyledDocument {
 							// better to show fewer suggestions of higher quality than to
 							// show a million suggestions that are... less good :D
 							*/
-							
+
 							// make tokens sortable by going back to an array
 							ArrayList<String> ourEncounteredTokens = new ArrayList<>();
 							ourEncounteredTokens.addAll(ourEncounteredTokenSet);
-							
+
 							Collections.sort(ourEncounteredTokens, new Comparator<String>() {
 								public int compare(String a, String b) {
 									if (a.length() == b.length()) {
@@ -455,7 +459,7 @@ public abstract class Code extends DefaultStyledDocument {
 									return b.length() - a.length();
 								}
 							});
-							
+
 							ArrayList<String> proposedTokens = new ArrayList<>();
 							for (String encounteredToken : ourEncounteredTokens) {
 								if ((encounteredToken != null) && encounteredToken.startsWith(curTokenStr) &&
@@ -463,7 +467,7 @@ public abstract class Code extends DefaultStyledDocument {
 									proposedTokens.add(encounteredToken.substring(curTokenStr.length()));
 								}
 							}
-							
+
 							((CodeEditor) decoratedEditor).setProposedTokens(proposedTokens);
 							((CodeEditor) decoratedEditor).setTokenSelStart(selStart + 1);
 							((CodeEditor) decoratedEditor).setProposedTokenSelection(0);
@@ -755,8 +759,56 @@ public abstract class Code extends DefaultStyledDocument {
 		// "fooBar"
 		String origStrWithDel = content.substring(strStart, strEnd + 1);
 
+		content = extractString(content, origStrWithDel, "\n\n");
+
+		decoratedEditor.setText(content);
+	}
+
+	public void extractAllStrings() {
+		extractAllStrings(false);
+	}
+
+	public void extractAllRepeatedStrings() {
+		extractAllStrings(true);
+	}
+
+	public void extractAllStrings(boolean onlyExtractRepeatedStrings) {
+
+		String content = decoratedEditor.getText();
+
+		collectedStrings = new ArrayList<>();
+		collectStrings = true;
+
+		removeCommentsAndStrings(content);
+
+		collectStrings = false;
+
+		// only extract each string once :)
+		Set<String> stringsToExtract = new HashSet<>(collectedStrings);
+
+		if (onlyExtractRepeatedStrings) {
+			stringsToExtract = SortUtils.getElementsMoreThanOnceInCollection(collectedStrings);
+		}
+
+		List<String> listOfStringsToExtract = SortUtils.sortAlphabetically(stringsToExtract);
+
+		String lineSep = "\n";
+
+		for (int i = 0; i < listOfStringsToExtract.size(); i++) {
+			String stringToExtract = listOfStringsToExtract.get(i);
+			if (i == listOfStringsToExtract.size() - 1) {
+				lineSep = "\n\n";
+			}
+			content = extractString(content, stringToExtract, lineSep);
+		}
+
+		decoratedEditor.setText(content);
+	}
+
+	private static String extractString(String content, String origStrWithDel, String lineSep) {
+
 		// fooBar
-		String origStr = content.substring(strStart + 1, strEnd);
+		String origStr = origStrWithDel.substring(1, origStrWithDel.length() - 1);
 
 		// FOO_BAR
 		String fieldName = "";
@@ -771,7 +823,38 @@ public abstract class Code extends DefaultStyledDocument {
 			} else {
 				justencounteredupcase = false;
 			}
-			fieldName += Character.toUpperCase(c);
+			switch (c) {
+				case ' ':
+				case '-':
+				case '+':
+				case '*':
+				case '?':
+				case '!':
+				case '.':
+				case ',':
+				case ':':
+				case ';':
+				case '|':
+				case '=':
+				case '\\':
+				case '/':
+				case '"':
+				case '\'':
+				case '#':
+				case '[':
+				case ']':
+				case '(':
+				case ')':
+				case '{':
+				case '}':
+					break;
+				default:
+					fieldName += Character.toUpperCase(c);
+			}
+		}
+
+		if ("".equals(fieldName)) {
+			fieldName = "STR";
 		}
 
 		content = StrUtils.replaceAll(content, origStrWithDel, fieldName);
@@ -779,14 +862,14 @@ public abstract class Code extends DefaultStyledDocument {
 		if (content.contains("{")) {
 			// Java-ish language
 			int pos = content.indexOf("{");
-			content = content.substring(0, pos + 1) + "\n\n" + "\tprivate final static String " + fieldName +
+			content = content.substring(0, pos + 1) + lineSep + "\tprivate final static String " + fieldName +
 				" = " + origStrWithDel + ";" + content.substring(pos + 1);
 		} else {
 			// generic other language
-			content = "const " + fieldName + " = " + origStrWithDel + ";\n\n" + content;
+			content = "const " + fieldName + " = " + origStrWithDel + ";" + lineSep + content;
 		}
 
-		decoratedEditor.setText(content);
+		return content;
 	}
 
 	public void indentSelection(String indentWithWhat) {
@@ -2878,6 +2961,10 @@ public abstract class Code extends DefaultStyledDocument {
 		} else {
 			// the string is not open-ended... so will the end marker or the line break be first?
 			endOfString = Math.min(endOfString, endOfLine);
+		}
+
+		if (collectStrings) {
+			collectedStrings.add(content.substring(start, endOfString + 1));
 		}
 
 		this.setCharacterAttributes(start, endOfString - start + 1, attrString, false);

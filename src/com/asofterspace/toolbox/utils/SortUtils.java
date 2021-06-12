@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 
 /**
@@ -23,7 +25,7 @@ public class SortUtils  {
 	private static Random rand;
 
 
-	public static <T> List<T> shuffle(List<T> listToShuffle) {
+	public static <T> List<T> shuffle(Collection<T> listToShuffle) {
 		if (rand == null) {
 			rand = new Random();
 		}
@@ -41,7 +43,7 @@ public class SortUtils  {
 		return newList;
 	}
 
-	public static <T> List<T> reverse(List<T> listToReverse) {
+	public static <T> List<T> reverse(Collection<T> listToReverse) {
 		List<T> newList = new ArrayList<>();
 		if (listToReverse == null) {
 			return newList;
@@ -51,11 +53,11 @@ public class SortUtils  {
 		return newList;
 	}
 
-	public static <T> List<T> sort(List<T> listToSort, SortOrder sortOrder) {
+	public static <T> List<T> sort(Collection<T> listToSort, SortOrder sortOrder) {
 		return sort(listToSort, sortOrder, null);
 	}
 
-	public static <T> List<T> sort(List<T> listToSort, SortOrder sortOrder, Stringifier<T> stringifier) {
+	public static <T> List<T> sort(Collection<T> listToSort, SortOrder sortOrder, Stringifier<T> stringifier) {
 		if (sortOrder == null) {
 			sortOrder = SortOrder.ALPHABETICAL;
 		}
@@ -69,11 +71,11 @@ public class SortUtils  {
 		}
 	}
 
-	public static <T> List<T> sortAlphabetically(List<T> listToSort) {
+	public static <T> List<T> sortAlphabetically(Collection<T> listToSort) {
 		return sortAlphabetically(listToSort, null);
 	}
 
-	public static <T> List<T> sortAlphabetically(List<T> listToSort, Stringifier<T> stringifier) {
+	public static <T> List<T> sortAlphabetically(Collection<T> listToSort, Stringifier<T> stringifier) {
 
 		List<T> newList = new ArrayList<>();
 
@@ -107,11 +109,11 @@ public class SortUtils  {
 		return newList;
 	}
 
-	public static <T> List<T> sortNumerically(List<T> listToSort) {
+	public static <T> List<T> sortNumerically(Collection<T> listToSort) {
 		return sortNumerically(listToSort, null);
 	}
 
-	public static <T> List<T> sortNumerically(List<T> listToSort, Stringifier<T> stringifier) {
+	public static <T> List<T> sortNumerically(Collection<T> listToSort, Stringifier<T> stringifier) {
 
 		List<T> newList = new ArrayList<>();
 
@@ -187,5 +189,33 @@ public class SortUtils  {
 		});
 
 		return newList;
+	}
+
+	public static <T> Set<T> getElementsOnlyOnceInCollection(Collection<T> collection) {
+
+		Set<T> result = new HashSet<>();
+
+		Set<T> encounteredMoreOften = getElementsMoreThanOnceInCollection(collection);
+
+		result.addAll(collection);
+		result.removeAll(encounteredMoreOften);
+
+		return result;
+	}
+
+	public static <T> Set<T> getElementsMoreThanOnceInCollection(Collection<T> collection) {
+
+		Set<T> encounteredOnce = new HashSet<>();
+		Set<T> encounteredMoreOften = new HashSet<>();
+
+		for (T elem : collection) {
+			if (encounteredOnce.contains(elem)) {
+				encounteredMoreOften.add(elem);
+			} else {
+				encounteredOnce.add(elem);
+			}
+		}
+
+		return encounteredMoreOften;
 	}
 }
