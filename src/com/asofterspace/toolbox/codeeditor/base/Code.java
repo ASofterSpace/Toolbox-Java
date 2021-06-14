@@ -728,7 +728,7 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 	}
 
-	public void extractString() {
+	public void extractString(boolean addPrefix) {
 
 		String content = decoratedEditor.getText();
 		int strStart = selStart;
@@ -759,20 +759,20 @@ public abstract class Code extends DefaultStyledDocument {
 		// "fooBar"
 		String origStrWithDel = content.substring(strStart, strEnd + 1);
 
-		content = extractString(content, origStrWithDel, "\n\n");
+		content = extractString(content, origStrWithDel, "\n\n", addPrefix);
 
 		decoratedEditor.setText(content);
 	}
 
-	public void extractAllStrings() {
-		extractAllStrings(false);
+	public void extractAllStrings(boolean addPrefix) {
+		extractAllStrings(false, addPrefix);
 	}
 
-	public void extractAllRepeatedStrings() {
-		extractAllStrings(true);
+	public void extractAllRepeatedStrings(boolean addPrefix) {
+		extractAllStrings(true, addPrefix);
 	}
 
-	public void extractAllStrings(boolean onlyExtractRepeatedStrings) {
+	public void extractAllStrings(boolean onlyExtractRepeatedStrings, boolean addPrefix) {
 
 		String content = decoratedEditor.getText();
 
@@ -799,13 +799,13 @@ public abstract class Code extends DefaultStyledDocument {
 			if (i == listOfStringsToExtract.size() - 1) {
 				lineSep = "\n\n";
 			}
-			content = extractString(content, stringToExtract, lineSep);
+			content = extractString(content, stringToExtract, lineSep, addPrefix);
 		}
 
 		decoratedEditor.setText(content);
 	}
 
-	private static String extractString(String content, String origStrWithDel, String lineSep) {
+	private static String extractString(String content, String origStrWithDel, String lineSep, boolean addPrefix) {
 
 		// fooBar
 		String origStr = origStrWithDel.substring(1, origStrWithDel.length() - 1);
@@ -857,7 +857,13 @@ public abstract class Code extends DefaultStyledDocument {
 			fieldName = "STR";
 		}
 
-		content = StrUtils.replaceAll(content, origStrWithDel, fieldName);
+		String fieldNameInText = fieldName;
+
+		if (addPrefix) {
+			fieldNameInText = "StrConstants." + fieldNameInText;
+		}
+
+		content = StrUtils.replaceAll(content, origStrWithDel, fieldNameInText);
 
 		if (content.contains("{")) {
 			// Java-ish language
