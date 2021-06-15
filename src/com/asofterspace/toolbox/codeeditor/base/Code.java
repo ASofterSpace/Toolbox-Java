@@ -759,7 +759,10 @@ public abstract class Code extends DefaultStyledDocument {
 		// "fooBar"
 		String origStrWithDel = content.substring(strStart, strEnd + 1);
 
-		content = extractString(content, origStrWithDel, "\n\n", addPrefix);
+		// we are only extracting a single string, so we have no previous fields
+		Set<String> extractStringExistingFields = new HashSet<>();
+
+		content = extractString(content, origStrWithDel, "\n\n", addPrefix, extractStringExistingFields);
 
 		decoratedEditor.setText(content);
 	}
@@ -794,18 +797,23 @@ public abstract class Code extends DefaultStyledDocument {
 
 		String lineSep = "\n";
 
+		// we are extracting several strings, so we are resetting the existing fields
+		// set just once here before calling extractString again and again
+		Set<String> extractStringExistingFields = new HashSet<>();
+
 		for (int i = 0; i < listOfStringsToExtract.size(); i++) {
 			String stringToExtract = listOfStringsToExtract.get(i);
 			if (i == listOfStringsToExtract.size() - 1) {
 				lineSep = "\n\n";
 			}
-			content = extractString(content, stringToExtract, lineSep, addPrefix);
+			content = extractString(content, stringToExtract, lineSep, addPrefix, extractStringExistingFields);
 		}
 
 		decoratedEditor.setText(content);
 	}
 
-	private static String extractString(String content, String origStrWithDel, String lineSep, boolean addPrefix) {
+	private static String extractString(String content, String origStrWithDel, String lineSep, boolean addPrefix,
+		Set<String> extractStringExistingFields) {
 
 		// fooBar
 		String origStr = origStrWithDel.substring(1, origStrWithDel.length() - 1);
@@ -856,6 +864,13 @@ public abstract class Code extends DefaultStyledDocument {
 		if ("".equals(fieldName)) {
 			fieldName = "STR";
 		}
+
+		// prevent using the same field name for different strings that just happen to have
+		// similar (but slightly different) contents
+		while (extractStringExistingFields.contains(fieldName)) {
+			fieldName += "_";
+		}
+		extractStringExistingFields.add(fieldName);
 
 		String fieldNameInText = fieldName;
 
