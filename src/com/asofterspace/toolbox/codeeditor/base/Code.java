@@ -793,7 +793,7 @@ public abstract class Code extends DefaultStyledDocument {
 			stringsToExtract = SortUtils.getElementsMoreThanOnceInCollection(collectedStrings);
 		}
 
-		List<String> listOfStringsToExtract = SortUtils.sortAlphabetically(stringsToExtract);
+		List<String> listOfStringsToExtract = SortUtils.reverse(SortUtils.sortAlphabetically(stringsToExtract));
 
 		String lineSep = "\n";
 
@@ -848,6 +848,7 @@ public abstract class Code extends DefaultStyledDocument {
 				case '/':
 				case '"':
 				case '\'':
+				case '&':
 				case '#':
 				case '[':
 				case ']':
