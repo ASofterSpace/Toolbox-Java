@@ -885,7 +885,7 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		// consolidate underscores in field names
-		fieldName = StrUtils.replaceAll(fieldName, "__", "_");
+		fieldName = StrUtils.replaceAllRepeatedly(fieldName, "__", "_");
 		while (fieldName.startsWith("_")) {
 			fieldName = fieldName.substring(1);
 		}
