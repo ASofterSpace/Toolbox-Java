@@ -832,34 +832,65 @@ public abstract class Code extends DefaultStyledDocument {
 				justencounteredupcase = false;
 			}
 			switch (c) {
-				case ' ':
 				case '-':
+					fieldName += "_MINUS_";
+					break;
 				case '+':
+					fieldName += "_PLUS_";
+					break;
+				case '.':
+					fieldName += "_DOT_";
+					break;
+				case ',':
+					fieldName += "_COMMA_";
+					break;
+				case '<':
+					fieldName += "_LT_";
+					break;
+				case '>':
+					fieldName += "_GT_";
+					break;
+				case '&':
+					fieldName += "_AND_";
+					break;
+				case '#':
+					fieldName += "_HASHTAG_";
+					break;
+				case '|':
+					fieldName += "_PIPE_";
+					break;
+				case ' ':
 				case '*':
 				case '?':
 				case '!':
-				case '.':
-				case ',':
 				case ':':
 				case ';':
-				case '|':
 				case '=':
 				case '\\':
 				case '/':
 				case '"':
 				case '\'':
-				case '&':
-				case '#':
 				case '[':
 				case ']':
 				case '(':
 				case ')':
 				case '{':
 				case '}':
+					fieldName += "_";
 					break;
 				default:
 					fieldName += Character.toUpperCase(c);
+					break;
 			}
+		}
+
+		// consolidate underscores in field names
+		fieldName = StrUtils.replaceAll(fieldName, "__", "_");
+		while (fieldName.startsWith("_")) {
+			fieldName = fieldName.substring(1);
+		}
+		while (fieldName.endsWith("_")) {
+			fieldName = fieldName.substring(0, fieldName.length() - 1);
 		}
 
 		if ("".equals(fieldName)) {
