@@ -871,6 +871,12 @@ public abstract class Code extends DefaultStyledDocument {
 				case '\'':
 					fieldName += "_APOSTROPHE_";
 					break;
+				case '$':
+					fieldName += "_DOLLAR_";
+					break;
+				case '€':
+					fieldName += "_EURO_";
+					break;
 				case ' ':
 				case '*':
 				case '?':
