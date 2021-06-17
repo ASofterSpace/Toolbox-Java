@@ -859,6 +859,18 @@ public abstract class Code extends DefaultStyledDocument {
 				case '|':
 					fieldName += "_PIPE_";
 					break;
+				case '\\':
+					fieldName += "_BACKSLASH_";
+					break;
+				case '/':
+					fieldName += "_SLASH_";
+					break;
+				case '"':
+					fieldName += "_QUOT_";
+					break;
+				case '\'':
+					fieldName += "_APOSTROPHE_";
+					break;
 				case ' ':
 				case '*':
 				case '?':
@@ -866,10 +878,6 @@ public abstract class Code extends DefaultStyledDocument {
 				case ':':
 				case ';':
 				case '=':
-				case '\\':
-				case '/':
-				case '"':
-				case '\'':
 				case '[':
 				case ']':
 				case '(':
@@ -899,8 +907,11 @@ public abstract class Code extends DefaultStyledDocument {
 
 		// prevent using the same field name for different strings that just happen to have
 		// similar (but slightly different) contents
+		String baseFieldName = fieldName;
+		int i = 1;
 		while (extractStringExistingFields.contains(fieldName)) {
-			fieldName += "_";
+			i++;
+			fieldName = baseFieldName + "_" + i;
 		}
 		extractStringExistingFields.add(fieldName);
 
@@ -915,7 +926,7 @@ public abstract class Code extends DefaultStyledDocument {
 		if (content.contains("{")) {
 			// Java-ish language
 			int pos = content.indexOf("{");
-			content = content.substring(0, pos + 1) + lineSep + "\tprivate final static String " + fieldName +
+			content = content.substring(0, pos + 1) + lineSep + "\tprivate static final String " + fieldName +
 				" = " + origStrWithDel + ";" + content.substring(pos + 1);
 		} else {
 			// generic other language
