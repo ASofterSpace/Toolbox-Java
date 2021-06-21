@@ -71,6 +71,32 @@ public class SortUtils  {
 		}
 	}
 
+	public static List<Integer> sortIntegers(Collection<Integer> listToSort) {
+
+		List<Integer> newList = new ArrayList<>();
+
+		if (listToSort == null) {
+			return newList;
+		}
+
+		newList.addAll(listToSort);
+
+		Collections.sort(newList, new Comparator<Integer>() {
+
+			public int compare(Integer a, Integer b) {
+				if (a == null) {
+					return -1;
+				}
+				if (b == null) {
+					return 1;
+				}
+				return a - b;
+			}
+		});
+
+		return newList;
+	}
+
 	public static <T> List<T> sortAlphabetically(Collection<T> listToSort) {
 		return sortAlphabetically(listToSort, null);
 	}

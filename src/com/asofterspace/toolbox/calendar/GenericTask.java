@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.calendar;
 
 import com.asofterspace.toolbox.utils.DateUtils;
+import com.asofterspace.toolbox.utils.SortUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -218,13 +219,30 @@ public class GenericTask {
 	}
 
 	public List<String> getScheduledOnDaysOfWeek() {
+
 		if (scheduledOnDaysOfWeek == null) {
 			return null;
 		}
-		List<String> result = new ArrayList<>();
+
+		List<Integer> weekDays = new ArrayList<>();
 		for (String dayOfWeek : scheduledOnDaysOfWeek) {
-			result.add(DateUtils.toDayOfWeekNameEN(dayOfWeek));
+			Integer weekDay = DateUtils.toDayOfWeek(dayOfWeek);
+			if (weekDay != null) {
+				// sort saturday and sunday to the end
+				if (weekDay < 2) {
+					weekDay += 7;
+				}
+				weekDays.add(weekDay);
+			}
 		}
+
+		weekDays = SortUtils.sortIntegers(weekDays);
+
+		List<String> result = new ArrayList<>();
+		for (Integer weekDay : weekDays) {
+			result.add(DateUtils.dayNumToDayOfWeekNameEN(weekDay));
+		}
+
 		return result;
 	}
 

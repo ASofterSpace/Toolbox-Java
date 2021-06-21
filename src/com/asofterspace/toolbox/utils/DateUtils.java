@@ -439,30 +439,57 @@ public class DateUtils {
 	 * Takes in something like "Tuesday", "tue", "Dienstag" and returns "Tuesday" in each case
 	 */
 	public static String toDayOfWeekNameEN(String weekDay) {
+		Integer dayOfWeek = toDayOfWeek(weekDay);
+		if (dayOfWeek == null) {
+			return null;
+		}
+		return DateUtils.DAY_NAMES[dayOfWeek];
+	}
+
+	/**
+	 * Takes in something like 3 and returns "Tuesday"
+	 */
+	public static String dayNumToDayOfWeekNameEN(Integer dayOfWeek) {
+		if (dayOfWeek == null) {
+			return null;
+		}
+		while (dayOfWeek < 0) {
+			dayOfWeek += 7;
+		}
+		while (dayOfWeek > 6) {
+			dayOfWeek -= 7;
+		}
+		return DateUtils.DAY_NAMES[dayOfWeek];
+	}
+
+	/**
+	 * Takes in something like "Tuesday", "tue", "Dienstag" and returns 3 in each case
+	 */
+	public static Integer toDayOfWeek(String weekDay) {
 		if (weekDay == null) {
 			return null;
 		}
 		weekDay = weekDay.toLowerCase().trim();
 		if (weekDay.startsWith("su") || weekDay.startsWith("so")) {
-			return DateUtils.DAY_NAMES[1];
+			return 1;
 		}
 		if (weekDay.startsWith("mo")) {
-			return DateUtils.DAY_NAMES[2];
+			return 2;
 		}
 		if (weekDay.startsWith("tu") || weekDay.startsWith("di")) {
-			return DateUtils.DAY_NAMES[3];
+			return 3;
 		}
 		if (weekDay.startsWith("we") || weekDay.startsWith("mi")) {
-			return DateUtils.DAY_NAMES[4];
+			return 4;
 		}
 		if (weekDay.startsWith("th") || weekDay.startsWith("do")) {
-			return DateUtils.DAY_NAMES[5];
+			return 5;
 		}
 		if (weekDay.startsWith("fr")) {
-			return DateUtils.DAY_NAMES[6];
+			return 6;
 		}
 		if (weekDay.startsWith("sa")) {
-			return DateUtils.DAY_NAMES[7];
+			return 7;
 		}
 		return null;
 	}
