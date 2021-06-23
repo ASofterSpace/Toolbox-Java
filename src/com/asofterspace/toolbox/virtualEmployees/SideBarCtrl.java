@@ -178,9 +178,6 @@ public class SideBarCtrl {
 
 
 		html.append("</div>");
-		html.append("</div>");
-		html.append("</div>");
-		html.append("</div>");
 
 
 		// TOOLS
