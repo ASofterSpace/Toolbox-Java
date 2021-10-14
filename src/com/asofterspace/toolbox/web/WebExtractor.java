@@ -37,6 +37,10 @@ public class WebExtractor {
 		}
 
 		keyvaluesraw = "{" + keyvaluesraw + "}";
+
+		// inside JSON, no newline is needed - and it can actually break things, so let's get rid of it!
+		keyvaluesraw = StrUtils.replaceAll(keyvaluesraw, "\n", "");
+
 		try {
 			return new JSON(keyvaluesraw
 				.replaceAll("&szlig;", "ß").replaceAll("&ouml;", "ö").replaceAll("&auml;", "ä")
@@ -110,7 +114,13 @@ public class WebExtractor {
 	public static Integer getNumberFromHtml(String html, String strbefore, String strafter) {
 		int len = strbefore.length();
 		int startindex = html.indexOf(strbefore);
+		if (startindex < 0) {
+			return null;
+		}
 		int endindex = html.indexOf(strafter, startindex + len);
+		if (endindex < 0) {
+			return null;
+		}
 		String z = html.substring(startindex + len, endindex);
 		return Integer.valueOf(z);
 	}

@@ -196,6 +196,33 @@ public class XML extends Record {
 				case '\"':
 					result.append("&quot;");
 					break;
+				case 'ä':
+					result.append("&auml;");
+					break;
+				case 'ö':
+					result.append("&ouml;");
+					break;
+				case 'ü':
+					result.append("&uuml;");
+					break;
+				case 'Ä':
+					result.append("&Auml;");
+					break;
+				case 'Ö':
+					result.append("&Ouml;");
+					break;
+				case 'Ü':
+					result.append("&Uuml;");
+					break;
+				case 'æ':
+					result.append("&aelig;");
+					break;
+				case 'Æ':
+					result.append("&AElig;");
+					break;
+				case 'ß':
+					result.append("&szlig;");
+					break;
 			default:
 				if (c > 0x7e) {
 					result.append("&#");
@@ -212,6 +239,8 @@ public class XML extends Record {
 
 	public static String unescapeXMLstr(String str) {
 
+		str = str.replace("&#10;", "\n");
+		str = str.replace("&#9;", "\t");
 		str = str.replace("&#039;", "'");
 		str = str.replace("&#160;", " ");
 		str = str.replace("&gt;", ">");
@@ -219,6 +248,15 @@ public class XML extends Record {
 		str = str.replace("&apos;", "'");
 		str = str.replace("&quot;", "\"");
 		str = str.replace("&amp;", "&");
+		str = str.replace("&auml;", "ä");
+		str = str.replace("&ouml;", "ö");
+		str = str.replace("&uuml;", "ü");
+		str = str.replace("&Äuml;", "Ä");
+		str = str.replace("&Ouml;", "Ö");
+		str = str.replace("&Uuml;", "Ü");
+		str = str.replace("&aelig;", "æ");
+		str = str.replace("&AElig;", "Æ");
+		str = str.replace("&szlig;", "ß");
 
 		return str;
 	}
