@@ -325,6 +325,26 @@ public class DateUtils {
 	}
 
 	/**
+	 * Returns a date that is the addTo date time plus howMany seconds
+	 * (negative values are also allowed)
+	 */
+	public static Date addSeconds(Date addTo, Integer howMany) {
+
+		if (howMany == null) {
+			return new Date();
+		}
+
+		if (addTo == null) {
+			addTo = new Date();
+		}
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(addTo);
+		cal.add(Calendar.SECOND, howMany);
+		return cal.getTime();
+	}
+
+	/**
 	 * Return a list of dates, starting on Monday and ending on Sunday,
 	 * that the passed in day lies within
 	 */
