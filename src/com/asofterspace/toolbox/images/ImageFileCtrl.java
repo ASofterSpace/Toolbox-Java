@@ -87,7 +87,7 @@ public class ImageFileCtrl {
 		}
 
 		imageFile.assign(image);
-		imageFile.save();
+		imageFile.saveTransparently();
 	}
 
 }

@@ -107,6 +107,7 @@ public class DefaultImageFile extends RasterImageFile {
 		}
 	}
 
+	@Override
 	public void saveTransparently() {
 		try {
 			if (img == null) {

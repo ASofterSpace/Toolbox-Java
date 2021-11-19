@@ -57,6 +57,21 @@ public class ColorRGB {
 		this(r, g, b, 255);
 	}
 
+	public ColorRGB(ColorRGB other, int a) {
+		this.r = other.getRByte();
+		this.g = other.getGByte();
+		this.b = other.getBByte();
+
+		if (a > 255) {
+			a = 255;
+		}
+		if (a < 0) {
+			a = 0;
+		}
+
+		this.a = (byte) a;
+	}
+
 	public ColorRGB(int r, int g, int b, int a) {
 
 		if (r > 255) {

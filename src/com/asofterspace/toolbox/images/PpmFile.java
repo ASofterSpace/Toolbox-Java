@@ -210,6 +210,11 @@ public class PpmFile extends RasterImageFile {
 		}
 	}
 
+	@Override
+	public void saveTransparently() {
+		save();
+	}
+
 	/**
 	 * Gives back a string representation of the ppm file object
 	 */

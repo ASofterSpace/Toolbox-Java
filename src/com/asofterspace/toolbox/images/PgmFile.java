@@ -206,6 +206,11 @@ public class PgmFile extends RasterImageFile {
 		}
 	}
 
+	@Override
+	public void saveTransparently() {
+		save();
+	}
+
 	/**
 	 * Gives back a string representation of the pgm file object
 	 */

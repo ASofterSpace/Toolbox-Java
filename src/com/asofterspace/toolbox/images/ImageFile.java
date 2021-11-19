@@ -60,4 +60,6 @@ public abstract class ImageFile extends BinaryFile {
 
 	public abstract void save();
 
+	public abstract void saveTransparently();
+
 }

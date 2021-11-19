@@ -188,6 +188,11 @@ public class PbmFile extends RasterImageFile {
 		}
 	}
 
+	@Override
+	public void saveTransparently() {
+		save();
+	}
+
 	/**
 	 * Gives back a string representation of the pbm file object
 	 */

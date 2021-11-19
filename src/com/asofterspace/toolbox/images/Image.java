@@ -1046,6 +1046,96 @@ public class Image {
 		}
 	}
 
+	/**
+	 * Take the RGBA image and set all alpha to 255, by displaying it on a continuous,
+	 * bgColor-ed background
+	 */
+	public void bakeAlpha(ColorRGB bgColor) {
+
+		int bgR = bgColor.getR();
+		int bgG = bgColor.getG();
+		int bgB = bgColor.getB();
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				ColorRGB col = data[y][x];
+				int a = col.getA();
+				if (a != 255) {
+					int r = col.getR();
+					int g = col.getG();
+					int b = col.getB();
+					if (a == 0) {
+						r = bgR;
+						g = bgG;
+						b = bgB;
+					} else {
+						r = ((a * r) / 255) + (((255 - a) * bgR) / 255);
+						g = ((a * g) / 255) + (((255 - a) * bgG) / 255);
+						b = ((a * b) / 255) + (((255 - a) * bgB) / 255);
+					}
+					a = 255;
+					data[y][x] = new ColorRGB(r, g, b, a);
+				}
+			}
+		}
+	}
+
+	public void extractBlackToAlpha() {
+		if ((width < 1) || (height < 1)) {
+			return;
+		}
+
+		// replace black color with full alpha, and any other colors with alpha-ified versions...
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				ColorRGB col = data[y][x];
+				int r = col.getR();
+				int g = col.getG();
+				int b = col.getB();
+				int a = col.getA();
+
+				int max = r;
+				if (g > max) {
+					max = g;
+				}
+				if (b > max) {
+					max = b;
+				}
+
+				if (max < 1) {
+					r = 0;
+					b = 0;
+					g = 0;
+					a = 0;
+				} else {
+					r = (255 * r) / max;
+					g = (255 * g) / max;
+					b = (255 * b) / max;
+					a = (a * max) / 255;
+				}
+
+				data[y][x] = new ColorRGB(r, g, b, a);
+			}
+		}
+	}
+
+	public void extractBackgroundColorToAlpha() {
+		if ((width < 1) || (height < 1)) {
+			return;
+		}
+
+		// replace the background color with full alpha
+		ColorRGB bgColor = data[0][0];
+		ColorRGB fullAlpha = new ColorRGB(bgColor, 0);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (bgColor.fastEquals(data[y][x])) {
+					data[y][x] = fullAlpha;
+				}
+			}
+		}
+	}
+
 	public int getLineWidth() {
 		return lineWidth;
 	}
