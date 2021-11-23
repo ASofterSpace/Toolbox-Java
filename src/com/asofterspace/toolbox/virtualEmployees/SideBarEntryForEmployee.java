@@ -16,6 +16,10 @@ public class SideBarEntryForEmployee implements SideBarEntry {
 		}
 	}
 
+	public String getName() {
+		return employee;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 

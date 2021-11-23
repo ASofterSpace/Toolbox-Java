@@ -21,10 +21,33 @@ import java.util.List;
 
 public class SideBarCtrl {
 
+	private static final String AVATAR = "avatar";
+
+	private static final String NAME = "name";
+
+	private static final String DESCRIPTION = "description";
+
 	private static Record rootRecord = null;
 
 	private static List<Record> virtualEmployeeRecords = null;
 
+
+	public static String getAvatarDescription(SideBarEntryForEmployee virtualEmployee) {
+
+		String result = null;
+
+		Record veRec = getVirtualEmployeeRecord(virtualEmployee);
+
+		if (veRec != null) {
+			result = veRec.getString(DESCRIPTION);
+		}
+
+		if (result == null) {
+			return "Huh, no idea what this one does! ;)";
+		}
+
+		return result;
+	}
 
 	public static String getSidebarHtmlStr() {
 		List<SideBarEntry> leaveOut = new ArrayList<>();
@@ -55,20 +78,21 @@ public class SideBarCtrl {
 		int maxVirtualEmployees = 4;
 
 		for (Record veRec : veRecords) {
-			if (!leaveOut.contains(new SideBarEntryForEmployee(veRec.getString("name")))) {
+			if (!leaveOut.contains(new SideBarEntryForEmployee(veRec.getString(NAME)))) {
 				maxVirtualEmployees--;
 
 				if (maxVirtualEmployees < 0) {
 					break;
 				}
 
-				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
+				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString(NAME) + "\" ");
 				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"top: " + top + "pt;");
 				if (veRec.getBoolean("flip", false)) {
 					html.append(" transform: scaleX(-1);");
 				}
 				html.append("\">\n");
-				html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString("name").toLowerCase() + ".jpg\" />\n");
+				html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString(NAME).toLowerCase() + ".jpg\" " +
+					"title=\"" + veRec.getString(DESCRIPTION) + "\"/>\n");
 				html.append("</a>\n");
 				script.append("document.getElementById('sidebar_" + entry + "').href = ");
 				script.append("\"http://\" + window.location.hostname + \":" + veRec.getInteger("port") + "/\";\n");
@@ -98,11 +122,12 @@ public class SideBarCtrl {
 		int left = LEFT_OFFSET;
 
 		for (Record veRec : veRecords) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString("name") + "\" ");
+			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString(NAME) + "\" ");
 			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center; text-decoration: none;\">\n");
-			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString("name").toLowerCase() + ".jpg\" />\n");
+			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString(NAME).toLowerCase() + ".jpg\" " +
+				"title=\"" + veRec.getString(DESCRIPTION) + "\"/>\n");
 			html.append("<br>\n");
-			html.append(veRec.getString("name") + "\n");
+			html.append(veRec.getString(NAME) + "\n");
 			html.append("</a>\n");
 			script.append("document.getElementById('sidebar_full_" + entry + "').href = ");
 			script.append("\"http://\" + window.location.hostname + \":" + veRec.getInteger("port") + "/\";\n");
@@ -263,8 +288,8 @@ public class SideBarCtrl {
 		List<Record> veRecords = getVirtualEmployeeRecords();
 
 		for (Record veRec : veRecords) {
-			if (location.equals("/pics/" + veRec.getString("name").toLowerCase() + ".jpg")) {
-				result = new File(basePath + veRec.getString("avatar"));
+			if (location.equals("/pics/" + veRec.getString(NAME).toLowerCase() + ".jpg")) {
+				result = new File(basePath + veRec.getString(AVATAR));
 			}
 		}
 
@@ -350,6 +375,23 @@ public class SideBarCtrl {
 		}
 
 		return virtualEmployeeRecords;
+	}
+
+	private static Record getVirtualEmployeeRecord(SideBarEntryForEmployee employee) {
+
+		List<Record> veRecords = getVirtualEmployeeRecords();
+		String name = employee.getName();
+		if (name == null) {
+			return null;
+		}
+
+		for (Record veRec : veRecords) {
+			if (name.equals(veRec.getString(NAME).toLowerCase())) {
+				return veRec;
+			}
+		}
+
+		return null;
 	}
 
 }
