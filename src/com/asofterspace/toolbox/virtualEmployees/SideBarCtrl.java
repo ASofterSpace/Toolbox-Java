@@ -122,10 +122,9 @@ public class SideBarCtrl {
 		int left = LEFT_OFFSET;
 
 		for (Record veRec : veRecords) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString(NAME) + "\" ");
+			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString(DESCRIPTION) + "\" ");
 			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center; text-decoration: none;\">\n");
-			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString(NAME).toLowerCase() + ".jpg\" " +
-				"title=\"" + veRec.getString(DESCRIPTION) + "\"/>\n");
+			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString(NAME).toLowerCase() + ".jpg\"/>\n");
 			html.append("<br>\n");
 			html.append(veRec.getString(NAME) + "\n");
 			html.append("</a>\n");
