@@ -1047,6 +1047,21 @@ public class Image {
 	}
 
 	/**
+	 * Just remove the alpha transparency completely
+	 */
+	public void removeAlpha() {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				ColorRGB col = data[y][x];
+				int a = col.getA();
+				if (a != 255) {
+					data[y][x] = new ColorRGB(col.getR(), col.getG(), col.getB(), 255);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Take the RGBA image and set all alpha to 255, by displaying it on a continuous,
 	 * bgColor-ed background
 	 */
