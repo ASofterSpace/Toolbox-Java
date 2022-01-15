@@ -680,4 +680,18 @@ public class DateUtils {
 		return true;
 	}
 
+	public static String getCurrentDateTimeStamp() {
+		Date date = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		String day = StrUtils.leftPad0(cal.get(Calendar.DAY_OF_MONTH), 2);
+		String month = StrUtils.leftPad0(cal.get(Calendar.MONTH) + 1, 2);
+		String year = StrUtils.leftPad0(cal.get(Calendar.YEAR), 4);
+		String hours = StrUtils.leftPad0(cal.get(Calendar.HOUR_OF_DAY), 2);
+		String minutes = StrUtils.leftPad0(cal.get(Calendar.MINUTE), 2);
+		String seconds = StrUtils.leftPad0(cal.get(Calendar.SECOND), 2);
+		String weekday = DAY_NAMES[cal.get(Calendar.DAY_OF_WEEK)];
+		return year + "-" + month + "-" + day + ", " + weekday + ", " + hours + ":" + minutes + ":" + seconds;
+	}
+
 }
