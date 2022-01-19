@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.selftest;
 
-import com.asofterspace.toolbox.images.ColorRGB;
+import com.asofterspace.toolbox.images.ColorRGBA;
 import com.asofterspace.toolbox.images.Image;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
@@ -15,13 +15,13 @@ public class ImageTest implements Test {
 	@Override
 	public void runAll() {
 
-		testColorRGBComparison();
+		testColorRGBAComparison();
 
-		testColorRGBMixing();
+		testColorRGBAMixing();
 
-		testColorRGBDarknessDetection();
+		testColorRGBADarknessDetection();
 
-		testColorRGBstringification();
+		testColorRGBAstringification();
 
 		testImageClearing();
 
@@ -30,15 +30,15 @@ public class ImageTest implements Test {
 		testImageRemoveColors();
 	}
 
-	public void testColorRGBComparison() {
+	public void testColorRGBAComparison() {
 
 		TestUtils.start("Color RGB Comparison");
 
-		ColorRGB blackOne = new ColorRGB(0, 0, 0);
+		ColorRGBA blackOne = new ColorRGBA(0, 0, 0);
 
-		ColorRGB blackTwo = new ColorRGB(0, 0, 0);
+		ColorRGBA blackTwo = new ColorRGBA(0, 0, 0);
 
-		ColorRGB white = new ColorRGB(255, 255, 255);
+		ColorRGBA white = new ColorRGBA(255, 255, 255);
 
 		if (!blackOne.equals(blackTwo)) {
 			TestUtils.fail("Black does not equal black!");
@@ -63,24 +63,24 @@ public class ImageTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void testColorRGBMixing() {
+	public void testColorRGBAMixing() {
 
 		TestUtils.start("Color RGB Mixing");
 
-		ColorRGB black = new ColorRGB(0, 0, 0);
-		ColorRGB red = new ColorRGB(254, 0, 0);
-		ColorRGB white = new ColorRGB(254, 252, 252);
+		ColorRGBA black = new ColorRGBA(0, 0, 0);
+		ColorRGBA red = new ColorRGBA(254, 0, 0);
+		ColorRGBA white = new ColorRGBA(254, 252, 252);
 
-		ColorRGB blackred = new ColorRGB(127, 0, 0);
-		ColorRGB blackredMix = ColorRGB.intermix(black, red, 0.5);
+		ColorRGBA blackred = new ColorRGBA(127, 0, 0);
+		ColorRGBA blackredMix = ColorRGBA.intermix(black, red, 0.5);
 
 		if (!blackred.equals(blackredMix)) {
 			TestUtils.fail("Black mixed with red does not give the correct result!");
 			return;
 		}
 
-		ColorRGB redredredwhite = new ColorRGB(254, 63, 63);
-		ColorRGB redredredwhiteMix = ColorRGB.intermix(red, white, 0.75);
+		ColorRGBA redredredwhite = new ColorRGBA(254, 63, 63);
+		ColorRGBA redredredwhiteMix = ColorRGBA.intermix(red, white, 0.75);
 
 		if (!redredredwhite.equals(redredredwhiteMix)) {
 			TestUtils.fail("Lots of red mixed with white does not give the correct result!");
@@ -90,17 +90,17 @@ public class ImageTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void testColorRGBDarknessDetection() {
+	public void testColorRGBADarknessDetection() {
 
 		TestUtils.start("Color RGB Darkness Comparison");
 
-		ColorRGB black = new ColorRGB(0, 0, 0);
+		ColorRGBA black = new ColorRGBA(0, 0, 0);
 
-		ColorRGB red = new ColorRGB(255, 0, 0);
+		ColorRGBA red = new ColorRGBA(255, 0, 0);
 
-		ColorRGB yellow = new ColorRGB(255, 255, 0);
+		ColorRGBA yellow = new ColorRGBA(255, 255, 0);
 
-		ColorRGB white = new ColorRGB(255, 255, 255);
+		ColorRGBA white = new ColorRGBA(255, 255, 255);
 
 		if (!black.isDark()) {
 			TestUtils.fail("Black is not dark!");
@@ -125,35 +125,35 @@ public class ImageTest implements Test {
 		TestUtils.succeed();
 	}
 
-	public void testColorRGBstringification() {
+	public void testColorRGBAstringification() {
 
 		TestUtils.start("Color RGB Stringification");
 
-		ColorRGB colOne = new ColorRGB(1, 2, 3);
-		ColorRGB colTwo = new ColorRGB(10, 20, 30);
-		ColorRGB colThree = new ColorRGB(240, 31, 197);
+		ColorRGBA colOne = new ColorRGBA(1, 2, 3);
+		ColorRGBA colTwo = new ColorRGBA(10, 20, 30);
+		ColorRGBA colThree = new ColorRGBA(240, 31, 197);
 
-		if (!colOne.equals(ColorRGB.fromString(colOne.toString()))) {
+		if (!colOne.equals(ColorRGBA.fromString(colOne.toString()))) {
 			TestUtils.fail("Color one does not equal itself when being transformed into a string and back!");
 			return;
 		}
 
-		if (!colTwo.equals(ColorRGB.fromString(colTwo.toString()))) {
+		if (!colTwo.equals(ColorRGBA.fromString(colTwo.toString()))) {
 			TestUtils.fail("Color two does not equal itself when being transformed into a string and back!");
 			return;
 		}
 
-		if (!colThree.equals(ColorRGB.fromString(colThree.toString()))) {
+		if (!colThree.equals(ColorRGBA.fromString(colThree.toString()))) {
 			TestUtils.fail("Color three does not equal itself when being transformed into a string and back!");
 			return;
 		}
 
-		if (!colOne.equals(ColorRGB.fromString("rgba ( 1 , 2 , 3 )"))) {
+		if (!colOne.equals(ColorRGBA.fromString("rgba ( 1 , 2 , 3 )"))) {
 			TestUtils.fail("Color one does not equal to rgba ( 1 , 2 , 3 )!");
 			return;
 		}
 
-		if (!colThree.equals(ColorRGB.fromString("#F01FC5"))) {
+		if (!colThree.equals(ColorRGBA.fromString("#F01FC5"))) {
 			TestUtils.fail("Color three does not equal to #F01FC5!");
 			return;
 		}
@@ -171,10 +171,10 @@ public class ImageTest implements Test {
 		TestUtils.start("Image Clearing");
 
 		Image img = new Image(100, 100);
-		img.setPixel(10, 10, new ColorRGB(128, 0, 176));
-		ColorRGB gotPix = img.getPixel(10, 10);
+		img.setPixel(10, 10, new ColorRGBA(128, 0, 176));
+		ColorRGBA gotPix = img.getPixel(10, 10);
 
-		if (gotPix.equals(new ColorRGB())) {
+		if (gotPix.equals(new ColorRGBA())) {
 			TestUtils.fail("A pixel that was set seems to have been cleared before calling clear()!");
 			return;
 		}
@@ -183,14 +183,14 @@ public class ImageTest implements Test {
 
 		gotPix = img.getPixel(10, 10);
 
-		if (!gotPix.equals(new ColorRGB())) {
+		if (!gotPix.equals(new ColorRGBA())) {
 			TestUtils.fail("Calling clear() on a pixel that was previously set does not seem to have worked!");
 			return;
 		}
 
 		gotPix = img.getPixel(8, 8);
 
-		if (!gotPix.equals(new ColorRGB())) {
+		if (!gotPix.equals(new ColorRGBA())) {
 			TestUtils.fail("Calling clear() on a pixel that was not explicitly set does not seem to have worked!");
 			return;
 		}
@@ -207,10 +207,10 @@ public class ImageTest implements Test {
 		Image plainBig = new Image(200, 200);
 
 		Image plainAndDot = new Image(100, 100);
-		plainAndDot.setPixel(10, 10, new ColorRGB(0, 0, 0));
+		plainAndDot.setPixel(10, 10, new ColorRGBA(0, 0, 0));
 
 		Image plainAndDot2 = new Image(100, 100);
-		plainAndDot2.setPixel(10, 10, new ColorRGB(0, 0, 0));
+		plainAndDot2.setPixel(10, 10, new ColorRGBA(0, 0, 0));
 
 		if (plain.equals(plainBig)) {
 			TestUtils.fail("Different sized images are reported as equals!");
@@ -235,18 +235,18 @@ public class ImageTest implements Test {
 		TestUtils.start("Image Color Removal");
 
 		Image before = new Image(100, 100);
-		before.setPixel(6, 7, new ColorRGB(33, 0, 0));
-		before.setPixel(6, 8, new ColorRGB(0, 66, 0));
-		before.setPixel(6, 9, new ColorRGB(0, 0, 99));
-		before.setPixel(6, 10, new ColorRGB(255, 255, 255));
-		before.setPixel(6, 13, new ColorRGB(0, 0, 0));
+		before.setPixel(6, 7, new ColorRGBA(33, 0, 0));
+		before.setPixel(6, 8, new ColorRGBA(0, 66, 0));
+		before.setPixel(6, 9, new ColorRGBA(0, 0, 99));
+		before.setPixel(6, 10, new ColorRGBA(255, 255, 255));
+		before.setPixel(6, 13, new ColorRGBA(0, 0, 0));
 
 		Image after = new Image(100, 100);
-		after.setPixel(6, 7, new ColorRGB(11, 11, 11));
-		after.setPixel(6, 8, new ColorRGB(22, 22, 22));
-		after.setPixel(6, 9, new ColorRGB(33, 33, 33));
-		after.setPixel(6, 10, new ColorRGB(255, 255, 255));
-		after.setPixel(6, 13, new ColorRGB(0, 0, 0));
+		after.setPixel(6, 7, new ColorRGBA(11, 11, 11));
+		after.setPixel(6, 8, new ColorRGBA(22, 22, 22));
+		after.setPixel(6, 9, new ColorRGBA(33, 33, 33));
+		after.setPixel(6, 10, new ColorRGBA(255, 255, 255));
+		after.setPixel(6, 13, new ColorRGBA(0, 0, 0));
 
 		before.removeColors();
 

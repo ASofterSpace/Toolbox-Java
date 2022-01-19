@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
-import com.asofterspace.toolbox.images.ColorRGB;
+import com.asofterspace.toolbox.images.ColorRGBA;
 import com.asofterspace.toolbox.images.Image;
 
 
@@ -161,7 +161,7 @@ public class QrCodeFactory {
 		Image result = createImageFromString(data, edcLevel, maskPattern);
 
 		// surround the QR code by three white modules
-		result.expandBy(3, 3, 3, 3, ColorRGB.WHITE);
+		result.expandBy(3, 3, 3, 3, ColorRGBA.WHITE);
 
 		return result;
 	}

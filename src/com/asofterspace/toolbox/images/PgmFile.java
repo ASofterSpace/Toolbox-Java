@@ -134,7 +134,7 @@ public class PgmFile extends RasterImageFile {
 			}
 
 			// content starts exactly one newline after the maxColorValue
-			ColorRGB[][] uncompressedData = new ColorRGB[height][width];
+			ColorRGBA[][] uncompressedData = new ColorRGBA[height][width];
 
 			// the scale is already exactly the RGB scale (0 .. 255)
 			if (maxColorValue == 255){
@@ -142,7 +142,7 @@ public class PgmFile extends RasterImageFile {
 					for (int x = 0; x < width; x++) {
 						byte g = binaryContent[cur++];
 
-						uncompressedData[y][x] = new ColorRGB(g, g, g);
+						uncompressedData[y][x] = new ColorRGBA(g, g, g);
 					}
 				}
 			} else {
@@ -151,7 +151,7 @@ public class PgmFile extends RasterImageFile {
 					for (int x = 0; x < width; x++) {
 						byte g = (byte) (((int) binaryContent[cur++] * 255) / maxColorValue);
 
-						uncompressedData[y][x] = new ColorRGB(g, g, g);
+						uncompressedData[y][x] = new ColorRGBA(g, g, g);
 					}
 				}
 			}
@@ -194,7 +194,7 @@ public class PgmFile extends RasterImageFile {
 
 			for (int y = 0; y < getHeight(); y++) {
 				for (int x = 0; x < getWidth(); x++) {
-					ColorRGB px = img.getPixel(x, y);
+					ColorRGBA px = img.getPixel(x, y);
 					stream.write(px.getGrayByte());
 					stream.write(px.getGrayByte());
 					stream.write(px.getGrayByte());

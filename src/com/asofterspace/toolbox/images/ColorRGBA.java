@@ -17,7 +17,7 @@ import java.util.Random;
  *
  * @author Moya (a softer space), 2019
  */
-public class ColorRGB {
+public class ColorRGBA {
 
 	// these fields are final as we want to be able to re-use pixels between images,
 	// and just because someone paints one image green we do not want all others to
@@ -29,35 +29,35 @@ public class ColorRGB {
 
 	private final static Random RANDOM = new Random();
 
-	public final static ColorRGB WHITE = new ColorRGB(255, 255, 255, 255);
-	public final static ColorRGB BLACK = new ColorRGB(  0,   0,   0, 255);
+	public final static ColorRGBA WHITE = new ColorRGBA(255, 255, 255, 255);
+	public final static ColorRGBA BLACK = new ColorRGBA(  0,   0,   0, 255);
 
 
 	// by default, just a white pixel
-	public ColorRGB() {
+	public ColorRGBA() {
 		this(255, 255, 255, 255);
 	}
 
-	public ColorRGB(Color col) {
+	public ColorRGBA(Color col) {
 		this(col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha());
 	}
 
-	public ColorRGB(byte r, byte g, byte b) {
+	public ColorRGBA(byte r, byte g, byte b) {
 		this(r, g, b, (byte) 255);
 	}
 
-	public ColorRGB(byte r, byte g, byte b, byte a) {
+	public ColorRGBA(byte r, byte g, byte b, byte a) {
 		this.r = r;
 		this.g = g;
 		this.b = b;
 		this.a = a;
 	}
 
-	public ColorRGB(int r, int g, int b) {
+	public ColorRGBA(int r, int g, int b) {
 		this(r, g, b, 255);
 	}
 
-	public ColorRGB(ColorRGB other, int a) {
+	public ColorRGBA(ColorRGBA other, int a) {
 		this.r = other.getRByte();
 		this.g = other.getGByte();
 		this.b = other.getBByte();
@@ -72,7 +72,7 @@ public class ColorRGB {
 		this.a = (byte) a;
 	}
 
-	public ColorRGB(int r, int g, int b, int a) {
+	public ColorRGBA(int r, int g, int b, int a) {
 
 		if (r > 255) {
 			r = 255;
@@ -108,11 +108,11 @@ public class ColorRGB {
 		this.a = (byte) a;
 	}
 
-	public ColorRGB(long r, long g, long b) {
+	public ColorRGBA(long r, long g, long b) {
 		this(r, g, b, 255l);
 	}
 
-	public ColorRGB(long r, long g, long b, long a) {
+	public ColorRGBA(long r, long g, long b, long a) {
 
 		if (r > 255) {
 			r = 255;
@@ -233,19 +233,19 @@ public class ColorRGB {
 	/**
 	 * Get a slightly different color
 	 */
-	public ColorRGB getSlightlyDifferent() {
+	public ColorRGBA getSlightlyDifferent() {
 		Random rand = new Random();
 		int diff = 16;
 		// we don't need to consider over- or underflows,
-		// as the ColorRGB(r,g,b,a) constructor will do it for us
+		// as the ColorRGBA(r,g,b,a) constructor will do it for us
 		int newR = getR() + rand.nextInt(2 * diff) - diff;
 		int newG = getG() + rand.nextInt(2 * diff) - diff;
 		int newB = getB() + rand.nextInt(2 * diff) - diff;
 		int newA = getA();
-		return new ColorRGB(newR, newG, newB, newA);
+		return new ColorRGBA(newR, newG, newB, newA);
 	}
 
-	public int getDifferenceTo(ColorRGB other) {
+	public int getDifferenceTo(ColorRGBA other) {
 		int result = 0;
 		result += Math.abs(getR() - other.getR());
 		result += Math.abs(getG() - other.getG());
@@ -266,11 +266,11 @@ public class ColorRGB {
 			return false;
 		}
 
-		if (!(other instanceof ColorRGB)) {
+		if (!(other instanceof ColorRGBA)) {
 			return false;
 		}
 
-		ColorRGB otherColor = (ColorRGB) other;
+		ColorRGBA otherColor = (ColorRGBA) other;
 
 		if (r != otherColor.getRByte()) {
 			return false;
@@ -291,11 +291,11 @@ public class ColorRGB {
 		return true;
 	}
 
-	public boolean fastEquals(ColorRGB other) {
+	public boolean fastEquals(ColorRGBA other) {
 		return (this.r == other.r) && (this.g == other.g) && (this.b == other.b) && (this.a == other.a);
 	}
 
-	public boolean fastSimilar(ColorRGB other) {
+	public boolean fastSimilar(ColorRGBA other) {
 
 		int diffR = (((int) this.r) & 0xFF) - (((int) other.r) & 0xFF);
 		if ((diffR > 16) || (diffR < -16)) {
@@ -320,7 +320,7 @@ public class ColorRGB {
 		return true;
 	}
 
-	public boolean fastVaguelySimilar(ColorRGB other) {
+	public boolean fastVaguelySimilar(ColorRGBA other) {
 
 		int different = 0;
 
@@ -351,7 +351,7 @@ public class ColorRGB {
 	 * intermix two colors, where the amount of the first color in the mix is given,
 	 * e.g. 0.45 for 45% one, 55% two
 	 */
-	public static ColorRGB intermix(ColorRGB one, ColorRGB two, double amountOfOne) {
+	public static ColorRGBA intermix(ColorRGBA one, ColorRGBA two, double amountOfOne) {
 
 		if (amountOfOne < 0) {
 			amountOfOne = 0;
@@ -363,7 +363,7 @@ public class ColorRGB {
 		double aO = amountOfOne;
 		double aT = 1 - amountOfOne;
 
-		return new ColorRGB(
+		return new ColorRGBA(
 			(int) (((((int) one.r) & 0xFF) * aO) + ((((int) two.r) & 0xFF) * aT)),
 			(int) (((((int) one.g) & 0xFF) * aO) + ((((int) two.g) & 0xFF) * aT)),
 			(int) (((((int) one.b) & 0xFF) * aO) + ((((int) two.b) & 0xFF) * aT)),
@@ -371,8 +371,8 @@ public class ColorRGB {
 		);
 	}
 
-	public static ColorRGB multiply(ColorRGB one, ColorRGB two) {
-		return new ColorRGB(
+	public static ColorRGBA multiply(ColorRGBA one, ColorRGBA two) {
+		return new ColorRGBA(
 			((((int) one.r) & 0xFF) * (((int) two.r) & 0xFF)) / 255,
 			((((int) one.g) & 0xFF) * (((int) two.g) & 0xFF)) / 255,
 			((((int) one.b) & 0xFF) * (((int) two.b) & 0xFF)) / 255,
@@ -380,8 +380,8 @@ public class ColorRGB {
 		);
 	}
 
-	public static ColorRGB max(ColorRGB one, ColorRGB two) {
-		return new ColorRGB(
+	public static ColorRGBA max(ColorRGBA one, ColorRGBA two) {
+		return new ColorRGBA(
 			Math.max((((int) one.r) & 0xFF), (((int) two.r) & 0xFF)),
 			Math.max((((int) one.g) & 0xFF), (((int) two.g) & 0xFF)),
 			Math.max((((int) one.b) & 0xFF), (((int) two.b) & 0xFF)),
@@ -392,14 +392,14 @@ public class ColorRGB {
 	/**
 	 * Gets a random color (could be any RGB color, but non-transparent)
 	 */
-	public static ColorRGB random() {
-		return new ColorRGB(RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256));
+	public static ColorRGBA random() {
+		return new ColorRGBA(RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256));
 	}
 
 	/**
 	 * Gets a random color (ensuring that the color is actually "colorful" in some way)
 	 */
-	public static ColorRGB randomColorful() {
+	public static ColorRGBA randomColorful() {
 		while (true) {
 			int r = RANDOM.nextInt(256);
 			int g = RANDOM.nextInt(256);
@@ -413,14 +413,14 @@ public class ColorRGB {
 			if ((b > 64) && (b < 196)) {
 				continue;
 			}
-			return new ColorRGB(r, g, b);
+			return new ColorRGBA(r, g, b);
 		}
 	}
 
 	/**
 	 * Gets a random color (ensuring that the color is actually "colorful" in some way and is bright)
 	 */
-	public static ColorRGB randomColorfulBright() {
+	public static ColorRGBA randomColorfulBright() {
 		while (true) {
 			int r = RANDOM.nextInt(256);
 			int g = RANDOM.nextInt(256);
@@ -438,65 +438,65 @@ public class ColorRGB {
 			}
 			// we are now sure that the color is colorful (r, g and b are not too similar)
 			// and bright (not dark)
-			return new ColorRGB(r, g, b);
+			return new ColorRGBA(r, g, b);
 		}
 	}
 
-	public ColorRGB getEditedChannels(String baseForR, double modifierForR,
+	public ColorRGBA getEditedChannels(String baseForR, double modifierForR,
 									  String baseForG, double modifierForG,
 									  String baseForB, double modifierForB) {
-		return new ColorRGB(
+		return new ColorRGBA(
 			getEditedChannel(baseForR, modifierForR),
 			getEditedChannel(baseForG, modifierForG),
 			getEditedChannel(baseForB, modifierForB)
 		);
 	}
 
-	public ColorRGB getDampened(float amount) {
+	public ColorRGBA getDampened(float amount) {
 
-		return new ColorRGB(
+		return new ColorRGBA(
 			Math.max(255 - Math.round((255 - getR()) * amount), 0),
 			Math.max(255 - Math.round((255 - getG()) * amount), 0),
 			Math.max(255 - Math.round((255 - getB()) * amount), 0)
 		);
 	}
 
-	public ColorRGB getRemovedColors() {
+	public ColorRGBA getRemovedColors() {
 
 		byte gray = getGrayByte();
 
-		return new ColorRGB(
+		return new ColorRGBA(
 			gray,
 			gray,
 			gray
 		);
 	}
 
-	public ColorRGB getRemovedPerceivedColors() {
+	public ColorRGBA getRemovedPerceivedColors() {
 
 		byte gray = getPerceivedGrayByte();
 
-		return new ColorRGB(
+		return new ColorRGBA(
 			gray,
 			gray,
 			gray
 		);
 	}
 
-	public ColorRGB getInverted() {
+	public ColorRGBA getInverted() {
 
-		return new ColorRGB(
+		return new ColorRGBA(
 			255 - getR(),
 			255 - getG(),
 			255 - getB()
 		);
 	}
 
-	public ColorRGB getBrightnessInverted1() {
+	public ColorRGBA getBrightnessInverted1() {
 
 		int targetGray = 255 - getPerceivedGrayness();
 
-		return new ColorRGB(
+		return new ColorRGBA(
 			(getR() * targetGray) / 255,
 			(getG() * targetGray) / 255,
 			(getB() * targetGray) / 255,
@@ -504,7 +504,7 @@ public class ColorRGB {
 		);
 	}
 
-	public ColorRGB getBrightnessInverted2() {
+	public ColorRGBA getBrightnessInverted2() {
 
 		// we want to get a pixel such that the color distribution is the same as before,
 		// but the perceived grayness is 255 - current perceived grayness
@@ -518,10 +518,10 @@ public class ColorRGB {
 		int origG = getG();
 		int origB = getB();
 
-		ColorRGB result = null;
+		ColorRGBA result = null;
 
 		for (int steps = 0; steps < 25; steps++) {
-			result = new ColorRGB(
+			result = new ColorRGBA(
 				Math.round(origR * factor),
 				Math.round(origG * factor),
 				Math.round(origB * factor),
@@ -604,11 +604,11 @@ public class ColorRGB {
 		return new Color(((int) r) & 0xFF, ((int) g) & 0xFF, ((int) b) & 0xFF, ((int) a) & 0xFF);
 	}
 
-	public static ColorRGB fromString(String str) {
+	public static ColorRGBA fromString(String str) {
 
 		if (str == null) {
 			System.err.println("No color string could not be parsed!");
-			return new ColorRGB();
+			return new ColorRGBA();
 		}
 
 		str = str.toLowerCase();
@@ -623,7 +623,7 @@ public class ColorRGB {
 			if (bStr.contains(",")) {
 				bStr = bStr.substring(0, bStr.indexOf(","));
 			}
-			return new ColorRGB(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr));
+			return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr));
 		}
 
 		if (str.startsWith("rgba")) {
@@ -635,18 +635,18 @@ public class ColorRGB {
 			String bStr = str.substring(0, str.indexOf(","));
 			str = str.substring(str.indexOf(",") + 1);
 			String aStr = str.substring(0, str.indexOf(")"));
-			return new ColorRGB(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr), StrUtils.strToInt(aStr));
+			return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr), StrUtils.strToInt(aStr));
 		}
 
 		if (str.startsWith("#")) {
 			String rStr = "" + str.charAt(1) + str.charAt(2);
 			String gStr = "" + str.charAt(3) + str.charAt(4);
 			String bStr = "" + str.charAt(5) + str.charAt(6);
-			return new ColorRGB(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
+			return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
 		}
 
 		System.err.println("The color string '" + str + "' could not be parsed!");
-		return new ColorRGB();
+		return new ColorRGBA();
 	}
 
 	@Override

@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.images3d;
 
-import com.asofterspace.toolbox.images.ColorRGB;
+import com.asofterspace.toolbox.images.ColorRGBA;
 import com.asofterspace.toolbox.images.Image;
 
 
@@ -51,7 +51,7 @@ public class Camera3D {
 
 		// TODO - for now, we just ignore the cameraTarget and assume that it is (0, 0, 1) - change that!
 
-		ColorRGB pointColor = new ColorRGB(0, 0, 0);
+		ColorRGBA pointColor = new ColorRGBA(0, 0, 0);
 
 		for (Object3D obj : scene.getObjects()) {
 			for (Point3D point : obj.getPoints()) {

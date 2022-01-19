@@ -108,10 +108,10 @@ public class PbmFile extends RasterImageFile {
 			}
 
 			// content starts exactly one newline after the height
-			ColorRGB[][] uncompressedData = new ColorRGB[height][width];
+			ColorRGBA[][] uncompressedData = new ColorRGBA[height][width];
 
-			ColorRGB black = new ColorRGB(0, 0, 0);
-			ColorRGB white = new ColorRGB(255, 255, 255);
+			ColorRGBA black = new ColorRGBA(0, 0, 0);
+			ColorRGBA white = new ColorRGBA(255, 255, 255);
 			boolean[] buffer = new boolean[8];
 			int curInBuffer = 8;
 

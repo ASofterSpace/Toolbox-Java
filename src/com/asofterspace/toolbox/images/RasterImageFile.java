@@ -84,7 +84,7 @@ public abstract class RasterImageFile extends ImageFile {
 		return img.getHeight();
 	}
 
-	public ColorRGB getPixel(int x, int y) {
+	public ColorRGBA getPixel(int x, int y) {
 
 		if (img == null) {
 			loadImageContents();
@@ -93,7 +93,7 @@ public abstract class RasterImageFile extends ImageFile {
 		return img.getPixel(x, y);
 	}
 
-	public void setPixel(int x, int y, ColorRGB pix) {
+	public void setPixel(int x, int y, ColorRGBA pix) {
 
 		if (img == null) {
 			loadImageContents();

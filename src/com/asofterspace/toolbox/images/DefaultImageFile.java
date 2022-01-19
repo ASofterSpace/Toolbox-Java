@@ -60,7 +60,7 @@ public class DefaultImageFile extends RasterImageFile {
 			int width = javaImg.getWidth();
 			int height = javaImg.getHeight();
 
-			ColorRGB[][] uncompressedData = new ColorRGB[height][width];
+			ColorRGBA[][] uncompressedData = new ColorRGBA[height][width];
 
 			img = new Image(uncompressedData);
 
@@ -82,11 +82,11 @@ public class DefaultImageFile extends RasterImageFile {
 
 			BufferedImage javaImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 
-			ColorRGB[][] data = img.getDataSafely();
+			ColorRGBA[][] data = img.getDataSafely();
 
 			for (int y = 0; y < img.getHeight(); y++) {
 				for (int x = 0; x < img.getWidth(); x++) {
-					ColorRGB c = data[y][x];
+					ColorRGBA c = data[y][x];
 					int rgb = c.getR() << 16;
 					rgb |= c.getG() << 8;
 					rgb |= c.getB();
@@ -118,11 +118,11 @@ public class DefaultImageFile extends RasterImageFile {
 
 			BufferedImage javaImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 
-			ColorRGB[][] data = img.getDataSafely();
+			ColorRGBA[][] data = img.getDataSafely();
 
 			for (int y = 0; y < img.getHeight(); y++) {
 				for (int x = 0; x < img.getWidth(); x++) {
-					ColorRGB c = data[y][x];
+					ColorRGBA c = data[y][x];
 					int rgb = c.getA() << 24;
 					rgb |= c.getR() << 16;
 					rgb |= c.getG() << 8;

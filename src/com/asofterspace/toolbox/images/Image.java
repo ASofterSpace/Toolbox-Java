@@ -32,7 +32,7 @@ import java.util.Random;
  */
 public class Image {
 
-	private ColorRGB[][] data;
+	private ColorRGBA[][] data;
 
 	private int width;
 
@@ -48,7 +48,7 @@ public class Image {
 	/**
 	 * Creates an image of the given dimensions, pre-filled with the given background color
 	 */
-	public Image(int width, int height, ColorRGB backgroundColor) {
+	public Image(int width, int height, ColorRGBA backgroundColor) {
 		initWithoutClear(width, height);
 		clear(backgroundColor);
 	}
@@ -69,7 +69,7 @@ public class Image {
 		}
 	}
 
-	public Image(ColorRGB[][] data) {
+	public Image(ColorRGBA[][] data) {
 
 		this.data = data;
 
@@ -94,7 +94,7 @@ public class Image {
 		this.height = height;
 		this.width = width;
 
-		this.data = new ColorRGB[height][width];
+		this.data = new ColorRGBA[height][width];
 	}
 
 	/**
@@ -158,11 +158,11 @@ public class Image {
 		/*
 		// simplest approach, but too slow:
 
-		List<ColorRGB> encountered = new ArrayList<>();
+		List<ColorRGBA> encountered = new ArrayList<>();
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				boolean found = false;
-				for (ColorRGB col : encountered) {
+				for (ColorRGBA col : encountered) {
 					if (data[y][x].equals(col)) {
 						data[y][x] = col;
 						found = true;
@@ -176,10 +176,10 @@ public class Image {
 		}
 		*/
 
-		Map<ColorRGB, Integer> sample = new HashMap<>();
+		Map<ColorRGBA, Integer> sample = new HashMap<>();
 		Random rand = new Random();
 		for (int i = 0; i < 256; i++) {
-			ColorRGB sampleCol = data[rand.nextInt(height)][rand.nextInt(width)];
+			ColorRGBA sampleCol = data[rand.nextInt(height)][rand.nextInt(width)];
 			Integer soFar = sample.get(sampleCol);
 			if (soFar == null) {
 				sample.put(sampleCol, 1);
@@ -188,8 +188,8 @@ public class Image {
 			}
 		}
 
-		List<ColorRGB> encountered = new ArrayList<>();
-		for (Map.Entry<ColorRGB, Integer> sampleCol : sample.entrySet()) {
+		List<ColorRGBA> encountered = new ArrayList<>();
+		for (Map.Entry<ColorRGBA, Integer> sampleCol : sample.entrySet()) {
 			if (sampleCol.getValue() > 1) {
 				encountered.add(sampleCol.getKey());
 			}
@@ -202,7 +202,7 @@ public class Image {
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				for (ColorRGB col : encountered) {
+				for (ColorRGBA col : encountered) {
 					if (data[y][x].equals(col)) {
 						data[y][x] = col;
 						break;
@@ -214,10 +214,10 @@ public class Image {
 
 	public void clear() {
 
-		clear(new ColorRGB());
+		clear(new ColorRGBA());
 	}
 
-	public void clear(ColorRGB defaultCol) {
+	public void clear(ColorRGBA defaultCol) {
 
 		/*
 		// naive implementation:
@@ -257,17 +257,17 @@ public class Image {
 		return height;
 	}
 
-	public ColorRGB[][] getData() {
+	public ColorRGBA[][] getData() {
 		return data;
 	}
 
-	public ColorRGB[][] getDataSafely() {
+	public ColorRGBA[][] getDataSafely() {
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				if (data[y][x] == null) {
 					System.err.println("Image.getDataSafely() called, but " + x + "x" + y + " is null! Will be set to black...");
-					data[y][x] = ColorRGB.BLACK;
+					data[y][x] = ColorRGBA.BLACK;
 				}
 			}
 		}
@@ -284,15 +284,15 @@ public class Image {
 		return result;
 	}
 
-	public ColorRGB getPixel(int x, int y) {
+	public ColorRGBA getPixel(int x, int y) {
 		return data[y][x];
 	}
 
-	public void setPixel(int x, int y, ColorRGB pix) {
+	public void setPixel(int x, int y, ColorRGBA pix) {
 		data[y][x] = pix;
 	}
 
-	public void setPixelSafely(int x, int y, ColorRGB pix) {
+	public void setPixelSafely(int x, int y, ColorRGBA pix) {
 		if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) {
 			return;
 		}
@@ -361,7 +361,7 @@ public class Image {
 	 * coordinates x and y (respective to this image), but ignore the
 	 * transparent color in the other image
 	 */
-	public void draw(Image other, int drawAtX, int drawAtY, ColorRGB transparentColor) {
+	public void draw(Image other, int drawAtX, int drawAtY, ColorRGBA transparentColor) {
 
 		for (int x = 0; (x < other.width) && (x + drawAtX < width); x++) {
 			for (int y = 0; (y < other.height) && (y + drawAtY < height); y++) {
@@ -374,15 +374,15 @@ public class Image {
 		}
 	}
 
-	public void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
+	public void drawLine(int startX, int startY, int endX, int endY, ColorRGBA lineColor) {
 		drawLine(startX, startY, endX, endY, lineColor, false);
 	}
 
-	public void drawDottedLine(int startX, int startY, int endX, int endY, ColorRGB lineColor) {
+	public void drawDottedLine(int startX, int startY, int endX, int endY, ColorRGBA lineColor) {
 		drawLine(startX, startY, endX, endY, lineColor, true);
 	}
 
-	private void drawLine(int startX, int startY, int endX, int endY, ColorRGB lineColor, boolean dotted) {
+	private void drawLine(int startX, int startY, int endX, int endY, ColorRGBA lineColor, boolean dotted) {
 
 		boolean invertDirection = false;
 
@@ -451,7 +451,7 @@ public class Image {
 		}
 	}
 
-	private void drawLinePoint(int x, int y, ColorRGB color) {
+	private void drawLinePoint(int x, int y, ColorRGBA color) {
 		setPixelSafely(x, y, color);
 		if (lineWidth > 1) {
 			setPixelSafely(x+1, y, color);
@@ -467,7 +467,7 @@ public class Image {
 		}
 	}
 
-	public void drawRectangle(int startX, int startY, int endX, int endY, ColorRGB rectColor) {
+	public void drawRectangle(int startX, int startY, int endX, int endY, ColorRGBA rectColor) {
 		for (int x = startX; x <= endX; x++) {
 			for (int y = startY; y <= endY; y++) {
 				data[y][x] = rectColor;
@@ -490,7 +490,7 @@ public class Image {
 		drawText(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, null);
 	}
 
-	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor) {
+	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor) {
 
 		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, null);
 	}
@@ -505,7 +505,7 @@ public class Image {
 		return metrics.getHeight();
 	}
 
-	private void drawTextOnto(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor, Image targetImage, ColorRGB backgroundColor) {
+	private void drawTextOnto(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, Image targetImage, ColorRGBA backgroundColor) {
 
 		// prepare font settings for drawing the text
 		if (fontName == null) {
@@ -591,7 +591,7 @@ public class Image {
 		}
 	}
 
-	public static Image createTextImage(String text, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGB textColor, ColorRGB backgroundColor) {
+	public static Image createTextImage(String text, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, ColorRGBA backgroundColor) {
 
 		Image result = new Image(1, 1);
 		result.drawTextOnto(text, 0, null, null, 0, fontName, fontSize, useAntiAliasing, textColor, result, backgroundColor);
@@ -650,7 +650,7 @@ public class Image {
 				int r = (rgb >> 16) & 0xFF;
 				int g = (rgb >> 8) & 0xFF;
 				int b = (rgb) & 0xFF;
-				data[y+top][x+left] = new ColorRGB(r, g, b, a);
+				data[y+top][x+left] = new ColorRGBA(r, g, b, a);
 			}
 		}
 	}
@@ -708,13 +708,13 @@ public class Image {
 			// ... by cutting something off :)
 			double cutOffAmount = (height - cutOffHeight) / 2;
 			// System.out.println("A width: " + width + ", height: " + height + ", newWidth: " + newWidth + ", newHeight: " + newHeight + ", cutOff: " + cutOffAmount);
-			expandBy(- (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), 0, ColorRGB.WHITE);
+			expandBy(- (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), 0, ColorRGBA.WHITE);
 		} else {
 			// cut off left and right
 			double cutOffWidth = (newWidth * height) / newHeight;
 			double cutOffAmount = (width - cutOffWidth) / 2;
 			// System.out.println("B width: " + width + ", height: " + height + ", newWidth: " + newWidth + ", newHeight: " + newHeight + ", cutOff: " + cutOffAmount);
-			expandBy(0, - (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), ColorRGB.WHITE);
+			expandBy(0, - (int) Math.floor(cutOffAmount), 0, - (int) Math.ceil(cutOffAmount), ColorRGBA.WHITE);
 		}
 	}
 
@@ -744,7 +744,7 @@ public class Image {
 			return;
 		}
 
-		ColorRGB[][] horzData = new ColorRGB[height][newWidth];
+		ColorRGBA[][] horzData = new ColorRGBA[height][newWidth];
 
 		for (int x = 0; x < newWidth; x++) {
 			for (int y = 0; y < height; y++) {
@@ -753,14 +753,14 @@ public class Image {
 				int hiX = (int) Math.ceil(newX);
 				double hiAmount = newX - loX;
 				if (hiX < width) {
-					horzData[y][x] = ColorRGB.intermix(data[y][loX], data[y][hiX], 1 - hiAmount);
+					horzData[y][x] = ColorRGBA.intermix(data[y][loX], data[y][hiX], 1 - hiAmount);
 				} else {
 					horzData[y][x] = data[y][loX];
 				}
 			}
 		}
 
-		ColorRGB[][] fullData = new ColorRGB[newHeight][newWidth];
+		ColorRGBA[][] fullData = new ColorRGBA[newHeight][newWidth];
 
 		for (int x = 0; x < newWidth; x++) {
 			for (int y = 0; y < newHeight; y++) {
@@ -769,7 +769,7 @@ public class Image {
 				int hiY = (int) Math.ceil(newY);
 				double hiAmount = newY - loY;
 				if (hiY < height) {
-					fullData[y][x] = ColorRGB.intermix(horzData[loY][x], horzData[hiY][x], 1 - hiAmount);
+					fullData[y][x] = ColorRGBA.intermix(horzData[loY][x], horzData[hiY][x], 1 - hiAmount);
 				} else {
 					fullData[y][x] = horzData[loY][x];
 				}
@@ -825,7 +825,7 @@ public class Image {
 			return;
 		}
 
-		ColorRGB[][] horzData = new ColorRGB[height][newWidth];
+		ColorRGBA[][] horzData = new ColorRGBA[height][newWidth];
 
 		for (int x = 0; x < newWidth; x++) {
 			for (int y = 0; y < height; y++) {
@@ -833,7 +833,7 @@ public class Image {
 			}
 		}
 
-		ColorRGB[][] fullData = new ColorRGB[newHeight][newWidth];
+		ColorRGBA[][] fullData = new ColorRGBA[newHeight][newWidth];
 
 		for (int x = 0; x < newWidth; x++) {
 			for (int y = 0; y < newHeight; y++) {
@@ -870,7 +870,7 @@ public class Image {
 	 * filling the new space with the fillWith color
 	 * (negative values are allowed, in that case the image will shrink)
 	 */
-	public void expandBy(int top, int right, int bottom, int left, ColorRGB fillWith) {
+	public void expandBy(int top, int right, int bottom, int left, ColorRGBA fillWith) {
 
 		int newwidth = width + right + left;
 
@@ -884,7 +884,7 @@ public class Image {
 			newwidth = 0;
 		}
 
-		ColorRGB[][] newdata = new ColorRGB[newheight][newwidth];
+		ColorRGBA[][] newdata = new ColorRGBA[newheight][newwidth];
 
 		if ((newheight > 0) && (newwidth > 0)) {
 
@@ -910,19 +910,19 @@ public class Image {
 		this.data = newdata;
 	}
 
-	public void expandTopBy(int howMuch, ColorRGB fillWith) {
+	public void expandTopBy(int howMuch, ColorRGBA fillWith) {
 		expandBy(howMuch, 0, 0, 0, fillWith);
 	}
 
-	public void expandRightBy(int howMuch, ColorRGB fillWith) {
+	public void expandRightBy(int howMuch, ColorRGBA fillWith) {
 		expandBy(0, howMuch, 0, 0, fillWith);
 	}
 
-	public void expandBottomBy(int howMuch, ColorRGB fillWith) {
+	public void expandBottomBy(int howMuch, ColorRGBA fillWith) {
 		expandBy(0, 0, howMuch, 0, fillWith);
 	}
 
-	public void expandLeftBy(int howMuch, ColorRGB fillWith) {
+	public void expandLeftBy(int howMuch, ColorRGBA fillWith) {
 		expandBy(0, 0, 0, howMuch, fillWith);
 	}
 
@@ -931,7 +931,7 @@ public class Image {
 		int newHeight = width;
 		int newWidth = height;
 
-		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
+		ColorRGBA[][] rotatedData = new ColorRGBA[newHeight][newWidth];
 
 		for (int x = 0; x < newWidth; x++) {
 			for (int y = 0; y < newHeight; y++) {
@@ -949,7 +949,7 @@ public class Image {
 		int newHeight = width;
 		int newWidth = height;
 
-		ColorRGB[][] rotatedData = new ColorRGB[newHeight][newWidth];
+		ColorRGBA[][] rotatedData = new ColorRGBA[newHeight][newWidth];
 
 		for (int x = 0; x < newWidth; x++) {
 			for (int y = 0; y < newHeight; y++) {
@@ -983,20 +983,20 @@ public class Image {
 		}
 	}
 
-	public void intermix(ColorRGB intermixWith, float amountOfPictureRemaining) {
+	public void intermix(ColorRGBA intermixWith, float amountOfPictureRemaining) {
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				data[y][x] = ColorRGB.intermix(data[y][x], intermixWith, amountOfPictureRemaining);
+				data[y][x] = ColorRGBA.intermix(data[y][x], intermixWith, amountOfPictureRemaining);
 			}
 		}
 	}
 
-	public void multiply(ColorRGB multiplyWith) {
+	public void multiply(ColorRGBA multiplyWith) {
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				data[y][x] = ColorRGB.multiply(data[y][x], multiplyWith);
+				data[y][x] = ColorRGBA.multiply(data[y][x], multiplyWith);
 			}
 		}
 	}
@@ -1052,10 +1052,10 @@ public class Image {
 	public void removeAlpha() {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				ColorRGB col = data[y][x];
+				ColorRGBA col = data[y][x];
 				int a = col.getA();
 				if (a != 255) {
-					data[y][x] = new ColorRGB(col.getR(), col.getG(), col.getB(), 255);
+					data[y][x] = new ColorRGBA(col.getR(), col.getG(), col.getB(), 255);
 				}
 			}
 		}
@@ -1065,7 +1065,7 @@ public class Image {
 	 * Take the RGBA image and set all alpha to 255, by displaying it on a continuous,
 	 * bgColor-ed background
 	 */
-	public void bakeAlpha(ColorRGB bgColor) {
+	public void bakeAlpha(ColorRGBA bgColor) {
 
 		int bgR = bgColor.getR();
 		int bgG = bgColor.getG();
@@ -1073,7 +1073,7 @@ public class Image {
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				ColorRGB col = data[y][x];
+				ColorRGBA col = data[y][x];
 				int a = col.getA();
 				if (a != 255) {
 					int r = col.getR();
@@ -1089,7 +1089,7 @@ public class Image {
 						b = ((a * b) / 255) + (((255 - a) * bgB) / 255);
 					}
 					a = 255;
-					data[y][x] = new ColorRGB(r, g, b, a);
+					data[y][x] = new ColorRGBA(r, g, b, a);
 				}
 			}
 		}
@@ -1103,7 +1103,7 @@ public class Image {
 		// replace black color with full alpha, and any other colors with alpha-ified versions...
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				ColorRGB col = data[y][x];
+				ColorRGBA col = data[y][x];
 				int r = col.getR();
 				int g = col.getG();
 				int b = col.getB();
@@ -1129,7 +1129,7 @@ public class Image {
 					a = (a * max) / 255;
 				}
 
-				data[y][x] = new ColorRGB(r, g, b, a);
+				data[y][x] = new ColorRGBA(r, g, b, a);
 			}
 		}
 	}
@@ -1140,8 +1140,8 @@ public class Image {
 		}
 
 		// replace the background color with full alpha
-		ColorRGB bgColor = data[0][0];
-		ColorRGB fullAlpha = new ColorRGB(bgColor, 0);
+		ColorRGBA bgColor = data[0][0];
+		ColorRGBA fullAlpha = new ColorRGBA(bgColor, 0);
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				if (bgColor.fastEquals(data[y][x])) {
@@ -1205,7 +1205,7 @@ public class Image {
 			return false;
 		}
 
-		ColorRGB[][] otherData = otherImage.getData();
+		ColorRGBA[][] otherData = otherImage.getData();
 
 		for (int y = 0; y < getHeight(); y++) {
 			for (int x = 0; x < getWidth(); x++) {

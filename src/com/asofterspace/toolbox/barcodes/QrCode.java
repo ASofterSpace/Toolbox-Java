@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.barcodes;
 
-import com.asofterspace.toolbox.images.ColorRGB;
+import com.asofterspace.toolbox.images.ColorRGBA;
 import com.asofterspace.toolbox.images.Image;
 import com.asofterspace.toolbox.utils.BitUtils;
 
@@ -183,8 +183,8 @@ public class QrCode {
 
 		Image result = new Image(width, height);
 
-		ColorRGB black = new ColorRGB(0, 0, 0);
-		ColorRGB white = new ColorRGB(255, 255, 255);
+		ColorRGBA black = new ColorRGBA(0, 0, 0);
+		ColorRGBA white = new ColorRGBA(255, 255, 255);
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {

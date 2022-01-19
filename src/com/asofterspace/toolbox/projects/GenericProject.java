@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.projects;
 
-import com.asofterspace.toolbox.images.ColorRGB;
+import com.asofterspace.toolbox.images.ColorRGBA;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
@@ -17,7 +17,7 @@ public class GenericProject {
 
 	private String shortName;
 
-	private ColorRGB color;
+	private ColorRGBA color;
 
 	private Boolean onShortlist;
 
@@ -51,7 +51,7 @@ public class GenericProject {
 	}
 
 	protected void readRecord(Record projectConfRec) {
-		this.color = ColorRGB.fromString(projectConfRec.getString("color"));
+		this.color = ColorRGBA.fromString(projectConfRec.getString("color"));
 		this.onShortlist = projectConfRec.getBoolean("onShortlist");
 	}
 
@@ -87,7 +87,7 @@ public class GenericProject {
 		return shortName;
 	}
 
-	public ColorRGB getColor() {
+	public ColorRGBA getColor() {
 		return color;
 	}
 

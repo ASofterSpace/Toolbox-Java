@@ -54,9 +54,9 @@ public abstract class ImageFile extends BinaryFile {
 
 	public abstract int getHeight();
 
-	public abstract ColorRGB getPixel(int x, int y);
+	public abstract ColorRGBA getPixel(int x, int y);
 
-	public abstract void setPixel(int x, int y, ColorRGB pix);
+	public abstract void setPixel(int x, int y, ColorRGBA pix);
 
 	public abstract void save();
 

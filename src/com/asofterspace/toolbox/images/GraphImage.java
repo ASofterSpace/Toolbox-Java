@@ -27,11 +27,11 @@ public class GraphImage extends Image {
 
 	private List<GraphDataPoint> data;
 	private List<List<GraphDataPoint>> extraData = new ArrayList<>();
-	private List<ColorRGB> extraDataColors = new ArrayList<>();
+	private List<ColorRGBA> extraDataColors = new ArrayList<>();
 
-	private ColorRGB backgroundColor;
-	private ColorRGB foregroundColor;
-	private ColorRGB dataColor;
+	private ColorRGBA backgroundColor;
+	private ColorRGBA foregroundColor;
+	private ColorRGBA dataColor;
 
 	private Double baseXmin;
 	private Double baseXmax;
@@ -120,7 +120,7 @@ public class GraphImage extends Image {
 	/**
 	 * Add additional absolute data points
 	 */
-	public void addAbsoluteDataPoints(List<GraphDataPoint> newData, ColorRGB color) {
+	public void addAbsoluteDataPoints(List<GraphDataPoint> newData, ColorRGBA color) {
 
 		this.extraData.add(newData);
 		this.extraDataColors.add(color);
@@ -269,33 +269,33 @@ public class GraphImage extends Image {
 		setAbsoluteDataPoints(newData);
 	}
 
-	public ColorRGB getBackgroundColor() {
+	public ColorRGBA getBackgroundColor() {
 		if (backgroundColor == null) {
-			return new ColorRGB(255, 255, 255);
+			return new ColorRGBA(255, 255, 255);
 		}
 		return backgroundColor;
 	}
 
-	public void setBackgroundColor(ColorRGB backgroundColor) {
+	public void setBackgroundColor(ColorRGBA backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
 
-	public ColorRGB getForegroundColor() {
+	public ColorRGBA getForegroundColor() {
 		if (foregroundColor == null) {
-			return new ColorRGB(0, 0, 0);
+			return new ColorRGBA(0, 0, 0);
 		}
 		return foregroundColor;
 	}
 
-	public void setForegroundColor(ColorRGB foregroundColor) {
+	public void setForegroundColor(ColorRGBA foregroundColor) {
 		this.foregroundColor = foregroundColor;
 	}
 
-	public void setDataColor(ColorRGB newColor) {
+	public void setDataColor(ColorRGBA newColor) {
 		this.dataColor = newColor;
 	}
 
-	public ColorRGB getDataColor() {
+	public ColorRGBA getDataColor() {
 		if (dataColor == null) {
 			return getForegroundColor();
 		}
@@ -348,7 +348,7 @@ public class GraphImage extends Image {
 	/**
 	 * Draws a vertical line inside the graph (it will vanish again when redraw() is called!)
 	 */
-	public void drawVerticalLineAt(int position, ColorRGB col) {
+	public void drawVerticalLineAt(int position, ColorRGBA col) {
 
 		int newX = (int) (xMultiplier * position);
 
@@ -364,7 +364,7 @@ public class GraphImage extends Image {
 	/**
 	 * Draws a vertical dotted line inside the graph (it will vanish again when redraw() is called!)
 	 */
-	public void drawVerticalDottedLineAt(int position, ColorRGB col) {
+	public void drawVerticalDottedLineAt(int position, ColorRGBA col) {
 
 		int newX = (int) (xMultiplier * position);
 
@@ -468,7 +468,7 @@ public class GraphImage extends Image {
 
 		drawRectangle(0, 0, getWidth()-1, getHeight()-1, getBackgroundColor());
 
-		ColorRGB black = getForegroundColor();
+		ColorRGBA black = getForegroundColor();
 		// y axis
 		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + innerHeight, black);
 		drawLine(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH - 4, BORDER_WIDTH + 9, black);
@@ -482,11 +482,11 @@ public class GraphImage extends Image {
 			drawData(extraData.get(i), extraDataColors.get(i));
 		}
 
-		ColorRGB dataColor = getDataColor();
+		ColorRGBA dataColor = getDataColor();
 		drawData(data, dataColor);
 	}
 
-	private void drawData(List<GraphDataPoint> curData, ColorRGB curDataColor) {
+	private void drawData(List<GraphDataPoint> curData, ColorRGBA curDataColor) {
 
 		if (curData == null) {
 			return;

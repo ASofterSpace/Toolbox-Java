@@ -25,7 +25,7 @@ public class Image2DFactory {
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
 					first.setPixel(x, y,
-						new ColorRGB(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
+						new ColorRGBA(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
 				}
 			}
 
@@ -52,7 +52,7 @@ public class Image2DFactory {
 		// discard one point for each pixel which has no neighbouring pixel that has a similar color
 		for (int x = 1; x < width-1; x++) {
 			for (int y = 1; y < height-1; y++) {
-				ColorRGB cur = img.getPixel(x, y);
+				ColorRGBA cur = img.getPixel(x, y);
 				if (cur.fastSimilar(img.getPixel(x+1, y))) {
 					continue;
 				}
