@@ -27,30 +27,14 @@ public class GroovyCode extends JavaCode {
 	}
 
 	/**
-	 * In groovy, in addition to regular java strings, we also have """...""" multi-line strings
+	 * In groovy, in addition to regular java strings, we also have """...""" multi-line strings,
+	 * so let's override the default behavior...
 	 */
 	@Override
-	protected int highlightString(String content, int start, int end) {
-
-		if (start + 3 <= content.length()) {
-			String stringDelimiters = content.substring(start, start + 3);
-			if ((stringDelimiters.charAt(0) == stringDelimiters.charAt(1)) &&
-				(stringDelimiters.charAt(0) == stringDelimiters.charAt(2))) {
-
-				int endOfString = content.indexOf(stringDelimiters, start + 3);
-
-				if (endOfString < 0) {
-					endOfString = content.length();
-				}
-
-				this.setCharacterAttributes(start, endOfString - start + 3, this.attrString, false);
-
-				return endOfString;
-			}
-		}
-
-		// if we found no funky triple-string-delimiter, do regular java string highlighting
-		return super.highlightString(content, start, end);
+	protected int highlightString(String content, int start, int end, boolean singleForMultiline, boolean threeForMultiline) {
+		singleForMultiline = false;
+		threeForMultiline = true;
+		return super.highlightString(content, start, end, singleForMultiline, threeForMultiline);
 	}
 
 	/**

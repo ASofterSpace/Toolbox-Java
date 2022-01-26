@@ -2985,16 +2985,45 @@ public abstract class Code extends DefaultStyledDocument {
 		return result;
 	}
 
-	protected int highlightString(String content, int start, int end) {
+	/**
+	 * Highlight a string in the content, within an area from start to end
+	 * singleForMultiline: if true, a single string delimiter is enough to make a string spanning several lines
+	 * threeForMultiline: if true, three string delimiters can make a string spanning several lines
+	 */
+	protected int highlightString(String content, int start, int end, boolean singleForMultiline, boolean threeForMultiline) {
+
+		if (threeForMultiline) {
+			// in addition to regular single-line strings, we also have """...""" multi-line strings
+			if (start + 3 <= content.length()) {
+				String stringDelimiters = content.substring(start, start + 3);
+				if ((stringDelimiters.charAt(0) == stringDelimiters.charAt(1)) &&
+					(stringDelimiters.charAt(0) == stringDelimiters.charAt(2))) {
+
+					int endOfString = content.indexOf(stringDelimiters, start + 3);
+
+					if (endOfString < 0) {
+						endOfString = content.length();
+					}
+
+					this.setCharacterAttributes(start, endOfString - start + 3, this.attrString, false);
+
+					return endOfString;
+				}
+			}
+
+			// if we found no funky triple-string-delimiter, continue with regular single-line string highlighting
+		}
 
 		// get the string delimiter that was actually used to start this string (so " or ') to be able to find the matching one
 		String stringDelimiter = content.substring(start, start + 1);
 
-		// find the end of line - as we do not want to go further
-		int endOfLine = content.indexOf(EOL, start + 2);
+		if (!singleForMultiline) {
+			// find the end of line - as we do not want to go further
+			int endOfLine = content.indexOf(EOL, start + 2);
 
-		if (endOfLine == -1) {
-			endOfLine = end;
+			if (endOfLine >= 0) {
+				end = endOfLine;
+			}
 		}
 
 		// find the matching end of string
@@ -3026,11 +3055,11 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		if (endOfString == -1) {
-			// the string is open-ended... go for end of line
-			endOfString = endOfLine;
+			// the string is open-ended... go for end of the area!
+			endOfString = end;
 		} else {
 			// the string is not open-ended... so will the end marker or the line break be first?
-			endOfString = Math.min(endOfString, endOfLine);
+			endOfString = Math.min(endOfString, end);
 		}
 
 		if (collectStrings) {

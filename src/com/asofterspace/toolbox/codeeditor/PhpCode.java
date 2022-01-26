@@ -220,7 +220,9 @@ public class PhpCode extends HtmlCode {
 	}
 
 	private int highlightPhpString(String content, int start, int end) {
-		return highlightString(content, start, end);
+		boolean singleForMultiline = true;
+		boolean threeForMultiline = false;
+		return highlightString(content, start, end, singleForMultiline, threeForMultiline);
 	}
 
 	private int highlightPhpOther(String content, int start, int end) {

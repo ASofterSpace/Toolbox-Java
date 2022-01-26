@@ -117,7 +117,9 @@ public class XmlCode extends Code {
 					} else if (isStringDelimiter(content.charAt(start))) {
 
 						// then let's get that string!
-						start = highlightString(content, start, end);
+						boolean singleForMultiline = false;
+						boolean threeForMultiline = false;
+						start = highlightString(content, start, end, singleForMultiline, threeForMultiline);
 
 					} else {
 						// please highlight the delimiter in the process ;)

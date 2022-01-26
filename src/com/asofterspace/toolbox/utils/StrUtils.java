@@ -453,8 +453,17 @@ public class StrUtils {
 			lineStartExcl = content.lastIndexOf("!", pos - 1) + 1;
 
 			lineStartN = content.lastIndexOf("\\n", pos - 1) + 2;
+			if (lineStartN == 1) {
+				lineStartN = 0;
+			}
 			lineStartR = content.lastIndexOf("\\r", pos - 1) + 2;
+			if (lineStartR == 1) {
+				lineStartR = 0;
+			}
 			lineStartT = content.lastIndexOf("\\t", pos - 1) + 2;
+			if (lineStartT == 1) {
+				lineStartT = 0;
+			}
 		}
 
 		int lineStart = 0;
