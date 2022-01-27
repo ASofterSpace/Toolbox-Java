@@ -222,7 +222,85 @@ public class PhpCode extends HtmlCode {
 	private int highlightPhpString(String content, int start, int end) {
 		boolean singleForMultiline = true;
 		boolean threeForMultiline = false;
-		return highlightString(content, start, end, singleForMultiline, threeForMultiline);
+		int endOfString = highlightString(content, start, end, singleForMultiline, threeForMultiline);
+
+		// do SQL highlighting
+		highlightSQLinString(content, start, endOfString);
+
+		return endOfString;
+	}
+
+	/**
+	 * Takes in a string area and checks if the string area looks like it is an SQL string
+	 * - and if so, highlights it that way
+	 */
+	private boolean highlightSQLinString(String content, int start, int end) {
+
+		// jump over string delimiters
+		start++;
+		end--;
+
+		// jump over whitespace in the beginning of the potential string
+		while (start <= end) {
+			char c = content.charAt(start);
+			if (!((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r'))) {
+				break;
+			}
+		}
+
+		if (start > end - 6) {
+			return false;
+		}
+
+		String lookingAt = content.substring(start, end);
+		// replace all whitespace characters with just a space
+		lookingAt = lookingAt.replaceAll("\\s", " ");
+		lookingAt = lookingAt.replaceAll("\\(", " ");
+		lookingAt = lookingAt.replaceAll("\\)", " ");
+		if (lookingAt.startsWith("SELECT ") ||
+			lookingAt.startsWith("UPDATE ") ||
+			lookingAt.startsWith("INSERT ") ||
+			lookingAt.startsWith("DELETE ")) {
+
+			int cur = 0;
+			while (true) {
+				int debug = lookingAt.indexOf(" ", cur);
+				if (debug < 0) { debug = lookingAt.length(); }
+
+				if ((lookingAt.indexOf("SELECT ", cur) == cur) ||
+					(lookingAt.indexOf("UPDATE ", cur) == cur) ||
+					(lookingAt.indexOf("INSERT ", cur) == cur) ||
+					(lookingAt.indexOf("DELETE ", cur) == cur) ||
+					(lookingAt.indexOf("WHERE ", cur) == cur) ||
+					(lookingAt.indexOf("FROM ", cur) == cur) ||
+					(lookingAt.indexOf("ON ", cur) == cur) ||
+					(lookingAt.indexOf("AND ", cur) == cur) ||
+					(lookingAt.indexOf("OR ", cur) == cur) ||
+					(lookingAt.indexOf("NOT ", cur) == cur) ||
+					(lookingAt.indexOf("EXISTS ", cur) == cur) ||
+					(lookingAt.indexOf("INNER ", cur) == cur) ||
+					(lookingAt.indexOf("OUTER ", cur) == cur) ||
+					(lookingAt.indexOf("LEFT ", cur) == cur) ||
+					(lookingAt.indexOf("RIGHT ", cur) == cur) ||
+					(lookingAt.indexOf("JOIN ", cur) == cur) ||
+					(lookingAt.indexOf("INTO ", cur) == cur) ||
+					(lookingAt.indexOf("SET ", cur) == cur) ||
+					(lookingAt.indexOf("VALUE ", cur) == cur) ||
+					(lookingAt.indexOf("VALUES ", cur) == cur) ||
+					(lookingAt.indexOf("ORDER ", cur) == cur) ||
+					(lookingAt.indexOf("BY ", cur) == cur) ||
+					(lookingAt.indexOf("AS ", cur) == cur)) {
+
+					this.setCharacterAttributes(start + cur, lookingAt.indexOf(" ", cur) - cur, attrSqlKeyword, false);
+				}
+				cur = lookingAt.indexOf(" ", cur) + 1;
+				if (cur == 0) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private int highlightPhpOther(String content, int start, int end) {
