@@ -289,6 +289,7 @@ public class PhpCode extends HtmlCode {
 					(lookingAt.indexOf("BY ", cur) == cur) ||
 					(lookingAt.indexOf("AS ", cur) == cur) ||
 					(lookingAt.indexOf("IS ", cur) == cur) ||
+					(lookingAt.indexOf("IN ", cur) == cur) ||
 					(lookingAt.indexOf("NULL ", cur) == cur)) {
 
 					this.setCharacterAttributes(start + cur, lookingAt.indexOf(" ", cur) - cur, attrSqlKeyword, false);
