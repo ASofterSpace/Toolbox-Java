@@ -293,7 +293,8 @@ public class PhpCode extends HtmlCode {
 					(lookingAt.indexOf("NULL ", cur) == cur) ||
 					(lookingAt.indexOf("LIMIT ", cur) == cur) ||
 					(lookingAt.indexOf("ASC ", cur) == cur) ||
-					(lookingAt.indexOf("DESC ", cur) == cur)) {
+					(lookingAt.indexOf("DESC ", cur) == cur) ||
+					(lookingAt.indexOf("DISTINCT ", cur) == cur)) {
 
 					this.setCharacterAttributes(start + cur, lookingAt.indexOf(" ", cur) - cur, attrSqlKeyword, false);
 				}
