@@ -246,6 +246,7 @@ public class PhpCode extends HtmlCode {
 			if (!((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r'))) {
 				break;
 			}
+			start++;
 		}
 
 		if (start > end - 6) {
