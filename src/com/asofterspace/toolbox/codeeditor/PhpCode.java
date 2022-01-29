@@ -264,9 +264,6 @@ public class PhpCode extends HtmlCode {
 
 			int cur = 0;
 			while (true) {
-				int debug = lookingAt.indexOf(" ", cur);
-				if (debug < 0) { debug = lookingAt.length(); }
-
 				if ((lookingAt.indexOf("SELECT ", cur) == cur) ||
 					(lookingAt.indexOf("UPDATE ", cur) == cur) ||
 					(lookingAt.indexOf("INSERT ", cur) == cur) ||
