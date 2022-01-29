@@ -290,7 +290,10 @@ public class PhpCode extends HtmlCode {
 					(lookingAt.indexOf("AS ", cur) == cur) ||
 					(lookingAt.indexOf("IS ", cur) == cur) ||
 					(lookingAt.indexOf("IN ", cur) == cur) ||
-					(lookingAt.indexOf("NULL ", cur) == cur)) {
+					(lookingAt.indexOf("NULL ", cur) == cur) ||
+					(lookingAt.indexOf("LIMIT ", cur) == cur) ||
+					(lookingAt.indexOf("ASC ", cur) == cur) ||
+					(lookingAt.indexOf("DESC ", cur) == cur)) {
 
 					this.setCharacterAttributes(start + cur, lookingAt.indexOf(" ", cur) - cur, attrSqlKeyword, false);
 				}
