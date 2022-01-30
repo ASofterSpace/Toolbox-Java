@@ -1022,6 +1022,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 							replacedSomeInThisLine = false;
 
+							// check if the line starts with " " or "\t " or "\t\t " or ...
+							// and remove the trailing space
 							for (int i = 0; i < line.length(); i++) {
 								StringBuilder repStrBuilder = new StringBuilder();
 								for (int j = 0; j < i; j++) {
@@ -1033,6 +1035,24 @@ public abstract class Code extends DefaultStyledDocument {
 									replaceAmount -= 1;
 									replacedSomeInThisLine = true;
 									break;
+								}
+							}
+
+							if (!replacedSomeInThisLine) {
+								// now check, from longest to shortest, back down, and if there is
+								// a \t somewhere at the start, replace the last \t with four spaces
+								// and remove one of them (so basically replace it with three)
+								for (int i = line.length(); i >= 0; i--) {
+									StringBuilder repStrBuilder = new StringBuilder();
+									for (int j = 0; j < i; j++) {
+										repStrBuilder.append("\t");
+									}
+									if (line.startsWith(repStrBuilder.toString())) {
+										line = line.substring(0, i - 1) + "   " + line.substring(i);
+										replaceAmount += 2;
+										replacedSomeInThisLine = true;
+										break;
+									}
 								}
 							}
 
