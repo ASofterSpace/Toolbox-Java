@@ -970,13 +970,25 @@ public abstract class Code extends DefaultStyledDocument {
 
 		if (doIndent) {
 
-			contentMiddle = "\n" + contentMiddle;
+			replaceAmount = StrUtils.countCharInString('\n', contentMiddle) + 1;
 
-			replaceAmount = StrUtils.countCharInString('\n', contentMiddle);
+			StringBuilder newMiddle = new StringBuilder();
+			boolean encounteredNewline = true;
+			for (int i = 0; i < contentMiddle.length(); i++) {
+				char c = contentMiddle.charAt(i);
+				if ((c != ' ') && (c != '\t') && (c != '\r')) {
+					if (encounteredNewline) {
+						encounteredNewline = false;
+						newMiddle.append(indentWithWhat);
+					}
+					if (c == '\n') {
+						encounteredNewline = true;
+					}
+				}
+				newMiddle.append(c);
+			}
 
-			contentMiddle = contentMiddle.replace("\n", "\n" + indentWithWhat);
-
-			contentMiddle = contentMiddle.substring(1);
+			contentMiddle = newMiddle.toString();
 
 			selStartOffset++;
 
@@ -994,41 +1006,59 @@ public abstract class Code extends DefaultStyledDocument {
 
 					boolean replacedSomeInThisLine = true;
 
-					if (" ".equals(indentWithWhat)) {
-
-						if (line.startsWith(" ")) {
+					if (forceUnindent) {
+						// line might be empty in case of forceUnindent,
+						// so we have to check...
+						if (line.length() > 0) {
 							line = line.substring(1);
-							replaceAmount -= 1;
-						} else {
-							replacedSomeInThisLine = false;
+							replaceAmount--;
+							if (curLine == 0) {
+								selStartOffset--;
+							}
 						}
-
 					} else {
 
-						if (forceUnindent || line.startsWith("\t")) {
-							// line might be empty in case of forceUnindent,
-							// so we have to check...
-							if (line.length() > 0) {
+						if (" ".equals(indentWithWhat)) {
+
+							replacedSomeInThisLine = false;
+
+							for (int i = 0; i < line.length(); i++) {
+								StringBuilder repStrBuilder = new StringBuilder();
+								for (int j = 0; j < i; j++) {
+									repStrBuilder.append("\t");
+								}
+								repStrBuilder.append(" ");
+								if (line.startsWith(repStrBuilder.toString())) {
+									line = line.substring(0, i) + line.substring(i + 1);
+									replaceAmount -= 1;
+									replacedSomeInThisLine = true;
+									break;
+								}
+							}
+
+						} else {
+
+							if (line.startsWith("\t")) {
 								line = line.substring(1);
 								replaceAmount--;
 								if (curLine == 0) {
 									selStartOffset--;
 								}
+							} else if (line.startsWith("    ")) {
+								line = line.substring(4);
+								replaceAmount -= 4;
+							} else if (line.startsWith("   ")) {
+								line = line.substring(3);
+								replaceAmount -= 3;
+							} else if (line.startsWith("  ")) {
+								line = line.substring(2);
+								replaceAmount -= 2;
+							} else if (line.startsWith(" ")) {
+								line = line.substring(1);
+								replaceAmount -= 1;
+							} else {
+								replacedSomeInThisLine = false;
 							}
-						} else if (line.startsWith("    ")) {
-							line = line.substring(4);
-							replaceAmount -= 4;
-						} else if (line.startsWith("   ")) {
-							line = line.substring(3);
-							replaceAmount -= 3;
-						} else if (line.startsWith("  ")) {
-							line = line.substring(2);
-							replaceAmount -= 2;
-						} else if (line.startsWith(" ")) {
-							line = line.substring(1);
-							replaceAmount -= 1;
-						} else {
-							replacedSomeInThisLine = false;
 						}
 					}
 
