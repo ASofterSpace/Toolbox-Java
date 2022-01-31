@@ -285,6 +285,7 @@ public class PhpCode extends HtmlCode {
 					(lookingAt.indexOf("SET ", cur) == cur) ||
 					(lookingAt.indexOf("VALUE ", cur) == cur) ||
 					(lookingAt.indexOf("VALUES ", cur) == cur) ||
+					(lookingAt.indexOf("GROUP ", cur) == cur) ||
 					(lookingAt.indexOf("ORDER ", cur) == cur) ||
 					(lookingAt.indexOf("BY ", cur) == cur) ||
 					(lookingAt.indexOf("AS ", cur) == cur) ||
