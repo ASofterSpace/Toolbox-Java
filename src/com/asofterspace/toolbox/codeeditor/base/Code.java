@@ -110,6 +110,7 @@ public abstract class Code extends DefaultStyledDocument {
 	protected MutableAttributeSet attrMatchingBrackets; // ( ... )
 	protected MutableAttributeSet attrSuspicious; // mark unused things as suspicious
 	protected MutableAttributeSet attrSqlKeyword; // mark SQL keywords inside strings
+	protected MutableAttributeSet attrSqlFunction; // mark SQL function names inside strings
 
 	// highlight thread and a boolean used to tell it to do some highlighting
 	private static Thread highlightThread;
@@ -2109,6 +2110,9 @@ public abstract class Code extends DefaultStyledDocument {
 		attrSqlKeyword = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSqlKeyword, new Color(128, 96, 0));
 
+		attrSqlFunction = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrSqlFunction, new Color(156, 48, 0));
+
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
 		decoratedEditor.setCaretColor(schemeForegroundColor);
@@ -2186,6 +2190,9 @@ public abstract class Code extends DefaultStyledDocument {
 		attrSqlKeyword = new SimpleAttributeSet();
 		StyleConstants.setForeground(attrSqlKeyword, new Color(255, 196, 0));
 
+		attrSqlFunction = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrSqlFunction, new Color(255, 154, 64));
+
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
 		decoratedEditor.setCaretColor(schemeForegroundColor);
@@ -2222,6 +2229,7 @@ public abstract class Code extends DefaultStyledDocument {
 		attrData = parentEditor.attrData;
 		attrSuspicious = parentEditor.attrSuspicious;
 		attrSqlKeyword = parentEditor.attrSqlKeyword;
+		attrSqlFunction = parentEditor.attrSqlFunction;
 	}
 
 	public Color getForegroundColor() {

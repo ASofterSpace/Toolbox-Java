@@ -298,6 +298,19 @@ public class PhpCode extends HtmlCode {
 					(lookingAt.indexOf("DISTINCT ", cur) == cur)) {
 
 					this.setCharacterAttributes(start + cur, lookingAt.indexOf(" ", cur) - cur, attrSqlKeyword, false);
+				} else if ((lookingAt.indexOf("NOW ", cur) == cur) ||
+					(lookingAt.indexOf("DATE_SUB ", cur) == cur) ||
+					(lookingAt.indexOf("CURDATE ", cur) == cur) ||
+					(lookingAt.indexOf("INTERVAL ", cur) == cur) ||
+					(lookingAt.indexOf("YEAR ", cur) == cur) ||
+					(lookingAt.indexOf("COUNT ", cur) == cur) ||
+					(lookingAt.indexOf("LEAST ", cur) == cur) ||
+					(lookingAt.indexOf("FLOOR ", cur) == cur) ||
+					(lookingAt.indexOf("MAX ", cur) == cur) ||
+					(lookingAt.indexOf("MIN ", cur) == cur) ||
+					(lookingAt.indexOf("SUM ", cur) == cur)) {
+
+					this.setCharacterAttributes(start + cur, lookingAt.indexOf(" ", cur) - cur, attrSqlFunction, false);
 				}
 				cur = lookingAt.indexOf(" ", cur) + 1;
 				if (cur == 0) {
