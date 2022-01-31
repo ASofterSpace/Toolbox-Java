@@ -253,7 +253,7 @@ public class PhpCode extends HtmlCode {
 			return false;
 		}
 
-		String lookingAt = content.substring(start, end);
+		String lookingAt = content.substring(start, end + 1) + " ";
 		// replace all whitespace characters with just a space
 		lookingAt = lookingAt.replaceAll("\\s", " ");
 		lookingAt = lookingAt.replaceAll("\\(", " ");
