@@ -2111,7 +2111,7 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setForeground(attrSqlKeyword, new Color(128, 96, 0));
 
 		attrSqlFunction = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrSqlFunction, new Color(156, 48, 0));
+		StyleConstants.setForeground(attrSqlFunction, new Color(156, 48, 12));
 
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
@@ -2191,7 +2191,7 @@ public abstract class Code extends DefaultStyledDocument {
 		StyleConstants.setForeground(attrSqlKeyword, new Color(255, 196, 0));
 
 		attrSqlFunction = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrSqlFunction, new Color(255, 154, 64));
+		StyleConstants.setForeground(attrSqlFunction, new Color(255, 64, 48));
 
 		// re-decorate the editor
 		decoratedEditor.setBackground(schemeBackgroundColor);
