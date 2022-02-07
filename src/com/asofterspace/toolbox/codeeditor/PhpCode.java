@@ -301,6 +301,7 @@ public class PhpCode extends HtmlCode {
 				} else if ((lookingAt.indexOf("NOW ", cur) == cur) ||
 					(lookingAt.indexOf("CONCAT ", cur) == cur) ||
 					(lookingAt.indexOf("DATE_SUB ", cur) == cur) ||
+					(lookingAt.indexOf("DATE_FORMAT ", cur) == cur) ||
 					(lookingAt.indexOf("CURDATE ", cur) == cur) ||
 					(lookingAt.indexOf("INTERVAL ", cur) == cur) ||
 					(lookingAt.indexOf("YEAR ", cur) == cur) ||
