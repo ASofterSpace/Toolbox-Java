@@ -291,6 +291,7 @@ public class PhpCode extends HtmlCode {
 					(lookingAt.indexOf("AS ", cur) == cur) ||
 					(lookingAt.indexOf("IS ", cur) == cur) ||
 					(lookingAt.indexOf("IN ", cur) == cur) ||
+					(lookingAt.indexOf("BETWEEN ", cur) == cur) ||
 					(lookingAt.indexOf("NULL ", cur) == cur) ||
 					(lookingAt.indexOf("LIMIT ", cur) == cur) ||
 					(lookingAt.indexOf("ASC ", cur) == cur) ||
@@ -299,10 +300,15 @@ public class PhpCode extends HtmlCode {
 
 					this.setCharacterAttributes(start + cur, lookingAt.indexOf(" ", cur) - cur, attrSqlKeyword, false);
 				} else if ((lookingAt.indexOf("NOW ", cur) == cur) ||
+					(lookingAt.indexOf("IF ", cur) == cur) ||
 					(lookingAt.indexOf("CONCAT ", cur) == cur) ||
 					(lookingAt.indexOf("DATE_SUB ", cur) == cur) ||
 					(lookingAt.indexOf("DATE_FORMAT ", cur) == cur) ||
+					(lookingAt.indexOf("DATE ", cur) == cur) ||
 					(lookingAt.indexOf("CURDATE ", cur) == cur) ||
+					(lookingAt.indexOf("SUBSTRING ", cur) == cur) ||
+					(lookingAt.indexOf("INSTR ", cur) == cur) ||
+					(lookingAt.indexOf("LENGTH ", cur) == cur) ||
 					(lookingAt.indexOf("INTERVAL ", cur) == cur) ||
 					(lookingAt.indexOf("YEAR ", cur) == cur) ||
 					(lookingAt.indexOf("COUNT ", cur) == cur) ||
