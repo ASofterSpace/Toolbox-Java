@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
 
 
 public class PhpCode extends HtmlCode {
@@ -63,6 +64,13 @@ public class PhpCode extends HtmlCode {
 	public PhpCode(JTextPane editor) {
 
 		super(editor);
+	}
+
+	// entering text in PHP mode should not behave exactly the same as in Java-mode, but close enough for it
+	// to make sense to call it for now
+	@Override
+	public void insertString(int offset, String insertedString, AttributeSet attrs) {
+		insertStringJavalike(offset, insertedString, attrs);
 	}
 
 	/**
