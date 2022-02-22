@@ -425,7 +425,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 					for (int i = selStart - 1; i >= 0; i--) {
 						char c = txt.charAt(i);
-						if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r') || (c == '.') || (c == '(') || (c == ')')) {
+						if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r') || (c == '.') || (c == '(') || (c == ')') || (c == '!')) {
 							if (selStart - i < 2) {
 								return;
 							}
