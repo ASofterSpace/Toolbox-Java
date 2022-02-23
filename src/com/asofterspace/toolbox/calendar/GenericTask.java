@@ -61,9 +61,15 @@ public class GenericTask {
 	// what interesting things did the user encounter while doing this task?
 	protected String doneLog;
 
+	// for a repeating task: is this task bi-weekly, on even weeks?
+	protected Boolean biweeklyEven;
+
+	// for a repeating task: is this task bi-weekly, on odd weeks?
+	protected Boolean biweeklyOdd;
+
 
 	public GenericTask(String title, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek, List<Integer> scheduledInMonths,
-		List<Integer> scheduledInYears, List<String> details, List<String> onDone) {
+		List<Integer> scheduledInYears, List<String> details, List<String> onDone, Boolean biweeklyEven, Boolean biweeklyOdd) {
 
 		this.title = title;
 		this.scheduledOnDay = scheduledOnDay;
@@ -72,6 +78,8 @@ public class GenericTask {
 		this.scheduledInYears = scheduledInYears;
 		this.details = details;
 		this.onDone = onDone;
+		this.biweeklyEven = biweeklyEven;
+		this.biweeklyOdd = biweeklyOdd;
 	}
 
 	/**
@@ -86,6 +94,8 @@ public class GenericTask {
 		this.scheduledInYears = other.scheduledInYears;
 		this.details = other.details;
 		this.onDone = other.onDone;
+		this.biweeklyEven = other.biweeklyEven;
+		this.biweeklyOdd = other.biweeklyOdd;
 	}
 
 	public GenericTask getNewInstance() {
@@ -126,6 +136,18 @@ public class GenericTask {
 				if (!foundYear) {
 					return false;
 				}
+			}
+		}
+
+		// handle biweekly-ness
+		if ((biweeklyEven != null) && biweeklyEven) {
+			if (cal.get(Calendar.WEEK_OF_YEAR) % 2 == 1) {
+				return false;
+			}
+		}
+		if ((biweeklyOdd != null) && biweeklyOdd) {
+			if (cal.get(Calendar.WEEK_OF_YEAR) % 2 == 0) {
+				return false;
 			}
 		}
 
@@ -564,6 +586,22 @@ public class GenericTask {
 		}
 
 		return DateUtils.isSameDay(day, displayDate);
+	}
+
+	public Boolean getBiweeklyEven() {
+		return biweeklyEven;
+	}
+
+	public void setBiweeklyEven(Boolean biweeklyEven) {
+		this.biweeklyEven = biweeklyEven;
+	}
+
+	public Boolean getBiweeklyOdd() {
+		return biweeklyOdd;
+	}
+
+	public void setBiweeklyOdd(Boolean biweeklyOdd) {
+		this.biweeklyOdd = biweeklyOdd;
 	}
 
 	/**

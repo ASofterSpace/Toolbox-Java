@@ -42,6 +42,12 @@ public class TaskCtrlBase {
 	protected final static String AMOUNT = "amount";
 	protected final static String ACCOUNT = "account";
 
+	// for a repeating task: is this task bi-weekly, on even weeks?
+	public final static String BIWEEKLY_EVEN = "biweeklyEven";
+
+	// for a repeating task: is this task bi-weekly, on odd weeks?
+	public final static String BIWEEKLY_ODD = "biweeklyOdd";
+
 	// contains one instance of each task, such that for a given day we can check which of
 	// these potential tasks actually occurs on that day
 	protected List<GenericTask> tasks;
@@ -128,7 +134,7 @@ public class TaskCtrlBase {
 		List<Integer> scheduledInYears = null;
 
 		GenericTask newTask = createTask(title, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
-			scheduledInYears, detailsList, onDone);
+			scheduledInYears, detailsList, onDone, false, false);
 
 		return releaseTaskInstanceOn(newTask, scheduleDate);
 	}
@@ -185,15 +191,18 @@ public class TaskCtrlBase {
 			months,
 			years,
 			recordTask.getArrayAsStringList(DETAILS),
-			recordTask.getArrayAsStringList(ON_DONE)
+			recordTask.getArrayAsStringList(ON_DONE),
+			recordTask.getBoolean(BIWEEKLY_EVEN),
+			recordTask.getBoolean(BIWEEKLY_ODD)
 		);
 	}
 
 	protected GenericTask createTask(String title, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek,
-		List<Integer> scheduledInMonths, List<Integer> scheduledInYears, List<String> details, List<String> onDone) {
+		List<Integer> scheduledInMonths, List<Integer> scheduledInYears, List<String> details, List<String> onDone,
+		Boolean biweeklyEven, Boolean biweeklyOdd) {
 
 		return new GenericTask(title, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
-			scheduledInYears, details, onDone);
+			scheduledInYears, details, onDone, biweeklyEven, biweeklyOdd);
 	}
 
 	protected GenericTask taskInstanceFromRecord(Record recordTask) {
@@ -349,6 +358,20 @@ public class TaskCtrlBase {
 			taskRecord.remove(ON_DONE);
 		} else {
 			taskRecord.set(ON_DONE, onDone);
+		}
+
+		if ((task.getBiweeklyEven() != null) && task.getBiweeklyEven()) {
+			taskRecord.set(BIWEEKLY_EVEN, true);
+		} else {
+			// false is default
+			taskRecord.remove(BIWEEKLY_EVEN);
+		}
+
+		if ((task.getBiweeklyOdd() != null) && task.getBiweeklyOdd()) {
+			taskRecord.set(BIWEEKLY_ODD, true);
+		} else {
+			// false is default
+			taskRecord.remove(BIWEEKLY_ODD);
 		}
 
 		if (task.isInstance()) {
