@@ -45,6 +45,9 @@ public class CodeEditor extends JTextPane {
 	private int proposedTokenSelection = 0;
 	private int tokenSelStart = 0;
 
+	private int firstDiffAt = 0;
+	private int lastDiffAt = 0;
+
 	// the original text that was contained in this CodeEditor at startup, which the current
 	// text is compared against for highlighting changed lines
 	private String origText = null;
@@ -169,7 +172,7 @@ public class CodeEditor extends JTextPane {
 				int curLen = curText.length();
 				int origLen = origText.length();
 
-				int firstDiffAt = 0;
+				firstDiffAt = 0;
 				// if both orig and current text are set, iterate over them...
 				for (; (firstDiffAt < origLen) && (firstDiffAt < curLen); firstDiffAt++) {
 					// ... until we find the first difference
@@ -182,7 +185,7 @@ public class CodeEditor extends JTextPane {
 					firstDiffAt = curLen - 1;
 				}
 
-				int lastDiffAt = curLen - 1;
+				lastDiffAt = curLen - 1;
 				// iterate again, this time from the back forward...
 				for (; (lastDiffAt >= 0) && (lastDiffAt >= curLen - origLen); lastDiffAt--) {
 					// ... until we find the first difference
@@ -451,6 +454,14 @@ public class CodeEditor extends JTextPane {
 			// whoops!
 			return 0;
 		}
+	}
+
+	public int getFirstDiffAt() {
+		return firstDiffAt;
+	}
+
+	public int getLastDiffAt() {
+		return lastDiffAt;
 	}
 
 }
