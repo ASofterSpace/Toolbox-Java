@@ -9,5 +9,6 @@ public enum SortOrder  {
 
 	ALPHABETICAL,
 	NUMERICAL,
-	REVERSE
+	REVERSE,
+	RANDOM;
 }

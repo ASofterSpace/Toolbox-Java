@@ -53,6 +53,16 @@ public class SortUtils  {
 		return newList;
 	}
 
+	public static <T> List<T> randomize(Collection<T> listToReverse) {
+		List<T> newList = new ArrayList<>();
+		if (listToReverse == null) {
+			return newList;
+		}
+		newList.addAll(listToReverse);
+		Collections.shuffle(newList);
+		return newList;
+	}
+
 	public static <T> List<T> sort(Collection<T> listToSort, SortOrder sortOrder) {
 		return sort(listToSort, sortOrder, null);
 	}
@@ -66,6 +76,8 @@ public class SortUtils  {
 				return sortNumerically(listToSort, stringifier);
 			case REVERSE:
 				return reverse(listToSort);
+			case RANDOM:
+				return randomize(listToSort);
 			default:
 				return sortAlphabetically(listToSort, stringifier);
 		}
