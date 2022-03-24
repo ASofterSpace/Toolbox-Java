@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.utils;
 
+import java.util.Random;
+
 
 /**
  * A utility class for mathematical fun
@@ -11,6 +13,9 @@ package com.asofterspace.toolbox.utils;
  * @author Moya (a softer space), 2019
  */
 public class MathUtils {
+
+	private static Random rand = null;
+
 
 	public static int[] findMaxima(double[] data, int amount) {
 
@@ -120,6 +125,48 @@ public class MathUtils {
 			return 0;
 		}
 		return (int) value;
+	}
+
+	/**
+	 * Gets a random true or false value
+	 */
+	public static boolean randomBoolean() {
+		return randomInteger(2) == 0;
+	}
+
+	/**
+	 * Gets an integer between 0 (inclusive) and under (exclusive),
+	 * so e.g. if 10 is put in, then the possibile results are:
+	 * 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+	 */
+	public static int randomInteger(int under) {
+		if (rand == null) {
+			rand = new Random();
+		}
+
+		return rand.nextInt(under);
+	}
+
+	/**
+	 * Gets a double between 0 (inclusive) and 1 (exclusive)
+	 */
+	public static double randomDouble() {
+		if (rand == null) {
+			rand = new Random();
+		}
+
+		return rand.nextDouble();
+	}
+
+	/**
+	 * Gets a double between 0 (inclusive) and under (exclusive)
+	 */
+	public static double randomDouble(double under) {
+		if (rand == null) {
+			rand = new Random();
+		}
+
+		return under * rand.nextDouble();
 	}
 
 }
