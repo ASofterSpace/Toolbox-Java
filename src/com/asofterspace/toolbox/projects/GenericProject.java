@@ -65,6 +65,7 @@ public class GenericProject {
 
 		String result = name;
 
+		// LABEL :: TO ADD ORIGIN, LOOK HERE (resolving display name to origin string)
 		if (result.equals("Polyamorous Pirates & Curious Cephalopods")) {
 			result = "ppcc";
 		}
@@ -72,6 +73,7 @@ public class GenericProject {
 		result = result.toLowerCase();
 		result = result.replace(" ", "");
 		result = result.replace("-", "");
+		result = result.replace("ü", "ue");
 		if (result.contains("(")) {
 			result = result.substring(0, result.indexOf("("));
 		}
