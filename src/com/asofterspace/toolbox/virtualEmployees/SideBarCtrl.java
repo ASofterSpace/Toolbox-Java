@@ -138,7 +138,7 @@ public class SideBarCtrl {
 
 		left = LEFT_OFFSET;
 
-		top = 225;
+		top = 180;
 
 		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
@@ -188,12 +188,23 @@ public class SideBarCtrl {
 
 		html.append("<div class='projectbar' style='right: unset;'>\n");
 
+		boolean topRow = true;
+
 		for (GenericProject proj : projects) {
 			html.append("\n");
-			html.append("  <a href=\"localhost:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: 25pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
+			int bottomPt = 25;
+			if (topRow) {
+				bottomPt = 95;
+			}
+			html.append("  <a href=\"localhost:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: " + bottomPt + "pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
 			html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
 			html.append("  </a>");
-			left += 99;
+
+			if (!topRow) {
+				left += 99;
+			}
+
+			topRow = !topRow;
 		}
 
 		html.append("</div>\n");
