@@ -57,6 +57,9 @@ public class TaskCtrlBase {
 
 	protected Date lastTaskGeneration;
 
+	// latest datetime of a task being set to done, as encountered during task load at startup
+	protected Date latestTaskDoneTimeAtLoad;
+
 
 	protected void loadFromRoot(Record root) {
 
@@ -75,10 +78,20 @@ public class TaskCtrlBase {
 
 		List<Record> taskInstanceRecordsInDatabase = root.getArray(TASK_INSTANCES);
 		this.taskInstances = new ArrayList<>();
+		this.latestTaskDoneTimeAtLoad = null;
 		for (Record curTask : taskInstanceRecordsInDatabase) {
 			GenericTask task = taskInstanceFromRecord(curTask);
 			if (task != null) {
 				taskInstances.add(task);
+				if (task.hasBeenDone()) {
+					Date setToDoneDateTime = task.getSetToDoneDateTime();
+					if (setToDoneDateTime != null) {
+						if ((this.latestTaskDoneTimeAtLoad == null) ||
+							this.latestTaskDoneTimeAtLoad.before(setToDoneDateTime)) {
+							this.latestTaskDoneTimeAtLoad = setToDoneDateTime;
+						}
+					}
+				}
 			}
 		}
 
@@ -413,6 +426,10 @@ public class TaskCtrlBase {
 
 	public List<GenericTask> getTasks() {
 		return tasks;
+	}
+
+	public Date getLatestTaskDoneTimeAtLoad() {
+		return latestTaskDoneTimeAtLoad;
 	}
 
 }

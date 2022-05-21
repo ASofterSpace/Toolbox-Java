@@ -403,6 +403,15 @@ public class DateUtils {
 		return (int) Math.round((to.getTime() - from.getTime()) / (1000.0 * 60.0 * 60.0 * 24.0));
 	}
 
+	public static Integer getMinuteDifference(Date from, Date to) {
+		from = parseDate(serializeDate(from));
+		to = parseDate(serializeDate(to));
+		if ((from == null) || (to == null)) {
+			return null;
+		}
+		return (int) Math.round((to.getTime() - from.getTime()) / (1000.0 * 60.0));
+	}
+
 	/**
 	 * Returns true if date a is after date b (JUST speaking about days here!),
 	 * false otherwise or in case of nulls
@@ -557,6 +566,22 @@ public class DateUtils {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(someDate);
 		return cal.get(Calendar.HOUR_OF_DAY);
+	}
+
+	public static Date setHour(Date someDate, Integer newHour) {
+
+		if (someDate == null) {
+			someDate = new Date();
+		}
+
+		if (newHour == null) {
+			return someDate;
+		}
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(someDate);
+		cal.set(Calendar.HOUR_OF_DAY, newHour);
+		return cal.getTime();
 	}
 
 	/**
