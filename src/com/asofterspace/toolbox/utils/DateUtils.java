@@ -404,8 +404,6 @@ public class DateUtils {
 	}
 
 	public static Integer getMinuteDifference(Date from, Date to) {
-		from = parseDate(serializeDate(from));
-		to = parseDate(serializeDate(to));
 		if ((from == null) || (to == null)) {
 			return null;
 		}
