@@ -5,6 +5,8 @@
 package com.asofterspace.toolbox.utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -14,9 +16,13 @@ import java.io.IOException;
  */
 public class ProcessUtils {
 
-	public static Process startProcess(String command, String argument) throws IOException {
+	public static Process startProcess(String command, List<String> arguments) throws IOException {
 
-		ProcessBuilder processBuilder = new ProcessBuilder(command, argument);
+		List<String> cmdAndArgs = new ArrayList<>();
+		cmdAndArgs.add(command);
+		cmdAndArgs.addAll(arguments);
+
+		ProcessBuilder processBuilder = new ProcessBuilder(cmdAndArgs);
 
 		processBuilder.redirectErrorStream(true);
 

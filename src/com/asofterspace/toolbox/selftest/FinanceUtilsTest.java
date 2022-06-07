@@ -28,6 +28,8 @@ public class FinanceUtilsTest implements Test {
 		testMoneyParsing("1,004.50€", 100450);
 		testMoneyParsing("1.015,50 EUR", 101550);
 		testMoneyParsing(" 1.026.500USD", 102650);
+		testMoneyParsing("\t\n1,002 ", 100200);
+		testMoneyParsing("3, 141 592", 314);
 
 		TestUtils.succeed();
 	}

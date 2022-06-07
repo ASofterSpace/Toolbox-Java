@@ -31,9 +31,11 @@ public class FinanceUtils {
 	 *      1                 100
 	 *      2,5               250
 	 *      2.50€             250
-	 *   1,002.50€         100250
-	 *   1.002,50 EUR      100250
-	 *   1.002.50USD       100250
+	 *  1,002.50€          100250
+	 *  1.002,50 EUR       100250
+	 *  1.002.50USD        100250
+	 *  1,002              100200
+	 *      3.141592          314
 	 *
 	 * So parses the passed in money string and returns the result in cents (!)
 	 */
@@ -51,6 +53,8 @@ public class FinanceUtils {
 			amountStr = amountStr.replaceAll("EUR", "");
 			amountStr = amountStr.replaceAll("USD", "");
 			amountStr = amountStr.replaceAll("€", "");
+			amountStr = amountStr.replaceAll("$", "");
+			amountStr = amountStr.replaceAll("\\?", "");
 
 			amountStr = StrUtils.prepareForParsing(amountStr);
 
@@ -58,9 +62,11 @@ public class FinanceUtils {
 			//      1                1
 			//      2,5              2.5
 			//      2.50€            2.50
-			//   1,002.50€        1002.50
-			//   1.002,50 EUR     1002.50
-			//   1.002.50USD     1.002.50
+			//  1,002.50€         1002.50
+			//  1.002,50 EUR      1002.50
+			//  1.002.50USD      1.002.50
+			//  1,002            1.002
+			 //      3.141592         3.14
 			// so all commas should be gone, all currency texts should be gone
 			// however, if there were several dots, then there still are several
 
@@ -73,9 +79,13 @@ public class FinanceUtils {
 			// we are now sure that there is a dot somewhere in there, but the offset
 			// from the end might be wrong...
 			int offset = amountStr.length() - amountStr.lastIndexOf(".");
-			// shorten, so 2.500 to 2.50
-			if (offset > 3) {
+			// shorten, so 2.5000 to 2.50
+			if (offset > 4) {
 				amountStr = amountStr.substring(0, amountStr.length() - (offset - 3));
+			}
+			// simplify, so 2.500 to 2.500.00 (as we assume having a thousands-separator here instead)
+			if (offset == 4) {
+				amountStr = amountStr += ".00";
 			}
 			// elongate, so 2.5 to 2.50
 			if (offset == 1) {
@@ -89,9 +99,12 @@ public class FinanceUtils {
 			//      1                1.00
 			//      2,5              2.50
 			//      2.50€            2.50
-			//   1,002.50€        1002.50
-			//   1.002,50 EUR     1002.50
-			//   1.002.50USD     1.002.50
+			//  1,002.50€         1002.50
+			//  1.002,50 EUR      1002.50
+			//  1.002.50USD      1.002.50
+			//  1,002            1.002.00
+			 //      3.141592         3.14
+			//
 			// so drop all the dots...
 			amountStr = amountStr.replaceAll("\\.", "");
 

@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 94;
+	public final static int TOOLBOX_VERSION_NUMBER = 95;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
