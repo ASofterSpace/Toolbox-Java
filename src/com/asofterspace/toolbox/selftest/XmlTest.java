@@ -39,16 +39,17 @@ public class XmlTest implements Test {
 
 		XML xml = new XML(testStr);
 
-		System.out.println(xml);
-		System.out.println(new JSON(xml));
-
 		if (!xml.getName().equals("blubb")) {
+			System.out.println(xml);
+			System.out.println(new JSON(xml));
 			TestUtils.fail("We read <blubb><foo bar='test' /></blubb> as XML - " +
 				"and did not get blubb as name of the outmost element!");
 			return;
 		}
 
 		if (!((XML) xml.get("foo")).getAttributes().get("bar").equals("test")) {
+			System.out.println(xml);
+			System.out.println(new JSON(xml));
 			TestUtils.fail("We read <blubb><foo bar='test' /></blubb> as XML - " +
 				"and did not get test inside bar inside foo inside blubb!");
 			return;

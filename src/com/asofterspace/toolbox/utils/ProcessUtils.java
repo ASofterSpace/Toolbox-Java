@@ -16,6 +16,14 @@ import java.util.List;
  */
 public class ProcessUtils {
 
+	public static Process startProcess(String command, String... arguments) throws IOException {
+		List<String> args = new ArrayList<>();
+		for (String arg : arguments) {
+			args.add(arg);
+		}
+		return startProcess(command, args);
+	}
+
 	public static Process startProcess(String command, List<String> arguments) throws IOException {
 
 		List<String> cmdAndArgs = new ArrayList<>();
