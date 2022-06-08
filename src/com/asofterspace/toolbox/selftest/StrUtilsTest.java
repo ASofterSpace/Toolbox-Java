@@ -46,6 +46,8 @@ public class StrUtilsTest implements Test {
 		startsWithUpperCaseTest();
 
 		leftPadTest();
+
+		removePartsTest();
 	}
 
 	public void countStringInStringTest() {
@@ -442,6 +444,53 @@ public class StrUtilsTest implements Test {
 		result = StrUtils.leftPad("blubb", 'f', 6);
 		if (!result.equals("fblubb")) {
 			TestUtils.fail("We called leftPad(\"blubb\", 'f', 6) and got '" + result + "'!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	private void removePartsTest() {
+
+		TestUtils.start("Remove Parts (removeContaining, removeTrailing, removePronouns, ...)");
+
+		String result = StrUtils.removeContainingAndAfter(" blubb (bla)", "(");
+		if (!result.equals(" blubb ")) {
+			TestUtils.fail("We called removeContainingAndAfter(\" blubb (bla)\", \"(\") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeContainingAndAfter(" blubb (bla)", "[");
+		if (!result.equals(" blubb (bla)")) {
+			TestUtils.fail("We called removeContainingAndAfter(\" blubb (bla)\", \"[\") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeTrailing(" blubb (bla)", "(bla)");
+		if (!result.equals(" blubb ")) {
+			TestUtils.fail("We called removeTrailing(\" blubb (bla)\", \"(bla)\") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeTrailing(" blubb (bla)", "(");
+		if (!result.equals(" blubb (bla)")) {
+			TestUtils.fail("We called removeTrailing(\" blubb (bla)\", \"(\") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeTrailingPronounsFromName("Moya (she/any)");
+		if (!result.equals("Moya")) {
+			TestUtils.fail("We called removeTrailingPronounsFromName(\"Moya (she/any)\") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeTrailingPronounsFromName(" Hugo he/him ");
+		if (!result.equals("Hugo")) {
+			TestUtils.fail("We called removeTrailingPronounsFromName(\" Hugo he/him \") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeTrailingPronounsFromName(" Mari her ");
+		if (!result.equals("Mari")) {
+			TestUtils.fail("We called removeTrailingPronounsFromName(\" Mari her \") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeTrailingPronounsFromName("Fefi [they/them]");
+		if (!result.equals("Fefi")) {
+			TestUtils.fail("We called removeTrailingPronounsFromName(\"Fefi [they/them]\") and got '" + result + "'!");
 		}
 
 		TestUtils.succeed();

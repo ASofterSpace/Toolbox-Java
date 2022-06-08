@@ -30,6 +30,9 @@ public class StrUtils {
 
 	private static Random randGen = null;
 
+	private static String[] PRONOUNS = new String[]{
+		"she", "he", "her", "him", "they", "them", "it", "any", "*", "none"};
+
 
 	/**
 	 * Returns a randomly chosen char representing an ascii lower case or upper case letter,
@@ -1268,6 +1271,71 @@ public class StrUtils {
 		str = str.replace('\t', ' ');
 		str = StrUtils.replaceAllRepeatedly(str, "  ", " ");
 		str = str.trim();
+		return str;
+	}
+
+	/**
+	 * If a string contains the search string, remove the search string and anything
+	 * after it, but do NOT trim the string - if a trimmed string is wanted, let
+	 * the caller do that afterwards!
+	 *
+	 * So:
+	 * " blubb (bla)", "(" => " blubb "
+	 * " blubb (bla)", "[" => " blubb (bla)"
+	 */
+	public static String removeContainingAndAfter(String str, String searchStr) {
+		int index = str.indexOf(searchStr);
+		if (index >= 0) {
+			return str.substring(0, index);
+		}
+		return str;
+	}
+
+	/**
+	 * If a string ends with the search string, remove the search string and anything
+	 * after it, but do NOT trim the string - if a trimmed string is wanted, let
+	 * the caller do that afterwards (and possibly before calling this!)
+	 *
+	 * So:
+	 * " blubb (bla)", "(bla)" => " blubb "
+	 * " blubb (bla)", "(" => " blubb (bla)"
+	 */
+	public static String removeTrailing(String str, String searchStr) {
+		if (str.endsWith(searchStr)) {
+			return str.substring(0, str.length() - searchStr.length());
+		}
+		return str;
+	}
+
+	/**
+	 * Takes a name-ish text and removes pronouns, if any are included,
+	 * and trims the string
+	 *
+	 * So:
+	 * "Moya (she/any)" => "Moya"
+	 * " Hugo he/him " => "Hugo"
+	 */
+	public static String removeTrailingPronounsFromName(String str) {
+
+		// assume that anything in brackets is a pronoun
+		str = removeContainingAndAfter(str, "(");
+		str = removeContainingAndAfter(str, "[");
+
+		str = str.trim();
+
+		for (String pronoun : PRONOUNS) {
+
+			// remove trailing pronoun
+			str = removeTrailing(str, " " + pronoun);
+
+			// remove trailing pronoun/pronoun
+			for (String secondPronoun : PRONOUNS) {
+				str = removeTrailing(str, " " + pronoun + "/" + secondPronoun);
+			}
+		}
+
+		str = str.trim();
+
 		return str;
 	}
 }
