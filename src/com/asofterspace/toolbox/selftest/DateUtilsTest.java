@@ -232,8 +232,20 @@ public class DateUtilsTest implements Test {
 
 		result = DateUtils.listDaysFromTo(now, tenDaysAgo);
 
+		if (result.size() != amount) {
+			TestUtils.fail("We wanted to list the days from now until " + amount + " days ago, but did not get " + amount + " days! (Which we should have gotten, as the input should have automatically been switched around!)");
+		}
+
+		result = DateUtils.listDaysFromTo(now, now);
+
 		if (result.size() != 0) {
-			TestUtils.fail("We wanted to list the days from now until " + amount + " days ago, but did not get 0 days!");
+			TestUtils.fail("We wanted to list the days from now until now, but did not get 0 days!");
+		}
+
+		result = DateUtils.listDaysFromTo(now, DateUtils.daysInTheFuture(1));
+
+		if (result.size() != 1) {
+			TestUtils.fail("We wanted to list the days from now until tomorrow, but did not get 1 day!");
 		}
 
 		TestUtils.succeed();
