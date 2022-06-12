@@ -473,6 +473,16 @@ public class StrUtilsTest implements Test {
 			TestUtils.fail("We called removeTrailing(\" blubb (bla)\", \"(\") and got '" + result + "'!");
 		}
 
+		result = StrUtils.removeTrailing(" blubb (BLA)", "(bla)");
+		if (!result.equals(" blubb (BLA)")) {
+			TestUtils.fail("We called removeTrailing(\" blubb (BLA)\", \"(bla)\") and got '" + result + "'!");
+		}
+
+		result = StrUtils.removeTrailingCaseIndifferent(" blubb (BLA)", "(bla)");
+		if (!result.equals(" blubb ")) {
+			TestUtils.fail("We called removeTrailing(\" blubb (BLA)\", \"(bla)\") and got '" + result + "'!");
+		}
+
 		result = StrUtils.removeTrailingPronounsFromName("Moya (she/any)");
 		if (!result.equals("Moya")) {
 			TestUtils.fail("We called removeTrailingPronounsFromName(\"Moya (she/any)\") and got '" + result + "'!");

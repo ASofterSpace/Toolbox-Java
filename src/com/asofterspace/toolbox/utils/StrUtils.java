@@ -1308,6 +1308,22 @@ public class StrUtils {
 	}
 
 	/**
+	 * If a string ends with the search string, remove the search string and anything
+	 * after it, but do NOT trim the string - if a trimmed string is wanted, let
+	 * the caller do that afterwards (and possibly before calling this!)
+	 *
+	 * So:
+	 * " blubb (BLA)", "(bla)" => " blubb "
+	 * " blubb (bla)", "(" => " blubb (bla)"
+	 */
+	public static String removeTrailingCaseIndifferent(String str, String searchStr) {
+		if (str.toLowerCase().endsWith(searchStr)) {
+			return str.substring(0, str.length() - searchStr.length());
+		}
+		return str;
+	}
+
+	/**
 	 * Takes a name-ish text and removes pronouns, if any are included,
 	 * and trims the string
 	 *
@@ -1323,16 +1339,22 @@ public class StrUtils {
 
 		str = str.trim();
 
+		str = removeTrailing(str, "!");
+
 		for (String pronoun : PRONOUNS) {
 
 			// remove trailing pronoun
-			str = removeTrailing(str, " " + pronoun);
+			str = removeTrailingCaseIndifferent(str, " " + pronoun);
 
 			// remove trailing pronoun/pronoun
 			for (String secondPronoun : PRONOUNS) {
-				str = removeTrailing(str, " " + pronoun + "/" + secondPronoun);
+				str = removeTrailingCaseIndifferent(str, " " + pronoun + "/" + secondPronoun);
 			}
 		}
+
+		str = str.trim();
+
+		str = removeTrailing(str, "-");
 
 		str = str.trim();
 
