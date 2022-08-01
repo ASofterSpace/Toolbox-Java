@@ -16,6 +16,8 @@ public class SimpleFile extends TextFile {
 
 	protected List<String> filecontents;
 
+	private String originalLineEndStr = "\n";
+
 
 	/**
 	 * Please do not construct a file without a name ;)
@@ -214,15 +216,16 @@ public class SimpleFile extends TextFile {
 
 		filecontents = new ArrayList<String>();
 
-		String[] lines = content.split("\n");
+		originalLineEndStr = "\n";
+		if (content.contains("\r\n")) {
+			originalLineEndStr = "\r\n";
+		} else if (content.contains("\r")) {
+			originalLineEndStr = "\r";
+		}
+
+		String[] lines = content.split(originalLineEndStr);
 
 		for (String line : lines) {
-			if (line.endsWith("\r")) {
-				line = line.substring(0, line.length() - 1);
-			}
-			if (line.startsWith("\r")) {
-				line = line.substring(1);
-			}
 			filecontents.add(line);
 		}
 	}
@@ -333,6 +336,14 @@ public class SimpleFile extends TextFile {
 
 			textOther.setContent(this.getContent());
 		}
+	}
+
+	/**
+	 * Get the line endings that the file had when it was originally loaded
+	 * (SimpleFile converts them to "\n" on load!)
+	 */
+	public String getOriginalLineEndStr() {
+		return originalLineEndStr;
 	}
 
 	/**
