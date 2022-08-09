@@ -12,6 +12,8 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 
 /**
  * This is a bar item right inside the main menu with a bar that
@@ -60,13 +62,21 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				mouseDown = true;
-				displayBarAtPosition(e.getX());
+				if (SwingUtilities.isRightMouseButton(e)) {
+					displayBarAtPosition(null);
+				} else {
+					displayBarAtPosition(e.getX());
+				}
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				mouseDown = false;
-				setBarPosition(e.getX(), true);
+				if (SwingUtilities.isRightMouseButton(e)) {
+					setBarPosition(null, true);
+				} else {
+					setBarPosition(e.getX(), true);
+				}
 			}
 		});
 
