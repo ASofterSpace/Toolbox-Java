@@ -25,7 +25,7 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 	private int min;
 	private int max;
-	private int pos;
+	private Integer pos;
 
 	private boolean mouseDown;
 
@@ -112,15 +112,15 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 	private void displayBarAtPosition(Integer newPos) {
 
 		if (newPos == null) {
-			newPos = 0;
-		}
-
-		if (newPos > max) {
-			this.pos = max;
-		} else if (newPos < min) {
-			this.pos = min;
-		} else {
 			this.pos = newPos;
+		} else {
+			if (newPos > max) {
+				this.pos = max;
+			} else if (newPos < min) {
+				this.pos = min;
+			} else {
+				this.pos = newPos;
+			}
 		}
 
 		repaint();
@@ -154,7 +154,16 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		g.setColor(getBackground());
 		g.fillRect(BORDER_WIDTH, BORDER_WIDTH, innerWidth, innerHeight);
 		g.setColor(getForeground());
-		g.fillRect(BORDER_WIDTH, BORDER_WIDTH, (innerWidth * pos) / max, innerHeight);
+		if (pos == null) {
+			int quarterWidth = innerWidth / 4;
+			int halfHeight = innerHeight / 2;
+			g.fillRect(BORDER_WIDTH, BORDER_WIDTH, quarterWidth, halfHeight);
+			g.fillRect(BORDER_WIDTH + quarterWidth, BORDER_WIDTH + halfHeight, quarterWidth, halfHeight);
+			g.fillRect(BORDER_WIDTH + (2 * quarterWidth), BORDER_WIDTH, quarterWidth, halfHeight);
+			g.fillRect(BORDER_WIDTH + (3 * quarterWidth), BORDER_WIDTH + halfHeight, quarterWidth, halfHeight);
+		} else {
+			g.fillRect(BORDER_WIDTH, BORDER_WIDTH, (innerWidth * pos) / max, innerHeight);
+		}
 
 		// if we re-introduce a label text, then the label should be written here :)
 	}
