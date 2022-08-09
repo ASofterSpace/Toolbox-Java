@@ -66,7 +66,7 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				mouseDown = false;
-				setBarPosition(e.getX());
+				setBarPosition(e.getX(), true);
 			}
 		});
 
@@ -100,11 +100,13 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		setMaximumSize(new Dimension(max + 2 * BORDER_WIDTH, (int) getMaximumSize().getHeight()));
 	}
 
-	public void setBarPosition(Integer newPos) {
+	public void setBarPosition(Integer newPos, boolean notifyListeners) {
 
 		displayBarAtPosition(newPos);
 
-		notifyBarListeners();
+		if (notifyListeners) {
+			notifyBarListeners();
+		}
 	}
 
 	private void displayBarAtPosition(Integer newPos) {
