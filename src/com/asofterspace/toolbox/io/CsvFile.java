@@ -89,7 +89,15 @@ public class CsvFile extends SimpleFile {
 
 	public List<String> getContentLineInColumns() {
 
-		String line = getContentLine();
+		return getLineInColumns(getContentLine());
+	}
+
+	public List<String> getHeadLineInColumns() {
+
+		return getLineInColumns(getHeadLine());
+	}
+
+	private List<String> getLineInColumns(String line) {
 
 		if (line == null) {
 			return null;
