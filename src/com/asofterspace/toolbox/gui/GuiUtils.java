@@ -57,6 +57,19 @@ public class GuiUtils {
 		return false;
 	}
 
+	public static String complainstr(String complainAbout) {
+
+		JOptionPane.showMessageDialog(
+			null,
+			complainAbout,
+			Utils.getProgramTitle(),
+			JOptionPane.ERROR_MESSAGE
+		);
+
+		// we return null, which can then immediately be returned by the caller
+		return null;
+	}
+
 	/**
 	 * Asks the user to confirm the request for deleting the thing toBeDeleted.
 	 * Returns true if the user selects Yes to the deletion.
