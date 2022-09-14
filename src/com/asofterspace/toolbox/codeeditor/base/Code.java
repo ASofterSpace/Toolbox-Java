@@ -1049,7 +1049,9 @@ public abstract class Code extends DefaultStyledDocument {
 										repStrBuilder.append("\t");
 									}
 									if (line.startsWith(repStrBuilder.toString())) {
-										line = line.substring(0, i - 1) + "   " + line.substring(i);
+										if (i > 0) {
+											line = line.substring(0, i - 1) + "   " + line.substring(i);
+										}
 										replaceAmount += 2;
 										replacedSomeInThisLine = true;
 										break;
@@ -3873,6 +3875,10 @@ public abstract class Code extends DefaultStyledDocument {
 		}
 
 		return result;
+	}
+
+	public List<String> getErrors() {
+		return new ArrayList<>();
 	}
 
 	public void setFilename(String filename) {

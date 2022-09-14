@@ -1257,6 +1257,29 @@ public class StrUtils {
 	}
 
 	/**
+	 * remove all whitespaces in the string
+	 */
+	public static String removeWhitespace(String origStr) {
+
+		if (origStr == null) {
+			return null;
+		}
+
+		String value = origStr;
+
+		// TODO :: actually make this more performant by iterating over the entire string just once
+		// and building the result in a StringBuilder, char-for-char, unless the char is a whitespace...
+
+		value = value.replaceAll("\u00a0", "");
+		value = value.replaceAll("\r", "");
+		value = value.replaceAll("\n", "");
+		value = value.replaceAll("\t", "");
+		value = value.replaceAll(" ", "");
+
+		return value;
+	}
+
+	/**
 	 * Takes some text extracted from HTML, which might contain several linebreaks,
 	 * and which might contain funny multiple whitespaces, and transforms it into
 	 * one trimmed line with the whitespaces between words being just one space,

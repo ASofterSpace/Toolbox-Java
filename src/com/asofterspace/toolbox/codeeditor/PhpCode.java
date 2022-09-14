@@ -66,6 +66,27 @@ public class PhpCode extends HtmlCode {
 		super(editor);
 	}
 
+	@Override
+	public List<String> getErrors() {
+		List<String> errors = super.getErrors();
+
+		String content = decoratedEditor.getText();
+
+		if (filename.endsWith(".blade.php")) {
+			if (content.contains("@elif")) {
+				errors.add("You are using @elif in a blade template - but it should be @elseif!");
+			}
+		}
+
+		String whitespacelessContent = StrUtils.removeWhitespace(content);
+		if (whitespacelessContent.contains("'+") || whitespacelessContent.contains("+'") ||
+			whitespacelessContent.contains("\"+") || whitespacelessContent.contains("+\"")) {
+			errors.add("You are concatenating strings using a plus, but in PHP you should concatenate via dot!");
+		}
+
+		return errors;
+	}
+
 	// entering text in PHP mode should not behave exactly the same as in Java-mode, but close enough for it
 	// to make sense to call it for now
 	@Override
