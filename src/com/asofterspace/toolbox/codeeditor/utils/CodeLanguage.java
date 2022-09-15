@@ -5,6 +5,9 @@
 package com.asofterspace.toolbox.codeeditor.utils;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
+import com.asofterspace.toolbox.io.HTML;
+import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.XML;
 
 import javax.swing.JTextPane;
 
@@ -31,6 +34,7 @@ public enum CodeLanguage {
 	PYTHON("Python"),
 	GO("Go"),
 	SHELL("Shell Script"),
+	STL("STL"),
 	XML("XML");
 
 
@@ -115,6 +119,10 @@ public enum CodeLanguage {
 
 		if (lowfilename.endsWith(".go")) {
 			return CodeLanguage.GO;
+		}
+
+		if (lowfilename.endsWith(".stl")) {
+			return CodeLanguage.STL;
 		}
 
 		return CodeLanguage.PLAINTEXT;

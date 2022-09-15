@@ -159,6 +159,10 @@ public class XML extends Record {
 	 * @return a string in which all such signs are escaped
 	 */
 	public static String escapeXMLstr(Object strToEscape) {
+		return escapeXMLstr(strToEscape, "&#10;");
+	}
+
+	public static String escapeXMLstr(Object strToEscape, String escapeNewlinesTo) {
 
 		if (strToEscape == null) {
 			return "";
@@ -180,15 +184,12 @@ public class XML extends Record {
 					result.append("&gt;");
 					break;
 				case '\n':
-					result.append("&#10;");
+					result.append(escapeNewlinesTo);
 					break;
 				case '\r':
 					break;
 				case '\t':
 					result.append("&#9;");
-					break;
-				case '&':
-					result.append("&amp;");
 					break;
 				case '\'':
 					result.append("&apos;");
@@ -223,6 +224,9 @@ public class XML extends Record {
 				case 'ß':
 					result.append("&szlig;");
 					break;
+				case '&':
+					result.append("&amp;");
+					break;
 			default:
 				if (c > 0x7e) {
 					result.append("&#");
@@ -240,6 +244,9 @@ public class XML extends Record {
 	public static String unescapeXMLstr(String str) {
 
 		str = str.replace("&#10;", "\n");
+		str = str.replace("&#xD;&#xA;", "\n");
+		str = str.replace("&#xD;", "\n");
+		str = str.replace("&#xA;", "\n");
 		str = str.replace("&#9;", "\t");
 		str = str.replace("&#039;", "'");
 		str = str.replace("&#160;", " ");
@@ -247,7 +254,6 @@ public class XML extends Record {
 		str = str.replace("&lt;", "<");
 		str = str.replace("&apos;", "'");
 		str = str.replace("&quot;", "\"");
-		str = str.replace("&amp;", "&");
 		str = str.replace("&auml;", "ä");
 		str = str.replace("&ouml;", "ö");
 		str = str.replace("&uuml;", "ü");
@@ -257,6 +263,7 @@ public class XML extends Record {
 		str = str.replace("&aelig;", "æ");
 		str = str.replace("&AElig;", "Æ");
 		str = str.replace("&szlig;", "ß");
+		str = str.replace("&amp;", "&");
 
 		return str;
 	}

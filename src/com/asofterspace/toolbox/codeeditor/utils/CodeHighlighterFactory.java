@@ -20,6 +20,7 @@ import com.asofterspace.toolbox.codeeditor.PhpCode;
 import com.asofterspace.toolbox.codeeditor.PlainText;
 import com.asofterspace.toolbox.codeeditor.PythonCode;
 import com.asofterspace.toolbox.codeeditor.ShellCode;
+import com.asofterspace.toolbox.codeeditor.StlCode;
 import com.asofterspace.toolbox.codeeditor.TypeScriptCode;
 import com.asofterspace.toolbox.codeeditor.XmlCode;
 
@@ -78,6 +79,9 @@ public class CodeHighlighterFactory {
 				break;
 			case GO:
 				highlighter = new GoCode(editor);
+				break;
+			case STL:
+				highlighter = new StlCode(editor);
 				break;
 			case SHELL:
 				highlighter = new ShellCode(editor);
