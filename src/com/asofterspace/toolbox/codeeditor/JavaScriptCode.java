@@ -252,11 +252,14 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 		if (isKeyword(couldBeKeyword)) {
 			if ("function".equals(couldBeKeyword)) {
-				String functionName = getFunctionNameFromLine(StrUtils.getLineFromPosition(start, content));
-				if (functionName.length() > 0) {
-					// add any line that contain the "function" keyword as a function
-					// (later on lines with indentation > 4 will be removed from that list though!)
-					functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+				String line = StrUtils.getLineFromPosition(start, content);
+				if (!line.endsWith(";")) {
+					String functionName = getFunctionNameFromLine(line);
+					if (functionName.length() > 0) {
+						// add any line that contain the "function" keyword as a function
+						// (later on lines with indentation > 4 will be removed from that list though!)
+						functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+					}
 				}
 			}
 			getMe().setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
