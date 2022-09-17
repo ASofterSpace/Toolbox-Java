@@ -9,15 +9,14 @@ import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.utils.StrUtils;
 
+import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 
 
 public class JavaScriptCode extends FunctionSupplyingCode {
@@ -253,7 +252,7 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 		if (isKeyword(couldBeKeyword)) {
 			if ("function".equals(couldBeKeyword)) {
 				String line = StrUtils.getLineFromPosition(start, content);
-				if (!line.endsWith(";")) {
+				if (!line.endsWith(";") && !line.contains("(function")) {
 					String functionName = getFunctionNameFromLine(line);
 					if (functionName.length() > 0) {
 						// add any line that contain the "function" keyword as a function
@@ -276,7 +275,10 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 					String functionName = lastCouldBeKeyword + " " + couldBeKeyword + "()";
 					// add any line that contains " foo(" as a function
 					// (later on lines with indentation > 4 will be removed from that list though!)
-					functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+					String line = StrUtils.getLineFromPosition(start, content);
+					if (!line.endsWith(";")) {
+						functions.add(new CodeSnippetWithLocation(functionName, StrUtils.getLineStartFromPosition(start, content)));
+					}
 				}
 			}
 		}
