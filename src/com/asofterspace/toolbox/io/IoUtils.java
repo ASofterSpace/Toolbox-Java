@@ -148,15 +148,39 @@ public class IoUtils {
 		}
 	}
 
+	public static Process executeAsync(String command, String... arguments) throws IOException {
+		List<String> args = new ArrayList<>();
+		for (String arg : arguments) {
+			args.add(arg);
+		}
+		return executeAsync(command, args);
+	}
+
+	public static Process executeAsync(String command, List<String> arguments) throws IOException {
+
+		List<String> cmdAndArgs = new ArrayList<>();
+		cmdAndArgs.add(command);
+		cmdAndArgs.addAll(arguments);
+
+		ProcessBuilder processBuilder = new ProcessBuilder(cmdAndArgs);
+
+		processBuilder.redirectErrorStream(true);
+
+		processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+
+		return processBuilder.start();
+	}
+
 	/**
 	 * Just execute a simple command asynchronously
 	 */
-	public static void executeAsync(String command) {
+	public static Process executeAsync(String command) {
 		try {
-			Runtime.getRuntime().exec(command);
+			return Runtime.getRuntime().exec(command);
 		} catch (IOException e) {
 			System.err.println("There was an I/O Exception while executing an external command asynchronously: " + e);
 		}
+		return null;
 	}
 
 	public static void shutdownOS() {
