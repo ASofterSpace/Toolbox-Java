@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.xlsx;
 
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
@@ -31,6 +32,14 @@ public class XlsmFile extends XlsxFile {
 	public XlsmFile(File regularFile) {
 
 		super(regularFile);
+	}
+
+	/**
+	 * You can construct an XlsmFile instance by basing it on a directory and a filename.
+	 */
+	public XlsmFile(Directory parentDirectory, String filename) {
+
+		super(parentDirectory, filename);
 	}
 
 	/**

@@ -7,8 +7,14 @@ package com.asofterspace.toolbox.xlsx;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
+import com.asofterspace.toolbox.utils.Record;
+import com.asofterspace.toolbox.utils.SortOrder;
+import com.asofterspace.toolbox.utils.SortUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class XlsxSheet {
@@ -31,38 +37,87 @@ public class XlsxSheet {
 		this.parent = parent;
 	}
 
-	public String getCellContent(String cellName) {
+	/**
+	 * Gets the content of a single cell
+	 */
+	public Record getCellContent(String cellName) {
 
 		List<XmlElement> matchingCells = sheetFile.domGetElems("c", "r", cellName);
 
 		for (XmlElement cell : matchingCells) {
 
-			String cellType = cell.getAttribute("t");
+			return getXmlElementContent(cell);
+		}
 
-			// no cellType means integer
-			if (cellType == null) {
-				return cell.getChild("v").getInnerText();
+		return null;
+	}
+
+	/**
+	 * Gets the contents of all cells
+	 */
+	public Map<String, Record> getCellContents() {
+
+		Map<String, Record> results = new HashMap<>();
+		List<XmlElement> cells = sheetFile.domGetElems("c");
+
+		for (XmlElement cell : cells) {
+			results.put(cell.getAttribute("r"), getXmlElementContent(cell));
+		}
+
+		return results;
+	}
+
+	private Record getXmlElementContent(XmlElement cell) {
+
+		String cellType = cell.getAttribute("t");
+		XmlElement vChild = cell.getChild("v");
+
+		if (vChild == null) {
+			return null;
+		}
+
+		// no cellType means integer
+		if (cellType == null) {
+			String intContentStr = vChild.getInnerText();
+
+			try {
+				int intContent = Integer.parseInt(intContentStr);
+
+				return new Record(intContent);
+
+			} catch (NumberFormatException e) {
+				// ooops... the string could not be parsed, humm...
 			}
+		}
 
-			// cellType s means string (from the shared strings document)
-			if (cellType.equals("s")) {
-				// we have a string... and the strings are kept in a separate string file... so look there!
-				String sharedStringIndexStr = cell.getChild("v").getInnerText();
-				try {
-					int sharedStringIndex = Integer.parseInt(sharedStringIndexStr);
+		// cellType s means string (from the shared strings document)
+		if (cellType.equals("s")) {
+			// we have a string... and the strings are kept in a separate string file... so look there!
+			String sharedStringIndexStr = vChild.getInnerText();
+			try {
+				int sharedStringIndex = Integer.parseInt(sharedStringIndexStr);
 
-					List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
+				List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
 
-					XmlElement actualStringElement = sharedStrings.get(sharedStringIndex);
+				XmlElement actualStringElement = sharedStrings.get(sharedStringIndex);
 
-					return actualStringElement.getChild("t").getInnerText();
-
-				} catch (NumberFormatException e) {
-					// ooops... the string could not be parsed, humm...
+				XmlElement tChild = actualStringElement.getChild("t");
+				if (tChild == null) {
+					XmlElement rChild = actualStringElement.getChild("r");
+					if (rChild != null) {
+						tChild = rChild.getChild("t");
+					}
 				}
-			}
+				if (tChild != null) {
+					String strContent = tChild.getInnerText();
+					if (strContent != null) {
+						return new Record(strContent);
+					}
+				}
 
-			return "unknown";
+			} catch (NumberFormatException e) {
+				// ooops... the string could not be parsed, humm...
+			}
 		}
 
 		return null;
@@ -331,6 +386,24 @@ public class XlsxSheet {
 
 	public void save() {
 		sheetFile.save();
+	}
+
+	@Override
+	public String toString() {
+
+		StringBuilder cellStr = new StringBuilder();
+
+		Map<String, Record> cellContents = getCellContents();
+		Set<String> cellKeys = cellContents.keySet();
+		List<String> sortedKeys = SortUtils.sort(cellKeys, SortOrder.NUMERICAL);
+		String sep = "";
+		for (String key : sortedKeys) {
+			cellStr.append(sep);
+			sep = ",";
+			cellStr.append(key);
+		}
+
+		return "XlsxSheet [title: " + this.title + ", cells: [" + cellStr.toString() + "]]";
 	}
 
 }

@@ -401,6 +401,14 @@ public class JSON extends Record {
 		return pos;
 	}
 
+	public static String toString(Record item) {
+		if (item == null) {
+			return "null";
+		}
+		JSON jsonItem = new JSON(item);
+		return jsonItem.toString();
+	}
+
 	@Override
 	protected String toString(Record item, boolean compressed, String linePrefix) {
 
