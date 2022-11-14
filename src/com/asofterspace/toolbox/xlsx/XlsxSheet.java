@@ -53,6 +53,44 @@ public class XlsxSheet {
 	}
 
 	/**
+	 * Gets the contents of all cells of that row
+	 */
+	public Map<String, Record> getRowContents(String rowNum) {
+
+		Map<String, Record> results = new HashMap<>();
+		List<XmlElement> cells = sheetFile.domGetElems("c");
+
+		for (XmlElement cell : cells) {
+			String which = cell.getAttribute("r");
+			String numPart = nameToRow(which);
+			if (rowNum.equals(numPart)) {
+				results.put(which, getXmlElementContent(cell));
+			}
+		}
+
+		return results;
+	}
+
+	/**
+	 * Gets the contents of all cells of that column
+	 */
+	public Map<String, Record> getColContents(String colName) {
+
+		Map<String, Record> results = new HashMap<>();
+		List<XmlElement> cells = sheetFile.domGetElems("c");
+
+		for (XmlElement cell : cells) {
+			String which = cell.getAttribute("r");
+			String colPart = nameToCol(which);
+			if (colName.equals(colPart)) {
+				results.put(which, getXmlElementContent(cell));
+			}
+		}
+
+		return results;
+	}
+
+	/**
 	 * Gets the contents of all cells
 	 */
 	public Map<String, Record> getCellContents() {
@@ -65,6 +103,24 @@ public class XlsxSheet {
 		}
 
 		return results;
+	}
+
+	/**
+	 * Gets the number of the highest-numbered row in the sheet that contains a cell, so is not entirely empty
+	 */
+	public int getHighestRowNum() {
+
+		int result = 0;
+		List<XmlElement> cells = sheetFile.domGetElems("c");
+
+		for (XmlElement cell : cells) {
+			int newRes = nameToRowI(cell.getAttribute("r"));
+			if (newRes > result) {
+				result = newRes;
+			}
+		}
+
+		return result;
 	}
 
 	private Record getXmlElementContent(XmlElement cell) {
@@ -131,7 +187,10 @@ public class XlsxSheet {
 
 			// the cell already exists and we are just editing it in place
 
+			// is the cell a string cell?
 			if ("s".equals(cell.getAttribute("t"))) {
+				// the cell is a string cell
+
 				// edit the shared string itself - TODO :: actually, check if the string is in use anywhere else first!
 
 				// we just set this to string... and the strings are kept in a separate string file... so put it there!
@@ -141,15 +200,35 @@ public class XlsxSheet {
 
 					List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
 
-					XmlElement actualStringElement = sharedStrings.get(sharedStringIndex).getChild("t");
+					XmlElement actualStringElement = sharedStrings.get(sharedStringIndex);
+					XmlElement tChild = actualStringElement.getChild("t");
 
-					actualStringElement.setInnerText(newContent);
+					if (tChild == null) {
+						XmlElement rChild = actualStringElement.getChild("r");
+						if (rChild != null) {
+							tChild = rChild.getChild("t");
+							if (tChild == null) {
+								tChild = rChild.createChild("t");
+							}
+						} else {
+							tChild = actualStringElement.createChild("t");
+						}
+					}
+
+					if (newContent.equals(tChild.getInnerText())) {
+						// nothing to be done, the value is already correct!
+						return;
+					}
+
+					tChild.setInnerText(newContent);
 
 				} catch (NumberFormatException e) {
 					// ooops... the string could not be parsed, humm...
 				}
 
 			} else {
+				// the cell is not yet a string cell
+
 				// create the shared string
 
 				cell.setAttribute("t", "s");
@@ -164,7 +243,12 @@ public class XlsxSheet {
 
 					actualStringElement.setInnerText(newContent);
 
-					cell.getChild("v").setInnerText(newSharedStringIndex);
+					XmlElement vCell = cell.getChild("v");
+					if (vCell == null) {
+						vCell = cell.createChild("v");
+					}
+
+					vCell.setInnerText(newSharedStringIndex);
 
 				} catch (NumberFormatException e) {
 					// ooops... the string could not be parsed, humm...
@@ -250,6 +334,9 @@ public class XlsxSheet {
 	}
 
 	public static String nameToCol(String cellName) {
+		if (cellName == null) {
+			return null;
+		}
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < cellName.length(); i++) {
 			if (Character.isLetter(cellName.charAt(i))) {
@@ -282,6 +369,9 @@ public class XlsxSheet {
 	}
 
 	public static String nameToRow(String cellName) {
+		if (cellName == null) {
+			return null;
+		}
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < cellName.length(); i++) {
 			if (Character.isDigit(cellName.charAt(i))) {
