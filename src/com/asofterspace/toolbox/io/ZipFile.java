@@ -201,6 +201,9 @@ public class ZipFile extends File {
 
 		java.io.File outputFile = new java.io.File(newLocation);
 
+		// create parent directories
+		outputFile.getParentFile().mkdirs();
+
 		try (ZipOutputStream data = new ZipOutputStream(new FileOutputStream(outputFile))) {
 
 			if (zippedFiles == null) {
