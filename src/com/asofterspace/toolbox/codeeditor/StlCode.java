@@ -24,7 +24,7 @@ public class StlCode extends FunctionSupplyingCode {
 	private static final long serialVersionUID = 1L;
 
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"LOG", "FOR", "TO", "SWITCH", "OTHERWISE", "ENDSWITCH", "DELAY", "CALL", "PROMPT", "FORMAT", "MSG", "NOW", "TOSTRING", "PROCEDURE", "TRUE", "FALSE", "WHEN", "INPUT", "DEFAULT", "SELECT", "ENDSELECT", "REQUIRE", "IF", "ENDIF", "ELSE", "SET", "THEN", "TITLE", "HELP", "ENDHELP", "DEFINE", "PRIVILEGE", "CTRL", "WINDOW", "MANDATORY", "ON", "EXIT", "DO", "ENDDO", "BEGIN", "END"}
+		new String[] {"LOG", "FOR", "TO", "SWITCH", "OTHERWISE", "ENDSWITCH", "DELAY", "CALL", "PROMPT", "FORMAT", "MSG", "NOW", "TOSTRING", "PROCEDURE", "TRUE", "FALSE", "WHEN", "INPUT", "DEFAULT", "SELECT", "ENDSELECT", "REQUIRE", "IF", "ENDIF", "ELSE", "SET", "THEN", "TITLE", "HELP", "ENDHELP", "DEFINE", "PRIVILEGE", "CTRL", "WINDOW", "MANDATORY", "ON", "EXIT", "DO", "ENDDO", "BEGIN", "END", "AND", "VERIFY", "TIMEOUT", "UNIT", "BREAK"}
 	));
 
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(

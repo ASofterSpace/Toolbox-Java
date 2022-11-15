@@ -10,7 +10,6 @@ import com.asofterspace.toolbox.io.XML;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.utils.StrUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -70,45 +69,14 @@ public class WebExtractor {
 	 * Extract the content from the html string that is between strbefore and strafter
 	 */
 	public static String extract(String html, String strbefore, String strafter) {
-		if (html == null) {
-			return null;
-		}
-		int len = strbefore.length();
-		int startindex = html.indexOf(strbefore);
-		int endindex = html.indexOf(strafter, startindex + len);
-		if ((startindex >= 0) && (endindex >= startindex + len)) {
-			return html.substring(startindex + len, endindex);
-		}
-		if (startindex >= 0) {
-			return html.substring(startindex + len);
-		}
-		return null;
+		return StrUtils.extract(html, strbefore, strafter);
 	}
 
 	/**
 	 * Extract the contents from the html string that are between strbefores and strafters
 	 */
 	public static List<String> extractAll(String html, String strbefore, String strafter) {
-		if (html == null) {
-			return null;
-		}
-		List<String> result = new ArrayList<>();
-		int cur = 0;
-		int len = strbefore.length();
-		while (html.indexOf(strbefore, cur) >= 0) {
-			int startindex = html.indexOf(strbefore, cur);
-			int endindex = html.indexOf(strafter, startindex + len);
-			if ((startindex >= 0) && (endindex >= startindex + len)) {
-				result.add(html.substring(startindex + len, endindex));
-				cur = endindex + strafter.length();
-			} else if (startindex >= 0) {
-				result.add(html.substring(startindex + len));
-				break;
-			} else {
-				break;
-			}
-		}
-		return result;
+		return StrUtils.extractAll(html, strbefore, strafter);
 	}
 
 	public static Integer getNumberFromHtml(String html, String strbefore, String strafter) {

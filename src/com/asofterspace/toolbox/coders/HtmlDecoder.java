@@ -4,7 +4,7 @@
  */
 package com.asofterspace.toolbox.coders;
 
-import com.asofterspace.toolbox.io.XML;
+import com.asofterspace.toolbox.io.HTML;
 
 
 /**
@@ -17,7 +17,7 @@ public class HtmlDecoder {
 	 */
 	public static String decode(String str) {
 
-		return XML.unescapeXMLstr(str);
+		return HTML.unescapeHTMLstr(str);
 	}
 
 }

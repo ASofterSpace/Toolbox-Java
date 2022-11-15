@@ -134,6 +134,51 @@ public class StrUtils {
 		return true;
 	}
 
+	/**
+	 * Extract the content from the haystack string that is between strbefore and strafter
+	 */
+	public static String extract(String haystack, String strbefore, String strafter) {
+		if (haystack == null) {
+			return null;
+		}
+		int len = strbefore.length();
+		int startindex = haystack.indexOf(strbefore);
+		int endindex = haystack.indexOf(strafter, startindex + len);
+		if ((startindex >= 0) && (endindex >= startindex + len)) {
+			return haystack.substring(startindex + len, endindex);
+		}
+		if (startindex >= 0) {
+			return haystack.substring(startindex + len);
+		}
+		return null;
+	}
+
+	/**
+	 * Extract the contents from the haystack string that are between strbefores and strafters
+	 */
+	public static List<String> extractAll(String haystack, String strbefore, String strafter) {
+		if (haystack == null) {
+			return null;
+		}
+		List<String> result = new ArrayList<>();
+		int cur = 0;
+		int len = strbefore.length();
+		while (haystack.indexOf(strbefore, cur) >= 0) {
+			int startindex = haystack.indexOf(strbefore, cur);
+			int endindex = haystack.indexOf(strafter, startindex + len);
+			if ((startindex >= 0) && (endindex >= startindex + len)) {
+				result.add(haystack.substring(startindex + len, endindex));
+				cur = endindex + strafter.length();
+			} else if (startindex >= 0) {
+				result.add(haystack.substring(startindex + len));
+				break;
+			} else {
+				break;
+			}
+		}
+		return result;
+	}
+
 	public static int countCharInString(char find, String inHere) {
 
 		return countCharInString(find, inHere, inHere.length());

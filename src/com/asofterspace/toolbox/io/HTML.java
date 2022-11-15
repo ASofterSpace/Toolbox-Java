@@ -63,6 +63,7 @@ public class HTML {
 	}
 
 	public static String unescapeHTMLstr(String strToUnescape) {
+		strToUnescape = StrUtils.replaceAll(strToUnescape, "&nbsp;", " ");
 		return XML.unescapeXMLstr(strToUnescape);
 	}
 
