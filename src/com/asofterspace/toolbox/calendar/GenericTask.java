@@ -17,6 +17,9 @@ public class GenericTask {
 
 	protected String title;
 
+	// on which Xth weekday of the month is this task scheduled?
+	protected Integer scheduledOnXDayOfMonth;
+
 	// on which day of the month is this task scheduled?
 	protected Integer scheduledOnDay;
 
@@ -68,10 +71,12 @@ public class GenericTask {
 	protected Boolean biweeklyOdd;
 
 
-	public GenericTask(String title, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek, List<Integer> scheduledInMonths,
-		List<Integer> scheduledInYears, List<String> details, List<String> onDone, Boolean biweeklyEven, Boolean biweeklyOdd) {
+	public GenericTask(String title, Integer scheduledOnXDayOfMonth, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek,
+		List<Integer> scheduledInMonths, List<Integer> scheduledInYears,
+		List<String> details, List<String> onDone, Boolean biweeklyEven, Boolean biweeklyOdd) {
 
 		this.title = title;
+		this.scheduledOnXDayOfMonth = scheduledOnXDayOfMonth;
 		this.scheduledOnDay = scheduledOnDay;
 		this.scheduledOnDaysOfWeek = scheduledOnDaysOfWeek;
 		this.scheduledInMonths = scheduledInMonths;
@@ -88,6 +93,7 @@ public class GenericTask {
 	 */
 	public GenericTask(GenericTask other) {
 		this.title = other.title;
+		this.scheduledOnXDayOfMonth = other.scheduledOnXDayOfMonth;
 		this.scheduledOnDay = other.scheduledOnDay;
 		this.scheduledOnDaysOfWeek = other.scheduledOnDaysOfWeek;
 		this.scheduledInMonths = other.scheduledInMonths;
@@ -113,6 +119,15 @@ public class GenericTask {
 				String dayName = DateUtils.DAY_NAMES[cal.get(Calendar.DAY_OF_WEEK)];
 				for (String weekDay : scheduledOnDaysOfWeek) {
 					if (dayName.equals(DateUtils.toDayOfWeekNameEN(weekDay))) {
+						// if scheduled on Xth weekday of the month, also check if it actually is that
+						if (scheduledOnXDayOfMonth != null) {
+							int curXDayOfMonth = ((cal.get(Calendar.DAY_OF_MONTH) - 1) / 7) + 1;
+							if (curXDayOfMonth != scheduledOnXDayOfMonth) {
+								// if not, keep searching
+								continue;
+							}
+							// if yes, found it!
+						}
 						foundDay = true;
 						break;
 					}
@@ -220,6 +235,10 @@ public class GenericTask {
 		return title;
 	}
 
+	public void setScheduledOnXDayOfMonth(Integer scheduledOnXDayOfMonth) {
+		this.scheduledOnXDayOfMonth = scheduledOnXDayOfMonth;
+	}
+
 	public void setScheduledOnDay(Integer scheduledOnDay) {
 		this.scheduledOnDay = scheduledOnDay;
 	}
@@ -234,6 +253,17 @@ public class GenericTask {
 
 	public void setScheduledInYears(List<Integer> scheduledInYears) {
 		this.scheduledInYears = scheduledInYears;
+	}
+
+	public Integer getScheduledOnXDayOfMonth() {
+		return scheduledOnXDayOfMonth;
+	}
+
+	public String getScheduledOnXDayOfMonthStr() {
+		if (scheduledOnXDayOfMonth == null) {
+			return "";
+		}
+		return ""+scheduledOnXDayOfMonth;
 	}
 
 	public Integer getScheduledOnDay() {
@@ -484,6 +514,11 @@ public class GenericTask {
 				if (day != null) {
 					result += day.substring(0, 2);
 					result += ", ";
+				}
+			}
+			if (daysOfWeek.size() > 0) {
+				if (scheduledOnXDayOfMonth != null) {
+					result = scheduledOnXDayOfMonth + ". " + result;
 				}
 			}
 		}

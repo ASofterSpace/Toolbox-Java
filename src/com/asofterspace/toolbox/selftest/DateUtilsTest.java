@@ -221,6 +221,9 @@ public class DateUtilsTest implements Test {
 
 		int amount = 10;
 
+		// get tomorrow before getting now, so that the difference is 24 hours or a few milliseconds less,
+		// not 24 hours or a few milliseconds more
+		Date tomorrow = DateUtils.daysInTheFuture(1);
 		Date now = DateUtils.now();
 		Date tenDaysAgo = DateUtils.daysInTheFuture(-amount);
 
@@ -242,10 +245,18 @@ public class DateUtilsTest implements Test {
 			TestUtils.fail("We wanted to list the days from now until now, but did not get 0 days!");
 		}
 
-		result = DateUtils.listDaysFromTo(now, DateUtils.daysInTheFuture(1));
+		result = DateUtils.listDaysFromTo(now, tomorrow);
 
 		if (result.size() != 1) {
-			TestUtils.fail("We wanted to list the days from now until tomorrow, but did not get 1 day!");
+			StringBuilder resStr = new StringBuilder();
+			String sep = "";
+			for (Date resD : result) {
+				resStr.append(sep);
+				sep = ", ";
+				resStr.append(DateUtils.serializeDateTime(resD));
+			}
+			TestUtils.fail("We wanted to list the days from now until tomorrow, but did not get 1 day, " +
+				"instead getting " + result.size() + " days: [" + resStr + "]!");
 		}
 
 		TestUtils.succeed();

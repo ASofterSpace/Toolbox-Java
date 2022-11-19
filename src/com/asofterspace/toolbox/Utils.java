@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 97;
+	public final static int TOOLBOX_VERSION_NUMBER = 98;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
@@ -62,7 +62,7 @@ public class Utils {
 
 		String heapStr = BitUtils.longToHumanReadableByteAmount(curHeap);
 
-		System.out.println(DateUtils.DEFAULT_TIME_FORMAT.format(new Date()) + " [heap " + heapStr + "]: " + logline);
+		System.out.println(DateUtils.serializeTime(new Date()) + " [heap " + heapStr + "]: " + logline);
 	}
 
 	public static void sleep(double milliseconds) {

@@ -26,12 +26,12 @@ public class DateUtils {
 	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
 	private static final String SHORT_TIME_FORMAT_STR = "HH:mm";
 
-	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
-	public static final SimpleDateFormat FALLBACK_DATE_FORMAT = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
-	public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
-	public static final SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
-	public static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
-	public static final SimpleDateFormat SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
+	private static SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+	private static SimpleDateFormat FALLBACK_DATE_FORMAT = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
+	private static SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+	private static SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
+	private static SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
+	private static SimpleDateFormat SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
 
 	public static final String[] DAY_NAMES = new String[]{"Saturday", "Sunday", "Monday",
 		"Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
@@ -139,7 +139,12 @@ public class DateUtils {
 			return null;
 		}
 
-		return DEFAULT_DATE_FORMAT.format(date);
+		try {
+			return DEFAULT_DATE_FORMAT.format(date);
+		} catch (ArrayIndexOutOfBoundsException aobE) {
+			DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+			return DEFAULT_DATE_FORMAT.format(date);
+		}
 	}
 
 	/**
@@ -231,7 +236,12 @@ public class DateUtils {
 			return null;
 		}
 
-		return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
+		try {
+			return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
+		} catch (ArrayIndexOutOfBoundsException aobE) {
+			DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+			return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
+		}
 	}
 
 	public static String serializeTime(Date time) {
@@ -240,7 +250,12 @@ public class DateUtils {
 			return null;
 		}
 
-		return DEFAULT_TIME_FORMAT.format(time);
+		try {
+			return DEFAULT_TIME_FORMAT.format(time);
+		} catch (ArrayIndexOutOfBoundsException aobE) {
+			DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
+			return DEFAULT_TIME_FORMAT.format(time);
+		}
 	}
 
 	public static String serializeTimeShort(Date time) {
@@ -249,7 +264,12 @@ public class DateUtils {
 			return null;
 		}
 
-		return SHORT_TIME_FORMAT.format(time);
+		try {
+			return SHORT_TIME_FORMAT.format(time);
+		} catch (ArrayIndexOutOfBoundsException aobE) {
+			SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
+			return SHORT_TIME_FORMAT.format(time);
+		}
 	}
 
 	public static String dateTimeStampNow() {
@@ -257,7 +277,12 @@ public class DateUtils {
 	}
 
 	public static String numericalDateTimeStampNow() {
-		return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
+		try {
+			return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
+		} catch (ArrayIndexOutOfBoundsException aobE) {
+			NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
+			return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
+		}
 	}
 
 	public static Date now() {

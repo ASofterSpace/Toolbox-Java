@@ -22,6 +22,7 @@ public class TaskCtrlBase {
 	protected final static String GENERIC = "generic";
 	protected final static String KIND = "kind";
 	public final static String TITLE = "title";
+	protected final static String X_DAY_OF_MONTH = "xDayOfMonth";
 	protected final static String DAY = "day";
 	protected final static String DAYS_OF_WEEK = "daysOfWeek";
 	protected final static String MONTH = "month";
@@ -141,13 +142,15 @@ public class TaskCtrlBase {
 		List<String> onDone = new ArrayList<>();
 
 		// this is an ad-hoc task which is not scheduled ever
+		Integer scheduledOnXDayOfMonth = null;
 		Integer scheduledOnDay = null;
 		List<String> scheduledOnDaysOfWeek = null;
 		List<Integer> scheduledInMonths = null;
 		List<Integer> scheduledInYears = null;
 
-		GenericTask newTask = createTask(title, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
-			scheduledInYears, detailsList, onDone, false, false);
+		GenericTask newTask = createTask(title, scheduledOnXDayOfMonth, scheduledOnDay,
+			scheduledOnDaysOfWeek, scheduledInMonths, scheduledInYears,
+			detailsList, onDone, false, false);
 
 		return releaseTaskInstanceOn(newTask, scheduleDate);
 	}
@@ -199,6 +202,7 @@ public class TaskCtrlBase {
 
 		return createTask(
 			recordTask.getString(TITLE),
+			recordTask.getInteger(X_DAY_OF_MONTH),
 			recordTask.getInteger(DAY),
 			daysOfWeek,
 			months,
@@ -210,11 +214,12 @@ public class TaskCtrlBase {
 		);
 	}
 
-	protected GenericTask createTask(String title, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek,
-		List<Integer> scheduledInMonths, List<Integer> scheduledInYears, List<String> details, List<String> onDone,
+	protected GenericTask createTask(String title, Integer scheduledOnXDayOfMonth, Integer scheduledOnDay,
+		List<String> scheduledOnDaysOfWeek, List<Integer> scheduledInMonths, List<Integer> scheduledInYears,
+		List<String> details, List<String> onDone,
 		Boolean biweeklyEven, Boolean biweeklyOdd) {
 
-		return new GenericTask(title, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
+		return new GenericTask(title, scheduledOnXDayOfMonth, scheduledOnDay, scheduledOnDaysOfWeek, scheduledInMonths,
 			scheduledInYears, details, onDone, biweeklyEven, biweeklyOdd);
 	}
 
@@ -323,6 +328,7 @@ public class TaskCtrlBase {
 		Record taskRecord = Record.emptyObject();
 		taskRecord.setOrRemove(KIND, GENERIC);
 		taskRecord.setOrRemove(TITLE, task.getTitle());
+		taskRecord.setOrRemove(X_DAY_OF_MONTH, task.getScheduledOnXDayOfMonth());
 		taskRecord.setOrRemove(DAY, task.getScheduledOnDay());
 		if ((task.getScheduledOnDaysOfWeek() == null) || (task.getScheduledOnDaysOfWeek().size() == 0)) {
 			taskRecord.remove(DAYS_OF_WEEK);
