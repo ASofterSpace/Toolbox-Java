@@ -142,8 +142,9 @@ public class DateUtils {
 		try {
 			return DEFAULT_DATE_FORMAT.format(date);
 		} catch (ArrayIndexOutOfBoundsException aobE) {
-			DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
-			return DEFAULT_DATE_FORMAT.format(date);
+			SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+			DEFAULT_DATE_FORMAT = newFormat;
+			return newFormat.format(new Date());
 		}
 	}
 
@@ -239,8 +240,9 @@ public class DateUtils {
 		try {
 			return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
 		} catch (ArrayIndexOutOfBoundsException aobE) {
-			DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
-			return DEFAULT_DATE_TIME_FORMAT.format(dateTime);
+			SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+			DEFAULT_DATE_TIME_FORMAT = newFormat;
+			return newFormat.format(new Date());
 		}
 	}
 
@@ -253,8 +255,9 @@ public class DateUtils {
 		try {
 			return DEFAULT_TIME_FORMAT.format(time);
 		} catch (ArrayIndexOutOfBoundsException aobE) {
-			DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
-			return DEFAULT_TIME_FORMAT.format(time);
+			SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
+			DEFAULT_TIME_FORMAT = newFormat;
+			return newFormat.format(new Date());
 		}
 	}
 
@@ -267,8 +270,9 @@ public class DateUtils {
 		try {
 			return SHORT_TIME_FORMAT.format(time);
 		} catch (ArrayIndexOutOfBoundsException aobE) {
-			SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
-			return SHORT_TIME_FORMAT.format(time);
+			SimpleDateFormat newFormat = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
+			SHORT_TIME_FORMAT = newFormat;
+			return newFormat.format(new Date());
 		}
 	}
 
@@ -280,8 +284,9 @@ public class DateUtils {
 		try {
 			return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
 		} catch (ArrayIndexOutOfBoundsException aobE) {
-			NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
-			return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
+			SimpleDateFormat newFormat = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
+			NUMERICAL_DATE_TIME_FORMAT = newFormat;
+			return newFormat.format(new Date());
 		}
 	}
 

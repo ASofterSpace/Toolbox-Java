@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -255,5 +256,46 @@ public class SortUtils  {
 		}
 
 		return encounteredMoreOften;
+	}
+
+	/**
+	 * Takes in a Map<T, Integer> and sorts the entries of the map into a list,
+	 * ordered by the value increasingly
+	 * So e.g. a Map<String, Integer> containing {"test", 3}, {"foo", 1}, {"bar", 5} is sorted
+	 * into a List<Pair<String, Integer>> containing [{"foo", 1}, {"test", 3}, {"bar", 5}].
+	 */
+	public static <T> List<Pair<T, Integer>> sortMapByValues(Map<T, Integer> map) {
+
+		List<Pair<T, Integer>> newList = new ArrayList<>();
+
+		if (map == null) {
+			return newList;
+		}
+
+		for (Map.Entry<T, Integer> entry : map.entrySet()) {
+			T key = entry.getKey();
+			Integer value = entry.getValue();
+			newList.add(new Pair<T, Integer>(key, value));
+		}
+
+		Collections.sort(newList, new Comparator<Pair<T, Integer>>() {
+
+			public int compare(Pair<T, Integer> a, Pair<T, Integer> b) {
+				if (a.getValue() == null) {
+					if (b.getValue() == null) {
+						return 0;
+					} else {
+						return 1;
+					}
+				} else {
+					if (b.getValue() == null) {
+						return -1;
+					}
+				}
+				return a.getValue() - b.getValue();
+			}
+		});
+
+		return newList;
 	}
 }
