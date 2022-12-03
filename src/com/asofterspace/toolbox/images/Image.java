@@ -5,6 +5,8 @@
 package com.asofterspace.toolbox.images;
 
 import com.asofterspace.toolbox.utils.MathUtils;
+import com.asofterspace.toolbox.utils.Pair;
+import com.asofterspace.toolbox.utils.SortUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -1024,6 +1026,183 @@ public class Image {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				data[y][x] = data[y][x].getBrightnessInverted2();
+			}
+		}
+	}
+
+	/**
+	 * Get the most common color in the image
+	 */
+	public ColorRGBA getMostCommonColor() {
+
+		HashMap<ColorRGBA, Integer> colorCountingMap = new HashMap<>();
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				Integer amount = colorCountingMap.get(data[y][x]);
+				if (amount == null) {
+					amount = 0;
+				}
+				colorCountingMap.put(data[y][x], amount + 1);
+			}
+		}
+
+		List<Pair<ColorRGBA, Integer>> sortedColorCounters = SortUtils.sortMapByValues(colorCountingMap);
+
+		if (sortedColorCounters.size() > 0) {
+			return sortedColorCounters.get(sortedColorCounters.size() - 1).getKey();
+		}
+
+		return null;
+	}
+
+	public void replaceStragglersWith(ColorRGBA bgColor, ColorRGBA toReplaceWith) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+
+				if (y > 0) {
+					if (!bgColor.equals(data[y-1][x])) {
+						continue;
+					}
+				}
+
+				if (y < height-1) {
+					if (!bgColor.equals(data[y+1][x])) {
+						continue;
+					}
+				}
+
+				if (x > 0) {
+					if (!bgColor.equals(data[y][x-1])) {
+						continue;
+					}
+				}
+
+				if (x < width-1) {
+					if (!bgColor.equals(data[y][x+1])) {
+						continue;
+					}
+				}
+
+				if (x > 0) {
+					if (y > 0) {
+						if (!bgColor.equals(data[y-1][x-1])) {
+							continue;
+						}
+					}
+
+					if (y < height-1) {
+						if (!bgColor.equals(data[y+1][x-1])) {
+							continue;
+						}
+					}
+				}
+
+				if (x < width-1) {
+					if (y > 0) {
+						if (!bgColor.equals(data[y-1][x+1])) {
+							continue;
+						}
+					}
+
+					if (y < height-1) {
+						if (!bgColor.equals(data[y+1][x+1])) {
+							continue;
+						}
+					}
+				}
+
+				data[y][x] = toReplaceWith;
+			}
+		}
+	}
+
+	public void replaceStragglersIshWith(ColorRGBA bgColor, ColorRGBA toReplaceWith) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+
+				if (y > 0) {
+					if (!bgColor.equals(data[y-1][x])) {
+						continue;
+					}
+				}
+
+				if (y < height-1) {
+					if (!bgColor.equals(data[y+1][x])) {
+						continue;
+					}
+				}
+
+				if (x > 0) {
+					if (!bgColor.equals(data[y][x-1])) {
+						continue;
+					}
+				}
+
+				if (x < width-1) {
+					if (!bgColor.equals(data[y][x+1])) {
+						continue;
+					}
+				}
+
+				data[y][x] = toReplaceWith;
+			}
+		}
+	}
+
+	/**
+	 * Get the most common color in the rows and columns at the edge of the image
+	 */
+	public ColorRGBA getMostCommonSurroundingColor() {
+
+		HashMap<ColorRGBA, Integer> colorCountingMap = new HashMap<>();
+
+		for (int x = 0; x < width; x++) {
+			Integer amount = colorCountingMap.get(data[0][x]);
+			if (amount == null) {
+				amount = 0;
+			}
+			colorCountingMap.put(data[0][x], amount + 1);
+
+			amount = colorCountingMap.get(data[height-1][x]);
+			if (amount == null) {
+				amount = 0;
+			}
+			colorCountingMap.put(data[height-1][x], amount + 1);
+		}
+
+		for (int y = 1; y < height - 1; y++) {
+			Integer amount = colorCountingMap.get(data[y][0]);
+			if (amount == null) {
+				amount = 0;
+			}
+			colorCountingMap.put(data[y][0], amount + 1);
+
+			amount = colorCountingMap.get(data[y][width-1]);
+			if (amount == null) {
+				amount = 0;
+			}
+			colorCountingMap.put(data[y][width-1], amount + 1);
+		}
+
+		List<Pair<ColorRGBA, Integer>> sortedColorCounters = SortUtils.sortMapByValues(colorCountingMap);
+
+		if (sortedColorCounters.size() > 0) {
+			return sortedColorCounters.get(sortedColorCounters.size() - 1).getKey();
+		}
+
+		return null;
+	}
+
+	public void replaceColors(ColorRGBA oldCol, ColorRGBA newCol) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (data[y][x].equals(oldCol)) {
+					data[y][x] = newCol;
+				}
 			}
 		}
 	}
