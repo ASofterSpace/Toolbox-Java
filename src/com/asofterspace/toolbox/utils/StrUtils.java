@@ -179,6 +179,7 @@ public class StrUtils {
 		return result;
 	}
 
+
 	public static int countCharInString(char find, String inHere) {
 
 		return countCharInString(find, inHere, inHere.length());
@@ -357,6 +358,31 @@ public class StrUtils {
 			}
 		}
 		return result.toString();
+	}
+
+	public static List<String> split(String text, String separator) {
+		List<String> result = new ArrayList<>();
+		if (text == null) {
+			return result;
+		}
+		if (separator == null) {
+			result.add(text);
+			return result;
+		}
+
+		int cur = 0;
+		int len = separator.length();
+		while (true) {
+			int endindex = text.indexOf(separator, cur);
+			if (endindex >= 0) {
+				result.add(text.substring(cur, endindex));
+				cur = endindex + len;
+			} else {
+				result.add(text.substring(cur, text.length()));
+				break;
+			}
+		}
+		return result;
 	}
 
 	public static String getLineFromPosition(int pos, String content) {
