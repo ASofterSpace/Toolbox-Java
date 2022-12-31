@@ -505,6 +505,10 @@ public class Record {
 		return getIntegerFromRecord(this);
 	}
 
+	public Double asDouble() {
+		return getDoubleFromRecord(this);
+	}
+
 	/**
 	 * Returns the value of this Record object as Object - which could be a String, Integer, etc.
 	 */
@@ -978,6 +982,46 @@ public class Record {
 
 		if (result.kind == RecordKind.STRING) {
 			return StrUtils.strToInt((String) result.simpleContents);
+		}
+
+		if (result.kind == RecordKind.NULL) {
+			return null;
+		}
+
+		return null;
+	}
+
+	private Double getDoubleFromRecord(Record result) {
+
+		if (result == null) {
+			return null;
+		}
+
+		if (result.kind == RecordKind.NUMBER) {
+			if (result.simpleContents instanceof Long) {
+				return (Double) (double) (long) ((Long) result.simpleContents);
+			}
+			if (result.simpleContents instanceof Integer) {
+				return (Double) (double) (int) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Double) {
+				return (Double) result.simpleContents;
+			}
+			if (result.simpleContents instanceof Float) {
+				return (Double) (double) Math.round((Float) result.simpleContents);
+			}
+		}
+
+		if (result.kind == RecordKind.BOOLEAN) {
+			if ((Boolean) result.simpleContents) {
+				return 1.0;
+			} else {
+				return 0.0;
+			}
+		}
+
+		if (result.kind == RecordKind.STRING) {
+			return StrUtils.strToDouble((String) result.simpleContents);
 		}
 
 		if (result.kind == RecordKind.NULL) {

@@ -132,17 +132,24 @@ public class XlsxSheet {
 			return null;
 		}
 
-		// no cellType means integer
+		// no cellType means number
 		if (cellType == null) {
 			String intContentStr = vChild.getInnerText();
 
 			try {
+				if (intContentStr.contains(".")) {
+					double doubleContent = Double.parseDouble(intContentStr);
+
+					return new Record(doubleContent);
+				}
+
 				int intContent = Integer.parseInt(intContentStr);
 
 				return new Record(intContent);
 
 			} catch (NumberFormatException e) {
 				// ooops... the string could not be parsed, humm...
+				System.out.println("Could not parse: " + intContentStr);
 			}
 		}
 
