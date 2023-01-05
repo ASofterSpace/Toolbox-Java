@@ -163,6 +163,10 @@ public class XML extends Record {
 	}
 
 	public static String escapeXMLstr(Object strToEscape, String escapeNewlinesTo) {
+		return escapeXMLstr(strToEscape, escapeNewlinesTo, false);
+	}
+
+	public static String escapeXMLstr(Object strToEscape, String escapeNewlinesTo, boolean doHtmlReplacements) {
 
 		if (strToEscape == null) {
 			return "";
@@ -175,6 +179,45 @@ public class XML extends Record {
 		for (int i = 0; i < text.length(); i++) {
 
 			char c = text.charAt(i);
+
+			if (doHtmlReplacements) {
+				boolean found = true;
+				switch (c) {
+					case 'ä':
+						result.append("&auml;");
+						break;
+					case 'ö':
+						result.append("&ouml;");
+						break;
+					case 'ü':
+						result.append("&uuml;");
+						break;
+					case 'Ä':
+						result.append("&Auml;");
+						break;
+					case 'Ö':
+						result.append("&Ouml;");
+						break;
+					case 'Ü':
+						result.append("&Uuml;");
+						break;
+					case 'æ':
+						result.append("&aelig;");
+						break;
+					case 'Æ':
+						result.append("&AElig;");
+						break;
+					case 'ß':
+						result.append("&szlig;");
+						break;
+					default:
+						found = false;
+						break;
+				}
+				if (found) {
+					continue;
+				}
+			}
 
 			switch (c) {
 				case '<':
@@ -196,33 +239,6 @@ public class XML extends Record {
 					break;
 				case '\"':
 					result.append("&quot;");
-					break;
-				case 'ä':
-					result.append("&auml;");
-					break;
-				case 'ö':
-					result.append("&ouml;");
-					break;
-				case 'ü':
-					result.append("&uuml;");
-					break;
-				case 'Ä':
-					result.append("&Auml;");
-					break;
-				case 'Ö':
-					result.append("&Ouml;");
-					break;
-				case 'Ü':
-					result.append("&Uuml;");
-					break;
-				case 'æ':
-					result.append("&aelig;");
-					break;
-				case 'Æ':
-					result.append("&AElig;");
-					break;
-				case 'ß':
-					result.append("&szlig;");
 					break;
 				case '&':
 					result.append("&amp;");
@@ -250,6 +266,7 @@ public class XML extends Record {
 		str = str.replace("&#9;", "\t");
 		str = str.replace("&#039;", "'");
 		str = str.replace("&#160;", " ");
+		str = str.replace("&#8364;", "€");
 		str = str.replace("&gt;", ">");
 		str = str.replace("&lt;", "<");
 		str = str.replace("&apos;", "'");

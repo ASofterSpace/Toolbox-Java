@@ -127,6 +127,16 @@ public class MathUtils {
 		return (int) value;
 	}
 
+	public static boolean equals(Integer left, Integer right) {
+		if (left == null) {
+			return right == null;
+		}
+		if (right == null) {
+			return left == null;
+		}
+		return (int) left == (int) right;
+	}
+
 	/**
 	 * Gets a random true or false value
 	 */

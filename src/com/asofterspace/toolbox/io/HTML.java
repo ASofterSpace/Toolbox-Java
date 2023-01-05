@@ -18,7 +18,7 @@ public class HTML {
 	 * @return a string in which all such signs are escaped
 	 */
 	public static String escapeHTMLstr(Object strToEscape) {
-		return XML.escapeXMLstr(strToEscape);
+		return XML.escapeXMLstr(strToEscape, "&#10;", true);
 	}
 
 	/**

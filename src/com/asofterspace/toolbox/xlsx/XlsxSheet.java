@@ -12,6 +12,8 @@ import com.asofterspace.toolbox.utils.SortOrder;
 import com.asofterspace.toolbox.utils.SortUtils;
 import com.asofterspace.toolbox.utils.StrUtils;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,66 @@ public class XlsxSheet {
 		}
 
 		return null;
+	}
+
+	public Integer getCellContentInteger(String cellName) {
+		Record result = getCellContent(cellName);
+		if (result == null) {
+			return null;
+		}
+		return result.asInteger();
+	}
+
+	public int getCellContentIntegerNonNull(String cellName) {
+		Record result = getCellContent(cellName);
+		if (result == null) {
+			return 0;
+		}
+		Integer innerResult = result.asInteger();
+		if (innerResult == null) {
+			return 0;
+		}
+		return innerResult;
+	}
+
+	public Double getCellContentDouble(String cellName) {
+		Record result = getCellContent(cellName);
+		if (result == null) {
+			return null;
+		}
+		return result.asDouble();
+	}
+
+	public double getCellContentDoubleNonNull(String cellName) {
+		Record result = getCellContent(cellName);
+		if (result == null) {
+			return 0;
+		}
+		Double innerResult = result.asDouble();
+		if (innerResult == null) {
+			return 0;
+		}
+		return innerResult;
+	}
+
+	public String getCellContentString(String cellName) {
+		Record result = getCellContent(cellName);
+		if (result == null) {
+			return null;
+		}
+		return result.asString();
+	}
+
+	public String getCellContentStringNonNull(String cellName) {
+		Record result = getCellContent(cellName);
+		if (result == null) {
+			return "";
+		}
+		String innerResult = result.asString();
+		if (innerResult == null) {
+			return "";
+		}
+		return innerResult;
 	}
 
 	/**
@@ -205,7 +267,6 @@ public class XlsxSheet {
 		if (row == null) {
 			row = sheetData.createChild("row");
 			row.setAttribute("r", rowNum);
-			row.setAttribute("spans", "1:1");
 		}
 
 		XmlElement cell = row.createChild("c");
@@ -217,14 +278,21 @@ public class XlsxSheet {
 		}
 		int spansFrom = StrUtils.strToInt(spansStr.substring(0, spansStr.indexOf(":")));
 		int spansTo = StrUtils.strToInt(spansStr.substring(spansStr.indexOf(":") + 1));
-		int rowNumI = StrUtils.strToInt(rowNum);
-		if (rowNumI < spansFrom) {
-			spansFrom = rowNumI;
+		int colNumI = nameToColI(cellName) + 1;
+		if (colNumI < spansFrom) {
+			spansFrom = colNumI;
 		}
-		if (rowNumI > spansTo) {
-			spansTo = rowNumI;
+		if (colNumI > spansTo) {
+			spansTo = colNumI;
 		}
 		row.setAttribute("spans", spansFrom + ":" + spansTo);
+
+		// sort cells within the row
+		Collections.sort(row.getChildNodes(), new Comparator<XmlElement>() {
+			public int compare(XmlElement leftChild, XmlElement rightChild) {
+				return nameToColI(leftChild.getAttribute("r")) - nameToColI(rightChild.getAttribute("r"));
+			}
+		});
 
 		return cell;
 	}
@@ -333,7 +401,11 @@ public class XlsxSheet {
 		List<XmlElement> matchingCells = sheetFile.domGetElems("c", "r", cellName);
 
 		for (XmlElement cell : matchingCells) {
+			XmlElement row = cell.getXmlParent();
 			cell.remove();
+			if (row.getChildNodes().size() < 1) {
+				row.remove();
+			}
 		}
 	}
 
