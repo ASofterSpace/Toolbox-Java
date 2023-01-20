@@ -467,7 +467,7 @@ public class DateUtils {
 			return null;
 		}
 
-		name = name.toLowerCase();
+		name = name.toLowerCase().trim();
 		for (int i = 0; i < 12; i++) {
 			if (name.equals(MONTH_NAMES[i].toLowerCase())) {
 				return i;
@@ -485,6 +485,13 @@ public class DateUtils {
 				return i;
 			}
 		}
+
+		// parse directly numbers, so e.g. "12" should be December, so int representation 11...
+		Integer intVal = StrUtils.strToInt(name);
+		if (intVal != null) {
+			return intVal - 1;
+		}
+
 		return null;
 	}
 
