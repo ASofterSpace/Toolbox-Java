@@ -158,12 +158,9 @@ public class QrCodeFactory {
 	 */
 	public static Image createWhitespacedImageFromString(String data, QrCodeQualityLevel edcLevel, QrCodeMaskPattern maskPattern) {
 
-		Image result = createImageFromString(data, edcLevel, maskPattern);
+		QrCode code = createFromString(data, edcLevel, maskPattern);
 
-		// surround the QR code by three white modules
-		result.expandBy(3, 3, 3, 3, ColorRGBA.WHITE);
-
-		return result;
+		return code.toImage(ColorRGBA.BLACK, ColorRGBA.WHITE, true);
 	}
 
 	/**

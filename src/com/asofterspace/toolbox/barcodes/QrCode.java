@@ -180,19 +180,25 @@ public class QrCode {
 	}
 
 	public Image toImage() {
+		return toImage(ColorRGBA.BLACK, ColorRGBA.WHITE, false);
+	}
 
-		Image result = new Image(width, height);
+	public Image toImage(ColorRGBA foregroundColor, ColorRGBA backgroundColor, boolean useFrame) {
 
-		ColorRGBA black = new ColorRGBA(0, 0, 0);
-		ColorRGBA white = new ColorRGBA(255, 255, 255);
+		int offset = 0;
+		if (useFrame) {
+			offset = 6;
+		}
+
+		Image result = new Image(width + offset, height + offset, backgroundColor);
+
+		if (useFrame) {
+			offset = 3;
+		}
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				if (data[x][y]) {
-					result.setPixel(x, y, black);
-				} else {
-					result.setPixel(x, y, white);
-				}
+				result.setPixel(x + offset, y + offset, data[x][y] ? foregroundColor : backgroundColor);
 			}
 		}
 
