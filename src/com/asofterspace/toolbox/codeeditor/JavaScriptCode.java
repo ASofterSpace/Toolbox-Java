@@ -9,14 +9,15 @@ import com.asofterspace.toolbox.codeeditor.base.FunctionSupplyingCode;
 import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.utils.StrUtils;
 
-import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 
 
 public class JavaScriptCode extends FunctionSupplyingCode {
@@ -25,12 +26,12 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 	// all keywords of the Java language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"as", "assert", "break", "case", "catch", "const", "continue", "default", "do", "else", "export", "extends", "false", "finally", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "typeof", "undefined", "while"}
+		new String[] {"as", "assert", "break", "case", "catch", "continue", "default", "do", "else", "export", "extends", "false", "finally", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "typeof", "undefined", "while"}
 	));
 
 	// all primitive types of the Java language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"abstract", "boolean", "char", "class", "def", "double", "enum", "final", "int", "long", "package", "private", "protected", "public", "static", "synchronized", "type", "var", "void", "volatile"}
+		new String[] {"abstract", "boolean", "char", "class", "const", "def", "double", "enum", "final", "int", "long", "package", "private", "protected", "public", "static", "synchronized", "type", "var", "void", "volatile"}
 	));
 
 	// all string delimiters of the Java language
