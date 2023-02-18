@@ -52,23 +52,27 @@ public class DateUtils {
 	 */
 	public static Date parseDate(String dateStr) {
 
-		if ((dateStr == null) || "".equals(dateStr)) {
+		if ((dateStr == null) || "".equals(dateStr.trim())) {
 			return null;
 		}
 
 		String origDateStr = dateStr;
 
 		// also parse months that are written out in English or German
+		dateStr = dateStr.trim();
 		dateStr = strContainingMonthNameToStrContainingMonthNum1IsJan(dateStr);
 		dateStr = dateStr.toLowerCase();
+		String beforeCutoffDateStr = dateStr;
+
+		dateStr = dateStr.replaceAll(" ", "-");
+		dateStr = dateStr.replaceAll("--", "-");
 
 		// handle date time string by omitting the timestamp such that we only get a date
-		if (dateStr.length() > DEFAULT_DATE_TIME_FORMAT_STR.length()) {
+		if (dateStr.length() > DEFAULT_DATE_FORMAT_STR.length()) {
 			dateStr = dateStr.substring(0, DEFAULT_DATE_FORMAT_STR.length());
 		}
 
 		try {
-			dateStr = dateStr.replaceAll(" ", "-");
 			// if we do not have 02-04-2020, but more like 2020-04-02
 			if (dateStr.length() > 5) {
 				if (!((dateStr.charAt(2) == '-') && (dateStr.charAt(5) == '-'))) {
@@ -78,6 +82,9 @@ public class DateUtils {
 		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			// oh no! fall through to backup approach...
 		}
+
+		// go back to original as it was before cutting pieces off
+		dateStr = beforeCutoffDateStr;
 
 		dateStr = dateStr.replaceAll("-", " ");
 
@@ -99,6 +106,11 @@ public class DateUtils {
 		// dd.MM.yyyy
 		// dd.MM.yyyy
 		// dd.MM.yyyy
+
+		// handle date time string by omitting the timestamp such that we only get a date
+		if (dateStr.length() > FALLBACK_DATE_FORMAT_STR.length()) {
+			dateStr = dateStr.substring(0, FALLBACK_DATE_FORMAT_STR.length());
+		}
 
 		try {
 			return FALLBACK_DATE_FORMAT.parse(dateStr);
