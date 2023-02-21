@@ -238,6 +238,19 @@ public class TaskCtrlBase {
 		return result;
 	}
 
+	public List<GenericTask> getDoneDateProblematicTaskInstances() {
+
+		List<GenericTask> result = new ArrayList<>();
+
+		for (GenericTask task : taskInstances) {
+			if (task.isDoneDateProblematicTaskInstance()) {
+				result.add(task);
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Get all the tasks that have ever been released (both ad-hoc tasks and scheduled tasks which have
 	 * been released when their scheduled date arrived)

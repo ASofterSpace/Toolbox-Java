@@ -76,7 +76,13 @@ public class DateUtils {
 			// if we do not have 02-04-2020, but more like 2020-04-02
 			if (dateStr.length() > 5) {
 				if (!((dateStr.charAt(2) == '-') && (dateStr.charAt(5) == '-'))) {
-					return DEFAULT_DATE_FORMAT.parse(dateStr);
+					try {
+						return DEFAULT_DATE_FORMAT.parse(dateStr);
+					} catch (ArrayIndexOutOfBoundsException aobE) {
+						SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+						DEFAULT_DATE_FORMAT = newFormat;
+						return newFormat.parse(dateStr);
+					}
 				}
 			}
 		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
@@ -113,7 +119,13 @@ public class DateUtils {
 		}
 
 		try {
-			return FALLBACK_DATE_FORMAT.parse(dateStr);
+			try {
+				return FALLBACK_DATE_FORMAT.parse(dateStr);
+			} catch (ArrayIndexOutOfBoundsException aobE) {
+				SimpleDateFormat newFormat = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
+				FALLBACK_DATE_FORMAT = newFormat;
+				return newFormat.parse(dateStr);
+			}
 		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex2) {
 			System.err.println("Could not parse the date '" + origDateStr + "' - returning null instead!");
 			return null;
@@ -135,7 +147,13 @@ public class DateUtils {
 		}
 
 		try {
-			return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
+			try {
+				return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
+			} catch (ArrayIndexOutOfBoundsException aobE) {
+				SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+				DEFAULT_DATE_TIME_FORMAT = newFormat;
+				return newFormat.parse(dateTimeStr);
+			}
 		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			System.err.println("Could not parse the date time " + dateTimeStr + " - using current time instead!");
 			return new Date();
@@ -156,7 +174,7 @@ public class DateUtils {
 		} catch (ArrayIndexOutOfBoundsException aobE) {
 			SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
 			DEFAULT_DATE_FORMAT = newFormat;
-			return newFormat.format(new Date());
+			return newFormat.format(date);
 		}
 	}
 
@@ -254,7 +272,7 @@ public class DateUtils {
 		} catch (ArrayIndexOutOfBoundsException aobE) {
 			SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
 			DEFAULT_DATE_TIME_FORMAT = newFormat;
-			return newFormat.format(new Date());
+			return newFormat.format(dateTime);
 		}
 	}
 
@@ -269,7 +287,7 @@ public class DateUtils {
 		} catch (ArrayIndexOutOfBoundsException aobE) {
 			SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
 			DEFAULT_TIME_FORMAT = newFormat;
-			return newFormat.format(new Date());
+			return newFormat.format(time);
 		}
 	}
 
@@ -284,7 +302,7 @@ public class DateUtils {
 		} catch (ArrayIndexOutOfBoundsException aobE) {
 			SimpleDateFormat newFormat = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
 			SHORT_TIME_FORMAT = newFormat;
-			return newFormat.format(new Date());
+			return newFormat.format(time);
 		}
 	}
 
@@ -293,12 +311,13 @@ public class DateUtils {
 	}
 
 	public static String numericalDateTimeStampNow() {
+		Date now = new Date();
 		try {
-			return NUMERICAL_DATE_TIME_FORMAT.format(new Date());
+			return NUMERICAL_DATE_TIME_FORMAT.format(now);
 		} catch (ArrayIndexOutOfBoundsException aobE) {
 			SimpleDateFormat newFormat = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 			NUMERICAL_DATE_TIME_FORMAT = newFormat;
-			return newFormat.format(new Date());
+			return newFormat.format(now);
 		}
 	}
 
@@ -679,8 +698,15 @@ public class DateUtils {
 
 	public static Date getFirstDateInMonth(String monthName, int year) {
 		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
+		String parseStr = StrUtils.leftPad0(year, 4) + "-" + monthName + "-01";
 		try {
-			return DEFAULT_DATE_FORMAT.parse(StrUtils.leftPad0(year, 4) + "-" + monthName + "-01");
+			try {
+				return DEFAULT_DATE_FORMAT.parse(parseStr);
+			} catch (ArrayIndexOutOfBoundsException aobE) {
+				SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+				DEFAULT_DATE_FORMAT = newFormat;
+				return newFormat.parse(parseStr);
+			}
 		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			return null;
 		}
@@ -688,8 +714,15 @@ public class DateUtils {
 
 	public static Date getDateInMonth(String monthName, int year) {
 		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
+		String parseStr = StrUtils.leftPad0(year, 4) + "-" + monthName + "-15";
 		try {
-			return DEFAULT_DATE_FORMAT.parse(StrUtils.leftPad0(year, 4) + "-" + monthName + "-15");
+			try {
+				return DEFAULT_DATE_FORMAT.parse(parseStr);
+			} catch (ArrayIndexOutOfBoundsException aobE) {
+				SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+				DEFAULT_DATE_FORMAT = newFormat;
+				return newFormat.parse(parseStr);
+			}
 		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 			return null;
 		}
@@ -700,8 +733,14 @@ public class DateUtils {
 		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
 		while (day > 25) {
 			try {
-				String dateStr = StrUtils.leftPad0(year, 4) + "-" + monthName + "-" + day;
-				return DEFAULT_DATE_FORMAT.parse(dateStr);
+				String parseStr = StrUtils.leftPad0(year, 4) + "-" + monthName + "-" + day;
+				try {
+					return DEFAULT_DATE_FORMAT.parse(parseStr);
+				} catch (ArrayIndexOutOfBoundsException aobE) {
+					SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+					DEFAULT_DATE_FORMAT = newFormat;
+					return newFormat.parse(parseStr);
+				}
 			} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
 				day--;
 			}

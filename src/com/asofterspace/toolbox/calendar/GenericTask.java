@@ -366,6 +366,21 @@ public class GenericTask {
 		this.setToDoneDateTime = setToDoneDateTime;
 	}
 
+	public boolean isDoneDateProblematicTaskInstance() {
+		if (hasBeenDone()) {
+			if (doneDate == null) {
+				return true;
+			}
+			if (setToDoneDateTime == null) {
+				return true;
+			}
+			// if the difference between doneDate and setToDoneDateTime is more than 3 days, report it!
+			return Math.abs(doneDate.getTime() - setToDoneDateTime.getTime()) / (1000.0 * 60.0 * 60.0 * 24.0) > 3;
+		}
+
+		return false;
+	}
+
 	public boolean isInstance() {
 		return releasedOnDay != null;
 	}
