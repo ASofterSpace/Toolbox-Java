@@ -171,6 +171,16 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"file:///C:/home/datacomx/Desktop/Filme/overview.htm\" target=\"_blank\" ");
+		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/films.png\" />\n");
+		html.append("<br>\n");
+		html.append("Films\n");
+		html.append("</a>\n");
+
+		entry++;
+		left += 62;
+
 		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('picturizer')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/picturizer.png\" />\n");
 		html.append("<br>\n");
@@ -313,6 +323,10 @@ public class SideBarCtrl {
 
 		if (location.equals("/pics/funtube.png")) {
 			result = new File(basePath + "assBrowser/server/pics/funtube.png");
+		}
+
+		if (location.equals("/pics/films.png")) {
+			result = new File(basePath + "assBrowser/server/pics/films.png");
 		}
 
 		if (location.equals("/pics/editor.png")) {
