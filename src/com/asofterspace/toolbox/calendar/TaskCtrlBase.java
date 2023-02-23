@@ -232,8 +232,8 @@ public class TaskCtrlBase {
 		result.setReleasedOnDay(recordTask.getInteger(RELEASED_ON_DAY));
 		result.setReleasedInMonth(recordTask.getInteger(RELEASED_IN_MONTH));
 		result.setReleasedInYear(recordTask.getInteger(RELEASED_IN_YEAR));
-		result.setDoneDate(DateUtils.parseDate(recordTask.getString(DONE_DATE)));
-		result.setSetToDoneDateTime(DateUtils.parseDateTime(recordTask.getString(SET_TO_DONE_DATE_TIME)));
+		result.setDoneDateHolder(recordTask.getDateHolder(DONE_DATE));
+		result.setSetToDoneDateTimeHolder(recordTask.getDateHolder(SET_TO_DONE_DATE_TIME));
 		result.setDoneLog(recordTask.getString(DONE_LOG));
 		return result;
 	}
@@ -411,8 +411,8 @@ public class TaskCtrlBase {
 			taskRecord.set(RELEASED_ON_DAY, task.getReleasedOnDay());
 			taskRecord.set(RELEASED_IN_MONTH, task.getReleasedInMonth());
 			taskRecord.set(RELEASED_IN_YEAR, task.getReleasedInYear());
-			taskRecord.setOrRemove(DONE_DATE, DateUtils.serializeDate(task.getDoneDate()));
-			taskRecord.setOrRemove(SET_TO_DONE_DATE_TIME, DateUtils.serializeDateTime(task.getSetToDoneDateTime()));
+			taskRecord.setOrRemove(DONE_DATE, task.getDoneDateHolder().serializeDate());
+			taskRecord.setOrRemove(SET_TO_DONE_DATE_TIME, task.getSetToDoneDateTimeHolder().serializeDateTime());
 			taskRecord.setOrRemove(DONE_LOG, task.getDoneLog());
 		}
 

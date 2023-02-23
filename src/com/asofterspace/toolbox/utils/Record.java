@@ -86,6 +86,10 @@ public class Record {
 			return new Record((String) recordOrWhatever);
 		}
 
+		if (recordOrWhatever instanceof DateHolder) {
+			return new Record(((DateHolder) recordOrWhatever).serializeDateTime());
+		}
+
 		if (recordOrWhatever instanceof Integer) {
 			return new Record((Integer) recordOrWhatever);
 		}
@@ -901,6 +905,15 @@ public class Record {
 	}
 
 	/**
+	 * Gets a date value stored in a key as DateHolder
+	 */
+	public DateHolder getDateHolder(Object key) {
+
+		// use exact parsing to be fast when loading large files
+		return DateUtils.parseDateHolderExactly(getString(key));
+	}
+
+	/**
 	 * Gets a boolean value stored in a key of a Record object
 	 * @param key  the key to be searched for
 	 * @return the boolean value stored in the key
@@ -1254,9 +1267,17 @@ public class Record {
 	public void setOrRemove(Object key, Object value) {
 		if (value == null) {
 			remove(key);
-		} else {
-			set(key, value);
+			return;
 		}
+
+		if (value instanceof DateHolder) {
+			if (((DateHolder) value).serializeDateTime() == null) {
+				remove(key);
+				return;
+			}
+		}
+
+		set(key, value);
 	}
 
 	/**

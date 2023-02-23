@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.calendar;
 
+import com.asofterspace.toolbox.utils.DateHolder;
 import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.SortUtils;
 
@@ -55,11 +56,11 @@ public class GenericTask {
 	private Date releasedDate;
 
 	// when was this task done?
-	protected Date doneDate;
+	protected DateHolder doneDate;
 
 	// when was this task set to done? (so e.g. I can today set the task to being done yesterday,
 	// then doneDate will be yesterday - as date - but today, now o'clock, will be the setToDoneDateTime)
-	protected Date setToDoneDateTime;
+	protected DateHolder setToDoneDateTime;
 
 	// what interesting things did the user encounter while doing this task?
 	protected String doneLog;
@@ -359,23 +360,34 @@ public class GenericTask {
 	}
 
 	public Date getSetToDoneDateTime() {
+		return getSetToDoneDateTimeHolder().getDate();
+	}
+
+	public DateHolder getSetToDoneDateTimeHolder() {
+		if (setToDoneDateTime == null) {
+			setToDoneDateTime = DateUtils.createNullDateHolder();
+		}
 		return setToDoneDateTime;
 	}
 
 	public void setSetToDoneDateTime(Date setToDoneDateTime) {
+		this.setToDoneDateTime = DateUtils.createDateHolder(setToDoneDateTime);
+	}
+
+	public void setSetToDoneDateTimeHolder(DateHolder setToDoneDateTime) {
 		this.setToDoneDateTime = setToDoneDateTime;
 	}
 
 	public boolean isDoneDateProblematicTaskInstance() {
 		if (hasBeenDone()) {
-			if (doneDate == null) {
+			if (getDoneDate() == null) {
 				return true;
 			}
-			if (setToDoneDateTime == null) {
+			if (getSetToDoneDateTime() == null) {
 				return true;
 			}
 			// if the difference between doneDate and setToDoneDateTime is more than 3 days, report it!
-			return Math.abs(doneDate.getTime() - setToDoneDateTime.getTime()) / (1000.0 * 60.0 * 60.0 * 24.0) > 3;
+			return Math.abs(getDoneDate().getTime() - getSetToDoneDateTime().getTime()) / (1000.0 * 60.0 * 60.0 * 24.0) > 3;
 		}
 
 		return false;
@@ -476,17 +488,28 @@ public class GenericTask {
 	 * If this is a repeating task rather than a single task instance, returns null.
 	 */
 	public Date getMainDateForTaskInstance() {
-		if (doneDate != null) {
-			return doneDate;
+		if (getDoneDate() != null) {
+			return getDoneDate();
 		}
 		return getReleaseDate();
 	}
 
 	public Date getDoneDate() {
+		return getDoneDateHolder().getDate();
+	}
+
+	public DateHolder getDoneDateHolder() {
+		if (doneDate == null) {
+			doneDate = DateUtils.createNullDateHolder();
+		}
 		return doneDate;
 	}
 
 	public void setDoneDate(Date doneDate) {
+		this.doneDate = DateUtils.createDateHolder(doneDate);
+	}
+
+	public void setDoneDateHolder(DateHolder doneDate) {
 		this.doneDate = doneDate;
 	}
 

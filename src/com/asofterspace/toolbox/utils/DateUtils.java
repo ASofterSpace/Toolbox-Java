@@ -133,6 +133,38 @@ public class DateUtils {
 	}
 
 	/**
+	 * Parse a date string into date holder object exactly and quickyl - the string must be
+	 * formatted as yyyy-MM-dd HH:mm:ss.SSS (leaving out as much as wanted from the right),
+	 * no attempt is made to check if e.g. interpreting months as text might be beneficial
+	 * (also, no attempt is made to check if the date even exists or not)
+	 */
+	public static DateHolder parseDateHolderExactly(String dateStr) {
+		DateHolder result = new DateHolder();
+		result.initParsingExactString(dateStr);
+		return result;
+	}
+
+	/**
+	 * Parse a date string into date holder object leniently - this allows for all kinds of
+	 * date formats, but does use the internal java Date class and ensures the date actually
+	 * makes sense
+	 */
+	public static DateHolder parseDateHolderLeniently(String dateStr) {
+		return createDateHolder(parseDate(dateStr));
+	}
+
+	public static DateHolder createDateHolder(Date date) {
+		DateHolder result = new DateHolder();
+		result.initWithDate(date);
+		return result;
+	}
+
+	public static DateHolder createNullDateHolder() {
+		DateHolder result = new DateHolder();
+		return result;
+	}
+
+	/**
 	 * Parses the date+time from either a date string or a date time string
 	 */
 	public static Date parseDateTime(String dateTimeStr) {
