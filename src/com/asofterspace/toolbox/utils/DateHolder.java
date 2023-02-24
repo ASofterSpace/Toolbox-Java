@@ -37,21 +37,24 @@ public class DateHolder {
 	DateHolder() {
 	}
 
-	void initParsingExactString(String dateStr) {
-		if (dateStr == null) {
+	void initParsingExactString(String dateStrArg) {
+		this.date = null;
+		this.dateTimeStr = null;
+
+		if (dateStrArg == null) {
 			this.isNull = true;
 			return;
 		}
 
-		if (dateStr.length() > FORMAT_LENGTH) {
-			dateStr = dateStr.substring(0, FORMAT_LENGTH);
+		if (dateStrArg.length() > FORMAT_LENGTH) {
+			dateStrArg = dateStrArg.substring(0, FORMAT_LENGTH);
 		}
 
-		if (dateStr.length() < FORMAT_LENGTH) {
-			dateStr = dateStr + EMPTY_FORMAT_STR.substring(dateStr.length());
+		if (dateStrArg.length() < FORMAT_LENGTH) {
+			dateStrArg = dateStrArg + EMPTY_FORMAT_STR.substring(dateStrArg.length());
 		}
 
-		this.dateTimeStr = dateStr;
+		this.dateTimeStr = dateStrArg;
 
 		this.isNull = false;
 	}
@@ -61,13 +64,16 @@ public class DateHolder {
 	 * date formats, but does use the internal java Date class and ensures the date actually
 	 * makes sense
 	 */
-	void initWithDate(Date date) {
-		if (date == null) {
+	void initWithDate(Date argDate) {
+		this.date = null;
+		this.dateTimeStr = null;
+
+		if (argDate == null) {
 			this.isNull = true;
 			return;
 		}
 
-		this.date = date;
+		this.date = argDate;
 
 		this.isNull = false;
 	}
@@ -106,6 +112,51 @@ public class DateHolder {
 
 	public String serializeDateTime() {
 		return toString();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+
+		if (other == null) {
+			return isNull;
+		}
+
+		if (other instanceof DateHolder) {
+			DateHolder otherDateHolder = (DateHolder) other;
+
+			if (otherDateHolder.isNull) {
+				return isNull;
+			} else {
+				if (isNull) {
+					return false;
+				}
+			}
+
+			// If our values for toString() are different...
+			if (this.toString() == null) {
+				if (otherDateHolder.toString() != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.toString().equals(otherDateHolder.toString())) {
+				// ... then we are not the same!
+				return false;
+			}
+
+			// We have no reason to assume that we are not the same
+			return true;
+		}
+
+		// If the other one cannot even be cast to us, then we are not the same!
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		if (this.isNull) {
+			return 0;
+		}
+		return this.toString().hashCode();
 	}
 
 }

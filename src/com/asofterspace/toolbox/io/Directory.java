@@ -270,7 +270,7 @@ public class Directory {
 	 */
 	public List<File> getAllFiles(boolean recursively) {
 
-		return getAllFilesInternally(new java.io.File(dirname), null, recursively);
+		return getAllFilesInternally(new java.io.File(dirname), null, null, recursively);
 	}
 
 	/**
@@ -280,10 +280,30 @@ public class Directory {
 	 */
 	public List<File> getAllFilesEndingWith(String endStr, boolean recursively) {
 
-		return getAllFilesInternally(new java.io.File(dirname), endStr, recursively);
+		return getAllFilesInternally(new java.io.File(dirname), null, endStr, recursively);
 	}
 
-	private List<File> getAllFilesInternally(java.io.File entryPoint, String endStr, boolean recursively) {
+	/**
+	 * Get all the files contained in the directory (and, if recursively
+	 * is set to true, in its sub-directories) whose names start with the
+	 * given string
+	 */
+	public List<File> getAllFilesStartingWith(String startStr, boolean recursively) {
+
+		return getAllFilesInternally(new java.io.File(dirname), startStr, null, recursively);
+	}
+
+	/**
+	 * Get all the files contained in the directory (and, if recursively
+	 * is set to true, in its sub-directories) whose names start and end
+	 * with the given strings
+	 */
+	public List<File> getAllFilesStartingAndEndingWith(String startStr, String endStr, boolean recursively) {
+
+		return getAllFilesInternally(new java.io.File(dirname), startStr, endStr, recursively);
+	}
+
+	private List<File> getAllFilesInternally(java.io.File entryPoint, String startStr, String endStr, boolean recursively) {
 
 		List<File> result = new ArrayList<>();
 
@@ -293,11 +313,13 @@ public class Directory {
 				for (java.io.File curChild : children) {
 					if (curChild.isDirectory()) {
 						if (recursively) {
-							result.addAll(getAllFilesInternally(curChild, endStr, true));
+							result.addAll(getAllFilesInternally(curChild, startStr, endStr, true));
 						}
 					} else {
 						if ((endStr == null) || curChild.getAbsolutePath().endsWith(endStr)) {
-							result.add(new File(curChild));
+							if ((startStr == null) || curChild.getName().startsWith(startStr)) {
+								result.add(new File(curChild));
+							}
 						}
 					}
 				}

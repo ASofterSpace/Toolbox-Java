@@ -35,7 +35,7 @@ public class TaskCtrlBase {
 	public final static String RELEASED_ON_DAY = "releasedOnDay";
 	protected final static String RELEASED_IN_MONTH = "releasedInMonth";
 	protected final static String RELEASED_IN_YEAR = "releasedInYear";
-	protected final static String DONE_DATE = "doneDate";
+	public final static String DONE_DATE = "doneDate";
 	public final static String SET_TO_DONE_DATE_TIME = "setToDoneDateTime";
 	protected final static String DONE_LOG = "doneLog";
 	public final static String DATE = "date";

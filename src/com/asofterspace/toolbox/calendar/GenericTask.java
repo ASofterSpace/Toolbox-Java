@@ -386,8 +386,8 @@ public class GenericTask {
 			if (getSetToDoneDateTime() == null) {
 				return true;
 			}
-			// if the difference between doneDate and setToDoneDateTime is more than 3 days, report it!
-			return Math.abs(getDoneDate().getTime() - getSetToDoneDateTime().getTime()) / (1000.0 * 60.0 * 60.0 * 24.0) > 3;
+			// if the difference between doneDate and setToDoneDateTime is more than 21 days, report it!
+			return Math.abs(getDoneDate().getTime() - getSetToDoneDateTime().getTime()) / (1000.0 * 60.0 * 60.0 * 24.0) > 21;
 		}
 
 		return false;
