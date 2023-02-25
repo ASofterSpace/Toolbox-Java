@@ -2725,6 +2725,8 @@ public abstract class Code extends DefaultStyledDocument {
 							line = line.substring(0, ifAt + 4) + "(" + line.substring(ifAt + 4);
 							String newContent = contentStart + line + contentEnd;
 
+							boolean preventTextSetting = false;
+
 							if ((foundEndAt >= 0) && (foundEndAt < lineOffset)) {
 								// we have:       if (blubb = foo) && |
 								// we insert:     if ((blubb = foo) && |)
@@ -2736,17 +2738,30 @@ public abstract class Code extends DefaultStyledDocument {
 								// we have:       if (blubb = foo && |)
 								// we insert:     if ((blubb = foo) && |)
 
+								//   so do in case of: if (blubb = foo && |)
+								//     and in case of: if (foo(bar) && |)
+								// but not in case of: if (blubb && |)
+								// so check if the inner string ("blubb = foo", "foo(bar)", "blubb")
+								// contains a space or bracket, and if not, prevent text setting...
+								String containedStr = newContent.substring(lineStart + ifAt + 5, offset - 2);
+								if (!containedStr.contains(" ") && !containedStr.contains("\t") &&
+									!containedStr.contains("(") && !containedStr.contains(")")) {
+									preventTextSetting = true;
+								}
+
 								newContent = newContent.substring(0, offset - 2) + ")" +
 									newContent.substring(offset - 2, offset + 1) + " " + newContent.substring(offset + 1);
 								insertedAmount = 3;
 							}
 
-							int origCaretPos = decoratedEditor.getCaretPosition();
-							decoratedEditor.setText(newContent);
-							decoratedEditor.setCaretPosition(origCaretPos + insertedAmount);
+							if (!preventTextSetting) {
+								int origCaretPos = decoratedEditor.getCaretPosition();
+								decoratedEditor.setText(newContent);
+								decoratedEditor.setCaretPosition(origCaretPos + insertedAmount);
 
-							// we do NOT bubble up the chain, as we already set the text explicitly!
-							return;
+								// we do NOT bubble up the chain, as we already set the text explicitly!
+								return;
+							}
 						}
 					}
 				}

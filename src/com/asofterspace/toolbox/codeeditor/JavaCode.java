@@ -693,7 +693,10 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 								(!thisLine.endsWith("(")) &&
 								(!thisLine.endsWith("[")) &&
 								(!thisLine.endsWith(":")) &&
-								(!thisLine.endsWith("*/")) &&
+								// a */ should not receive a semicomma, but even a / or * individually shouldn't in case
+								// a maths expression is split over several lines
+								(!thisLine.endsWith("/")) &&
+								(!thisLine.endsWith("*")) &&
 								(!thisLine.endsWith("&")) &&
 								(!thisLine.endsWith("|")) &&
 								(!thisLine.endsWith("<")) &&
