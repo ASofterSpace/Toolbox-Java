@@ -290,6 +290,13 @@ public class Image {
 		return data[y][x];
 	}
 
+	public ColorRGBA getPixelSafely(int x, int y) {
+		if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) {
+			return null;
+		}
+		return data[y][x];
+	}
+
 	public void setPixel(int x, int y, ColorRGBA pix) {
 		data[y][x] = pix;
 	}
