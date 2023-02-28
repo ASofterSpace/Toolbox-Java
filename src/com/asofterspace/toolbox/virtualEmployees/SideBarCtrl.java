@@ -86,7 +86,8 @@ public class SideBarCtrl {
 				}
 
 				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString(NAME) + "\" ");
-				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"top: " + top + "pt;");
+				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" target=\"_blank\" ");
+				html.append("style=\"top: " + top + "pt;");
 				if (veRec.getBoolean("flip", false)) {
 					html.append(" transform: scaleX(-1);");
 				}
@@ -123,7 +124,8 @@ public class SideBarCtrl {
 
 		for (Record veRec : veRecords) {
 			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString(DESCRIPTION) + "\" ");
-			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center; text-decoration: none;\">\n");
+			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" target=\"_blank\" ");
+			html.append("style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center; text-decoration: none;\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString(NAME).toLowerCase() + ".jpg\"/>\n");
 			html.append("<br>\n");
 			html.append(veRec.getString(NAME) + "\n");
@@ -149,7 +151,7 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"target\" ");
 		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
 		html.append("<br>\n");
@@ -160,7 +162,7 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" target=\"target\" ");
 		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/funtube.png\" />\n");
 		html.append("<br>\n");
@@ -260,11 +262,7 @@ public class SideBarCtrl {
 		}
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3013/\" ");
-		// when we are currently on the browser page, instead of leaving it out, we change the default behavior
-		// to opening another one in a new tab when clicked
-		if (leaveOut.contains(SideBarEntryForTool.BROWSER)) {
-			html.append("target=\"_blank\" ");
-		}
+		html.append("target=\"_blank\" ");
 		html.append("style=\"bottom: " + bottom + "pt;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
 		html.append("</a>\n");
