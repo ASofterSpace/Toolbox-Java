@@ -612,6 +612,8 @@ public class ColorRGBA {
 		}
 
 		str = str.toLowerCase();
+		str = StrUtils.replaceAll(str, " ", "");
+		str = StrUtils.replaceAll(str, "\t", "");
 
 		if (str.startsWith("rgb")) {
 			str = str.substring(str.indexOf("(") + 1);
@@ -639,10 +641,25 @@ public class ColorRGBA {
 		}
 
 		if (str.startsWith("#")) {
-			String rStr = "" + str.charAt(1) + str.charAt(2);
-			String gStr = "" + str.charAt(3) + str.charAt(4);
-			String bStr = "" + str.charAt(5) + str.charAt(6);
-			return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
+			if (str.length() == 4) {
+				String rStr = "" + str.charAt(1) + str.charAt(1);
+				String gStr = "" + str.charAt(2) + str.charAt(2);
+				String bStr = "" + str.charAt(3) + str.charAt(3);
+				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
+			}
+			if (str.length() == 7) {
+				String rStr = "" + str.charAt(1) + str.charAt(2);
+				String gStr = "" + str.charAt(3) + str.charAt(4);
+				String bStr = "" + str.charAt(5) + str.charAt(6);
+				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
+			}
+			if (str.length() == 9) {
+				String rStr = "" + str.charAt(1) + str.charAt(2);
+				String gStr = "" + str.charAt(3) + str.charAt(4);
+				String bStr = "" + str.charAt(5) + str.charAt(6);
+				String aStr = "" + str.charAt(7) + str.charAt(8);
+				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr), HexDecoder.decodeInt(aStr));
+			}
 		}
 
 		System.err.println("The color string '" + str + "' could not be parsed!");
@@ -651,7 +668,7 @@ public class ColorRGBA {
 
 	@Override
 	public String toString() {
-		return "RGB(" + (((int) r) & 0xFF) + ", " + (((int) g) & 0xFF) + ", " + (((int) b) & 0xFF) + ", " + (((int) a) & 0xFF) + ")";
+		return "rgba(" + (((int) r) & 0xFF) + ", " + (((int) g) & 0xFF) + ", " + (((int) b) & 0xFF) + ", " + (((int) a) & 0xFF) + ")";
 	}
 
 	public String toHexString() {
