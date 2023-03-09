@@ -1037,6 +1037,69 @@ public class Image {
 		}
 	}
 
+	/*
+	Farben intensivieren:
+	p^[1] := max255((p^[1] * p^[1]) div 128);
+	p^[2] := max255((p^[2] * p^[2]) div 128);
+	p^[3] := max255((p^[3] * p^[3]) div 128);
+	*/
+	public void intensify() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int r = Math.min(255, (data[y][x].getR() * data[y][x].getR()) / 128);
+				int g = Math.min(255, (data[y][x].getG() * data[y][x].getG()) / 128);
+				int b = Math.min(255, (data[y][x].getB() * data[y][x].getB()) / 128);
+				int a = data[y][x].getA();
+				data[y][x] = new ColorRGBA(r, g, b, a);
+			}
+		}
+	}
+
+	/*
+	Farben leicht intensivieren:
+	p^[1] := (max255((p^[1] * p^[1]) div 128) + p^[1]) div 2;
+	p^[2] := (max255((p^[2] * p^[2]) div 128) + p^[2]) div 2;
+	p^[3] := (max255((p^[3] * p^[3]) div 128) + p^[3]) div 2;
+	*/
+	public void intensifySlightly() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int r = ((Math.min(255, (data[y][x].getR() * data[y][x].getR()) / 128)) + data[y][x].getR()) / 2;
+				int g = ((Math.min(255, (data[y][x].getG() * data[y][x].getG()) / 128)) + data[y][x].getG()) / 2;
+				int b = ((Math.min(255, (data[y][x].getB() * data[y][x].getB()) / 128)) + data[y][x].getB()) / 2;
+				int a = data[y][x].getA();
+				data[y][x] = new ColorRGBA(r, g, b, a);
+			}
+		}
+	}
+
+	/*
+	intensifies colors, and the ones that achieve black or white are set to that,
+	but all others are kept as before, so if it was somewhere in the middle before,
+	it just stays exactly there
+	*/
+	public void intensifyExtremes() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int r = Math.min(255, (data[y][x].getR() * data[y][x].getR()) / 128);
+				int g = Math.min(255, (data[y][x].getG() * data[y][x].getG()) / 128);
+				int b = Math.min(255, (data[y][x].getB() * data[y][x].getB()) / 128);
+				int a = data[y][x].getA();
+				if (r+g+b > 512) {
+					data[y][x] = new ColorRGBA(255, 255, 255, a);
+					continue;
+				}
+				if (r+g+b < 255) {
+					data[y][x] = new ColorRGBA(0, 0, 0, a);
+					continue;
+				}
+			}
+		}
+	}
+
 	/**
 	 * Get the most common color in the image
 	 */

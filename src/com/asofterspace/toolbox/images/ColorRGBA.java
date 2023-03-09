@@ -448,7 +448,8 @@ public class ColorRGBA {
 		return new ColorRGBA(
 			getEditedChannel(baseForR, modifierForR),
 			getEditedChannel(baseForG, modifierForG),
-			getEditedChannel(baseForB, modifierForB)
+			getEditedChannel(baseForB, modifierForB),
+			getA()
 		);
 	}
 
@@ -457,7 +458,8 @@ public class ColorRGBA {
 		return new ColorRGBA(
 			Math.max(255 - Math.round((255 - getR()) * amount), 0),
 			Math.max(255 - Math.round((255 - getG()) * amount), 0),
-			Math.max(255 - Math.round((255 - getB()) * amount), 0)
+			Math.max(255 - Math.round((255 - getB()) * amount), 0),
+			getA()
 		);
 	}
 
@@ -468,7 +470,8 @@ public class ColorRGBA {
 		return new ColorRGBA(
 			gray,
 			gray,
-			gray
+			gray,
+			getA()
 		);
 	}
 
@@ -479,7 +482,8 @@ public class ColorRGBA {
 		return new ColorRGBA(
 			gray,
 			gray,
-			gray
+			gray,
+			getA()
 		);
 	}
 
@@ -488,7 +492,8 @@ public class ColorRGBA {
 		return new ColorRGBA(
 			255 - getR(),
 			255 - getG(),
-			255 - getB()
+			255 - getB(),
+			getA()
 		);
 	}
 
@@ -500,7 +505,7 @@ public class ColorRGBA {
 			(getR() * targetGray) / 255,
 			(getG() * targetGray) / 255,
 			(getB() * targetGray) / 255,
-			255
+			getA()
 		);
 	}
 
@@ -525,7 +530,7 @@ public class ColorRGBA {
 				Math.round(origR * factor),
 				Math.round(origG * factor),
 				Math.round(origB * factor),
-				255
+				getA()
 			);
 
 			if (result.getPerceivedGrayness() > targetGray) {
