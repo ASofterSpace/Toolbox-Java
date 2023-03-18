@@ -975,10 +975,50 @@ public class Image {
 							 String baseForG, double modifierForG,
 							 String baseForB, double modifierForB) {
 
+		editChannels(baseForR, modifierForR, baseForG, modifierForG, baseForB, modifierForB,
+			ColorRGBA.DEFAULT_ALLOW_OVERFLOW);
+	}
+
+	public void editChannels(String baseForR, double modifierForR,
+							 String baseForG, double modifierForG,
+							 String baseForB, double modifierForB,
+							 boolean allowOverflow) {
+
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				data[y][x] = data[y][x].getEditedChannels(baseForR, modifierForR, baseForG,
-														  modifierForG, baseForB, modifierForB);
+				data[y][x] = data[y][x].getEditedChannels(
+					baseForR, modifierForR,
+					baseForG, modifierForG,
+					baseForB, modifierForB,
+					allowOverflow);
+			}
+		}
+	}
+
+	public void editChannels(String baseForR, double modifierForR,
+							 String baseForG, double modifierForG,
+							 String baseForB, double modifierForB,
+							 String baseForA, double modifierForA) {
+
+		editChannels(baseForR, modifierForR, baseForG, modifierForG,
+			baseForB, modifierForB, baseForA, modifierForA,
+			ColorRGBA.DEFAULT_ALLOW_OVERFLOW);
+	}
+
+	public void editChannels(String baseForR, double modifierForR,
+							 String baseForG, double modifierForG,
+							 String baseForB, double modifierForB,
+							 String baseForA, double modifierForA,
+							 boolean allowOverflow) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getEditedChannels(
+					baseForR, modifierForR,
+					baseForG, modifierForG,
+					baseForB, modifierForB,
+					baseForA, modifierForA,
+					allowOverflow);
 			}
 		}
 	}

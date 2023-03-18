@@ -31,6 +31,7 @@ public class ColorRGBA {
 
 	public final static ColorRGBA WHITE = new ColorRGBA(255, 255, 255, 255);
 	public final static ColorRGBA BLACK = new ColorRGBA(  0,   0,   0, 255);
+	public final static boolean DEFAULT_ALLOW_OVERFLOW = false;
 
 
 	// by default, just a white pixel
@@ -73,33 +74,39 @@ public class ColorRGBA {
 	}
 
 	public ColorRGBA(int r, int g, int b, int a) {
+		this(r, g, b, a, DEFAULT_ALLOW_OVERFLOW);
+	}
 
-		if (r > 255) {
-			r = 255;
-		}
-		if (r < 0) {
-			r = 0;
-		}
+	public ColorRGBA(int r, int g, int b, int a, boolean allowOverflow) {
 
-		if (g > 255) {
-			g = 255;
-		}
-		if (g < 0) {
-			g = 0;
-		}
+		if (!allowOverflow) {
+			if (r > 255) {
+				r = 255;
+			}
+			if (r < 0) {
+				r = 0;
+			}
 
-		if (b > 255) {
-			b = 255;
-		}
-		if (b < 0) {
-			b = 0;
-		}
+			if (g > 255) {
+				g = 255;
+			}
+			if (g < 0) {
+				g = 0;
+			}
 
-		if (a > 255) {
-			a = 255;
-		}
-		if (a < 0) {
-			a = 0;
+			if (b > 255) {
+				b = 255;
+			}
+			if (b < 0) {
+				b = 0;
+			}
+
+			if (a > 255) {
+				a = 255;
+			}
+			if (a < 0) {
+				a = 0;
+			}
 		}
 
 		this.r = (byte) r;
@@ -445,11 +452,49 @@ public class ColorRGBA {
 	public ColorRGBA getEditedChannels(String baseForR, double modifierForR,
 									  String baseForG, double modifierForG,
 									  String baseForB, double modifierForB) {
+		return getEditedChannels(
+			baseForR, modifierForR,
+			baseForG, modifierForG,
+			baseForB, modifierForB,
+			DEFAULT_ALLOW_OVERFLOW);
+	}
+
+	public ColorRGBA getEditedChannels(String baseForR, double modifierForR,
+									  String baseForG, double modifierForG,
+									  String baseForB, double modifierForB,
+									  boolean allowOverflow) {
 		return new ColorRGBA(
 			getEditedChannel(baseForR, modifierForR),
 			getEditedChannel(baseForG, modifierForG),
 			getEditedChannel(baseForB, modifierForB),
-			getA()
+			getA(),
+			allowOverflow
+		);
+	}
+
+	public ColorRGBA getEditedChannels(String baseForR, double modifierForR,
+									  String baseForG, double modifierForG,
+									  String baseForB, double modifierForB,
+									  String baseForA, double modifierForA) {
+		return getEditedChannels(
+			baseForR, modifierForR,
+			baseForG, modifierForG,
+			baseForB, modifierForB,
+			baseForA, modifierForA,
+			DEFAULT_ALLOW_OVERFLOW);
+	}
+
+	public ColorRGBA getEditedChannels(String baseForR, double modifierForR,
+									  String baseForG, double modifierForG,
+									  String baseForB, double modifierForB,
+									  String baseForA, double modifierForA,
+									  boolean allowOverflow) {
+		return new ColorRGBA(
+			getEditedChannel(baseForR, modifierForR),
+			getEditedChannel(baseForG, modifierForG),
+			getEditedChannel(baseForB, modifierForB),
+			getEditedChannel(baseForA, modifierForA),
+			allowOverflow
 		);
 	}
 
