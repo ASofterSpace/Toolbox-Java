@@ -1131,6 +1131,10 @@ public class Image {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 
+				if (bgColor.equals(data[y][x])) {
+					continue;
+				}
+
 				if (y > 0) {
 					if (!bgColor.equals(data[y-1][x])) {
 						continue;
@@ -1192,6 +1196,10 @@ public class Image {
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
+
+				if (bgColor.equals(data[y][x])) {
+					continue;
+				}
 
 				if (y > 0) {
 					if (!bgColor.equals(data[y-1][x])) {
