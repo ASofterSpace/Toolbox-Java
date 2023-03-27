@@ -34,6 +34,19 @@ public class GenericPrettifier {
 		// line break - but gets in the way of reading the text when it is not hidden, so just remove it
 		text = StrUtils.replaceAll(text, "­", "");
 
+		// replace lines do not end with whitespace
+		text = text + "\n";
+		boolean somethingChanged = true;
+		while (somethingChanged) {
+			int textLen = text.length();
+			text = StrUtils.replaceAll(text, "\t\r\n", "\r\n");
+			text = StrUtils.replaceAll(text, " \r\n", "\r\n");
+			text = StrUtils.replaceAll(text, "\t\n", "\n");
+			text = StrUtils.replaceAll(text, " \n", "\n");
+			somethingChanged = (textLen != text.length());
+		}
+		text = text.substring(0, text.length() - 1);
+
 		return text;
 	}
 
