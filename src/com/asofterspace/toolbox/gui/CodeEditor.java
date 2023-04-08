@@ -41,6 +41,7 @@ public class CodeEditor extends JTextPane {
 	private Color changedLineBackgroundColor = Color.DARK_GRAY;
 	private Color changedLineHighlightColor = Color.DARK_GRAY;
 	private boolean highlightChanges = true;
+	private boolean wordWrap = false;
 
 	private List<String> proposedTokens;
 	private int proposedTokenSelection = 0;
@@ -74,6 +75,10 @@ public class CodeEditor extends JTextPane {
 
 	public void setHighlightChanges(boolean highlightChanges) {
 		this.highlightChanges = highlightChanges;
+	}
+
+	public void setWordWrap(boolean wordWrap) {
+		this.wordWrap = wordWrap;
 	}
 
 	public void setStartLineColor(Color startLineColor) {
@@ -117,7 +122,7 @@ public class CodeEditor extends JTextPane {
 		// ... instead, ALWAYS ask the surrounding container to make as much space as
 		// required (this prevents word-wrap, as I really don't like word wrapping in
 		// a code editor!)
-		return false;
+		return wordWrap;
 	}
 
 	@Override

@@ -6,14 +6,11 @@ package com.asofterspace.toolbox.codeeditor;
 
 import com.asofterspace.toolbox.codeeditor.base.Code;
 
-import java.util.Set;
-
 import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 
-public class MarkdownCode extends Code {
+public class MarkdownCode extends PlainText {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,38 +26,6 @@ public class MarkdownCode extends Code {
 	public MarkdownCode(JTextPane editor) {
 
 		super(editor);
-	}
-
-	@Override
-	public void insertString(int offset, String insertedString, AttributeSet attrs) {
-
-		int origCaretPos = decoratedEditor.getCaretPosition();
-
-		boolean overrideCaretPos = false;
-
-		// automagically close brackets that are being opened
-		switch (insertedString) {
-			case "{":
-				insertedString = "{}";
-				overrideCaretPos = true;
-				break;
-			case "(":
-				insertedString = "()";
-				overrideCaretPos = true;
-				break;
-			case "[":
-				insertedString = "[]";
-				overrideCaretPos = true;
-				break;
-		}
-
-		super.insertString(offset, insertedString, attrs);
-
-		highlightText(offset, insertedString.length());
-
-		if (overrideCaretPos) {
-			decoratedEditor.setCaretPosition(origCaretPos + 1);
-		}
 	}
 
 	// this is the main function that... well... highlights our text :)
