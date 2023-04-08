@@ -40,6 +40,7 @@ public class CodeEditor extends JTextPane {
 	private Color horzLineColor = Color.DARK_GRAY;
 	private Color changedLineBackgroundColor = Color.DARK_GRAY;
 	private Color changedLineHighlightColor = Color.DARK_GRAY;
+	private boolean highlightChanges = true;
 
 	private List<String> proposedTokens;
 	private int proposedTokenSelection = 0;
@@ -69,6 +70,10 @@ public class CodeEditor extends JTextPane {
 	 */
 	public void enableStartLine(boolean doEnable) {
 		this.showStartLine = doEnable;
+	}
+
+	public void setHighlightChanges(boolean highlightChanges) {
+		this.highlightChanges = highlightChanges;
 	}
 
 	public void setStartLineColor(Color startLineColor) {
@@ -157,6 +162,10 @@ public class CodeEditor extends JTextPane {
 			int height = getHeight();
 			graphics2d.setColor(getBackground());
 			graphics2d.fillRect(0, 0, width, height);
+
+			if (!highlightChanges) {
+				return;
+			}
 
 			// in here, access the latest diff between the original code and the current code,
 			// and draw the changed lines in gray
