@@ -178,6 +178,23 @@ public class ConfigFile extends JsonFile {
 	}
 
 	/**
+	 * Gets the value stored with the given key
+	 * @param key
+	 * @param defaultValue
+	 * @return the value stored in the key, or defaultValue if it cannot be found
+	 */
+	public String getValue(String key, String defaultValue) {
+
+		String result = getValue(key);
+
+		if (result == null) {
+			return defaultValue;
+		}
+
+		return result;
+	}
+
+	/**
 	 * Gets a list of values stored with the given key,
 	 * so if the JSON is {"bla": ["1", "2", "3"]},
 	 * then getList("bla") gives a list containing "1", "2" and "3"
