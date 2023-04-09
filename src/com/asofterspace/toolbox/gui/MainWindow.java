@@ -37,8 +37,12 @@ public abstract class MainWindow implements Runnable {
 
 		// Set an icon
 		String classPath = System.getProperty("java.class.path");
-		ImageIcon ico = new ImageIcon(classPath + "/../res/ico.png");
+		ImageIcon ico = new ImageIcon(classPath + "/../res/" + getIconName());
 		mainFrame.setIconImage(ico.getImage());
+	}
+
+	protected String getIconName() {
+		return "ico.png";
 	}
 
 	public void show() {
