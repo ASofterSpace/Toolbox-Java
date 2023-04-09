@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.EditorKit;
 
 
 /**
@@ -54,6 +55,8 @@ public class CodeEditor extends JTextPane {
 	// text is compared against for highlighting changed lines
 	private String origText = null;
 
+	private EditorKit origKit = null;
+
 
 	public CodeEditor() {
 		super();
@@ -79,6 +82,15 @@ public class CodeEditor extends JTextPane {
 
 	public void setWordWrap(boolean wordWrap) {
 		this.wordWrap = wordWrap;
+
+		if (wordWrap) {
+			if (origKit == null) {
+				origKit = getEditorKit();
+			}
+			setEditorKit(new CodeWrapEditorKit());
+		} else {
+			setEditorKit(origKit);
+		}
 	}
 
 	public void setStartLineColor(Color startLineColor) {

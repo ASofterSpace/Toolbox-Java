@@ -31,69 +31,46 @@ public class CodeHighlighterFactory {
 
 	public static Code getHighlighterForLanguage(CodeLanguage language, JTextPane editor) {
 
-		if (language == null) {
-			return new PlainText(editor);
+		if (language != null) {
+			switch (language) {
+				case JAVA:
+					return new JavaCode(editor);
+				case GROOVY:
+					return new GroovyCode(editor);
+				case CSHARP:
+					return new CSharpCode(editor);
+				case MARKDOWN:
+					return new MarkdownCode(editor);
+				case CSS:
+					return new CssCode(editor);
+				case HTML:
+					return new HtmlCode(editor);
+				case XML:
+					return new XmlCode(editor);
+				case PHP:
+					return new PhpCode(editor);
+				case JAVASCRIPT:
+					return new JavaScriptCode(editor);
+				case TYPESCRIPT:
+					return new TypeScriptCode(editor);
+				case DELPHI:
+					return new DelphiCode(editor);
+				case JSON:
+					return new JsonCode(editor);
+				case PYTHON:
+					return new PythonCode(editor);
+				case GO:
+					return new GoCode(editor);
+				case STL:
+					return new StlCode(editor);
+				case SHELL:
+					return new ShellCode(editor);
+				case BATCH:
+					return new BatchCode(editor);
+			}
 		}
 
-		Code highlighter = null;
-
-		switch (language) {
-			case JAVA:
-				highlighter = new JavaCode(editor);
-				break;
-			case GROOVY:
-				highlighter = new GroovyCode(editor);
-				break;
-			case CSHARP:
-				highlighter = new CSharpCode(editor);
-				break;
-			case MARKDOWN:
-				highlighter = new MarkdownCode(editor);
-				break;
-			case CSS:
-				highlighter = new CssCode(editor);
-				break;
-			case HTML:
-				highlighter = new HtmlCode(editor);
-				break;
-			case XML:
-				highlighter = new XmlCode(editor);
-				break;
-			case PHP:
-				highlighter = new PhpCode(editor);
-				break;
-			case JAVASCRIPT:
-				highlighter = new JavaScriptCode(editor);
-				break;
-			case TYPESCRIPT:
-				highlighter = new TypeScriptCode(editor);
-				break;
-			case DELPHI:
-				highlighter = new DelphiCode(editor);
-				break;
-			case JSON:
-				highlighter = new JsonCode(editor);
-				break;
-			case PYTHON:
-				highlighter = new PythonCode(editor);
-				break;
-			case GO:
-				highlighter = new GoCode(editor);
-				break;
-			case STL:
-				highlighter = new StlCode(editor);
-				break;
-			case SHELL:
-				highlighter = new ShellCode(editor);
-				break;
-			case BATCH:
-				highlighter = new BatchCode(editor);
-				break;
-			default:
-				highlighter = new PlainText(editor);
-		}
-
-		return highlighter;
+		return new PlainText(editor);
 	}
 
 }
