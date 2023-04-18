@@ -79,6 +79,8 @@ public class SortUtils  {
 				return reverse(listToSort);
 			case RANDOM:
 				return randomize(listToSort);
+			case ALPHABETICAL_IGNORE_UMLAUTS:
+				return sortAlphabetically(listToSort, stringifier, true);
 			default:
 				return sortAlphabetically(listToSort, stringifier);
 		}
@@ -115,6 +117,11 @@ public class SortUtils  {
 	}
 
 	public static <T> List<T> sortAlphabetically(Collection<T> listToSort, Stringifier<T> stringifier) {
+		return sortAlphabetically(listToSort, stringifier, false);
+	}
+
+	public static <T> List<T> sortAlphabetically(Collection<T> listToSort, Stringifier<T> stringifier,
+		boolean ignoreUmlauts) {
 
 		List<T> newList = new ArrayList<>();
 
@@ -135,6 +142,12 @@ public class SortUtils  {
 			public int compare(T a, T b) {
 				String bLow = finalifier.getString(b);
 				String aLow = finalifier.getString(a);
+
+				if (ignoreUmlauts) {
+					aLow = ignoreUmlauts(aLow);
+					bLow = ignoreUmlauts(bLow);
+				}
+
 				if (aLow == null) {
 					return -1;
 				}
@@ -146,6 +159,22 @@ public class SortUtils  {
 		});
 
 		return newList;
+	}
+
+	private static String ignoreUmlauts(String result) {
+		result = StrUtils.replaceAll(result, "ä", "a");
+		result = StrUtils.replaceAll(result, "Ä", "A");
+		result = StrUtils.replaceAll(result, "ö", "o");
+		result = StrUtils.replaceAll(result, "Ö", "O");
+		result = StrUtils.replaceAll(result, "ü", "u");
+		result = StrUtils.replaceAll(result, "Ü", "U");
+		result = StrUtils.replaceAll(result, "é", "e");
+		result = StrUtils.replaceAll(result, "É", "E");
+		result = StrUtils.replaceAll(result, "è", "e");
+		result = StrUtils.replaceAll(result, "È", "E");
+		result = StrUtils.replaceAll(result, "ê", "e");
+		result = StrUtils.replaceAll(result, "Ê", "E");
+		return result;
 	}
 
 	public static <T> List<T> sortNumerically(Collection<T> listToSort) {
