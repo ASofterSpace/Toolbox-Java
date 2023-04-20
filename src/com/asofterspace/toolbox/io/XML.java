@@ -265,6 +265,11 @@ public class XML extends Record {
 		str = str.replace("&#xA;", "\n");
 		str = str.replace("&#9;", "\t");
 		str = str.replace("&#039;", "'");
+		str = str.replace("&#132;", "„");
+		str = str.replace("&#145;", "‘");
+		str = str.replace("&#146;", "’");
+		str = str.replace("&#147;", "“");
+		str = str.replace("&#148;", "”");
 		str = str.replace("&#160;", " ");
 		str = str.replace("&#8364;", "€");
 		str = str.replace("&gt;", ">");
