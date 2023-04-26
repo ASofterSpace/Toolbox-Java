@@ -121,7 +121,7 @@ public class SortUtils  {
 	}
 
 	public static <T> List<T> sortAlphabetically(Collection<T> listToSort, Stringifier<T> stringifier,
-		boolean ignoreUmlauts) {
+		final boolean ignoreUmlauts) {
 
 		List<T> newList = new ArrayList<>();
 

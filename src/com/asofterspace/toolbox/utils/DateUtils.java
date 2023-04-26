@@ -35,6 +35,8 @@ public class DateUtils {
 
 	public static final String[] DAY_NAMES = new String[]{"Saturday", "Sunday", "Monday",
 		"Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+	public static final String[] DAY_NAMES_GERMAN = new String[]{"Samstag", "Sonntag", "Montag",
+		"Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"};
 	public static final String[] MONTH_NAMES = new String[]{"January", "February", "March",
 		"April", "May", "June", "July", "August", "September", "October", "November", "December"};
 	private static final String[] MONTH_NAMES_GERMAN = new String[]{"Januar", "Februar", "März",
@@ -844,6 +846,39 @@ public class DateUtils {
 		String seconds = StrUtils.leftPad0(cal.get(Calendar.SECOND), 2);
 		String weekday = DAY_NAMES[cal.get(Calendar.DAY_OF_WEEK)];
 		return year + "-" + month + "-" + day + ", " + weekday + ", " + hours + ":" + minutes + ":" + seconds;
+	}
+
+	/**
+	 * Take in a text and replace all DE datetimestamps with EN ones
+	 */
+	public static String convertDateTimeStampsDEtoEN(String text) {
+		for (int i = 0; i < 7; i++) {
+			text = convertOneDateTimeStampDEtoEN(text, DAY_NAMES_GERMAN[i], DAY_NAMES[i]);
+		}
+		return text;
+	}
+
+	private static String convertOneDateTimeStampDEtoEN(String text, String from, String to) {
+		String commaFromComma = ", " + from + ", ";
+		int cur = text.indexOf(commaFromComma);
+		while (cur >= 0) {
+			if (cur > 11) {
+				if ((text.charAt(cur - 10) == '.') && (text.charAt(cur - 9) == ' ') &&
+					(text.charAt(cur - 6) == '.') && (text.charAt(cur - 5) == ' ')) {
+					text = text.substring(0, cur - 12) +
+						// yyyy
+						text.charAt(cur - 4) + text.charAt(cur - 3) + text.charAt(cur - 2) + text.charAt(cur - 1) +
+						// -mm
+						"-" + text.charAt(cur - 8) + text.charAt(cur - 7) +
+						// -dd
+						"-" + text.charAt(cur - 12) + text.charAt(cur - 11) +
+						", " + to + ", " +
+						text.substring(cur + commaFromComma.length());
+				}
+			}
+			cur = text.indexOf(commaFromComma, cur + 1);
+		}
+		return text;
 	}
 
 }

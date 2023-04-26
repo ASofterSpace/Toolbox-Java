@@ -234,14 +234,14 @@ public class ImageTest implements Test {
 
 		TestUtils.start("Image Color Removal");
 
-		Image before = new Image(100, 100);
+		Image before = new Image(100, 100, new ColorRGBA(255, 255, 255));
 		before.setPixel(6, 7, new ColorRGBA(33, 0, 0));
 		before.setPixel(6, 8, new ColorRGBA(0, 66, 0));
 		before.setPixel(6, 9, new ColorRGBA(0, 0, 99));
 		before.setPixel(6, 10, new ColorRGBA(255, 255, 255));
 		before.setPixel(6, 13, new ColorRGBA(0, 0, 0));
 
-		Image after = new Image(100, 100);
+		Image after = new Image(100, 100, new ColorRGBA(255, 255, 255));
 		after.setPixel(6, 7, new ColorRGBA(11, 11, 11));
 		after.setPixel(6, 8, new ColorRGBA(22, 22, 22));
 		after.setPixel(6, 9, new ColorRGBA(33, 33, 33));

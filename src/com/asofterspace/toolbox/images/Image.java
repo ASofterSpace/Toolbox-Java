@@ -1507,6 +1507,8 @@ public class Image {
 		for (int y = 0; y < getHeight(); y++) {
 			for (int x = 0; x < getWidth(); x++) {
 				if (!this.data[y][x].fastEquals(otherData[y][x])) {
+					// System.out.println("Equals fails at x: " + x + ", y: " + y +
+					//	", this: " + this.data[y][x] + ", other: " + otherData[y][x]);
 					return false;
 				}
 			}

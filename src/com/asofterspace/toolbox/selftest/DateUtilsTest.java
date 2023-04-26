@@ -30,6 +30,8 @@ public class DateUtilsTest implements Test {
 		monthToNumAndBackTest();
 
 		listDatesTest();
+
+		convertDateTimeStampsDEtoENTest();
 	}
 
 	public void parseAndSerializeDateTest() {
@@ -214,7 +216,6 @@ public class DateUtilsTest implements Test {
 		}
 	}
 
-
 	public void listDatesTest() {
 
 		TestUtils.start("List Dates");
@@ -257,6 +258,22 @@ public class DateUtilsTest implements Test {
 			}
 			TestUtils.fail("We wanted to list the days from now until tomorrow, but did not get 1 day, " +
 				"instead getting " + result.size() + " days: [" + resStr + "]!");
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void convertDateTimeStampsDEtoENTest() {
+
+		TestUtils.start("Convert Date Time Stamps DE to EN");
+
+		String input = "02. 04. 2023, Sonntag, 16:41:22 \n 03. 04. 2023, Montag, 11:45:21";
+		String expected = "2023-04-02, Sunday, 16:41:22 \n 2023-04-03, Monday, 11:45:21";
+
+		String result = DateUtils.convertDateTimeStampsDEtoEN(input);
+
+		if (!result.equals(expected)) {
+			TestUtils.fail("Expected: " + expected + "\nBut got: " + result);
 		}
 
 		TestUtils.succeed();

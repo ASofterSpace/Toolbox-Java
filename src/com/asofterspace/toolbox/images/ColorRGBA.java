@@ -516,7 +516,7 @@ public class ColorRGBA {
 			gray,
 			gray,
 			gray,
-			getA()
+			getAByte()
 		);
 	}
 
@@ -528,7 +528,7 @@ public class ColorRGBA {
 			gray,
 			gray,
 			gray,
-			getA()
+			getAByte()
 		);
 	}
 
