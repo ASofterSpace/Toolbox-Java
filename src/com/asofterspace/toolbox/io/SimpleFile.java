@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.StrUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,6 +93,8 @@ public class SimpleFile extends TextFile {
 	public List<String> loadContents(boolean complainIfMissing) {
 
 		setContent(super.loadContent(complainIfMissing));
+
+		originalLineEndStr = StrUtils.detectLineEndStr(filecontent);
 
 		return filecontents;
 	}
@@ -214,20 +218,7 @@ public class SimpleFile extends TextFile {
 			return;
 		}
 
-		filecontents = new ArrayList<String>();
-
-		originalLineEndStr = "\n";
-		if (content.contains("\r\n")) {
-			originalLineEndStr = "\r\n";
-		} else if (content.contains("\r")) {
-			originalLineEndStr = "\r";
-		}
-
-		String[] lines = content.split(originalLineEndStr);
-
-		for (String line : lines) {
-			filecontents.add(line);
-		}
+		filecontents = StrUtils.splitLines(content);
 	}
 
 	/**

@@ -1454,4 +1454,33 @@ public class StrUtils {
 
 		return str;
 	}
+
+	public static String detectLineEndStr(String text) {
+
+		String originalLineEndStr = "\n";
+		if (text != null) {
+			if (text.contains("\r\n")) {
+				originalLineEndStr = "\r\n";
+			} else if (text.contains("\r")) {
+				originalLineEndStr = "\r";
+			}
+		}
+
+		return originalLineEndStr;
+	}
+
+	public static List<String> splitLines(String text) {
+
+		List<String> result = new ArrayList<>();
+
+		String originalLineEndStr = detectLineEndStr(text);
+
+		String[] lines = text.split(originalLineEndStr);
+
+		for (String line : lines) {
+			result.add(line);
+		}
+
+		return result;
+	}
 }
