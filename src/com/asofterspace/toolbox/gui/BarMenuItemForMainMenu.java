@@ -28,6 +28,8 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 	private int min;
 	private int max;
 	private Integer pos;
+	private Integer setPos;
+	private Integer prevPos;
 
 	private boolean mouseDown;
 
@@ -40,6 +42,8 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		setMinimum(0);
 		setMaximum(100);
 		this.pos = 0;
+		this.setPos = 0;
+		this.prevPos = null;
 
 		this.listeners = new ArrayList<>();
 
@@ -63,7 +67,11 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			public void mousePressed(MouseEvent e) {
 				mouseDown = true;
 				if (SwingUtilities.isRightMouseButton(e)) {
-					displayBarAtPosition(null);
+					if (setPos == null) {
+						displayBarAtPosition(prevPos);
+					} else {
+						displayBarAtPosition(null);
+					}
 				} else {
 					displayBarAtPosition(e.getX());
 				}
@@ -73,7 +81,12 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			public void mouseReleased(MouseEvent e) {
 				mouseDown = false;
 				if (SwingUtilities.isRightMouseButton(e)) {
-					setBarPosition(null, true);
+					if (setPos == null) {
+						setBarPosition(prevPos, true);
+					} else {
+						prevPos = setPos;
+						setBarPosition(null, true);
+					}
 				} else {
 					setBarPosition(e.getX(), true);
 				}
@@ -113,6 +126,8 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 	public void setBarPosition(Integer newPos, boolean notifyListeners) {
 
 		displayBarAtPosition(newPos);
+
+		setPos = pos;
 
 		if (notifyListeners) {
 			notifyBarListeners();
@@ -168,9 +183,9 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			int quarterWidth = innerWidth / 4;
 			int halfHeight = innerHeight / 2;
 			g.fillRect(BORDER_WIDTH, BORDER_WIDTH, quarterWidth, halfHeight);
-			g.fillRect(BORDER_WIDTH + quarterWidth, BORDER_WIDTH + halfHeight, quarterWidth, halfHeight);
+			g.fillRect(BORDER_WIDTH + quarterWidth, BORDER_WIDTH + halfHeight, quarterWidth, innerHeight-halfHeight);
 			g.fillRect(BORDER_WIDTH + (2 * quarterWidth), BORDER_WIDTH, quarterWidth, halfHeight);
-			g.fillRect(BORDER_WIDTH + (3 * quarterWidth), BORDER_WIDTH + halfHeight, quarterWidth, halfHeight);
+			g.fillRect(BORDER_WIDTH + (3 * quarterWidth), BORDER_WIDTH + halfHeight, quarterWidth, innerHeight-halfHeight);
 		} else {
 			g.fillRect(BORDER_WIDTH, BORDER_WIDTH, (innerWidth * pos) / max, innerHeight);
 		}
