@@ -70,7 +70,7 @@ public class Directory {
 	 */
 	public Directory copyToDisk(Directory destination) {
 
-		java.io.File entryPoint = new java.io.File(dirname);
+		java.io.File entryPoint = getJavaFile();
 
 		if (entryPoint.isDirectory()) {
 			copyToDiskInternally(entryPoint, destination.getJavaFile());
@@ -156,7 +156,20 @@ public class Directory {
 
 		Path basePath = getJavaPath();
 
-		return basePath.toAbsolutePath().toString();
+		// there is a weird bug where absolute paths of "C:" do not work
+		// and anyway, cannot do shorter / absolute-er than just "C:" ^^
+		String directString = basePath.toString();
+		if (directString.length() == 2) {
+			return directString;
+		}
+
+		try {
+			basePath = basePath.toAbsolutePath();
+		} catch (Throwable e) {
+			System.err.println("Cannot convert " + basePath + " to absolute path: " + e);
+		}
+
+		return basePath.toString();
 	}
 
 	/**
@@ -167,12 +180,25 @@ public class Directory {
 
 		Path basePath = getJavaPath();
 
+		// there is a weird bug where canonical paths of "C:" do not work
+		// and anyway, cannot do shorter / canonical-er than just "C:" ^^
+		String directString = basePath.toString();
+		if (directString.length() == 2) {
+			return directString;
+		}
+
 		try {
 			return basePath.toRealPath().toString();
 
-		} catch (IOException | SecurityException e) {
+		} catch (IOException | SecurityException ei) {
 
-			return basePath.toAbsolutePath().toString();
+			try {
+				return basePath.toAbsolutePath().toString();
+			} catch (Throwable e) {
+				System.err.println("Cannot convert " + basePath + " to absolute path: " + e);
+			}
+
+			return basePath.toString();
 		}
 	}
 
@@ -181,7 +207,11 @@ public class Directory {
 	 */
 	public java.io.File getJavaFile() {
 
-		return new java.io.File(dirname);
+		java.io.File result = new java.io.File(dirname);
+		if (dirname.length() == 2) {
+			result = new java.io.File(dirname + "/");
+		}
+		return result;
 	}
 
 	/**
@@ -197,7 +227,7 @@ public class Directory {
 	 */
 	public void create() {
 
-		java.io.File dir = new java.io.File(dirname);
+		java.io.File dir = getJavaFile();
 
 		dir.mkdirs();
 	}
@@ -224,7 +254,7 @@ public class Directory {
 
 	public Boolean isEmpty() {
 
-		java.io.File entryPoint = new java.io.File(dirname);
+		java.io.File entryPoint = getJavaFile();
 
 		// a directory is empty if it has no children
 		if (entryPoint.isDirectory()) {
@@ -251,7 +281,7 @@ public class Directory {
 	 */
 	public boolean exists() {
 
-		java.io.File entryPoint = new java.io.File(dirname);
+		java.io.File entryPoint = getJavaFile();
 
 		return entryPoint.exists() && entryPoint.isDirectory();
 	}
@@ -270,7 +300,7 @@ public class Directory {
 	 */
 	public List<File> getAllFiles(boolean recursively) {
 
-		return getAllFilesInternally(new java.io.File(dirname), null, null, recursively);
+		return getAllFilesInternally(getJavaFile(), null, null, recursively);
 	}
 
 	/**
@@ -280,7 +310,7 @@ public class Directory {
 	 */
 	public List<File> getAllFilesEndingWith(String endStr, boolean recursively) {
 
-		return getAllFilesInternally(new java.io.File(dirname), null, endStr, recursively);
+		return getAllFilesInternally(getJavaFile(), null, endStr, recursively);
 	}
 
 	/**
@@ -290,7 +320,7 @@ public class Directory {
 	 */
 	public List<File> getAllFilesStartingWith(String startStr, boolean recursively) {
 
-		return getAllFilesInternally(new java.io.File(dirname), startStr, null, recursively);
+		return getAllFilesInternally(getJavaFile(), startStr, null, recursively);
 	}
 
 	/**
@@ -300,7 +330,7 @@ public class Directory {
 	 */
 	public List<File> getAllFilesStartingAndEndingWith(String startStr, String endStr, boolean recursively) {
 
-		return getAllFilesInternally(new java.io.File(dirname), startStr, endStr, recursively);
+		return getAllFilesInternally(getJavaFile(), startStr, endStr, recursively);
 	}
 
 	private List<File> getAllFilesInternally(java.io.File entryPoint, String startStr, String endStr, boolean recursively) {
@@ -334,8 +364,7 @@ public class Directory {
 	 * is set to true, in its sub-directories)
 	 */
 	public List<Directory> getAllDirectories(boolean recursively) {
-
-		return getAllDirectoriesInternally(new java.io.File(dirname), recursively);
+		return getAllDirectoriesInternally(getJavaFile(), recursively);
 	}
 
 	private List<Directory> getAllDirectoriesInternally(java.io.File entryPoint, boolean recursively) {
@@ -364,7 +393,7 @@ public class Directory {
 	 */
 	public File findFile(String localFilename) {
 
-		return findFileInternally(new java.io.File(dirname), localFilename);
+		return findFileInternally(getJavaFile(), localFilename);
 	}
 
 	/**
@@ -373,7 +402,7 @@ public class Directory {
 	public File findFileFromList(List<String> localFilenames) {
 
 		for (String localFilename : localFilenames) {
-			File result = findFileInternally(new java.io.File(dirname), localFilename);
+			File result = findFileInternally(getJavaFile(), localFilename);
 			if (result != null) {
 				return result;
 			}
@@ -484,7 +513,7 @@ public class Directory {
 	 * recursively
 	 */
 	public void delete() {
-		deleteDir(new java.io.File(dirname));
+		deleteDir(getJavaFile());
 	}
 
 	private static void deleteDir(java.io.File dir) {
