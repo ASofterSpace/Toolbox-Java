@@ -637,6 +637,35 @@ public class Record {
 		return result;
 	}
 
+	public Map<String, String> getStringMap(String key) {
+		Record rec = get(key);
+		if (rec == null) {
+			return new HashMap<String, String>();
+		}
+		return rec.getStringMap();
+	}
+
+	public Map<String, String> getStringMap() {
+
+		if (objContents == null) {
+			return new HashMap<String, String>();
+		}
+
+		Map<String, String> result = new HashMap<>();
+
+		for (Map.Entry<String, Record> entry : objContents.entrySet()) {
+			String key = entry.getKey();
+			Record recValue = entry.getValue();
+			if (recValue == null) {
+				result.put(key, null);
+			} else {
+				result.put(key, recValue.asString());
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Get the Record-value corresponding to a specific key
 	 * in a Record object or to a specific index in a Record
