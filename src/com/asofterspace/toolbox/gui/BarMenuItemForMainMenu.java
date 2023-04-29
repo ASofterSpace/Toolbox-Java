@@ -32,6 +32,7 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 	private Integer prevPos;
 
 	private boolean mouseDown;
+	private boolean sendUpdateOnMousePress = false;
 
 	private List<BarListener> listeners;
 
@@ -73,7 +74,11 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 						displayBarAtPosition(null);
 					}
 				} else {
-					displayBarAtPosition(e.getX());
+					if (sendUpdateOnMousePress) {
+						setBarPosition(e.getX(), true);
+					} else {
+						displayBarAtPosition(e.getX());
+					}
 				}
 			}
 
@@ -191,6 +196,14 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		}
 
 		// if we re-introduce a label text, then the label should be written here :)
+	}
+
+	public boolean getSendUpdateOnMousePress() {
+		return sendUpdateOnMousePress;
+	}
+
+	public void setSendUpdateOnMousePress(boolean sendUpdateOnMousePress) {
+		this.sendUpdateOnMousePress = sendUpdateOnMousePress;
 	}
 
 }
