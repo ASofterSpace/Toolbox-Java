@@ -113,15 +113,19 @@ public class TaskCtrlBase {
 		}
 	}
 
-	protected void generateNewInstancesOnDay(Date day) {
+	protected List<GenericTask> generateNewInstancesOnDay(Date day) {
+
+		List<GenericTask> result = new ArrayList<>();
 
 		for (GenericTask task : tasks) {
 			if (task.isScheduledOn(day)) {
-				releaseTaskOn(task, day);
+				result.add(releaseTaskOn(task, day));
 			}
 		}
 
 		lastTaskGeneration = day;
+
+		return result;
 	}
 
 	public void addNewRepeatingTask(GenericTask newTask) {
