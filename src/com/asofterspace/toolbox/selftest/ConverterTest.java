@@ -10,6 +10,8 @@ import com.asofterspace.toolbox.coders.HexDecoder;
 import com.asofterspace.toolbox.coders.HexEncoder;
 import com.asofterspace.toolbox.coders.MorseDecoder;
 import com.asofterspace.toolbox.coders.MorseEncoder;
+import com.asofterspace.toolbox.coders.NumericalDecoder;
+import com.asofterspace.toolbox.coders.NumericalEncoder;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 
@@ -33,6 +35,8 @@ public class ConverterTest implements Test {
 		morseEncoderTest();
 		morseDecoderTest();
 		morseEncoderDecoderTest();
+
+		numericalEncoderDecoderTest();
 	}
 
 	public void base64HexCrossTest(int testnum) {
@@ -163,6 +167,24 @@ public class ConverterTest implements Test {
 		String output = MorseDecoder.decode(middleput);
 
 		if (!output.equals(input.toUpperCase())) {
+			TestUtils.fail("We tried to encode and decode a well-known string but got " + output + "!");
+			return;
+		}
+
+		TestUtils.succeed();
+	}
+
+	public void numericalEncoderDecoderTest() {
+
+		TestUtils.start("Numerical Encoder/Decoder");
+
+		String input = "This is the A Softer Space numerical test text, and there are numbers too: 27398!";
+
+		String middleput = NumericalEncoder.encode(input);
+
+		String output = NumericalDecoder.decode(middleput);
+
+		if (!output.equals(input)) {
 			TestUtils.fail("We tried to encode and decode a well-known string but got " + output + "!");
 			return;
 		}
