@@ -12,6 +12,7 @@ import com.asofterspace.toolbox.codeeditor.utils.CodeSnippetWithLocation;
 import com.asofterspace.toolbox.codeeditor.utils.OpenFileCallback;
 import com.asofterspace.toolbox.gui.CodeEditor;
 import com.asofterspace.toolbox.utils.Callback;
+import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.Pair;
 import com.asofterspace.toolbox.utils.SortOrder;
 import com.asofterspace.toolbox.utils.SortUtils;
@@ -263,7 +264,8 @@ public abstract class Code extends DefaultStyledDocument {
 		keyListener = new KeyAdapter() {
 			public void keyPressed(KeyEvent event) {
 				/*
-				// on [Ctrl / Shift] + [Enter], duplicate current row
+				// on [Ctrl / Shift] + [Enter], duplicate current row - this is commented out but still works in
+				// the assEditor, as it is actually handled by the MainMenu calling AugFileTab > duplicateCurrentLine()
 				if (copyOnCtrlEnter) {
 					if ((event.getKeyCode() == KeyEvent.VK_ENTER) && (event.isControlDown() || event.isShiftDown())) {
 						int caretPos = decoratedEditor.getCaretPosition();
@@ -285,6 +287,42 @@ public abstract class Code extends DefaultStyledDocument {
 					}
 				}
 				*/
+
+
+				// [F1] to add „“
+				if (event.getKeyCode() == KeyEvent.VK_F1) {
+					insertTextForFunctionKey("„“");
+					event.consume();
+					return;
+				}
+
+				// [F2] to add “”
+				if (event.getKeyCode() == KeyEvent.VK_F2) {
+					insertTextForFunctionKey("“”");
+					event.consume();
+					return;
+				}
+
+				// [F3] to add ‚‘
+				if (event.getKeyCode() == KeyEvent.VK_F3) {
+					insertTextForFunctionKey("‚‘");
+					event.consume();
+					return;
+				}
+
+				// [F4] to add ’ (as that is useful more often than ‘’)
+				if (event.getKeyCode() == KeyEvent.VK_F4) {
+					insertTextForFunctionKey("’");
+					event.consume();
+					return;
+				}
+
+				// [F6] to add a date-time-stamp
+				if (event.getKeyCode() == KeyEvent.VK_F6) {
+					insertTextForFunctionKey(DateUtils.getCurrentDateTimeStamp());
+					event.consume();
+					return;
+				}
 
 
 				boolean proposeTokens = (decoratedEditor instanceof CodeEditor) && proposeTokenAutoComplete;
@@ -311,8 +349,8 @@ public abstract class Code extends DefaultStyledDocument {
 									} catch(InterruptedException e) {
 										// Ooops...
 									}
-							decoratedEditor.setFocusable(true);
-							decoratedEditor.requestFocus();
+									decoratedEditor.setFocusable(true);
+									decoratedEditor.requestFocus();
 									decoratedEditor.setCaretPosition(extraPrevSelStart);
 									decoratedEditor.setSelectionStart(extraPrevSelStart);
 								}
@@ -347,8 +385,8 @@ public abstract class Code extends DefaultStyledDocument {
 									} catch(InterruptedException e) {
 										// Ooops...
 									}
-							decoratedEditor.setFocusable(true);
-							decoratedEditor.requestFocus();
+									decoratedEditor.setFocusable(true);
+									decoratedEditor.requestFocus();
 									decoratedEditor.setCaretPosition(extraPrevSelStart);
 									decoratedEditor.setSelectionStart(extraPrevSelStart);
 								}
@@ -383,7 +421,7 @@ public abstract class Code extends DefaultStyledDocument {
 
 						// ... and prevent the next text change (coming from the \t key)
 						preventInsert += 1;
-						// (we here to not prevent the removal, as we are not removing anything, as nothing
+						// (we here do not prevent the removal, as we are not removing anything, as nothing
 						// is selected - and even if we were, we would want to remove it)
 
 						return;
@@ -509,6 +547,41 @@ public abstract class Code extends DefaultStyledDocument {
 		};
 
 		decoratedEditor.addMouseListener(mouseListener);
+	}
+
+	private void insertTextForFunctionKey(String textToInsert) {
+		String txt = decoratedEditor.getText();
+		int newSelStart = selStart + textToInsert.length();
+		decoratedEditor.setText(
+			txt.substring(0, selStart) +
+			textToInsert +
+			txt.substring(selEnd)
+		);
+
+		Thread selThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(50);
+				} catch(InterruptedException e) {
+					// Ooops...
+				}
+				decoratedEditor.setFocusable(true);
+				decoratedEditor.requestFocus();
+				decoratedEditor.setCaretPosition(newSelStart);
+				decoratedEditor.setSelectionStart(newSelStart);
+				decoratedEditor.setSelectionEnd(newSelStart);
+
+				selStart = newSelStart;
+				selEnd = newSelStart;
+				selLength = 0;
+			}
+		});
+		selThread.start();
+
+		selStart = newSelStart;
+		selEnd = newSelStart;
+		selLength = 0;
 	}
 
 	protected void onCaretUpdate(CaretEvent e) {
