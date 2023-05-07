@@ -1041,6 +1041,66 @@ public class Image {
 		}
 	}
 
+	public void intermixImage(Image other, float amountOfPictureRemaining) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), amountOfPictureRemaining);
+			}
+		}
+	}
+
+	public void intermixImageLeftToRight(Image other) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * x) / minWidth);
+			}
+		}
+	}
+
+	public void intermixImageRightToLeft(Image other) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * (minWidth - x)) / minWidth);
+			}
+		}
+	}
+
+	public void intermixImageTopToBottom(Image other) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * y) / minHeight);
+			}
+		}
+	}
+
+	public void intermixImageBottomToTop(Image other) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * (minHeight - y)) / minHeight);
+			}
+		}
+	}
+
 	public void multiply(ColorRGBA multiplyWith) {
 
 		for (int x = 0; x < width; x++) {
@@ -1124,18 +1184,44 @@ public class Image {
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				int r = Math.min(255, (data[y][x].getR() * data[y][x].getR()) / 128);
-				int g = Math.min(255, (data[y][x].getG() * data[y][x].getG()) / 128);
-				int b = Math.min(255, (data[y][x].getB() * data[y][x].getB()) / 128);
-				int a = data[y][x].getA();
-				if (r+g+b > 512) {
-					data[y][x] = new ColorRGBA(255, 255, 255, a);
+				ColorRGBA cur = data[y][x];
+				int rO = cur.getR();
+				int gO = cur.getG();
+				int bO = cur.getB();
+				int aO = cur.getA();
+				int r = Math.min(255, (rO * rO) / 128);
+				int g = Math.min(255, (gO * gO) / 128);
+				int b = Math.min(255, (bO * bO) / 128);
+				if (rO+gO+bO > 637) {
+					data[y][x] = new ColorRGBA(r, g, b, aO);
 					continue;
 				}
-				if (r+g+b < 255) {
-					data[y][x] = new ColorRGBA(0, 0, 0, a);
+				if (rO+gO+bO < 128) {
+					data[y][x] = new ColorRGBA(r, g, b, aO);
 					continue;
 				}
+			}
+		}
+	}
+
+	public void createMapOfExtremes(ColorRGBA extremeCol, ColorRGBA nonExtremeCol) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				ColorRGBA cur = data[y][x];
+				int rO = cur.getR();
+				int gO = cur.getG();
+				int bO = cur.getB();
+				int aO = cur.getA();
+				if (rO+gO+bO > 637) {
+					data[y][x] = extremeCol;
+					continue;
+				}
+				if (rO+gO+bO < 128) {
+					data[y][x] = extremeCol;
+					continue;
+				}
+				data[y][x] = nonExtremeCol;
 			}
 		}
 	}
