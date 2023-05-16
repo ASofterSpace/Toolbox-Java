@@ -69,15 +69,15 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 				mouseDown = true;
 				if (SwingUtilities.isRightMouseButton(e)) {
 					if (setPos == null) {
-						displayBarAtPosition(prevPos);
+						displayBarAtPosition(prevPos, true);
 					} else {
-						displayBarAtPosition(null);
+						displayBarAtPosition(null, true);
 					}
 				} else {
 					if (sendUpdateOnMousePress) {
 						setBarPosition(e.getX(), true);
 					} else {
-						displayBarAtPosition(e.getX());
+						displayBarAtPosition(e.getX(), true);
 					}
 				}
 			}
@@ -103,14 +103,14 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				if (mouseDown) {
-					displayBarAtPosition(e.getX());
+					displayBarAtPosition(e.getX(), true);
 				}
 			}
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				if (mouseDown) {
-					displayBarAtPosition(e.getX());
+					displayBarAtPosition(e.getX(), true);
 				}
 			}
 		});
@@ -130,16 +130,19 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 	public void setBarPosition(Integer newPos, boolean notifyListeners) {
 
-		displayBarAtPosition(newPos);
+		// re-display but do not send update as this will be done in a second anyway
+		displayBarAtPosition(newPos, false);
 
-		setPos = pos;
+		this.setPos = this.pos;
 
 		if (notifyListeners) {
-			notifyBarListeners();
+			for (BarListener listener : listeners) {
+				listener.onBarMove(this.pos);
+			}
 		}
 	}
 
-	private void displayBarAtPosition(Integer newPos) {
+	private void displayBarAtPosition(Integer newPos, boolean notifyListeners) {
 
 		if (newPos == null) {
 			this.pos = newPos;
@@ -153,14 +156,13 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 			}
 		}
 
-		repaint();
-	}
-
-	private void notifyBarListeners() {
-
-		for (BarListener listener : listeners) {
-			listener.onBarMove(this.pos);
+		if (notifyListeners) {
+			for (BarListener listener : listeners) {
+				listener.onBarDisplay(this.pos);
+			}
 		}
+
+		repaint();
 	}
 
 	public void addBarListener(BarListener listener) {

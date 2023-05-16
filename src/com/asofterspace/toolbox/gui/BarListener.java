@@ -10,4 +10,6 @@ package com.asofterspace.toolbox.gui;
 public interface BarListener {
 
 	public void onBarMove(Integer position);
+
+	public void onBarDisplay(Integer position);
 }
