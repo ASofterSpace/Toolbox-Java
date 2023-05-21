@@ -185,6 +185,9 @@ public abstract class Code extends DefaultStyledDocument {
 	private boolean collectStrings = false;
 	private List<String> collectedStrings;
 
+	// keep track of encountered errors
+	private List<String> errorList = new ArrayList<>();
+
 
 	public Code(JTextPane editor) {
 
@@ -2982,6 +2985,7 @@ public abstract class Code extends DefaultStyledDocument {
 	// you might want to override it, but do call super! ;)
 	protected void highlightText(int start, int length) {
 
+		this.errorList = new ArrayList<>();
 		this.lastBracketStart = null;
 		this.lastBracketEnd = null;
 
@@ -3159,6 +3163,8 @@ public abstract class Code extends DefaultStyledDocument {
 
 					if (endOfString < 0) {
 						endOfString = content.length();
+						// the string is open-ended in the first way - multi-marker is never encountered again
+						errorList.add("There seems to be an unescaped multi-line string in line " + (StrUtils.getLineNumberFromPosition(start, content) + 1) + "!");
 					}
 
 					this.setCharacterAttributes(start, endOfString - start + 3, this.attrString, false);
@@ -3210,12 +3216,12 @@ public abstract class Code extends DefaultStyledDocument {
 			}
 		}
 
-		if (endOfString == -1) {
-			// the string is open-ended... go for end of the area!
+		// the string is open-ended in the second way - no such marker ever appears again (endOfString is -1)
+		// or a marker appears, but only in another line (endOfString is above end)...
+		// in both cases, complain and go for end of the line!
+		if ((endOfString == -1) || (endOfString > end)) {
 			endOfString = end;
-		} else {
-			// the string is not open-ended... so will the end marker or the line break be first?
-			endOfString = Math.min(endOfString, end);
+			errorList.add("There seems to be an unescaped string in line " + (StrUtils.getLineNumberFromPosition(start, content) + 1) + "!");
 		}
 
 		if (collectStrings) {
@@ -3966,7 +3972,7 @@ public abstract class Code extends DefaultStyledDocument {
 	}
 
 	public List<String> getErrors() {
-		return new ArrayList<>();
+		return errorList;
 	}
 
 	public void setFilename(String filename) {
