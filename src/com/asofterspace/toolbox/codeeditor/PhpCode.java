@@ -73,8 +73,10 @@ public class PhpCode extends HtmlCode {
 		String content = decoratedEditor.getText();
 
 		if (filename.endsWith(".blade.php")) {
-			if (content.contains("@elif")) {
-				errors.add("You are using @elif in a blade template - but it should be @elseif!");
+			int index = content.indexOf("@elif");
+			if (index >= 0) {
+				errors.add("You are using @elif at line " + (StrUtils.getLineNumberFromPosition(index, content) + 1) +
+					" in a blade template - but it should be @elseif!");
 			}
 		}
 
