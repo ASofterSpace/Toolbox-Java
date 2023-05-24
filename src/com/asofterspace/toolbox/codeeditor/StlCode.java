@@ -24,11 +24,11 @@ public class StlCode extends FunctionSupplyingCode {
 	private static final long serialVersionUID = 1L;
 
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-		new String[] {"AT", "LOG", "FOR", "TO", "SWITCH", "OTHERWISE", "ENDSWITCH", "DELAY", "CALL", "PROMPT", "FORMAT", "MSG", "NOW", "TOSTRING", "PROCEDURE", "TRUE", "FALSE", "WHEN", "INPUT", "DEFAULT", "SELECT", "ENDSELECT", "REQUIRE", "IF", "ENDIF", "ELSE", "SET", "THEN", "TITLE", "HELP", "ENDHELP", "DEFINE", "PRIVILEGE", "CTRL", "WINDOW", "MANDATORY", "OPTIONAL", "SILENT", "ON", "EXIT", "DO", "ENDDO", "BEGIN", "END", "AND", "VERIFY", "TIMEOUT", "UNIT", "BREAK"}
+		new String[] {"AT", "LOG", "FOR", "TO", "SWITCH", "OTHERWISE", "ENDSWITCH", "DELAY", "CALL", "PROMPT", "FORMAT", "MSG", "NOW", "TOSTRING", "PROCEDURE", "TRUE", "FALSE", "WHEN", "INPUT", "DEFAULT", "SELECT", "ENDSELECT", "REQUIRE", "IF", "ENDIF", "ELSE", "SET", "THEN", "TITLE", "HELP", "ENDHELP", "DEFINE", "PRIVILEGE", "CTRL", "MASTER_CONTROL", "WINDOW", "MANDATORY", "OPTIONAL", "SILENT", "ON", "EXIT", "DO", "ENDDO", "BEGIN", "END", "AND", "VERIFY", "TIMEOUT", "UNIT", "BREAK"}
 	));
 
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"INT", "INTEGER", "STRING", "BOOLEAN", "TIME", "DURATION", "SIGNED", "UNSIGNED"}
+		new String[] {"INT", "INTEGER", "STRING", "BOOLEAN", "TIME", "DURATION", "SIGNED", "UNSIGNED", "MONOBJ", "VOID", "EVENT", "SCOBJ"}
 	));
 
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
@@ -197,6 +197,17 @@ public class StlCode extends FunctionSupplyingCode {
 		if (setAttributesAndDetectFunctions) {
 			if (isKeyword(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrKeyword, false);
+
+				// display text within HELP block as plain-ish text
+				if ("HELP".equals(couldBeKeyword.toUpperCase())) {
+					int helpEnd = content.indexOf("ENDHELP", start);
+					if (helpEnd >= 0) {
+						couldBeKeywordEnd = helpEnd;
+					}
+					start += 4;
+					this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrData, false);
+				}
+
 			} else if (isPrimitiveType(couldBeKeyword)) {
 				this.setCharacterAttributes(start, couldBeKeywordEnd - start, this.attrPrimitiveType, false);
 			} else if (isAdvancedType(couldBeKeyword)) {
