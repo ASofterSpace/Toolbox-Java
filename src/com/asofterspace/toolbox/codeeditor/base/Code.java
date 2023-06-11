@@ -3164,7 +3164,7 @@ public abstract class Code extends DefaultStyledDocument {
 					if (endOfString < 0) {
 						endOfString = content.length();
 						// the string is open-ended in the first way - multi-marker is never encountered again
-						errorList.add("There seems to be an unescaped multi-line string in line " + (StrUtils.getLineNumberFromPosition(start, content) + 1) + "!");
+						errorList.add("There seems to be an open-ended multi-line string in line " + (StrUtils.getLineNumberFromPosition(start, content) + 1) + "!");
 					}
 
 					this.setCharacterAttributes(start, endOfString - start + 3, this.attrString, false);
@@ -3221,7 +3221,7 @@ public abstract class Code extends DefaultStyledDocument {
 		// in both cases, complain and go for end of the line!
 		if ((endOfString == -1) || (endOfString > end)) {
 			endOfString = end;
-			errorList.add("There seems to be an unescaped string in line " + (StrUtils.getLineNumberFromPosition(start, content) + 1) + "!");
+			errorList.add("There seems to be an open-ended string in line " + (StrUtils.getLineNumberFromPosition(start, content) + 1) + "!");
 		}
 
 		if (collectStrings) {
