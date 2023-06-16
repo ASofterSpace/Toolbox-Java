@@ -133,11 +133,23 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		// re-display but do not send update as this will be done in a second anyway
 		displayBarAtPosition(newPos, false);
 
-		this.setPos = this.pos;
+		// only send an update on change
+		if (this.setPos != this.pos) {
+			this.setPos = this.pos;
 
-		if (notifyListeners) {
-			for (BarListener listener : listeners) {
-				listener.onBarMove(this.pos);
+			if (notifyListeners) {
+
+				List<BarListener> threadListeners = this.listeners;
+				Integer threadPos = this.pos;
+
+				Thread notifierThread = new Thread() {
+					public void run() {
+						for (BarListener listener : threadListeners) {
+							listener.onBarMove(threadPos);
+						}
+					}
+				};
+				notifierThread.start();
 			}
 		}
 	}
