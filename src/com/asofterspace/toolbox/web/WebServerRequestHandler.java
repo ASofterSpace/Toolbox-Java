@@ -485,14 +485,16 @@ public class WebServerRequestHandler implements Runnable {
 		if (location.contains("?")) {
 			String[] locations = location.split("\\?");
 			location = locations[0];
-			arguments = locations[1].split("&");
-			for (String arg : arguments) {
-				if (arg.contains("=")) {
-					String key = arg.substring(0, arg.indexOf("="));
-					String value = arg.substring(arg.indexOf("=") + 1);
-					key = UrlDecoder.decode(key);
-					value = UrlDecoder.decode(value);
-					argumentMap.put(key, value);
+			if (locations.length > 1) {
+				arguments = locations[1].split("&");
+				for (String arg : arguments) {
+					if (arg.contains("=")) {
+						String key = arg.substring(0, arg.indexOf("="));
+						String value = arg.substring(arg.indexOf("=") + 1);
+						key = UrlDecoder.decode(key);
+						value = UrlDecoder.decode(value);
+						argumentMap.put(key, value);
+					}
 				}
 			}
 		}

@@ -72,6 +72,9 @@ public class GenericProject {
 		if (result.toLowerCase().startsWith("dir")) {
 			return "da";
 		}
+		if (result.toLowerCase().startsWith("effect")) {
+			return "ea";
+		}
 
 		result = result.toLowerCase();
 		result = result.replace(" ", "");
