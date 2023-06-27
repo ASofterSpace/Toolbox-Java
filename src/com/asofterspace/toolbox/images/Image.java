@@ -1053,6 +1053,30 @@ public class Image {
 		}
 	}
 
+	public void intermixImageMin(Image other) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				data[y][x] = ColorRGBA.min(data[y][x], other.getPixel(x, y));
+			}
+		}
+	}
+
+	public void intermixImageMax(Image other) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				data[y][x] = ColorRGBA.max(data[y][x], other.getPixel(x, y));
+			}
+		}
+	}
+
 	public void intermixImageLeftToRight(Image other) {
 
 		int minWidth = Math.min(width, other.getWidth());
@@ -1222,6 +1246,67 @@ public class Image {
 					continue;
 				}
 				data[y][x] = nonExtremeCol;
+			}
+		}
+	}
+
+	public void createMapOfDifferences() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				ColorRGBA cur = data[y][x];
+				ColorRGBA nextR = cur;
+				ColorRGBA nextD = cur;
+				ColorRGBA nextRD = cur;
+				if (x < width - 1) {
+					nextR = data[y][x+1];
+				}
+				if (y < height - 1) {
+					nextD = data[y+1][x];
+					if (x < width - 1) {
+						nextRD = data[y+1][x+1];
+					}
+				}
+
+				data[y][x] = new ColorRGBA(
+					Math.max(Math.abs(cur.getR() - nextR.getR()), Math.max(Math.abs(cur.getR() - nextD.getR()), Math.abs(cur.getR() - nextRD.getR()))),
+					Math.max(Math.abs(cur.getG() - nextR.getG()), Math.max(Math.abs(cur.getG() - nextD.getG()), Math.abs(cur.getG() - nextRD.getG()))),
+					Math.max(Math.abs(cur.getB() - nextR.getB()), Math.max(Math.abs(cur.getB() - nextD.getB()), Math.abs(cur.getB() - nextRD.getB())))
+				);
+			}
+		}
+	}
+
+	public void createMapOfDifferencesBW() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				ColorRGBA cur = data[y][x];
+				ColorRGBA nextR = cur;
+				ColorRGBA nextD = cur;
+				ColorRGBA nextRD = cur;
+				if (x < width - 1) {
+					nextR = data[y][x+1];
+				}
+				if (y < height - 1) {
+					nextD = data[y+1][x];
+					if (x < width - 1) {
+						nextRD = data[y+1][x+1];
+					}
+				}
+
+				int val = Math.max(
+					Math.max(
+						Math.max(Math.abs(cur.getR() - nextR.getR()), Math.max(Math.abs(cur.getR() - nextD.getR()), Math.abs(cur.getR() - nextRD.getR()))),
+						Math.max(Math.abs(cur.getG() - nextR.getG()), Math.max(Math.abs(cur.getG() - nextD.getG()), Math.abs(cur.getG() - nextRD.getG())))
+					),
+					Math.max(
+						Math.max(Math.abs(cur.getB() - nextR.getB()), Math.max(Math.abs(cur.getB() - nextD.getB()), Math.abs(cur.getB() - nextRD.getB()))),
+						Math.max(Math.abs(cur.getA() - nextR.getA()), Math.max(Math.abs(cur.getA() - nextD.getA()), Math.abs(cur.getA() - nextRD.getA())))
+					)
+				);
+
+				data[y][x] = new ColorRGBA(val, val, val);
 			}
 		}
 	}
