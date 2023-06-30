@@ -70,4 +70,77 @@ public class HTML {
 	public static String removeHtmlTagsFromText(String str) {
 		return XML.removeXmlTagsFromText(str);
 	}
+
+	/**
+	 * Takes a line that has naively been encoded from plain text into HTML
+	 * and prettifies it for nicer display in HTML
+	 */
+	public static String prettifyLine(String line) {
+
+		// if we have an enumeration, with *, -, > or >> as bullet points...
+		if (line.startsWith("* ") || line.startsWith("- ") || line.startsWith("&gt; ") || line.startsWith("&gt;&gt; ") ||
+			line.startsWith("&nbsp;") || line.startsWith("&#9;") || line.startsWith(" ") || line.startsWith("\t")) {
+
+			// ... set level 0 by default / for the top-most level...
+			int spaceCounter = 0;
+			// ... and then we count the level depth
+			while (line.startsWith("&nbsp;") || line.startsWith("&#9;") || line.startsWith(" ") || line.startsWith("\t")) {
+				if (line.startsWith("\t") || line.startsWith("&#9;")) {
+					if (line.startsWith("\t")) {
+						line = line.substring(1);
+					} else {
+						line = line.substring(4);
+					}
+					spaceCounter = spaceCounter + 4;
+				} else {
+					if (line.startsWith(" ")) {
+						line = line.substring(1);
+					} else {
+						line = line.substring(6);
+					}
+					spaceCounter++;
+				}
+			}
+
+			StringBuilder lineStartIndentBuilder = new StringBuilder();
+			for (int i = 0; i < spaceCounter; i++) {
+				lineStartIndentBuilder.append("&nbsp;");
+			}
+
+			String lineStartIndent = "";
+			if (spaceCounter > 0) {
+				lineStartIndent = "<span style='position:absolute;left: 0;'>" + lineStartIndentBuilder.toString() + "</span>";
+				System.out.println("lineStartIndent: " + lineStartIndent);
+			}
+
+			// add bullet point and increase level of indentation so that the text flows vertically besides the bullet point
+			// (oh and here we have space before and behind the enumeration sign in the <span> so that when text is copied
+			// out, it is copied correctly with the space ^^)
+
+			if (line.startsWith("* ")) {
+				line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;top:2pt;'>* </span>" + line.substring(2);
+				spaceCounter += 3;
+			} else {
+				if (line.startsWith("- ")) {
+					line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>- </span>" + line.substring(2);
+					spaceCounter += 3;
+				} else {
+					if (line.startsWith("&gt; ")) {
+						line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>&gt; </span>" + line.substring(5);
+						spaceCounter += 3;
+					} else {
+						if (line.startsWith("&gt;&gt; ")) {
+							line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>&gt;&gt; </span>" + line.substring(9);
+							spaceCounter += 5;
+						}
+					}
+				}
+			}
+			line = "<span style='position:relative;padding-left:" + (3*spaceCounter) + "pt;display:inline-block;'>" +
+				lineStartIndent + line + "</span>";
+		}
+
+		return line;
+	}
+
 }

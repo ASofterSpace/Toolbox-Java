@@ -9,11 +9,14 @@ import com.asofterspace.toolbox.Utils;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.io.IOException;
 
@@ -209,6 +212,12 @@ public class GuiUtils {
 		}
 
 		return new Color(r, g, b, a);
+	}
+
+	public static void copyToClipboard(String toBeCopiedText) {
+		StringSelection selection = new StringSelection(toBeCopiedText);
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(selection, selection);
 	}
 
 }
