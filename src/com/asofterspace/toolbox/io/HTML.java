@@ -110,7 +110,6 @@ public class HTML {
 			String lineStartIndent = "";
 			if (spaceCounter > 0) {
 				lineStartIndent = "<span style='position:absolute;left: 0;'>" + lineStartIndentBuilder.toString() + "</span>";
-				System.out.println("lineStartIndent: " + lineStartIndent);
 			}
 
 			// add bullet point and increase level of indentation so that the text flows vertically besides the bullet point
