@@ -1125,6 +1125,19 @@ public class Image {
 		}
 	}
 
+	public void maskOutImage(Image other, ColorRGBA replaceWithCol) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				if (data[y][x].equals(other.data[y][x])) {
+					data[y][x] = replaceWithCol;
+				}
+			}
+		}
+	}
 	public void multiply(ColorRGBA multiplyWith) {
 
 		for (int x = 0; x < width; x++) {
