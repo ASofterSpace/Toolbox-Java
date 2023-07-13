@@ -300,11 +300,18 @@ public class WebAccessor {
 				callback.gotResponseCode(connection.getResponseCode());
 			}
 
-			BufferedInputStream reader = new BufferedInputStream(connection.getInputStream());
+			BufferedInputStream reader = null;
+			int resCode = connection.getResponseCode();
+			if ((resCode >= 100) && (resCode < 400)) {
+				reader = new BufferedInputStream(connection.getInputStream());
+			} else {
+				// TODO :: throw an exception with the content of this? or in some other way notify that this is not cool!
+				reader = new BufferedInputStream(connection.getErrorStream());
+			}
 
 			// we could here do readLine() on an actual BufferedReader, and read for each line
 			// in that case we would need to manually append line endings such as \n or \r\n though
-			// sadly, the buffered reader does not discrimiate, so we cannot reconstruct whether
+			// sadly, the buffered reader does not discriminate, so we cannot reconstruct whether
 			// a particular line ended in \n or in \r\n (and YES, there are files which must contain
 			// both in different locations, such as JPEG image files!)
 			ByteBuffer buffer = new ByteBuffer();

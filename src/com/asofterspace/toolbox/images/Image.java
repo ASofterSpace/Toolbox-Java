@@ -1509,6 +1509,17 @@ public class Image {
 		}
 	}
 
+	public void replaceColorsExcept(ColorRGBA oldCol, ColorRGBA newCol) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (!data[y][x].equals(oldCol)) {
+					data[y][x] = newCol;
+				}
+			}
+		}
+	}
+
 	public void removeColors() {
 
 		for (int x = 0; x < width; x++) {

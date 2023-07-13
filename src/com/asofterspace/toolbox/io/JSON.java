@@ -53,6 +53,14 @@ public class JSON extends Record {
 	}
 
 	/**
+	 * Create a JSON object based on a given JSON string
+	 */
+	public static JSON parse(String jsonString) throws JsonParseException {
+
+		return new JSON(jsonString);
+	}
+
+	/**
 	 * Initialize this JSON object based on a given JSON string
 	 * and return the rest that is left over of the string after
 	 * initialization
