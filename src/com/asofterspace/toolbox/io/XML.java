@@ -176,9 +176,21 @@ public class XML extends Record {
 
 		StringBuilder result = new StringBuilder();
 
+		int prevC = 0;
+		boolean multiCodepoint = false;
+
 		for (int i = 0; i < text.length(); i++) {
 
 			char c = text.charAt(i);
+
+			if (multiCodepoint) {
+				result.append("&#");
+				// offset to add is 15300 for prevC == 55356, but 17346 for prevC == 55358
+				result.append(((int) c) + prevC + 15300 + ((prevC - 55356) * 1023));
+				result.append(";");
+				multiCodepoint = false;
+				continue;
+			}
 
 			if (doHtmlReplacements) {
 				boolean found = true;
@@ -245,9 +257,15 @@ public class XML extends Record {
 					break;
 			default:
 				if (c > 0x7e) {
-					result.append("&#");
-					result.append((int) c);
-					result.append(";");
+					// unsure about the correct values here, but 55356 is included and 55358 as well
+					if (((int) c > 55355) && ((int) c < 55359)) {
+						prevC = c;
+						multiCodepoint = true;
+					} else {
+						result.append("&#");
+						result.append((int) c);
+						result.append(";");
+					}
 				} else {
 					result.append(c);
 				}
