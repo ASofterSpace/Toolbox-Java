@@ -1509,6 +1509,17 @@ public class Image {
 		}
 	}
 
+	public void replaceColors(ColorRGBA oldCol, ColorRGBA newCol, int leniency) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (data[y][x].fastDiff(oldCol) < leniency) {
+					data[y][x] = newCol;
+				}
+			}
+		}
+	}
+
 	public void replaceColorsExcept(ColorRGBA oldCol, ColorRGBA newCol) {
 
 		for (int x = 0; x < width; x++) {

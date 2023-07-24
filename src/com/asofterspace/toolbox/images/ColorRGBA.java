@@ -354,6 +354,16 @@ public class ColorRGBA {
 		return different < 2;
 	}
 
+	public int fastDiff(ColorRGBA other) {
+
+		int diffR = (((int) this.r) & 0xFF) - (((int) other.r) & 0xFF);
+		int diffG = (((int) this.g) & 0xFF) - (((int) other.g) & 0xFF);
+		int diffB = (((int) this.b) & 0xFF) - (((int) other.b) & 0xFF);
+		int diffA = (((int) this.a) & 0xFF) - (((int) other.a) & 0xFF);
+
+		return Math.abs(diffR) + Math.abs(diffG) + Math.abs(diffB) + Math.abs(diffA);
+	}
+
 	/**
 	 * intermix two colors, where the amount of the first color in the mix is given,
 	 * e.g. 0.45 for 45% one, 55% two
