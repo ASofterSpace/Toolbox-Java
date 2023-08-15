@@ -25,6 +25,8 @@ public class TextFile extends File {
 
 	protected boolean savingAllowed = true;
 
+	private boolean useISOorUTFreadAndUTFwriteEncoding = false;
+
 
 	/**
 	 * Please do not construct a file without a name ;)
@@ -81,13 +83,13 @@ public class TextFile extends File {
 		return usingEncoding;
 	}
 
-	private Charset getCharset() {
+	private Charset encodingToCharset(TextEncoding encoding) {
 
-		if (usingEncoding == null) {
+		if (encoding == null) {
 			return StandardCharsets.UTF_8;
 		}
 
-		switch (usingEncoding) {
+		switch (encoding) {
 
 			case UTF8_WITH_BOM:
 			case UTF8_WITHOUT_BOM:
@@ -109,6 +111,23 @@ public class TextFile extends File {
 	 */
 	public void setEncoding(TextEncoding encoding) {
 		usingEncoding = encoding;
+	}
+
+	/**
+	 * By default, text files attempt to load and save with the explicitly set encoding,
+	 * if none is set default to UTF without BOM or (if a BOM is present) to UTF with BOM,
+	 * and save with the exact same encoding as they loaded.
+	 * Call this method and set the argument to true to change this behavior to instead
+	 * explicitly load with ISO_LATIN_1 unless a BOM is present (in that case load as UTF),
+	 * and save to UTF with BOM regardless of how it was loaded (or in general, to save with
+	 * the encoding specified by calling setEncoding() after this function has been called.)
+	 */
+	public void setISOorUTFreadAndUTFwriteEncoding(boolean useISOorUTFreadAndUTFwriteEncoding) {
+		this.useISOorUTFreadAndUTFwriteEncoding = useISOorUTFreadAndUTFwriteEncoding;
+
+		if (useISOorUTFreadAndUTFwriteEncoding) {
+			this.usingEncoding = TextEncoding.UTF8_WITH_BOM;
+		}
 	}
 
 	/**
@@ -146,23 +165,35 @@ public class TextFile extends File {
 		try {
 			byte[] binaryContent = Files.readAllBytes(this.getJavaPath());
 
+			TextEncoding loadEncoding = this.usingEncoding;
+			TextEncoding defaultLoadEncoding = TextEncoding.UTF8_WITHOUT_BOM;
+
+			if (useISOorUTFreadAndUTFwriteEncoding) {
+				loadEncoding = null;
+				defaultLoadEncoding = TextEncoding.ISO_LATIN_1;
+			}
+
 			// autodetect encoding - read as UTF8...
-			if (usingEncoding == null) {
-				usingEncoding = TextEncoding.UTF8_WITHOUT_BOM;
+			if (loadEncoding == null) {
+				loadEncoding = defaultLoadEncoding;
 
 				// ... and detect presence of BOM
 				if (binaryContent.length > 2) {
 					if ((binaryContent[0] == (byte) 239) &&
 						(binaryContent[1] == (byte) 187) &&
 						(binaryContent[2] == (byte) 191)) {
-						usingEncoding = TextEncoding.UTF8_WITH_BOM;
+						loadEncoding = TextEncoding.UTF8_WITH_BOM;
 					}
+				}
+
+				if (!useISOorUTFreadAndUTFwriteEncoding) {
+					this.usingEncoding = loadEncoding;
 				}
 			}
 
-			filecontent = new String(binaryContent, getCharset());
+			filecontent = new String(binaryContent, encodingToCharset(loadEncoding));
 
-			if (usingEncoding == TextEncoding.UTF8_WITH_BOM) {
+			if (loadEncoding == TextEncoding.UTF8_WITH_BOM) {
 				filecontent = filecontent.substring(1);
 			}
 
@@ -282,7 +313,8 @@ public class TextFile extends File {
 		// if we are using a UTF8 BOM, append now (to the BOM we just wrote)
 		// if we are not using a UTF8 BOM, do not append (but just overwrite), as we have not yet written
 		// to the file (as we have not written any BOM or anything else)
-		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, usingBom), getCharset())) {
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile, usingBom),
+			encodingToCharset(usingEncoding))) {
 
 			writer.write(filecontent);
 

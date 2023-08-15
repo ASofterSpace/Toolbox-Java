@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.utils;
 
+
 public enum TextEncoding {
 
 	UTF8_WITHOUT_BOM,
