@@ -989,6 +989,16 @@ public class StrUtils {
 		return str.substring(0, 1).toLowerCase() + str.substring(1);
 	}
 
+	public static boolean startsWithOrIs(String haystack, String needle) {
+		if ((haystack == null) || (needle == null)) {
+			return false;
+		}
+		if (haystack.length() > needle.length()) {
+			return haystack.startsWith(needle);
+		}
+		return haystack.equals(needle);
+	}
+
 	public static boolean startsWithLowerCase(String str) {
 		if (str == null) {
 			return false;
