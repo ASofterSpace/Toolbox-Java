@@ -374,6 +374,11 @@ public class DateUtils {
 			return null;
 		}
 
+		while (month < 1) {
+			year--;
+			month += 12;
+		}
+
 		String dayStr = "" + day;
 		String monthStr = "" + month;
 		String yearStr = "" + year;
