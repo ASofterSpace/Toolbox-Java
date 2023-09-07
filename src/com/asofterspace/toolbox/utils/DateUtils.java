@@ -735,6 +735,15 @@ public class DateUtils {
 		return cal.get(Calendar.YEAR);
 	}
 
+	public static Integer getWeek(Date someDate) {
+		if (someDate == null) {
+			return null;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(someDate);
+		return cal.get(Calendar.WEEK_OF_YEAR);
+	}
+
 	public static Date getFirstDateInMonth(String monthName, int year) {
 		monthName = strContainingMonthNameToStrContainingMonthNum1IsJan(monthName).trim();
 		String parseStr = StrUtils.leftPad0(year, 4) + "-" + monthName + "-01";
