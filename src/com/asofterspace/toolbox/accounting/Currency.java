@@ -7,7 +7,9 @@ package com.asofterspace.toolbox.accounting;
 
 public enum Currency {
 
+	E,
 	EUR,
+	D,
 	USD,
 	GBP,
 	CHF,
@@ -30,8 +32,12 @@ public enum Currency {
 		str = str.trim().toUpperCase();
 
 		switch (str) {
+			case "€":
+				return E;
 			case "EUR":
 				return EUR;
+			case "$":
+				return D;
 			case "USD":
 				return USD;
 			case "GBP":
@@ -57,5 +63,16 @@ public enum Currency {
 		}
 
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		switch (this) {
+			case E:
+				return "€";
+			case D:
+				return "$";
+		}
+		return this.name();
 	}
 }

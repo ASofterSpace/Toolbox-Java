@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.accounting;
 
+import com.asofterspace.toolbox.utils.Language;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 
@@ -129,7 +130,21 @@ public class FinanceUtils {
 		return result;
 	}
 
-	public static String formatMoney(Integer amount) {
+	public static String formatMoney(Integer amount, Language lang) {
+		if (lang == Language.DE) {
+			return formatMoneyDE(amount);
+		}
+		return formatMoneyEN(amount);
+	}
+
+	public static String formatMoney(Integer amount, Currency currency, Language lang) {
+		if (lang == Language.DE) {
+			return formatMoneyDE(amount, currency);
+		}
+		return formatMoneyEN(amount, currency);
+	}
+
+	public static String formatMoneyEN(Integer amount) {
 
 		if (amount == null) {
 			return "N/A";
@@ -168,14 +183,14 @@ public class FinanceUtils {
 		return result;
 	}
 
-	public static String formatMoney(Integer amount, Currency currency) {
+	public static String formatMoneyEN(Integer amount, Currency currency) {
 
 		if (amount == null) {
-			return formatMoney(amount);
+			return formatMoneyEN(amount);
 		}
 
 		// 0.01 to 0.01 EUR
-		return formatMoney(amount) + " " + currency;
+		return formatMoneyEN(amount) + " " + currency;
 	}
 
 	public static String formatMoneyDE(Integer amount) {
