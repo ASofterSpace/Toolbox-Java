@@ -230,6 +230,34 @@ public class StrUtils {
 		return result;
 	}
 
+	public static Integer getWordAmount(String text) {
+		if (text != null) {
+			text = replaceAll(text, ".", " ");
+			text = replaceAll(text, ",", " ");
+			text = replaceAll(text, ";", " ");
+			text = replaceAll(text, "!", " ");
+			text = replaceAll(text, "?", " ");
+			text = replaceAll(text, "\t", " ");
+			text = replaceAll(text, "\n", " ");
+			text = replaceAll(text, "  ", " ");
+			text = replaceAll(text, "<br>", " ");
+			text = replaceAll(text, "  ", " ");
+			text = text.trim();
+			return countCharInString(' ', text) + 1;
+		}
+		return null;
+	}
+
+
+	public static String getReadingTimeStr(String text) {
+		float words = (float) getWordAmount(text);
+		float readingTime = words / 135;
+		int minutes = (int) Math.floor(readingTime);
+		int seconds = (((int) (readingTime * 60))) % 60;
+
+		return minutes + " min, " + seconds + " sec";
+	}
+
 	/**
 	 * Takes a number, e.g. 2 or 6 or 11 or 42, and returns it as ordinal string, e.g. 2nd, 6th, 11th or 42nd
 	 */
