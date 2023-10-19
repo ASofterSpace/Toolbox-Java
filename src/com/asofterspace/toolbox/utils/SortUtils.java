@@ -80,9 +80,13 @@ public class SortUtils  {
 			case RANDOM:
 				return randomize(listToSort);
 			case ALPHABETICAL_IGNORE_UMLAUTS:
-				return sortAlphabetically(listToSort, stringifier, true);
+				return sortAlphabetically(listToSort, stringifier, true, false);
+			case ALPHABETICAL_IGNORE_ARTICLES:
+				return sortAlphabetically(listToSort, stringifier, false, true);
+			case ALPHABETICAL_IGNORE_ALL:
+				return sortAlphabetically(listToSort, stringifier, true, true);
 			default:
-				return sortAlphabetically(listToSort, stringifier);
+				return sortAlphabetically(listToSort, stringifier, false, false);
 		}
 	}
 
@@ -117,11 +121,11 @@ public class SortUtils  {
 	}
 
 	public static <T> List<T> sortAlphabetically(Collection<T> listToSort, Stringifier<T> stringifier) {
-		return sortAlphabetically(listToSort, stringifier, false);
+		return sortAlphabetically(listToSort, stringifier, false, false);
 	}
 
 	public static <T> List<T> sortAlphabetically(Collection<T> listToSort, Stringifier<T> stringifier,
-		final boolean ignoreUmlauts) {
+		final boolean ignoreUmlauts, final boolean ignoreArticles) {
 
 		List<T> newList = new ArrayList<>();
 
@@ -143,6 +147,11 @@ public class SortUtils  {
 				String bLow = finalifier.getString(b);
 				String aLow = finalifier.getString(a);
 
+				if (ignoreArticles) {
+					aLow = ignoreArticles(aLow);
+					bLow = ignoreArticles(bLow);
+				}
+
 				if (ignoreUmlauts) {
 					aLow = ignoreUmlauts(aLow);
 					bLow = ignoreUmlauts(bLow);
@@ -159,6 +168,17 @@ public class SortUtils  {
 		});
 
 		return newList;
+	}
+
+	private static String ignoreArticles(String result) {
+		String resLow = result.toLowerCase();
+		if (resLow.startsWith("the ")) {
+			return result.substring(4);
+		}
+		if (resLow.startsWith("a ")) {
+			return result.substring(2);
+		}
+		return result;
 	}
 
 	private static String ignoreUmlauts(String result) {
