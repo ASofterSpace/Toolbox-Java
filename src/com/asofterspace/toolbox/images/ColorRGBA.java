@@ -676,7 +676,7 @@ public class ColorRGBA {
 	public static ColorRGBA fromString(String str) {
 
 		if (str == null) {
-			System.err.println("No color string could not be parsed!");
+			System.err.println("Color string <null> could not be parsed!");
 			return new ColorRGBA();
 		}
 
