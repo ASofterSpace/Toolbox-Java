@@ -75,6 +75,9 @@ public class GenericProject {
 		if (result.toLowerCase().startsWith("effect")) {
 			return "ea";
 		}
+		if (result.toLowerCase().startsWith("uni")) {
+			return "uni";
+		}
 
 		result = result.toLowerCase();
 		result = result.replace(" ", "");
