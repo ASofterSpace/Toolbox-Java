@@ -313,8 +313,15 @@ public abstract class Code extends DefaultStyledDocument {
 					return;
 				}
 
-				// [F4] to add ’ (as that is useful more often than ‘’)
+				// [F4] to add ‘’
 				if (event.getKeyCode() == KeyEvent.VK_F4) {
+					insertTextForFunctionKey("‘’");
+					event.consume();
+					return;
+				}
+
+				// [F5] to add ’ (as that is useful more often than ‘’)
+				if (event.getKeyCode() == KeyEvent.VK_F5) {
 					insertTextForFunctionKey("’");
 					event.consume();
 					return;
