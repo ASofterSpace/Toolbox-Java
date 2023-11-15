@@ -477,9 +477,120 @@ public class Image {
 	}
 
 	public void drawRectangle(int startX, int startY, int endX, int endY, ColorRGBA rectColor) {
+		if (startX < 0) {
+			startX = 0;
+		}
+		if (startX >= width) {
+			startX = width - 1;
+		}
+		if (endX < 0) {
+			endX = 0;
+		}
+		if (endX >= width) {
+			endX = width - 1;
+		}
+		if (startY < 0) {
+			startY = 0;
+		}
+		if (startY >= height) {
+			startY = height - 1;
+		}
+		if (endY < 0) {
+			endY = 0;
+		}
+		if (endY >= height) {
+			endY = height - 1;
+		}
+
 		for (int x = startX; x <= endX; x++) {
 			for (int y = startY; y <= endY; y++) {
 				data[y][x] = rectColor;
+			}
+		}
+	}
+
+	public void drawRectangleWithTransparency(int startX, int startY, int endX, int endY, ColorRGBA rectColor) {
+		if (!rectColor.hasTransparency()) {
+			drawRectangle(startX, startY, endX, endY, rectColor);
+		}
+
+		if (startX < 0) {
+			startX = 0;
+		}
+		if (startX >= width) {
+			startX = width - 1;
+		}
+		if (endX < 0) {
+			endX = 0;
+		}
+		if (endX >= width) {
+			endX = width - 1;
+		}
+		if (startY < 0) {
+			startY = 0;
+		}
+		if (startY >= height) {
+			startY = height - 1;
+		}
+		if (endY < 0) {
+			endY = 0;
+		}
+		if (endY >= height) {
+			endY = height - 1;
+		}
+
+		for (int x = startX; x <= endX; x++) {
+			for (int y = startY; y <= endY; y++) {
+				data[y][x] = rectColor.drawTransparentlyOnto(data[y][x]);
+			}
+		}
+	}
+
+	public void drawDiamond(int startX, int startY, int endX, int endY, ColorRGBA rectColor) {
+		if (startX < 0) {
+			startX = 0;
+		}
+		if (startX >= width) {
+			startX = width - 1;
+		}
+		if (endX < 0) {
+			endX = 0;
+		}
+		if (endX >= width) {
+			endX = width - 1;
+		}
+		if (startY < 0) {
+			startY = 0;
+		}
+		if (startY >= height) {
+			startY = height - 1;
+		}
+		if (endY < 0) {
+			endY = 0;
+		}
+		if (endY >= height) {
+			endY = height - 1;
+		}
+
+		int midX = startX + ((endX - startX) / 2);
+		int midY = startY + ((endY - startY) / 2);
+		for (int x = startX; x <= endX; x++) {
+			for (int y = startY; y <= endY; y++) {
+				double xperc = 0;
+				if (x < midX) {
+					xperc = (x - startX) / (1.0 * (midX - startX));
+				} else {
+					xperc = (endX - x) / (1.0 * (endX - midX));
+				}
+				double yperc = 0;
+				if (y < midY) {
+					yperc = (y - startY) / (1.0 * (midY - startY));
+				} else {
+					yperc = (endY - y) / (1.0 * (endY - midY));
+				}
+				if (yperc + xperc > 1) {
+					data[y][x] = rectColor;
+				}
 			}
 		}
 	}
@@ -501,7 +612,12 @@ public class Image {
 
 	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor) {
 
-		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, null);
+		drawText(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null);
+	}
+
+	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, ColorRGBA backgroundColor) {
+
+		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, backgroundColor);
 	}
 
 	public static int getTextHeight(String fontName, int fontSize) {
@@ -514,6 +630,10 @@ public class Image {
 		return metrics.getHeight();
 	}
 
+	/**
+	 * Draw text at top and right (bottom and left can be left out;
+	 * if they are set to the same values as top/right, the text is centered)
+	 */
 	private void drawTextOnto(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, Image targetImage, ColorRGBA backgroundColor) {
 
 		// prepare font settings for drawing the text
@@ -574,9 +694,17 @@ public class Image {
 			intermediate.resampleTo((textWidth / 2) + (textWidth % 2), (textHeight / 2) + (textHeight % 2));
 			if (left == null) {
 				left = right - intermediate.getWidth();
+			} else {
+				if (left.equals(right)) {
+					left -= intermediate.getWidth() / 2;
+				}
 			}
 			if (top == null) {
 				top = bottom - intermediate.getHeight();
+			} else {
+				if (top.equals(bottom)) {
+					top -= intermediate.getHeight() / 2;
+				}
 			}
 
 			if (targetImage != null) {
@@ -585,11 +713,20 @@ public class Image {
 				draw(intermediate, left, top);
 			}
 		} else {
+
 			if (left == null) {
 				left = right - textWidth;
+			} else {
+				if (left.equals(right)) {
+					left -= textWidth / 2;
+				}
 			}
 			if (top == null) {
 				top = bottom - textHeight;
+			} else {
+				if (top.equals(bottom)) {
+					top -= textHeight / 2;
+				}
 			}
 
 			if (targetImage != null) {

@@ -164,6 +164,20 @@ public class ColorRGBA {
 		return result < (255 * 3) / 2;
 	}
 
+	// does this color draw transparently onto others (so is it not fully opaque?)
+	public boolean hasTransparency() {
+		int intA = a & 0xFF;
+		return (intA < 255);
+	}
+
+	public ColorRGBA getWithoutTransparency() {
+		int intA = a & 0xFF;
+		if (intA > 254) {
+			return this;
+		}
+		return new ColorRGBA(r, g, b);
+	}
+
 	// is this pixel the one we would expect?
 	public boolean is(int r, int g, int b) {
 		return (this.r == (byte) r) && (this.g == (byte) g) && (this.b == (byte) b);
@@ -365,6 +379,27 @@ public class ColorRGBA {
 	}
 
 	/**
+	 * Draw this current color onto a background color and return the result
+	 */
+	public ColorRGBA drawTransparentlyOnto(ColorRGBA backgroundColor) {
+		// shortcut in case we are at fully opaque / non-transparent drawing
+		int intA = ((int) a) & 0xFF;
+		if (intA > 254) {
+			return this;
+		}
+
+		double amountOfOne = intA / 255.0;
+		double amountOfTwo = 1 - amountOfOne;
+
+		return new ColorRGBA(
+			(int) (((((int) r) & 0xFF) * amountOfOne) + ((((int) backgroundColor.r) & 0xFF) * amountOfTwo)),
+			(int) (((((int) g) & 0xFF) * amountOfOne) + ((((int) backgroundColor.g) & 0xFF) * amountOfTwo)),
+			(int) (((((int) b) & 0xFF) * amountOfOne) + ((((int) backgroundColor.b) & 0xFF) * amountOfTwo)),
+			255
+		);
+	}
+
+	/**
 	 * intermix two colors, where the amount of the first color in the mix is given,
 	 * e.g. 0.45 for 45% one, 55% two
 	 */
@@ -377,14 +412,13 @@ public class ColorRGBA {
 			amountOfOne = 1;
 		}
 
-		double aO = amountOfOne;
-		double aT = 1 - amountOfOne;
+		double amountOfTwo = 1 - amountOfOne;
 
 		return new ColorRGBA(
-			(int) (((((int) one.r) & 0xFF) * aO) + ((((int) two.r) & 0xFF) * aT)),
-			(int) (((((int) one.g) & 0xFF) * aO) + ((((int) two.g) & 0xFF) * aT)),
-			(int) (((((int) one.b) & 0xFF) * aO) + ((((int) two.b) & 0xFF) * aT)),
-			(int) (((((int) one.a) & 0xFF) * aO) + ((((int) two.a) & 0xFF) * aT))
+			(int) (((((int) one.r) & 0xFF) * amountOfOne) + ((((int) two.r) & 0xFF) * amountOfTwo)),
+			(int) (((((int) one.g) & 0xFF) * amountOfOne) + ((((int) two.g) & 0xFF) * amountOfTwo)),
+			(int) (((((int) one.b) & 0xFF) * amountOfOne) + ((((int) two.b) & 0xFF) * amountOfTwo)),
+			(int) (((((int) one.a) & 0xFF) * amountOfOne) + ((((int) two.a) & 0xFF) * amountOfTwo))
 		);
 	}
 
@@ -680,9 +714,22 @@ public class ColorRGBA {
 			return new ColorRGBA();
 		}
 
-		str = str.toLowerCase();
 		str = StrUtils.replaceAll(str, " ", "");
 		str = StrUtils.replaceAll(str, "\t", "");
+		str = StrUtils.replaceAll(str, ";", ",");
+		str = str.toLowerCase();
+
+		if (str.startsWith("rgba")) {
+			str = str.substring(str.indexOf("(") + 1);
+			String rStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String gStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String bStr = str.substring(0, str.indexOf(","));
+			str = str.substring(str.indexOf(",") + 1);
+			String aStr = str.substring(0, str.indexOf(")"));
+			return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr), StrUtils.strToInt(aStr));
+		}
 
 		if (str.startsWith("rgb")) {
 			str = str.substring(str.indexOf("(") + 1);
@@ -697,36 +744,35 @@ public class ColorRGBA {
 			return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr));
 		}
 
-		if (str.startsWith("rgba")) {
-			str = str.substring(str.indexOf("(") + 1);
-			String rStr = str.substring(0, str.indexOf(","));
-			str = str.substring(str.indexOf(",") + 1);
-			String gStr = str.substring(0, str.indexOf(","));
-			str = str.substring(str.indexOf(",") + 1);
-			String bStr = str.substring(0, str.indexOf(","));
-			str = str.substring(str.indexOf(",") + 1);
-			String aStr = str.substring(0, str.indexOf(")"));
-			return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr), StrUtils.strToInt(aStr));
-		}
-
 		if (str.startsWith("#")) {
-			if (str.length() == 4) {
-				String rStr = "" + str.charAt(1) + str.charAt(1);
-				String gStr = "" + str.charAt(2) + str.charAt(2);
-				String bStr = "" + str.charAt(3) + str.charAt(3);
-				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
-			}
+			// #RRGGBB
 			if (str.length() == 7) {
 				String rStr = "" + str.charAt(1) + str.charAt(2);
 				String gStr = "" + str.charAt(3) + str.charAt(4);
 				String bStr = "" + str.charAt(5) + str.charAt(6);
 				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
 			}
+			// #RGB
+			if (str.length() == 4) {
+				String rStr = "" + str.charAt(1) + str.charAt(1);
+				String gStr = "" + str.charAt(2) + str.charAt(2);
+				String bStr = "" + str.charAt(3) + str.charAt(3);
+				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr));
+			}
+			// #RRGGBBAA
 			if (str.length() == 9) {
 				String rStr = "" + str.charAt(1) + str.charAt(2);
 				String gStr = "" + str.charAt(3) + str.charAt(4);
 				String bStr = "" + str.charAt(5) + str.charAt(6);
 				String aStr = "" + str.charAt(7) + str.charAt(8);
+				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr), HexDecoder.decodeInt(aStr));
+			}
+			// #RGBA
+			if (str.length() == 5) {
+				String rStr = "" + str.charAt(1) + str.charAt(1);
+				String gStr = "" + str.charAt(2) + str.charAt(2);
+				String bStr = "" + str.charAt(3) + str.charAt(3);
+				String aStr = "" + str.charAt(4) + str.charAt(4);
 				return new ColorRGBA(HexDecoder.decodeInt(rStr), HexDecoder.decodeInt(gStr), HexDecoder.decodeInt(bStr), HexDecoder.decodeInt(aStr));
 			}
 		}
