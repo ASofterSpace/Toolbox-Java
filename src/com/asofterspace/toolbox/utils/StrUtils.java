@@ -919,6 +919,14 @@ public class StrUtils {
 		}
 	}
 
+	public static Byte strToByte(String value) {
+		Integer result = strToInt(value);
+		if (result == null) {
+			return null;
+		}
+		return (byte) (result & 0xFF);
+	}
+
 	public static String intToStr(Integer value) {
 		return ""+value;
 	}

@@ -19,6 +19,10 @@ public class GenericProject {
 
 	private ColorRGBA color;
 
+	private ColorRGBA colorDirty;
+
+	private String colorDirtySpecial;
+
 	private Boolean onShortlist;
 
 	private Directory projectDir;
@@ -52,6 +56,14 @@ public class GenericProject {
 
 	protected void readRecord(Record projectConfRec) {
 		this.color = ColorRGBA.fromString(projectConfRec.getString("color"));
+
+		String colorDirtyStr = projectConfRec.getString("colorDirty");
+		if (colorDirtyStr != null) {
+			this.colorDirty = ColorRGBA.fromString(colorDirtyStr);
+		}
+
+		this.colorDirtySpecial = projectConfRec.getString("colorDirtySpecial");
+
 		this.onShortlist = projectConfRec.getBoolean("onShortlist");
 	}
 
@@ -78,6 +90,9 @@ public class GenericProject {
 		if (result.toLowerCase().startsWith("uni")) {
 			return "uni";
 		}
+		if (result.toLowerCase().startsWith("queeres")) {
+			return "qzt";
+		}
 
 		result = result.toLowerCase();
 		result = result.replace(" ", "");
@@ -102,6 +117,20 @@ public class GenericProject {
 
 	public ColorRGBA getColor() {
 		return color;
+	}
+
+	public ColorRGBA getColorDirty() {
+		if (colorDirty == null) {
+			return ColorRGBA.multiply(getColor(), new ColorRGBA(128, 255, 0));
+		}
+		return colorDirty;
+	}
+
+	public String getColorDirtyStr() {
+		if (colorDirtySpecial != null) {
+			return colorDirtySpecial;
+		}
+		return getColorDirty().toHexString();
 	}
 
 	public boolean isOnShortlist() {

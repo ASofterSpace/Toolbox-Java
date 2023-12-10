@@ -5,7 +5,7 @@
 package com.asofterspace.toolbox.coders;
 
 /**
- * A class that can dencode numbers from their binary representations
+ * A class that can decode numbers from their binary representations
  *
  * @author Moya (a softer space, 2017)
  */
