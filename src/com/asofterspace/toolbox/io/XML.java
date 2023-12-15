@@ -277,11 +277,12 @@ public class XML extends Record {
 
 	public static String unescapeXMLstr(String str) {
 
-		str = str.replace("&#10;", "\n");
-		str = str.replace("&#xD;&#xA;", "\n");
-		str = str.replace("&#xD;", "\n");
-		str = str.replace("&#xA;", "\n");
+		str = str.replace("&#x9;", "\t");
 		str = str.replace("&#9;", "\t");
+		str = str.replace("&#xD;&#xA;", "\n");
+		str = str.replace("&#10;", "\n");
+		str = str.replace("&#xA;", "\n");
+		str = str.replace("&#xD;", "\n");
 		str = str.replace("&#039;", "'");
 		str = str.replace("&#132;", "„");
 		str = str.replace("&#145;", "‘");

@@ -408,6 +408,14 @@ public class File {
 			return "image/bmp";
 		}
 
+		if (lowFilename.endsWith(".webp")) {
+			return "image/webp";
+		}
+
+		if (lowFilename.endsWith(".avif")) {
+			return "image/avif";
+		}
+
 		if (lowFilename.endsWith(".mp4")) {
 			return "video/mp4";
 		}
