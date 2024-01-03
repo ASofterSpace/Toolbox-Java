@@ -219,6 +219,14 @@ public class ColorRGBA {
 		return ((a & 0xFF) << 24) + ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
 	}
 
+	public int getSum() {
+		int intR = r & 0xFF;
+		int intG = g & 0xFF;
+		int intB = b & 0xFF;
+		int result = intR + intG + intB;
+		return result;
+	}
+
 	public int getGrayness() {
 		int intR = r & 0xFF;
 		int intG = g & 0xFF;

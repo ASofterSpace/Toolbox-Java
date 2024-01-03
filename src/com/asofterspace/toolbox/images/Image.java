@@ -1132,6 +1132,24 @@ public class Image {
 		}
 	}
 
+	public void editChannelsAboveCutoff(String baseForR, double modifierForR,
+							 String baseForG, double modifierForG,
+							 String baseForB, double modifierForB,
+							 boolean allowOverflow, int cutoff) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (data[y][x].getSum() > cutoff) {
+					data[y][x] = data[y][x].getEditedChannels(
+						baseForR, modifierForR,
+						baseForG, modifierForG,
+						baseForB, modifierForB,
+						allowOverflow);
+				}
+			}
+		}
+	}
+
 	public void editChannels(String baseForR, double modifierForR,
 							 String baseForG, double modifierForG,
 							 String baseForB, double modifierForB,
