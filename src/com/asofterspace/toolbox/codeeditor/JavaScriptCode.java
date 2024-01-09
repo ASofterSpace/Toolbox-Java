@@ -24,33 +24,33 @@ public class JavaScriptCode extends FunctionSupplyingCode {
 
 	private static final long serialVersionUID = 1L;
 
-	// all keywords of the Java language
+	// all keywords of the JavaScript language
 	private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
 		new String[] {"as", "assert", "break", "case", "catch", "continue", "default", "do", "else", "export", "extends", "false", "finally", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "return", "super", "switch", "this", "throw", "throws", "trait", "true", "try", "typeof", "undefined", "while"}
 	));
 
-	// all primitive types of the Java language and other stuff that looks that way
+	// all primitive types of the JavaScript language and other stuff that looks that way
 	private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		new String[] {"abstract", "boolean", "char", "class", "const", "def", "double", "enum", "final", "int", "long", "package", "private", "protected", "public", "static", "synchronized", "type", "var", "void", "volatile"}
+		new String[] {"abstract", "boolean", "char", "class", "const", "def", "double", "enum", "final", "int", "let", "long", "package", "private", "protected", "public", "static", "synchronized", "type", "var", "void", "volatile"}
 	));
 
-	// all string delimiters of the Java language
+	// all string delimiters of the JavaScript language
 	private static final Set<Character> STRING_DELIMITERS = new HashSet<>(Arrays.asList(
 		new Character[] {'"', '\''}
 	));
 
-	// operand characters in the Java language
+	// operand characters in the JavaScript language
 	private static final Set<Character> OPERAND_CHARS = new HashSet<>(Arrays.asList(
 		new Character[] {';', ':', '.', ',', '{', '}', '(', ')', '[', ']', '+', '-', '/', '%', '<', '=', '>', '!', '&', '|', '^', '~', '*'}
 	));
 
-	// start of single line comments in the Java language
+	// start of single line comments in the JavaScript language
 	private static final String START_SINGLELINE_COMMENT = "//";
 
-	// start of multiline comments in the Java language
+	// start of multiline comments in the JavaScript language
 	private static final String START_MULTILINE_COMMENT = "/*";
 
-	// end of multiline comments in the Java language
+	// end of multiline comments in the JavaScript language
 	private static final String END_MULTILINE_COMMENT = "*/";
 
 	// end of <script> blocks (but without the end tag, as we want to be a bit fuzzy on that!)
