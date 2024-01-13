@@ -132,6 +132,7 @@ public class ImageTest implements Test {
 		ColorRGBA colOne = new ColorRGBA(1, 2, 3);
 		ColorRGBA colTwo = new ColorRGBA(10, 20, 30);
 		ColorRGBA colThree = new ColorRGBA(240, 31, 197);
+		ColorRGBA colOneAlph = new ColorRGBA(1, 2, 3, 128);
 
 		if (!colOne.equals(ColorRGBA.fromString(colOne.toString()))) {
 			TestUtils.fail("Color one does not equal itself when being transformed into a string and back!");
@@ -148,8 +149,18 @@ public class ImageTest implements Test {
 			return;
 		}
 
+		if (!colOne.equals(ColorRGBA.fromString("rgb ( 1 , 2 , 3 )"))) {
+			TestUtils.fail("Color one does not equal to rgb ( 1 , 2 , 3 )!");
+			return;
+		}
+
 		if (!colOne.equals(ColorRGBA.fromString("rgba ( 1 , 2 , 3 )"))) {
 			TestUtils.fail("Color one does not equal to rgba ( 1 , 2 , 3 )!");
+			return;
+		}
+
+		if (!colOneAlph.equals(ColorRGBA.fromString("rgba ( 1 , 2 , 3 , 128 )"))) {
+			TestUtils.fail("Color one alph does not equal to rgba ( 1 , 2 , 3 , 128 )!");
 			return;
 		}
 

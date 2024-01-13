@@ -192,6 +192,24 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('backupgenerator')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/backupgenerator.png\" />\n");
+		html.append("<br>\n");
+		html.append("Backups\n");
+		html.append("</div>\n");
+
+		entry++;
+		left += 62;
+
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('cybersnail')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/cybersnail.png\" />\n");
+		html.append("<br>\n");
+		html.append("CyberSnail\n");
+		html.append("</div>\n");
+
+		entry++;
+		left += 62;
+
 		left = LEFT_OFFSET;
 
 		GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
@@ -335,6 +353,14 @@ public class SideBarCtrl {
 			result = new File(basePath + "Picturizer/res/ico.png");
 		}
 
+		if (location.equals("/pics/backupgenerator.png")) {
+			result = new File(basePath + "BackupGenerator/res/ico.png");
+		}
+
+		if (location.equals("/pics/cybersnail.png")) {
+			result = new File(basePath + "CyberSnail/res/ico.png");
+		}
+
 		// get project logo files from assWorkbench
 		if (location.startsWith("/projectlogos/") && location.endsWith(".png") && !location.contains("..")) {
 			String filename = location.substring("/projectlogos/".length());
@@ -369,6 +395,12 @@ public class SideBarCtrl {
 					}
 					if ("picturizer".equals(json.getString("whatToOpen"))) {
 						IoUtils.execute(basePath + "Picturizer/run.bat");
+					}
+					if ("backupgenerator".equals(json.getString("whatToOpen"))) {
+						IoUtils.execute(basePath + "BackupGenerator/run.bat");
+					}
+					if ("cybersnail".equals(json.getString("whatToOpen"))) {
+						IoUtils.execute(basePath + "CyberSnail/run.bat");
 					}
 					return new WebServerAnswerInJson("{\"success\": true}");
 			}

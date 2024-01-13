@@ -727,29 +727,23 @@ public class ColorRGBA {
 		str = StrUtils.replaceAll(str, ";", ",");
 		str = str.toLowerCase();
 
-		if (str.startsWith("rgba")) {
-			str = str.substring(str.indexOf("(") + 1);
-			String rStr = str.substring(0, str.indexOf(","));
-			str = str.substring(str.indexOf(",") + 1);
-			String gStr = str.substring(0, str.indexOf(","));
-			str = str.substring(str.indexOf(",") + 1);
-			String bStr = str.substring(0, str.indexOf(","));
-			str = str.substring(str.indexOf(",") + 1);
-			String aStr = str.substring(0, str.indexOf(")"));
-			return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr), StrUtils.strToInt(aStr));
-		}
-
+		// interpret both rgb and rgba in the same way - depending on how many arguments follow
 		if (str.startsWith("rgb")) {
 			str = str.substring(str.indexOf("(") + 1);
 			String rStr = str.substring(0, str.indexOf(","));
 			str = str.substring(str.indexOf(",") + 1);
 			String gStr = str.substring(0, str.indexOf(","));
 			str = str.substring(str.indexOf(",") + 1);
-			String bStr = str.substring(0, str.indexOf(")"));
-			if (bStr.contains(",")) {
-				bStr = bStr.substring(0, bStr.indexOf(","));
+			String bStr = "0";
+			if (str.indexOf(",") < 0) {
+				bStr = str.substring(0, str.indexOf(")"));
+				return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr));
+			} else {
+				bStr = str.substring(0, str.indexOf(","));
+				str = str.substring(str.indexOf(",") + 1);
+				String aStr = str.substring(0, str.indexOf(")"));
+				return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr), StrUtils.strToInt(aStr));
 			}
-			return new ColorRGBA(StrUtils.strToInt(rStr), StrUtils.strToInt(gStr), StrUtils.strToInt(bStr));
 		}
 
 		if (str.startsWith("#")) {
