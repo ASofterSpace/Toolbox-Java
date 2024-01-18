@@ -1686,6 +1686,19 @@ public class Image {
 		}
 	}
 
+	public void makeBlackAndWhite() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (data[y][x].getSum() > 256 * 3 / 2) {
+					data[y][x] = ColorRGBA.WHITE;
+				} else {
+					data[y][x] = ColorRGBA.BLACK;
+				}
+			}
+		}
+	}
+
 	public void removeColors() {
 
 		for (int x = 0; x < width; x++) {
