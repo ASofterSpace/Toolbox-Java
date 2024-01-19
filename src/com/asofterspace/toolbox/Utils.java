@@ -12,13 +12,14 @@ import java.util.Date;
 
 public class Utils {
 
-	public final static int TOOLBOX_VERSION_NUMBER = 107;
+	public final static int TOOLBOX_VERSION_NUMBER = 108;
 
 	// these values are set once at the startup of the program which contains
 	// the Utils and are constant from then onwards
 	public static String PROGRAM_TITLE;
 	public static String VERSION_NUMBER;
 	public static String VERSION_DATE;
+	public static String CREATOR = "A Softer Space";
 
 
 	public static void setProgramTitle(String programTitle) {
@@ -31,6 +32,10 @@ public class Utils {
 
 	public static void setVersionDate(String versionDate) {
 		VERSION_DATE = versionDate;
+	}
+
+	public static void setCreator(String creatorStr) {
+		CREATOR = creatorStr;
 	}
 
 	public static String getProgramTitle() {
@@ -46,7 +51,7 @@ public class Utils {
 	}
 
 	public static String getFullProgramIdentifier() {
-		return "A Softer Space " + getProgramTitle() + " version " + getVersionNumber();
+		return CREATOR + " " + getProgramTitle() + " version " + getVersionNumber();
 	}
 
 	public static String getFullProgramIdentifierWithDate() {

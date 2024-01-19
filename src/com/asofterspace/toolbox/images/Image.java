@@ -1203,7 +1203,7 @@ public class Image {
 
 		for (int x = 0; x < minWidth; x++) {
 			for (int y = 0; y < minHeight; y++) {
-				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), amountOfPictureRemaining);
+				data[y][x] = ColorRGBA.intermix(data[y][x],  other.data[y][x], amountOfPictureRemaining);
 			}
 		}
 	}
@@ -1215,7 +1215,7 @@ public class Image {
 
 		for (int x = 0; x < minWidth; x++) {
 			for (int y = 0; y < minHeight; y++) {
-				data[y][x] = ColorRGBA.min(data[y][x], other.getPixel(x, y));
+				data[y][x] = ColorRGBA.min(data[y][x],  other.data[y][x]);
 			}
 		}
 	}
@@ -1227,7 +1227,7 @@ public class Image {
 
 		for (int x = 0; x < minWidth; x++) {
 			for (int y = 0; y < minHeight; y++) {
-				data[y][x] = ColorRGBA.max(data[y][x], other.getPixel(x, y));
+				data[y][x] = ColorRGBA.max(data[y][x], other.data[y][x]);
 			}
 		}
 	}
@@ -1239,7 +1239,7 @@ public class Image {
 
 		for (int x = 0; x < minWidth; x++) {
 			for (int y = 0; y < minHeight; y++) {
-				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * x) / minWidth);
+				data[y][x] = ColorRGBA.intermix(data[y][x],  other.data[y][x], (1.0f * x) / minWidth);
 			}
 		}
 	}
@@ -1251,7 +1251,7 @@ public class Image {
 
 		for (int x = 0; x < minWidth; x++) {
 			for (int y = 0; y < minHeight; y++) {
-				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * (minWidth - x)) / minWidth);
+				data[y][x] = ColorRGBA.intermix(data[y][x],  other.data[y][x], (1.0f * (minWidth - x)) / minWidth);
 			}
 		}
 	}
@@ -1263,7 +1263,7 @@ public class Image {
 
 		for (int x = 0; x < minWidth; x++) {
 			for (int y = 0; y < minHeight; y++) {
-				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * y) / minHeight);
+				data[y][x] = ColorRGBA.intermix(data[y][x],  other.data[y][x], (1.0f * y) / minHeight);
 			}
 		}
 	}
@@ -1275,7 +1275,21 @@ public class Image {
 
 		for (int x = 0; x < minWidth; x++) {
 			for (int y = 0; y < minHeight; y++) {
-				data[y][x] = ColorRGBA.intermix(data[y][x], other.getPixel(x, y), (1.0f * (minHeight - y)) / minHeight);
+				data[y][x] = ColorRGBA.intermix(data[y][x],  other.data[y][x], (1.0f * (minHeight - y)) / minHeight);
+			}
+		}
+	}
+
+	public void interlaceImage(Image other) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				if ((x + y) % 2 == 0) {
+					data[y][x] = other.data[y][x];
+				}
 			}
 		}
 	}
