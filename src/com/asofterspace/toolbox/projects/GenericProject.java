@@ -93,6 +93,9 @@ public class GenericProject {
 		if (result.toLowerCase().startsWith("queeres")) {
 			return "qzt";
 		}
+		if (result.toLowerCase().startsWith("wood")) {
+			return "ww";
+		}
 
 		result = result.toLowerCase();
 		result = result.replace(" ", "");
