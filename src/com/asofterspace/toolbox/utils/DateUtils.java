@@ -359,6 +359,12 @@ public class DateUtils {
 		return new Date();
 	}
 
+	public static DateHolder nowHolder() {
+		DateHolder result = new DateHolder();
+		result.initWithDate(now());
+		return result;
+	}
+
 	/**
 	 * The month here should start at 1, so January is 1, February is 2, etc.
 	 */

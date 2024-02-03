@@ -38,11 +38,11 @@ public class DateHolder {
 	}
 
 	void initParsingExactString(String dateStrArg) {
+		this.isNull = true;
 		this.date = null;
 		this.dateTimeStr = null;
 
 		if (dateStrArg == null) {
-			this.isNull = true;
 			return;
 		}
 
@@ -55,7 +55,6 @@ public class DateHolder {
 		}
 
 		this.dateTimeStr = dateStrArg;
-
 		this.isNull = false;
 	}
 
@@ -65,11 +64,11 @@ public class DateHolder {
 	 * makes sense
 	 */
 	void initWithDate(Date argDate) {
+		this.isNull = true;
 		this.date = null;
 		this.dateTimeStr = null;
 
 		if (argDate == null) {
-			this.isNull = true;
 			return;
 		}
 
@@ -112,6 +111,10 @@ public class DateHolder {
 
 	public String serializeDateTime() {
 		return toString();
+	}
+
+	public boolean getIsNull() {
+		return isNull;
 	}
 
 	@Override
