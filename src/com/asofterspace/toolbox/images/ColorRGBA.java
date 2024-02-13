@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.coders.HexEncoder;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Random;
 
 
@@ -427,6 +428,39 @@ public class ColorRGBA {
 			(int) (((((int) one.g) & 0xFF) * amountOfOne) + ((((int) two.g) & 0xFF) * amountOfTwo)),
 			(int) (((((int) one.b) & 0xFF) * amountOfOne) + ((((int) two.b) & 0xFF) * amountOfTwo)),
 			(int) (((((int) one.a) & 0xFF) * amountOfOne) + ((((int) two.a) & 0xFF) * amountOfTwo))
+		);
+	}
+
+	/**
+	 * intermix lots of colors, ignoring null ones
+	 */
+	public static ColorRGBA mixPix(List<ColorRGBA> pixList) {
+
+		int amountOfPix = 0;
+		int curR = 0;
+		int curG = 0;
+		int curB = 0;
+		int curA = 0;
+
+		for (ColorRGBA pix : pixList) {
+			if (pix != null) {
+				amountOfPix++;
+				curR += ((int) pix.r) & 0xFF;
+				curG += ((int) pix.g) & 0xFF;
+				curB += ((int) pix.b) & 0xFF;
+				curA += ((int) pix.a) & 0xFF;
+			}
+		}
+
+		if (amountOfPix < 1) {
+			return null;
+		}
+
+		return new ColorRGBA(
+			(curR / amountOfPix),
+			(curG / amountOfPix),
+			(curB / amountOfPix),
+			(curA / amountOfPix)
 		);
 	}
 
