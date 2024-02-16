@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.calendar;
 
+import com.asofterspace.toolbox.utils.DateHolder;
 import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.Record;
 
@@ -56,7 +57,7 @@ public class TaskCtrlBase {
 	// contains the actual released and potentially worked on tasks
 	protected List<GenericTask> taskInstances;
 
-	protected Date lastTaskGeneration;
+	protected DateHolder lastTaskGeneration;
 
 	// latest datetime of a task being set to done, as encountered during task load at startup
 	protected Date latestTaskDoneTimeAtLoad;
@@ -96,12 +97,17 @@ public class TaskCtrlBase {
 			}
 		}
 
-		this.lastTaskGeneration = DateUtils.parseDate(root.getString(LAST_TASK_GENERATION));
+		this.lastTaskGeneration = root.getDateHolder(LAST_TASK_GENERATION);
 	}
 
 	public void generateNewInstances(Date until) {
 
-		List<Date> daysToGenerate = DateUtils.listDaysFromTo(lastTaskGeneration, until);
+		List<Date> daysToGenerate = DateUtils.listDaysFromTo(lastTaskGeneration.getDate(), until);
+
+		// if we are asked to generate more than 64 days at once, there must be some kind of bug... so ignore this!
+		if (daysToGenerate.size() > 64) {
+			return;
+		}
 
 		// we ignore the very first day that is returned,
 		// as we already reported tasks for that one last time!
@@ -123,7 +129,7 @@ public class TaskCtrlBase {
 			}
 		}
 
-		lastTaskGeneration = day;
+		lastTaskGeneration = DateUtils.createDateHolder(day);
 
 		return result;
 	}
@@ -318,7 +324,7 @@ public class TaskCtrlBase {
 		List<GenericTask> results = new ArrayList<>();
 
 		List<GenericTask> origTasks = new ArrayList<>(taskInstances);
-		Date origLastTaskGeneration = lastTaskGeneration;
+		DateHolder origLastTaskGeneration = lastTaskGeneration;
 
 		// generate future instances, but do not save them!
 		generateNewInstances(DateUtils.addDays(DateUtils.now(), upcomingDays));
@@ -444,7 +450,7 @@ public class TaskCtrlBase {
 	public void saveIntoRecord(Record root) {
 		root.set(TASKS, getTasksAsRecord());
 		root.set(TASK_INSTANCES, getTaskInstancesAsRecord());
-		root.set(LAST_TASK_GENERATION, DateUtils.serializeDate(lastTaskGeneration));
+		root.set(LAST_TASK_GENERATION, lastTaskGeneration);
 	}
 
 	public List<GenericTask> getTasks() {
