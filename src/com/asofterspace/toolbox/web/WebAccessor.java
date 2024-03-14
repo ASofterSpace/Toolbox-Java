@@ -57,7 +57,7 @@ public class WebAccessor {
 		t.start();
 	}
 
-	private static String bytesToString(byte[] byteArr) {
+	public static String bytesToString(byte[] byteArr) {
 		return new String(byteArr, StandardCharsets.UTF_8);
 	}
 
@@ -239,7 +239,7 @@ public class WebAccessor {
 		return result.toString();
 	}
 
-	private static byte[] getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders,
+	public static byte[] getPutPost(String url, String messageBody, String requestKind, Map<String, String> extraHeaders,
 		WebAccessedCallback callback) {
 
 		try {

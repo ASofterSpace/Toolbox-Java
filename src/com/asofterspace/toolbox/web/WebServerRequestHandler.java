@@ -129,6 +129,10 @@ public class WebServerRequestHandler implements Runnable {
 								handleDelete(fileLocation);
 								break;
 
+							case "OPTIONS":
+								handleOptions(fileLocation);
+								break;
+
 							default:
 								respond(501);
 						}
@@ -171,6 +175,11 @@ public class WebServerRequestHandler implements Runnable {
 		synchronized(threadList) {
 			threadList.remove(ourThread);
 		}
+	}
+
+	protected void handleOptions(String fileLocation) throws IOException {
+
+		respond(200);
 	}
 
 	protected void handleGet(String fileLocation) throws IOException {
@@ -394,7 +403,9 @@ public class WebServerRequestHandler implements Runnable {
 		send("Server: A Softer Space Java Server version " + Utils.TOOLBOX_VERSION_NUMBER);
 
 		send("Access-Control-Allow-Origin: *");
-		send("Access-Control-Allow-Methods: \"POST, GET\"");
+		send("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+		send("Access-Control-Allow-Headers: X-PINGOTHER, Content-Type");
+		send("Access-Control-Max-Age: 86400");
 
 		if (answer == null) {
 
