@@ -9,6 +9,9 @@ import com.asofterspace.toolbox.test.TestUtils;
 import com.asofterspace.toolbox.utils.MathUtils;
 import com.asofterspace.toolbox.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MathUtilsTest implements Test {
 
@@ -20,6 +23,8 @@ public class MathUtilsTest implements Test {
 		findMaximaTest();
 
 		divideIntsTest();
+
+		averageTest();
 	}
 
 	public void findMinimaTest() {
@@ -159,6 +164,63 @@ public class MathUtilsTest implements Test {
 		if (res != expectedResult) {
 			TestUtils.fail("We called x = " + dividend + " / " + divisor +
 				" and did not get x == " + expectedResult + "!");
+		}
+	}
+
+	public void averageTest() {
+
+		TestUtils.start("Average of a List of Integers");
+
+		List<Integer> testList;
+		testList = new ArrayList<>();
+		testAverageOfInts(testList, 0);
+
+		testList.add(1);
+		testAverageOfInts(testList, 1);
+
+		testList.add(3);
+		testAverageOfInts(testList, 2);
+
+		testList.add(5);
+		testAverageOfInts(testList, 3);
+
+		testList.add(11);
+		testAverageOfInts(testList, 5);
+
+		testList.add(-10);
+		testAverageOfInts(testList, 2);
+
+		TestUtils.succeed();
+	}
+
+	private void testAverageOfInts(List<Integer> testList, int expectedResult) {
+
+		int res = MathUtils.averageFast(testList);
+
+		if (res != expectedResult) {
+			StringBuilder listStr = new StringBuilder();
+			String sep = "";
+			for (Integer val : testList) {
+				listStr.append(sep);
+				sep = ", ";
+				listStr.append(val);
+			}
+			TestUtils.fail("We called averageFast([" + listStr + "])" +
+				" and did not get the expected result " + expectedResult + " but instead " + res + "!");
+		}
+
+		res = MathUtils.averageSlow(testList);
+
+		if (res != expectedResult) {
+			StringBuilder listStr = new StringBuilder();
+			String sep = "";
+			for (Integer val : testList) {
+				listStr.append(sep);
+				sep = ", ";
+				listStr.append(val);
+			}
+			TestUtils.fail("We called averageSlow([" + listStr + "])" +
+				" and did not get the expected result " + expectedResult + " but instead " + res + "!");
 		}
 	}
 

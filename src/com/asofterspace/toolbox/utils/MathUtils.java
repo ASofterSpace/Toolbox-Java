@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.utils;
 
+import java.util.List;
 import java.util.Random;
 
 
@@ -114,10 +115,71 @@ public class MathUtils {
 	 */
 	public static int divideInts(int dividend, int divisor) {
 		int result = dividend / divisor;
-		if (dividend % divisor > divisor / 2) {
+		if ((dividend % divisor) * 2 > divisor) {
 			result++;
 		}
 		return result;
+	}
+
+	/**
+	 * Gets an average of a list of integers, assuming none of them are null (!)
+	 * Returns 0 for an empty list
+	 * Only assured to work if the entries of the input list stay within 25% of
+	 * the int range - the further they escape (up or down), the more likely it
+	 * is that overflows will occur
+	 * (and even then - it will work-ish but can easily be off due to internal
+	 * rounding errors)
+	 */
+	public static int averageFast(List<Integer> lotsOfInts) {
+		return averageFastFromTo(lotsOfInts, 0, lotsOfInts.size() - 1);
+	}
+
+	private static int averageFastFromTo(List<Integer> lotsOfInts, int from, int to) {
+		if (to - from < 4) {
+			switch (to - from) {
+				case 3:
+					return (lotsOfInts.get(from) + lotsOfInts.get(from + 1) +
+						lotsOfInts.get(from + 2) + lotsOfInts.get(to)) / 4;
+				case 2:
+					return (lotsOfInts.get(from) + lotsOfInts.get(from + 1) + lotsOfInts.get(to)) / 3;
+				case 1:
+					return (lotsOfInts.get(from) + lotsOfInts.get(to)) / 2;
+				case 0:
+					return lotsOfInts.get(from);
+				default:
+					return 0;
+			}
+		}
+		int mid = (from + to) / 2;
+		return (averageFastFromTo(lotsOfInts, from, mid) + averageFastFromTo(lotsOfInts, mid, to)) / 2;
+	}
+
+	/**
+	 * should be slower than averageFast, but have less problems with overflows and rounding,
+	 * as everything is done in doubles and rounding is only applied a single time in the end
+	 */
+	public static int averageSlow(List<Integer> lotsOfInts) {
+		return (int) averageSlowFromTo(lotsOfInts, 0, lotsOfInts.size() - 1);
+	}
+
+	private static double averageSlowFromTo(List<Integer> lotsOfInts, int from, int to) {
+		if (to - from < 4) {
+			switch (to - from) {
+				case 3:
+					return (0.0 + lotsOfInts.get(from) + lotsOfInts.get(from + 1) +
+						lotsOfInts.get(from + 2) + lotsOfInts.get(to)) / 4;
+				case 2:
+					return (0.0 + lotsOfInts.get(from) + lotsOfInts.get(from + 1) + lotsOfInts.get(to)) / 3;
+				case 1:
+					return (0.0 + lotsOfInts.get(from) + lotsOfInts.get(to)) / 2;
+				case 0:
+					return 0.0 + lotsOfInts.get(from);
+				default:
+					return 0.0;
+			}
+		}
+		int mid = (from + to) / 2;
+		return (averageSlowFromTo(lotsOfInts, from, mid) + averageSlowFromTo(lotsOfInts, mid, to)) / 2;
 	}
 
 	public static int zeroIfNull(Integer value) {
