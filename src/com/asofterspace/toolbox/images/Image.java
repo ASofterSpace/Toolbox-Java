@@ -1864,7 +1864,7 @@ public class Image {
 	 * Takes in a list of points / (x, y) coordinates and returns a list of all points / (x, y) coordinates
 	 * within an area spanned by these points
 	 */
-	public List<Pair<Integer, Integer>> getPointsInArea(List<Pair<Integer, Integer>> areaCornerPoints) {
+	public static List<Pair<Integer, Integer>> getPointsInArea(List<Pair<Integer, Integer>> areaCornerPoints) {
 		List<Pair<Integer, Integer>> result = new ArrayList<>();
 		for (Pair<Integer, Integer> p : areaCornerPoints) {
 			if (!result.contains(p)) {
@@ -1892,7 +1892,7 @@ public class Image {
 		return result;
 	}
 
-	public List<Pair<Integer, Integer>> getPointsInTriangle(
+	public static List<Pair<Integer, Integer>> getPointsInTriangle(
 		Pair<Integer, Integer> corner1, Pair<Integer, Integer> corner2, Pair<Integer, Integer> corner3) {
 
 		List<Pair<Integer, Integer>> result = new ArrayList<>();
