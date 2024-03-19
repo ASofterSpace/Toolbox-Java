@@ -3796,20 +3796,19 @@ public abstract class Code extends DefaultStyledDocument {
 		newCode.append("\t@Override\n");
 		newCode.append("\tpublic int hashCode() {\n");
 		if (fields.size() > 0) {
-			newCode.append("\t\treturn ");
-			String sep = "";
+			newCode.append("\t\tint result = 0;\n");
 			for (CodeField field : fields) {
-				newCode.append(sep);
-				sep = " + ";
 				if ("int".equals(field.getType())) {
-					newCode.append("this." + field.getName());
+					newCode.append("\t\tresult += this." + field.getName() + ";\n");
 				} else if (StrUtils.startsWithLowerCase(field.getType())) {
-					newCode.append("(int) this." + field.getName());
+					newCode.append("\t\tresult += (int) this." + field.getName() + ";\n");
 				} else {
-					newCode.append("this." + field.getName() + ".hashCode()");
+					newCode.append("\t\tif (this." + field.getName() + " != null) {\n");
+					newCode.append("\t\t\tresult += this." + field.getName() + ".hashCode();\n");
+					newCode.append("\t\t}\n");
 				}
 			}
-			newCode.append(";\n");
+			newCode.append("\t\treturn result;\n");
 		} else {
 			newCode.append("\t\t// TODO - actually compute a useful hash\n");
 			newCode.append("\t\treturn this.?;\n");

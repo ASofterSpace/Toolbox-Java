@@ -1853,6 +1853,98 @@ public class Image {
 		// do nothing in the base implementation
 	}
 
+	public void drawArea(List<Pair<Integer, Integer>> areaCornerPoints, ColorRGBA areaColor) {
+		List<Pair<Integer, Integer>> points = getPointsInArea(areaCornerPoints);
+		for (Pair<Integer, Integer> point : points) {
+			setPixelSafely(point.getX(), point.getY(), areaColor);
+		}
+	}
+
+	/**
+	 * Takes in a list of points / (x, y) coordinates and returns a list of all points / (x, y) coordinates
+	 * within an area spanned by these points
+	 */
+	public List<Pair<Integer, Integer>> getPointsInArea(List<Pair<Integer, Integer>> areaCornerPoints) {
+		List<Pair<Integer, Integer>> result = new ArrayList<>();
+		for (Pair<Integer, Integer> p : areaCornerPoints) {
+			if (!result.contains(p)) {
+				result.add(p);
+			}
+		}
+
+		// very VERY ooompfh algorithm that has O^3 complexity and EACH O is huge, but at least this way
+		// we get full area coverage...
+		// which is not even how the usual area filling algorithm behaves, but oh well... xD
+		for (int i = 0; i < areaCornerPoints.size(); i++) {
+			for (int j = i+1; j < areaCornerPoints.size(); j++) {
+				for (int k = j+1; k < areaCornerPoints.size(); k++) {
+					List<Pair<Integer, Integer>> cur = getPointsInTriangle(
+						areaCornerPoints.get(i), areaCornerPoints.get(j), areaCornerPoints.get(k));
+					for (Pair<Integer, Integer> p : cur) {
+						if (!result.contains(p)) {
+							result.add(p);
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<Pair<Integer, Integer>> getPointsInTriangle(
+		Pair<Integer, Integer> corner1, Pair<Integer, Integer> corner2, Pair<Integer, Integer> corner3) {
+
+		List<Pair<Integer, Integer>> result = new ArrayList<>();
+
+		// start at random
+		Pair<Integer, Integer> leftMost = corner1;
+		Pair<Integer, Integer> rightMost = corner2;
+
+		// ensure leftMost and rightMost are sorted
+		if (corner2.getX() < leftMost.getX()) {
+			rightMost = leftMost;
+			leftMost = corner2;
+		}
+
+		// check where corner3 goes - by default, in the middle, but maybe also left or right
+		Pair<Integer, Integer> middle = corner3;
+		if (corner3.getX() < leftMost.getX()) {
+			middle = leftMost;
+			leftMost = corner3;
+		} else if (corner3.getX() > rightMost.getX()) {
+			middle = rightMost;
+			rightMost = corner3;
+		}
+
+		// now that we are sorted, let's iterate from left to right...
+		int leftestX = leftMost.getX();
+		int rightestX = rightMost.getX();
+		for (int x = leftestX; x < rightestX; x++) {
+			double progressLeftRight = (0.0 + x - leftestX) / (rightestX - leftestX);
+			int yLineLeftToRight = (int) (leftMost.getY() + (progressLeftRight * (rightMost.getY() - leftMost.getY())));
+			int yLineToFromMid;
+			if (x < middle.getX()) {
+				double beforeMidProgress = (0.0 + x - leftestX) / (middle.getX() - leftestX);
+				yLineToFromMid = (int) (leftMost.getY() + (beforeMidProgress * (middle.getY() - leftMost.getY())));
+			} else {
+				double afterMidProgress = (0.0 + x - middle.getX()) / (rightestX - middle.getX());
+				yLineToFromMid = (int) (middle.getY() + (afterMidProgress * (rightMost.getY() - middle.getY())));
+			}
+			int y1 = yLineLeftToRight;
+			int y2 = yLineToFromMid;
+			if (y2 < y1) {
+				y2 = yLineLeftToRight;
+				y1 = yLineToFromMid;
+			}
+			for (int y = y1; y <= y2; y++) {
+				result.add(new Pair<>(x, y));
+			}
+		}
+
+		return result;
+	}
+
 	@Override
 	public int hashCode() {
 
