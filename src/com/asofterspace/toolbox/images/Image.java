@@ -18,6 +18,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -633,7 +634,12 @@ public class Image {
 
 	public void drawText(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, ColorRGBA backgroundColor) {
 
-		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, backgroundColor);
+		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, backgroundColor, false);
+	}
+
+	public void drawTextTransparently(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor) {
+
+		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, null, true);
 	}
 
 	public static int getTextHeight(String fontName, int fontSize) {
@@ -650,7 +656,9 @@ public class Image {
 	 * Draw text at top and right (bottom and left can be left out;
 	 * if they are set to the same values as top/right, the text is centered)
 	 */
-	private void drawTextOnto(String text, Integer top, Integer right, Integer bottom, Integer left, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, Image targetImage, ColorRGBA backgroundColor) {
+	private void drawTextOnto(String text, Integer top, Integer right, Integer bottom, Integer left,
+		String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, Image targetImage,
+		ColorRGBA backgroundColor, boolean drawTransparentlyInsteadOfBgColor) {
 
 		// prepare font settings for drawing the text
 		if (fontName == null) {
@@ -674,23 +682,62 @@ public class Image {
 		Canvas c = new Canvas();
 		FontMetrics metrics = c.getFontMetrics(font);
 
-		// draw text onto buffered image
+		// get width and height
 		int textWidth = metrics.stringWidth(text);
 		int textHeight = metrics.getHeight();
+		int targetWidth = textWidth;
+		int targetHeight = textHeight;
+
+		// find the correct left and top offsets if they are not given
+		if (useAntiAliasing) {
+			targetWidth = (textWidth / 2) + (textWidth % 2);
+			targetHeight = (textHeight / 2) + (textHeight % 2);
+		}
+		if (left == null) {
+			left = right - targetWidth;
+		} else {
+			if (left.equals(right)) {
+				left -= targetWidth / 2;
+			}
+		}
+		if (top == null) {
+			top = bottom - targetHeight;
+		} else {
+			if (top.equals(bottom)) {
+				top -= targetHeight / 2;
+			}
+		}
 
 		if (targetImage != null) {
-			if (useAntiAliasing) {
-				targetImage.setWidthAndHeight(textWidth / 2, textHeight / 2);
-			} else {
-				targetImage.setWidthAndHeight(textWidth, textHeight);
-			}
+			targetImage.setWidthAndHeight(targetWidth, targetHeight);
 			targetImage.clear(backgroundColor);
 		}
 
 		BufferedImage bufImg = new BufferedImage(textWidth, textHeight, BufferedImage.TYPE_INT_ARGB);
 
+		// if we want to draw onto the current image, rather than just onto some background,
+		// then we have to get the current image pixels into the buffered image
+		if (drawTransparentlyInsteadOfBgColor) {
+			if (useAntiAliasing) {
+				// this here does NOT work well with anti-aliasing - for that, we would need to scale up
+				// our original image... but then we would need to also scale the background back down
+				// again, losing background sharpness, so let's just not support that x_X'
+				System.out.println("Anti-aliasing is currently not supported with background drawing!");
+			} else {
+				drawToAwtImage(bufImg, -left, -top);
+			}
+		}
+
 		Graphics2D graphics = bufImg.createGraphics();
 		graphics.setFont(font);
+		// just some default anti-aliasing
+		// (but not related to the input paramter, which switches our selfmade downscaling anti-aliasing on and off)
+		graphics.setRenderingHint(
+			RenderingHints.KEY_ANTIALIASING,
+			RenderingHints.VALUE_ANTIALIAS_ON);
+		graphics.setRenderingHint(
+			RenderingHints.KEY_TEXT_ANTIALIASING,
+			RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		if (backgroundColor != null) {
 			graphics.setColor(backgroundColor.toColor());
 			graphics.fillRect(0, 0, textWidth, textHeight);
@@ -708,43 +755,12 @@ public class Image {
 			Image intermediate = new Image(textWidth, textHeight);
 			intermediate.drawAwtImage(bufImg, 0, 0);
 			intermediate.resampleTo((textWidth / 2) + (textWidth % 2), (textHeight / 2) + (textHeight % 2));
-			if (left == null) {
-				left = right - intermediate.getWidth();
-			} else {
-				if (left.equals(right)) {
-					left -= intermediate.getWidth() / 2;
-				}
-			}
-			if (top == null) {
-				top = bottom - intermediate.getHeight();
-			} else {
-				if (top.equals(bottom)) {
-					top -= intermediate.getHeight() / 2;
-				}
-			}
-
 			if (targetImage != null) {
 				targetImage.draw(intermediate, 0, 0);
 			} else {
 				draw(intermediate, left, top);
 			}
 		} else {
-
-			if (left == null) {
-				left = right - textWidth;
-			} else {
-				if (left.equals(right)) {
-					left -= textWidth / 2;
-				}
-			}
-			if (top == null) {
-				top = bottom - textHeight;
-			} else {
-				if (top.equals(bottom)) {
-					top -= textHeight / 2;
-				}
-			}
-
 			if (targetImage != null) {
 				targetImage.drawAwtImage(bufImg, 0, 0);
 			} else {
@@ -756,7 +772,7 @@ public class Image {
 	public static Image createTextImage(String text, String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, ColorRGBA backgroundColor) {
 
 		Image result = new Image(1, 1);
-		result.drawTextOnto(text, 0, null, null, 0, fontName, fontSize, useAntiAliasing, textColor, result, backgroundColor);
+		result.drawTextOnto(text, 0, null, null, 0, fontName, fontSize, useAntiAliasing, textColor, result, backgroundColor, false);
 		return result;
 	}
 
@@ -825,9 +841,11 @@ public class Image {
 		int bufWidth = javaImg.getWidth();
 		int bufHeight = javaImg.getHeight();
 
-		for (int y = 0; (y < bufHeight) && (y + top < height); y++) {
-			for (int x = 0; (x < bufWidth) && (x + left < width); x++) {
-				javaImg.setRGB(x+left, y+top, data[y][x].getRGB());
+		for (int y = 0; (y + top < bufHeight) && (y + top < height); y++) {
+			for (int x = 0; (x + left < bufWidth) && (x + left < width); x++) {
+				if ((x+left >= 0) && (y+top >= 0)) {
+					javaImg.setRGB(x+left, y+top, data[y][x].getRGB());
+				}
 			}
 		}
 	}

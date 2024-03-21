@@ -68,6 +68,28 @@ public class ImageMultiLayered {
 		return layers.size();
 	}
 
+	public void moveLayerFullyUp(int index) {
+		List<ImageLayer> others = new ArrayList<>();
+		for (int i = 0; i < layers.size(); i++) {
+			if (i != index) {
+				others.add(layers.get(i));
+			}
+		}
+		others.add(layers.get(index));
+		layers = others;
+	}
+
+	public void moveLayerFullyDown(int index) {
+		List<ImageLayer> others = new ArrayList<>();
+		others.add(layers.get(index));
+		for (int i = 0; i < layers.size(); i++) {
+			if (i != index) {
+				others.add(layers.get(i));
+			}
+		}
+		layers = others;
+	}
+
 	public ImageMultiLayered copy() {
 		ImageMultiLayered result = new ImageMultiLayered(width, height);
 		for (ImageLayer layer : layers) {

@@ -34,9 +34,17 @@ public abstract class ImageLayer  {
 		return offsetY;
 	}
 
+	public abstract int getWidth();
+	public abstract int getHeight();
+
 	public void move(int x, int y) {
 		offsetX += x;
 		offsetY += y;
+	}
+
+	public void moveTo(int x, int y) {
+		offsetX = x;
+		offsetY = y;
 	}
 
 }

@@ -14,22 +14,59 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 
 	private String text;
 
+	private String fontName;
 
-	public ImageLayerBasedOnText(int offsetX, int offsetY, String text) {
+	private Integer fontSize;
+
+	private ColorRGBA textColor;
+
+
+	public ImageLayerBasedOnText(int offsetX, int offsetY, String text, String fontName, Integer fontSize, ColorRGBA textColor) {
 		super(offsetX, offsetY);
 		this.text = text;
+		this.fontName = fontName;
+		this.fontSize = fontSize;
+		this.textColor = textColor;
 	}
 
 	public void drawOnto(Image ontoImage) {
-		ontoImage.drawText(text, offsetY, null, null, offsetX);
+
+		if ((text != null) && (!"".equals(text))) {
+
+			// not currently supported with transparent drawing!
+			Boolean useAntiAliasing = false;
+
+			ontoImage.drawTextTransparently(text, offsetY, null, null, offsetX,
+				fontName, fontSize, useAntiAliasing, textColor);
+		}
 	}
 
 	public String getText() {
 		return text;
 	}
 
+	public String getFontName() {
+		return fontName;
+	}
+
+	public Integer getFontSize() {
+		return fontSize;
+	}
+
+	public ColorRGBA getTextColor() {
+		return textColor;
+	}
+
+	public int getWidth() {
+		return 0;
+	}
+
+	public int getHeight() {
+		return 0;
+	}
+
 	public ImageLayerBasedOnText copy() {
-		return new ImageLayerBasedOnText(offsetX, offsetY, text);
+		return new ImageLayerBasedOnText(offsetX, offsetY, text, fontName, fontSize, textColor);
 	}
 
 }

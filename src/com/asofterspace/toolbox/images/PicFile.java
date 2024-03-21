@@ -89,7 +89,8 @@ public class PicFile extends JsonFile {
 						break;
 					case "text":
 						ImageLayerBasedOnText txtLayer = new ImageLayerBasedOnText(
-							offsetX, offsetY, layerRec.getString("text")
+							offsetX, offsetY, layerRec.getString("text"), layerRec.getString("fontName"),
+							layerRec.getInteger("fontSize"), ColorRGBA.fromString(layerRec.getString("color"))
 						);
 						img.addLayer(txtLayer);
 						break;
@@ -143,6 +144,9 @@ public class PicFile extends JsonFile {
 					layerRec.set("kind", "text");
 					ImageLayerBasedOnText textLayer = (ImageLayerBasedOnText) layer;
 					layerRec.set("text", textLayer.getText());
+					layerRec.set("fontName", textLayer.getFontName());
+					layerRec.set("fontSize", textLayer.getFontSize());
+					layerRec.set("color", textLayer.getTextColor().toString());
 				}
 				layerRecArr.append(layerRec);
 				i++;

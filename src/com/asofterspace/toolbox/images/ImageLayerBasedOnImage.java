@@ -32,6 +32,14 @@ public class ImageLayerBasedOnImage extends ImageLayer  {
 		this.image = image;
 	}
 
+	public int getWidth() {
+		return this.image.getWidth();
+	}
+
+	public int getHeight() {
+		return this.image.getHeight();
+	}
+
 	public ImageLayerBasedOnImage copy() {
 		return new ImageLayerBasedOnImage(offsetX, offsetY, image.copy());
 	}
