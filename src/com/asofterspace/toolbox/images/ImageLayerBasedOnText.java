@@ -74,11 +74,11 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 	}
 
 	public int getWidth() {
-		return 0;
+		return Image.getTextDimensions(text, fontName, fontSize).getX();
 	}
 
 	public int getHeight() {
-		return 0;
+		return Image.getTextDimensions(text, fontName, fontSize).getY();
 	}
 
 	public ImageLayerBasedOnText copy() {

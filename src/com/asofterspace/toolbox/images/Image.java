@@ -642,14 +642,14 @@ public class Image {
 		drawTextOnto(text, top, right, bottom, left, fontName, fontSize, useAntiAliasing, textColor, null, null, true);
 	}
 
-	public static int getTextHeight(String fontName, int fontSize) {
+	public static Pair<Integer, Integer> getTextDimensions(String text, String fontName, int fontSize) {
 
 		Font font = new Font(fontName, Font.PLAIN, fontSize);
 
 		Canvas c = new Canvas();
 		FontMetrics metrics = c.getFontMetrics(font);
 
-		return metrics.getHeight();
+		return new Pair<>(metrics.stringWidth(text), metrics.getMaxAscent() + metrics.getMaxDescent());
 	}
 
 	/**
@@ -677,14 +677,16 @@ public class Image {
 			fontSize *= 2;
 		}
 
+		Pair<Integer, Integer> textDim = getTextDimensions(text, fontName, fontSize);
+
+		// get width and height
 		Font font = new Font(fontName, Font.PLAIN, fontSize);
 
 		Canvas c = new Canvas();
 		FontMetrics metrics = c.getFontMetrics(font);
 
-		// get width and height
 		int textWidth = metrics.stringWidth(text);
-		int textHeight = metrics.getHeight();
+		int textHeight = metrics.getMaxAscent() + metrics.getMaxDescent();
 		int targetWidth = textWidth;
 		int targetHeight = textHeight;
 
