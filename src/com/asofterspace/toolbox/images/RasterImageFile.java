@@ -57,6 +57,16 @@ public abstract class RasterImageFile extends ImageFile {
 		this.img = img;
 	}
 
+	public void assign(ImageMultiLayered img) {
+
+		setImage(img);
+	}
+
+	public void setImage(ImageMultiLayered img) {
+
+		this.img = img.bake();
+	}
+
 	public Image getImage() {
 
 		if (img == null) {

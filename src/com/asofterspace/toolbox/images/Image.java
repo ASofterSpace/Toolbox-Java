@@ -383,6 +383,22 @@ public class Image {
 		}
 	}
 
+	/**
+	 * Draw another image on top of this one, starting (top left) at
+	 * coordinates x and y (respective to this image), and actually draw,
+	 * taking transparency into account - don't just assign pixels, but draw...
+	 */
+	public void drawTransparently(Image other, int drawAtX, int drawAtY) {
+
+		for (int x = 0; (x < other.width) && (x + drawAtX < width); x++) {
+			for (int y = 0; (y < other.height) && (y + drawAtY < height); y++) {
+				if ((x + drawAtX >= 0) && (y + drawAtY >= 0)) {
+					data[y + drawAtY][x + drawAtX] = other.data[y][x].drawTransparentlyOnto(data[y + drawAtY][x + drawAtX]);
+				}
+			}
+		}
+	}
+
 	public void drawLine(int startX, int startY, int endX, int endY, ColorRGBA lineColor) {
 		drawLine(startX, startY, endX, endY, lineColor, false);
 	}
