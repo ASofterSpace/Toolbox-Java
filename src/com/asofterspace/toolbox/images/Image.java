@@ -287,6 +287,15 @@ public class Image {
 		return result;
 	}
 
+	public BufferedImage getAwtImageWithoutTransparency() {
+
+		BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+		drawToAwtImage(result, 0, 0);
+
+		return result;
+	}
+
 	public ColorRGBA getPixel(int x, int y) {
 		return data[y][x];
 	}
@@ -825,12 +834,14 @@ public class Image {
 
 		for (int y = 0; (y < bufHeight) && (y + top < height); y++) {
 			for (int x = 0; (x < bufWidth) && (x + left < width); x++) {
-				int rgb = javaImg.getRGB(x, y);
-				int a = (rgb >> 24) & 0xFF;
-				int r = (rgb >> 16) & 0xFF;
-				int g = (rgb >> 8) & 0xFF;
-				int b = (rgb) & 0xFF;
-				data[y+top][x+left] = new ColorRGBA(r, g, b, a);
+				if ((x+left >= 0) && (y+top >= 0)) {
+					int rgb = javaImg.getRGB(x, y);
+					int a = (rgb >> 24) & 0xFF;
+					int r = (rgb >> 16) & 0xFF;
+					int g = (rgb >> 8) & 0xFF;
+					int b = (rgb) & 0xFF;
+					data[y+top][x+left] = new ColorRGBA(r, g, b, a);
+				}
 			}
 		}
 	}
@@ -843,8 +854,8 @@ public class Image {
 		int bufWidth = javaImg.getWidth();
 		int bufHeight = javaImg.getHeight();
 
-		for (int y = 0; (y + top < bufHeight) && (y + top < height); y++) {
-			for (int x = 0; (x + left < bufWidth) && (x + left < width); x++) {
+		for (int y = 0; (y + top < bufHeight) && (y < height); y++) {
+			for (int x = 0; (x + left < bufWidth) && (x < width); x++) {
 				if ((x+left >= 0) && (y+top >= 0)) {
 					javaImg.setRGB(x+left, y+top, data[y][x].getRGB());
 				}

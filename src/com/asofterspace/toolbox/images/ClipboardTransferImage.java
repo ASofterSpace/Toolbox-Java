@@ -21,7 +21,8 @@ public class ClipboardTransferImage implements Transferable {
 	@Override
 	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
 		if (flavor.equals(DataFlavor.imageFlavor)) {
-			return picture.getAwtImage();
+			// clipboards can get confused when we use images with transparency, so let's use it without...
+			return picture.getAwtImageWithoutTransparency();
 		}
 		throw new UnsupportedFlavorException(flavor);
 	}
