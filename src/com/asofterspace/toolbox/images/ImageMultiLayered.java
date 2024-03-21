@@ -79,11 +79,13 @@ public class ImageMultiLayered {
 	public Image bake() {
 		if (layers.size() == 1) {
 			ImageLayer layer = layers.get(0);
-			if (layer instanceof ImageLayerBasedOnImage) {
-				ImageLayerBasedOnImage imgLayer = (ImageLayerBasedOnImage) layer;
-				Image image = imgLayer.getImage();
-				if ((image.getWidth() == width) && (image.getHeight() == height)) {
-					return image.copy();
+			if ((layer.getOffsetX() == 0) && (layer.getOffsetY() == 0)) {
+				if (layer instanceof ImageLayerBasedOnImage) {
+					ImageLayerBasedOnImage imgLayer = (ImageLayerBasedOnImage) layer;
+					Image image = imgLayer.getImage();
+					if ((image.getWidth() == width) && (image.getHeight() == height)) {
+						return image.copy();
+					}
 				}
 			}
 		}
