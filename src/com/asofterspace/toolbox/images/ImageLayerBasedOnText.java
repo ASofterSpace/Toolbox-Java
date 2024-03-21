@@ -45,16 +45,32 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 		return text;
 	}
 
+	public void setText(String text) {
+		this.text = text;
+	}
+
 	public String getFontName() {
 		return fontName;
+	}
+
+	public void setFontName(String fontName) {
+		this.fontName = fontName;
 	}
 
 	public Integer getFontSize() {
 		return fontSize;
 	}
 
+	public void setFontSize(Integer fontSize) {
+		this.fontSize = fontSize;
+	}
+
 	public ColorRGBA getTextColor() {
 		return textColor;
+	}
+
+	public void setTextColor(ColorRGBA textColor) {
+		this.textColor = textColor;
 	}
 
 	public int getWidth() {

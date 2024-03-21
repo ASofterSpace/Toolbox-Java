@@ -30,8 +30,16 @@ public abstract class ImageLayer  {
 		return offsetX;
 	}
 
+	public void setOffsetX(int offsetX) {
+		this.offsetX = offsetX;
+	}
+
 	public int getOffsetY() {
 		return offsetY;
+	}
+
+	public void setOffsetY(int offsetY) {
+		this.offsetY = offsetY;
 	}
 
 	public abstract int getWidth();
