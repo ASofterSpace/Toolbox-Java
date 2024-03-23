@@ -1287,6 +1287,28 @@ public class Record {
 
 		objContents.put(key.toString(), fromAnything(value));
 	}
+	public void set(Object key, int[] values) {
+
+		if (key == null) {
+			return;
+		}
+
+		Record arrRecord = Record.emptyArray();
+		List<Record> valList = new ArrayList<>();
+		for (int val : values) {
+			valList.add(fromAnything((Integer) val));
+		}
+		arrRecord.arrContents = valList;
+
+		if (key instanceof Integer) {
+			set((int) key, arrRecord);
+			return;
+		}
+
+		makeObject();
+
+		objContents.put(key.toString(), arrRecord);
+	}
 
 	/**
 	 * Sets a key of the Record object to the Record value, or removes the key is null is passed in as value

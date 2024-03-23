@@ -345,6 +345,30 @@ public class Image {
 	}
 
 	/**
+	 * Generates a histogram of this entire image with the given amount of buckets per color channel
+	 */
+	public HistogramRGBA getHistogram(int bucketAmount) {
+		HistogramRGBA result = new HistogramRGBA(bucketAmount);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				result.encounterPixel(data[y][x]);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Generates a histogram of the given pixels of this image with the given amount of buckets per color channel
+	 */
+	public HistogramRGBA getHistogramOfPixels(int bucketAmount, List<Pair<Integer, Integer>> pixelCoordinates) {
+		HistogramRGBA result = new HistogramRGBA(bucketAmount);
+		for (Pair<Integer, Integer> pix : pixelCoordinates) {
+			result.encounterPixel(data[pix.getY()][pix.getX()]);
+		}
+		return result;
+	}
+
+	/**
 	 * Draw another image on top of this one, starting (top left) at
 	 * coordinates x and y (respective to this image)
 	 */
