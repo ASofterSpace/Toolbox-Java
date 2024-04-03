@@ -388,6 +388,10 @@ public class WebServerRequestHandler implements Runnable {
 		output.write(line.getBytes(StandardCharsets.UTF_8));
 	}
 
+	protected String getAccessControlAllowOrigin() {
+		return "*";
+	}
+
 	protected void respond(String status, WebServerAnswer answer) throws IOException {
 
 		if (responded) {
@@ -402,7 +406,7 @@ public class WebServerRequestHandler implements Runnable {
 
 		send("Server: A Softer Space Java Server version " + Utils.TOOLBOX_VERSION_NUMBER);
 
-		send("Access-Control-Allow-Origin: *");
+		send("Access-Control-Allow-Origin: " + getAccessControlAllowOrigin());
 		send("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 		send("Access-Control-Allow-Headers: X-PINGOTHER, Content-Type");
 		send("Access-Control-Max-Age: 86400");

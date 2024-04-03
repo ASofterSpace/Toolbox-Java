@@ -1287,18 +1287,24 @@ public class Record {
 
 		objContents.put(key.toString(), fromAnything(value));
 	}
+
 	public void set(Object key, int[] values) {
 
 		if (key == null) {
 			return;
 		}
 
-		Record arrRecord = Record.emptyArray();
-		List<Record> valList = new ArrayList<>();
-		for (int val : values) {
-			valList.add(fromAnything((Integer) val));
+		Record arrRecord;
+		if (values == null) {
+			arrRecord = fromAnything(null);
+		} else {
+			arrRecord = Record.emptyArray();
+			List<Record> valList = new ArrayList<>();
+			for (int val : values) {
+				valList.add(fromAnything((Integer) val));
+			}
+			arrRecord.arrContents = valList;
 		}
-		arrRecord.arrContents = valList;
 
 		if (key instanceof Integer) {
 			set((int) key, arrRecord);
