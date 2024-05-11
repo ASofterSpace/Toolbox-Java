@@ -436,6 +436,10 @@ public class File {
 			return "video/x-msvideo";
 		}
 
+		if (lowFilename.endsWith(".qzp")) {
+			return "application/octet-stream";
+		}
+
 		return "text/plain";
 	}
 

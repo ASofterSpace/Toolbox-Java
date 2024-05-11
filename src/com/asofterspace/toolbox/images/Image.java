@@ -693,6 +693,10 @@ public class Image {
 		String fontName, Integer fontSize, Boolean useAntiAliasing, ColorRGBA textColor, Image targetImage,
 		ColorRGBA backgroundColor, boolean drawTransparentlyInsteadOfBgColor) {
 
+		if ((text == null) || "".equals(text)) {
+			return;
+		}
+
 		// prepare font settings for drawing the text
 		if (fontName == null) {
 			fontName = "Arial";
