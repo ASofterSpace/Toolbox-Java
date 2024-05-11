@@ -714,8 +714,6 @@ public class Image {
 			fontSize *= 2;
 		}
 
-		Pair<Integer, Integer> textDim = getTextDimensions(text, fontName, fontSize);
-
 		// get width and height
 		Font font = new Font(fontName, Font.PLAIN, fontSize);
 
@@ -723,7 +721,8 @@ public class Image {
 		FontMetrics metrics = c.getFontMetrics(font);
 
 		int textWidth = metrics.stringWidth(text);
-		int textHeight = metrics.getMaxAscent() + metrics.getMaxDescent();
+		// adding max descent twice as otherwise Ä is missing dots in League Spartan...
+		int textHeight = metrics.getMaxAscent() + (2 * metrics.getMaxDescent());
 		int targetWidth = textWidth;
 		int targetHeight = textHeight;
 
@@ -786,7 +785,7 @@ public class Image {
 		} else {
 			graphics.setColor(textColor.toColor());
 		}
-		graphics.drawString(text, 0, metrics.getMaxAscent());
+		graphics.drawString(text, 0, metrics.getMaxAscent() + metrics.getMaxDescent());
 		graphics.dispose();
 
 		// copy image of drawn text from buffered image onto our image
