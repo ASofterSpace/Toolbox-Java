@@ -394,7 +394,11 @@ public class Image {
 				if (drawAtX + drawWidth > width) {
 					drawWidth = width - drawAtX;
 				}
-				System.arraycopy(other.data[y], 0, this.data[y + drawAtY], drawAtX, drawWidth);
+				if (drawAtX < 0) {
+					System.arraycopy(other.data[y], -drawAtX, this.data[y + drawAtY], 0, drawWidth + drawAtX);
+				} else {
+					System.arraycopy(other.data[y], 0, this.data[y + drawAtY], drawAtX, drawWidth);
+				}
 			}
 		}
 	}
@@ -1893,6 +1897,12 @@ public class Image {
 		}
 	}
 
+	public void extractWhiteToAlpha() {
+		invert();
+		extractBlackToAlpha();
+		invert();
+	}
+
 	public void extractBackgroundColorToAlpha() {
 		if ((width < 1) || (height < 1)) {
 			return;
@@ -2017,6 +2027,13 @@ public class Image {
 		}
 
 		return result;
+	}
+
+	// try to explicitly get rid of the memory this is taking up
+	public void dispose() {
+		this.height = 0;
+		this.width = 0;
+		this.data = new ColorRGBA[0][0];
 	}
 
 	@Override
