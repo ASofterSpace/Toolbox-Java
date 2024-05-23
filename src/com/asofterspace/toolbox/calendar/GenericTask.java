@@ -437,6 +437,9 @@ public class GenericTask {
 	}
 
 	public void setReleasedDate(Date day) {
+		if (day == null) {
+			return;
+		}
 		releasedDate = null;
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(day);

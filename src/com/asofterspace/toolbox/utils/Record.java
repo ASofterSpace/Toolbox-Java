@@ -1455,4 +1455,100 @@ public class Record {
 		append(value);
 	}
 
+	@Override
+	public boolean equals(Object other) {
+
+		// If the other one does not even exist, we are not the same - because we exist!
+		if (other == null) {
+			return false;
+		}
+
+		if (other instanceof Record) {
+			Record otherRecord = (Record) other;
+
+			// If our values for kind are different...
+			if (this.kind == null) {
+				if (otherRecord.kind != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.kind.equals(otherRecord.kind)) {
+				// ... then we are not the same!
+				return false;
+			}
+
+			switch (kind) {
+
+				case BOOLEAN:
+				case NUMBER:
+				case STRING:
+					// If our values for simpleContents are different...
+					if (this.simpleContents == null) {
+						if (otherRecord.simpleContents != null) {
+							// ... then we are not the same!
+							return false;
+						}
+					} else if (!this.simpleContents.equals(otherRecord.simpleContents)) {
+						// ... then we are not the same!
+						return false;
+					}
+					break;
+
+				case ARRAY:
+					// If our values for arrContents are different...
+					if (this.arrContents == null) {
+						if (otherRecord.arrContents != null) {
+							// ... then we are not the same!
+							return false;
+						}
+					} else if (!this.arrContents.equals(otherRecord.arrContents)) {
+						// ... then we are not the same!
+						return false;
+					}
+					break;
+
+				case OBJECT:
+					// If our values for objContents are different...
+					if (this.objContents == null) {
+						if (otherRecord.objContents != null) {
+							// ... then we are not the same!
+							return false;
+						}
+					} else if (!this.objContents.equals(otherRecord.objContents)) {
+						// ... then we are not the same!
+						return false;
+					}
+					break;
+
+				default:
+					return true;
+			}
+
+			// We have no reason to assume that we are not the same
+			return true;
+		}
+
+		// If the other one cannot even be cast to us, then we are not the same!
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = 0;
+		if (this.kind != null) {
+			result += this.kind.hashCode();
+
+			switch (kind) {
+				case BOOLEAN:
+				case NUMBER:
+				case STRING:
+					if (this.simpleContents != null) {
+						result += this.simpleContents.hashCode();
+					}
+					break;
+			}
+		}
+		return result;
+	}
+
 }
