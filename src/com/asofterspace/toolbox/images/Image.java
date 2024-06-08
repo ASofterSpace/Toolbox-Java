@@ -156,17 +156,45 @@ public class Image {
 		int oldHeight = height;
 		ColorRGBA[][] oldData = data;
 
-		this.height = newHeight;
-		this.width = newWidth;
-
-		this.data = new ColorRGBA[height][width];
+		initWithoutClear(newWidth, newHeight);
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				data[y][x] = oldData[(y * oldHeight) / height][(x * oldWidth) / width];
 			}
 		}
+	}
 
+	public void resample(int newWidth, int newHeight) {
+
+		int oldWidth = width;
+		int oldHeight = height;
+		ColorRGBA[][] oldData = data;
+
+		initWithoutClear(newWidth, newHeight);
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				double xAmount = (x * oldWidth) / (0.0 + width);
+				int oldX = (int) Math.floor(xAmount);
+				xAmount -= oldX;
+				int oldXp1 = oldX + 1;
+				if (oldXp1 >= oldWidth) {
+					oldXp1 = oldWidth - 1;
+				}
+				double yAmount = (y * oldHeight) / (0.0 + height);
+				int oldY = (int) Math.floor(yAmount);
+				yAmount -= oldY;
+				int oldYp1 = oldY + 1;
+				if (oldYp1 >= oldHeight) {
+					oldYp1 = oldHeight - 1;
+				}
+				data[y][x] = ColorRGBA.intermixMinAlpha(
+					ColorRGBA.intermixMinAlpha(oldData[oldY][oldX], oldData[oldY][oldXp1], xAmount),
+					ColorRGBA.intermixMinAlpha(oldData[oldYp1][oldX], oldData[oldYp1][oldXp1], xAmount),
+					yAmount);
+			}
+		}
 	}
 
 	/**

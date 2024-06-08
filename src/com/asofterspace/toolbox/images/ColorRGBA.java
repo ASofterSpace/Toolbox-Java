@@ -432,6 +432,29 @@ public class ColorRGBA {
 	}
 
 	/**
+	 * intermix two colors, where the amount of the first color in the mix is given,
+	 * e.g. 0.45 for 45% one, 55% two, but where the minimum of the alpha value is used
+	 */
+	public static ColorRGBA intermixMinAlpha(ColorRGBA one, ColorRGBA two, double amountOfOne) {
+
+		if (amountOfOne < 0) {
+			amountOfOne = 0;
+		}
+		if (amountOfOne > 1) {
+			amountOfOne = 1;
+		}
+
+		double amountOfTwo = 1 - amountOfOne;
+
+		return new ColorRGBA(
+			(int) (((((int) one.r) & 0xFF) * amountOfOne) + ((((int) two.r) & 0xFF) * amountOfTwo)),
+			(int) (((((int) one.g) & 0xFF) * amountOfOne) + ((((int) two.g) & 0xFF) * amountOfTwo)),
+			(int) (((((int) one.b) & 0xFF) * amountOfOne) + ((((int) two.b) & 0xFF) * amountOfTwo)),
+			Math.min((((int) one.a) & 0xFF), (((int) two.a) & 0xFF))
+		);
+	}
+
+	/**
 	 * intermix lots of colors, ignoring null ones
 	 */
 	public static ColorRGBA mixPix(List<ColorRGBA> pixList) {
