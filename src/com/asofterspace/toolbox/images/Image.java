@@ -150,6 +150,25 @@ public class Image {
 		clip.setContents(clipContent, null);
 	}
 
+	public void resize(int newWidth, int newHeight) {
+
+		int oldWidth = width;
+		int oldHeight = height;
+		ColorRGBA[][] oldData = data;
+
+		this.height = newHeight;
+		this.width = newWidth;
+
+		this.data = new ColorRGBA[height][width];
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				data[y][x] = oldData[(y * oldHeight) / height][(x * oldWidth) / width];
+			}
+		}
+
+	}
+
 	/**
 	 * Replaces some same pixel values with single object instances
 	 * (replacing all would take a LONG time in a picture that has many different colors,
