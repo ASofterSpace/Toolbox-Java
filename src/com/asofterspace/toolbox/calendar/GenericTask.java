@@ -109,9 +109,7 @@ public class GenericTask {
 		return new GenericTask(this);
 	}
 
-	public boolean isScheduledOn(Date date) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
+	public boolean isScheduledOn(Calendar cal) {
 
 		// handle weekdays before day of month and month (as they have special 29th-Feb-code)
 		if (scheduledOnDaysOfWeek != null) {
@@ -491,8 +489,9 @@ public class GenericTask {
 	 * If this is a repeating task rather than a single task instance, returns null.
 	 */
 	public Date getMainDateForTaskInstance() {
-		if (getDoneDate() != null) {
-			return getDoneDate();
+		Date result = getDoneDate();
+		if (result != null) {
+			return result;
 		}
 		return getReleaseDate();
 	}
@@ -606,7 +605,7 @@ public class GenericTask {
 		return result;
 	}
 
-	public boolean appliesTo(Date from, Date to) {
+	public boolean appliesToRange(Date from, Date to, Date today) {
 
 		if ((from == null) && (to == null)) {
 			return true;
@@ -629,7 +628,6 @@ public class GenericTask {
 
 		// entries which are not yet done apply to their release date...
 		Date displayDate = getReleaseDate();
-		Date today = DateUtils.now();
 
 		// ... or, if they were released before today, they apply to today
 		if (displayDate.before(today)) {
@@ -645,7 +643,7 @@ public class GenericTask {
 		return toResult || fromResult;
 	}
 
-	public boolean appliesTo(Date day) {
+	public boolean appliesToDay(Date day, Date today) {
 
 		// entries which are done apply to the date on which they were done
 		if (hasBeenDone()) {
@@ -654,7 +652,6 @@ public class GenericTask {
 
 		// entries which are not yet done apply to their release date...
 		Date displayDate = getReleaseDate();
-		Date today = DateUtils.now();
 
 		// ... or, if they were released before today, they apply to today
 		if (displayDate.before(today)) {

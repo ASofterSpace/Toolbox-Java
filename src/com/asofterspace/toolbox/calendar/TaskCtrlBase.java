@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.Record;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -123,8 +124,11 @@ public class TaskCtrlBase {
 
 		List<GenericTask> result = new ArrayList<>();
 
+		Calendar dayCal = Calendar.getInstance();
+		dayCal.setTime(day);
+
 		for (GenericTask task : tasks) {
-			if (task.isScheduledOn(day)) {
+			if (task.isScheduledOn(dayCal)) {
 				result.add(releaseTaskOn(task, day));
 			}
 		}
