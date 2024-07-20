@@ -1468,6 +1468,15 @@ public class Image {
 		}
 	}
 
+	public void invertBrightness3() {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = data[y][x].getBrightnessInverted3();
+			}
+		}
+	}
+
 	/*
 	Farben intensivieren:
 	p^[1] := max255((p^[1] * p^[1]) div 128);

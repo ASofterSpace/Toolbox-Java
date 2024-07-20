@@ -244,6 +244,9 @@ public class ColorRGBA {
 		return (byte) (result / 3);
 	}
 
+	/**
+	 * Gets the perceived grayness of this color on a scale from 0 to 255
+	 */
 	public int getPerceivedGrayness() {
 		int intR = r & 0xFF;
 		int intG = g & 0xFF;
@@ -252,6 +255,9 @@ public class ColorRGBA {
 		return result / 100;
 	}
 
+	/**
+	 * Gets the perceived grayness of this color on a scale from 0 to 255
+	 */
 	public byte getPerceivedGrayByte() {
 		int intR = r & 0xFF;
 		int intG = g & 0xFF;
@@ -705,6 +711,28 @@ public class ColorRGBA {
 		}
 
 		return result;
+	}
+
+	public ColorRGBA getBrightnessInverted3() {
+
+		int percGray = getPerceivedGrayness();
+
+		if (percGray > 0) {
+			double factor = (255.0 - percGray) / percGray;
+
+			return new ColorRGBA(
+				Math.round(getR() * factor),
+				Math.round(getG() * factor),
+				Math.round(getB() * factor),
+				getA()
+			);
+		}
+		return new ColorRGBA(
+			255,
+			255,
+			255,
+			getA()
+		);
 	}
 
 	private int getEditedChannel(String baseStr, double modifier) {
