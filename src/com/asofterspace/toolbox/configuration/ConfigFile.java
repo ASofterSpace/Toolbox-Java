@@ -127,7 +127,7 @@ public class ConfigFile extends JsonFile {
 		}
 	}
 
-	private static String getConfigFilename(String name, Boolean baseOnClasspath) {
+	public static String getConfigFilename(String name, Boolean baseOnClasspath) {
 
 		if (baseOnClasspath == null) {
 			baseOnClasspath = false;
