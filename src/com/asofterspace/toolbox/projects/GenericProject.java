@@ -76,25 +76,32 @@ public class GenericProject {
 	private String nameToShortName(String name) {
 
 		String result = name;
+		String resLo = result.toLowerCase();
 
 		// LABEL :: TO ADD ORIGIN, LOOK HERE (resolving display name to origin string)
-		if (result.toLowerCase().equals("polyamorous pirates & curious cephalopods")) {
+		if (resLo.equals("polyamorous pirates & curious cephalopods")) {
 			return "ppcc";
 		}
-		if (result.toLowerCase().startsWith("dir")) {
+		if (resLo.startsWith("dir")) {
 			return "da";
 		}
-		if (result.toLowerCase().startsWith("effect")) {
+		if (resLo.startsWith("effect")) {
 			return "ea";
 		}
-		if (result.toLowerCase().startsWith("uni")) {
+		if (resLo.startsWith("uni")) {
 			return "uni";
 		}
-		if (result.toLowerCase().startsWith("queeres")) {
+		if (resLo.startsWith("queeres")) {
 			return "qzt";
 		}
-		if (result.toLowerCase().startsWith("wood")) {
+		if (resLo.startsWith("queer")) {
+			return "qld";
+		}
+		if (resLo.startsWith("wood")) {
 			return "ww";
+		}
+		if (resLo.startsWith("transition")) {
+			return "tt";
 		}
 
 		result = result.toLowerCase();
