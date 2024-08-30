@@ -416,6 +416,10 @@ public class File {
 			return "image/avif";
 		}
 
+		if (lowFilename.endsWith(".svg")) {
+			return "image/svg+xml";
+		}
+
 		if (lowFilename.endsWith(".mp4")) {
 			return "video/mp4";
 		}

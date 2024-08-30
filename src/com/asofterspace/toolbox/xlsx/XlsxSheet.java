@@ -195,8 +195,8 @@ public class XlsxSheet {
 			return null;
 		}
 
-		// no cellType means number
-		if (cellType == null) {
+		// cellType n (in OpenOffice) or no cellType (in Excel) means number
+		if ((cellType == null) || cellType.equals("n")) {
 			String intContentStr = vChild.getInnerText();
 
 			try {
