@@ -25,7 +25,11 @@ public class UrlEncoder {
 			return null;
 		}
 
-		return encodeFormData(urlString).replace(".", "%2E").replace("+", "%20").replace("#", "%23");
+		return encodeFormData(urlString)
+			.replace(".", "%2E")
+			.replace("+", "%20")
+			.replace("#", "%23")
+			.replace("'", "%27");
 	}
 
 	// encodes to the special string format inside form requests (both GET and POST requests),
