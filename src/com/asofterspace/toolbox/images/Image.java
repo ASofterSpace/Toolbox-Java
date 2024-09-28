@@ -1419,6 +1419,8 @@ public class Image {
 		}
 	}
 
+	// iterate over all pixels of both images;
+	// for each pixel that is same in both, replace that pixel with replaceWithCol
 	public void maskOutImage(Image other, ColorRGBA replaceWithCol) {
 
 		int minWidth = Math.min(width, other.getWidth());
@@ -1432,6 +1434,39 @@ public class Image {
 			}
 		}
 	}
+
+	// iterate over all pixels of both images;
+	// for each pixel that is ifOtherHasColor in other, replace that pixel with replaceWithCol
+	public void maskOutImage(Image other, ColorRGBA ifOtherHasColor, ColorRGBA replaceWithCol) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				if (ifOtherHasColor.equals(other.data[y][x])) {
+					data[y][x] = replaceWithCol;
+				}
+			}
+		}
+	}
+
+	// iterate over all pixels of both images;
+	// for each pixel that is NOT ifOtherNotHasColor in other, replace that pixel with replaceWithCol
+	public void maskOutImageNotCol(Image other, ColorRGBA ifOtherNotHasColor, ColorRGBA replaceWithCol) {
+
+		int minWidth = Math.min(width, other.getWidth());
+		int minHeight = Math.min(height, other.getHeight());
+
+		for (int x = 0; x < minWidth; x++) {
+			for (int y = 0; y < minHeight; y++) {
+				if (!ifOtherNotHasColor.equals(other.data[y][x])) {
+					data[y][x] = replaceWithCol;
+				}
+			}
+		}
+	}
+
 	public void multiply(ColorRGBA multiplyWith) {
 
 		for (int x = 0; x < width; x++) {
