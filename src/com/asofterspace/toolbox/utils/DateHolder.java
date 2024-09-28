@@ -89,6 +89,12 @@ public class DateHolder {
 		return date;
 	}
 
+	public void resetParsedDate() {
+		if (dateTimeStr != null) {
+			date = null;
+		}
+	}
+
 	public String toString() {
 		if (isNull) {
 			return null;

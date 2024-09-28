@@ -384,11 +384,21 @@ public class GenericTask {
 			if (getSetToDoneDateTime() == null) {
 				return true;
 			}
-			// if the difference between doneDate and setToDoneDateTime is more than 21 days, report it!
-			return Math.abs(getDoneDate().getTime() - getSetToDoneDateTime().getTime()) / (1000.0 * 60.0 * 60.0 * 24.0) > 21;
+			boolean isProblematicInternal = _isDoneDateProblematicTaskInstance();
+
+			if (isProblematicInternal) {
+				// reset and try again :D
+				getDoneDateHolder().resetParsedDate();
+				return _isDoneDateProblematicTaskInstance();
+			}
 		}
 
 		return false;
+	}
+
+	private boolean _isDoneDateProblematicTaskInstance() {
+		// if the difference between doneDate and setToDoneDateTime is more than 21 days, report it!
+		return Math.abs(getDoneDate().getTime() - getSetToDoneDateTime().getTime()) / (1000.0 * 60.0 * 60.0 * 24.0) > 21;
 	}
 
 	public boolean isInstance() {
