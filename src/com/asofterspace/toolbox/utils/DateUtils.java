@@ -195,6 +195,26 @@ public class DateUtils {
 	}
 
 	/**
+	 * Just quickly checks if the string looks like a YYYY-MM-DD date string
+	 * without (!) parsing it through any API
+	 */
+	public static boolean looksLikeADate(String str) {
+		if (str.length() == 10) {
+			return Character.isDigit(str.charAt(0)) &&
+				Character.isDigit(str.charAt(1)) &&
+				Character.isDigit(str.charAt(2)) &&
+				Character.isDigit(str.charAt(3)) &&
+				(str.charAt(4) == ' ') &&
+				Character.isDigit(str.charAt(5)) &&
+				Character.isDigit(str.charAt(6)) &&
+				(str.charAt(7) == ' ') &&
+				Character.isDigit(str.charAt(8)) &&
+				Character.isDigit(str.charAt(9));
+		}
+		return false;
+	}
+
+	/**
 	 * Serializes a date as e.g. 2020-05-10
 	 */
 	public static String serializeDate(Date date) {
