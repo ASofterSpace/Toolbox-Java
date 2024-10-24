@@ -204,10 +204,10 @@ public class DateUtils {
 				Character.isDigit(str.charAt(1)) &&
 				Character.isDigit(str.charAt(2)) &&
 				Character.isDigit(str.charAt(3)) &&
-				(str.charAt(4) == ' ') &&
+				(str.charAt(4) == '-') &&
 				Character.isDigit(str.charAt(5)) &&
 				Character.isDigit(str.charAt(6)) &&
-				(str.charAt(7) == ' ') &&
+				(str.charAt(7) == '-') &&
 				Character.isDigit(str.charAt(8)) &&
 				Character.isDigit(str.charAt(9));
 		}
