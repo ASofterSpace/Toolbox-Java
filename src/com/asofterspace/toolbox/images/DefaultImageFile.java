@@ -57,14 +57,7 @@ public class DefaultImageFile extends RasterImageFile {
 			File file = new File(this.filename);
 			BufferedImage javaImg = ImageIO.read(file.getJavaFile());
 
-			int width = javaImg.getWidth();
-			int height = javaImg.getHeight();
-
-			ColorRGBA[][] uncompressedData = new ColorRGBA[height][width];
-
-			img = new Image(uncompressedData);
-
-			img.drawAwtImage(javaImg, 0, 0);
+			img = Image.createFromAwtImage(javaImg);
 
 		} catch (IOException e) {
 			System.err.println("[ERROR] Trying to load the default image file " + filename + ", but there was an exception - inconceivable!\n" + e);

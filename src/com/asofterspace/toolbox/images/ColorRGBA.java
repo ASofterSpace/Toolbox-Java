@@ -402,6 +402,10 @@ public class ColorRGBA {
 		if (intA > 254) {
 			return this;
 		}
+		// shortcut in case we are at fully transparent drawing
+		if (intA < 1) {
+			return backgroundColor;
+		}
 
 		double amountOfOne = intA / 255.0;
 		double amountOfTwo = 1 - amountOfOne;
@@ -619,6 +623,16 @@ public class ColorRGBA {
 			getEditedChannel(baseForB, modifierForB),
 			getEditedChannel(baseForA, modifierForA),
 			allowOverflow
+		);
+	}
+
+	public ColorRGBA getAlphaAdjusted(int newAlpha) {
+
+		return new ColorRGBA(
+			getR(),
+			getG(),
+			getB(),
+			newAlpha
 		);
 	}
 

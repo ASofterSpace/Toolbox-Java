@@ -484,6 +484,15 @@ public class Image {
 		}
 	}
 
+	public void applyBitMask(Image other) {
+
+		for (int x = 0; (x < other.width) && (x < width); x++) {
+			for (int y = 0; (y < other.height) && (y < height); y++) {
+				data[y][x] = data[y][x].getAlphaAdjusted(other.data[y][x].getR());
+			}
+		}
+	}
+
 	public void drawLine(int startX, int startY, int endX, int endY, ColorRGBA lineColor) {
 		drawLine(startX, startY, endX, endY, lineColor, false);
 	}
