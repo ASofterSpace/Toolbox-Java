@@ -1242,6 +1242,32 @@ public class Image {
 		this.height = newHeight;
 	}
 
+	public void reflectHorizontally() {
+
+		ColorRGBA[][] reflectedData = new ColorRGBA[height][width];
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				reflectedData[y][x] = data[y][width - x - 1];
+			}
+		}
+
+		this.data = reflectedData;
+	}
+
+	public void reflectVertically() {
+
+		ColorRGBA[][] reflectedData = new ColorRGBA[height][width];
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				reflectedData[y][x] = data[height - y - 1][x];
+			}
+		}
+
+		this.data = reflectedData;
+	}
+
 	public void editChannels(String baseForR, double modifierForR,
 							 String baseForG, double modifierForG,
 							 String baseForB, double modifierForB) {

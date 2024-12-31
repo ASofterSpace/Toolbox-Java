@@ -102,6 +102,12 @@ public class DefaultImageFile extends RasterImageFile {
 
 	@Override
 	public void saveTransparently() {
+		// jpg and bmp cannot save transparently and then just refuse to save at all
+		if (!filename.toLowerCase().endsWith(".png")) {
+			save();
+			return;
+		}
+
 		try {
 			if (img == null) {
 				loadImageContents();
@@ -124,13 +130,7 @@ public class DefaultImageFile extends RasterImageFile {
 				}
 			}
 
-			if (filename.toLowerCase().endsWith(".bmp")) {
-				ImageIO.write(javaImg, "bmp", file.getJavaFile());
-			} else if (filename.toLowerCase().endsWith(".png")) {
-				ImageIO.write(javaImg, "png", file.getJavaFile());
-			} else {
-				ImageIO.write(javaImg, "jpeg", file.getJavaFile());
-			}
+			ImageIO.write(javaImg, "png", file.getJavaFile());
 
 		} catch (IOException e) {
 			System.err.println("[ERROR] Trying to save the default image file " + filename + ", but there was an exception - inconceivable!\n" + e);

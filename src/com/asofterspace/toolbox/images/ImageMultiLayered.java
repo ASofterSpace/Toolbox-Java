@@ -98,7 +98,6 @@ public class ImageMultiLayered {
 		layers = others;
 	}
 
-
 	public void moveLayerOneDown(int index) {
 		if (index < 1) {
 			return;
