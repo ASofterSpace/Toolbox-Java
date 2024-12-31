@@ -5,6 +5,7 @@
 package com.asofterspace.toolbox.gui;
 
 import com.asofterspace.toolbox.io.Directory;
+import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.Utils;
 
 import java.awt.Color;
@@ -174,7 +175,9 @@ public class GuiUtils {
 		try {
 			Desktop.getDesktop().open(new java.io.File(folderpath));
 		} catch (IOException ex) {
-			// do nothing
+			// if the desktop environment does not exist or has problems with this,
+			// try to run in xterm if one exists
+			IoUtils.executeAsyncInDir("xterm -e '' &", new Directory(folderpath));
 		}
 	}
 

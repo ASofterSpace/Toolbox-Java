@@ -183,6 +183,18 @@ public class IoUtils {
 		return null;
 	}
 
+	public static Process executeAsyncInDir(String command, Directory dir) {
+		if (dir == null) {
+			return executeAsync(command);
+		}
+		try {
+			return Runtime.getRuntime().exec(command, null, dir.getJavaFile());
+		} catch (IOException e) {
+			System.err.println("There was an I/O Exception while executing an external command in dir asynchronously: " + e);
+		}
+		return null;
+	}
+
 	public static void shutdownOS() {
 		execute("shutdown -s");
 	}
