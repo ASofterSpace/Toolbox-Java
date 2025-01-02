@@ -97,7 +97,7 @@ public class IoUtils {
 				// well, stop waiting...
 			}
 		} catch (IOException e) {
-			System.err.println("There was an I/O Exception while executing an external command synchronously: " + e);
+			System.err.println("There was an I/O Exception while executing the external command '" + command + "' synchronously: " + e);
 		}
 	}
 
