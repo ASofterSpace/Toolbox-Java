@@ -195,6 +195,29 @@ public class IoUtils {
 		return null;
 	}
 
+	/**
+	 * Returns null (if no args are given) or all args concatenated with spaces
+	 */
+	public static String assembleArgumentsIntoOne(String[] args) {
+		if (args.length < 1) {
+			return null;
+		}
+
+		if (args.length == 1) {
+			return args[0];
+		}
+
+		// when several arguments are given, assume that it is just one file whose name contains spaces
+		StringBuilder result = new StringBuilder();
+		String sep = "";
+		for (int i = 0; i < args.length; i++) {
+			result.append(sep);
+			result.append(args[i]);
+			sep = " ";
+		}
+		return result.toString();
+	}
+
 	public static void shutdownOS() {
 		execute("shutdown -s");
 	}
