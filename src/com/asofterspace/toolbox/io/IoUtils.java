@@ -204,6 +204,9 @@ public class IoUtils {
 		}
 
 		if (args.length == 1) {
+			if ("".equals(args[0])) {
+				return null;
+			}
 			return args[0];
 		}
 
@@ -215,7 +218,11 @@ public class IoUtils {
 			result.append(args[i]);
 			sep = " ";
 		}
-		return result.toString();
+		String resStr = result.toString();
+		if ("".equals(resStr)) {
+			return null;
+		}
+		return resStr;
 	}
 
 	public static void shutdownOS() {
