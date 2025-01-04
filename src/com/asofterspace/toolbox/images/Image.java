@@ -904,7 +904,7 @@ public class Image {
 			// yes to both - let's do this!
 			return createFromAwtImage((BufferedImage) clipContent.getTransferData(DataFlavor.imageFlavor));
 
-		} catch (UnsupportedFlavorException | IOException e) {
+		} catch (UnsupportedFlavorException | IOException | IllegalArgumentException e) {
 
 			// whoops - this should not happen, as we already checked about this flavor being the right one...
 			return null;
