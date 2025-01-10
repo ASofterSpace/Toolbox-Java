@@ -193,6 +193,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 				content = removeCommentsAndStrings(content);
 				for (String line : content.split("\n")) {
 					line = line.trim();
+					if ("".equals(line) || line.startsWith("//")) {
+						continue;
+					}
 					// add imports of other files also as possible imports, but guard against
 					// multi-line ones
 					if ((line.startsWith("import ") && line.contains(".") && line.endsWith(";"))) {
@@ -204,6 +207,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 							!thisImportPackageStr.equals("java.lang")) {
 							automaticallyAddedImports.put(thisImportClass, thisFullImport);
 						}
+						continue;
 					}
 					// add other source files directly as possible imports
 					if (line.startsWith("package ")) {
@@ -211,23 +215,19 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 						if (packageStr.endsWith(";")) {
 							packageStr = packageStr.substring(0, packageStr.length() - 1).trim();
 						}
+						continue;
 					}
 					if (line.contains(" class ")) {
 						classNameStr = line.substring(line.indexOf(" class ") + 7);
-					}
-					if (line.startsWith("class ")) {
+					} else if (line.startsWith("class ")) {
 						classNameStr = line.substring(6);
-					}
-					if (line.contains(" interface ")) {
+					} else if (line.contains(" interface ")) {
 						classNameStr = line.substring(line.indexOf(" interface ") + 11);
-					}
-					if (line.startsWith("interface ")) {
+					} else if (line.startsWith("interface ")) {
 						classNameStr = line.substring(10);
-					}
-					if (line.contains(" enum ")) {
+					} else if (line.contains(" enum ")) {
 						classNameStr = line.substring(line.indexOf(" enum ") + 6);
-					}
-					if (line.startsWith("enum ")) {
+					} else if (line.startsWith("enum ")) {
 						classNameStr = line.substring(5);
 					}
 					// once a class name has been found, interrupt - as there will be no further
@@ -259,7 +259,9 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 			}
 		}
 
-		return addMissingImportsJavalike("import", origText);
+		String result = addMissingImportsJavalike("import", origText);
+
+		return result;
 	}
 
 	@Override

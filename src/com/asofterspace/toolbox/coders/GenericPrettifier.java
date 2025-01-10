@@ -30,6 +30,9 @@ public class GenericPrettifier {
 		text = StrUtils.replaceAll(text, "U¨", "Ü");
 		text = StrUtils.replaceAll(text, "…", "...");
 
+		// fixes stuff like Ã¶...
+		text = Utf8Decoder.decode(text);
+
 		// this is a special dash (not the regular -) which is used to separate word parts for a possible
 		// line break - but gets in the way of reading the text when it is not hidden, so just remove it
 		text = StrUtils.replaceAll(text, "­", "");
