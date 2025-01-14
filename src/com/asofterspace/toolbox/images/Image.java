@@ -2063,6 +2063,30 @@ public class Image {
 		// do nothing in the base implementation
 	}
 
+	public void drawPen(int x, int y, ColorRGBA color, int size) {
+		if (size > 0) {
+			setPixelSafely(x, y, color);
+		}
+		if (size > 1) {
+			setPixelSafely(x+1, y, color);
+			setPixelSafely(x, y+1, color);
+			setPixelSafely(x+1, y+1, color);
+		}
+		if (size > 3) {
+			setPixelSafely(x, y-1, color);
+			setPixelSafely(x+1, y-1, color);
+			setPixelSafely(x+1, y, color);
+			setPixelSafely(x-1, y, color);
+			setPixelSafely(x+2, y, color);
+			setPixelSafely(x-1, y+1, color);
+			setPixelSafely(x+2, y+1, color);
+			setPixelSafely(x, y+1, color);
+			setPixelSafely(x+1, y+1, color);
+			setPixelSafely(x, y+2, color);
+			setPixelSafely(x+1, y+2, color);
+		}
+	}
+
 	public void drawArea(List<Pair<Integer, Integer>> areaCornerPoints, ColorRGBA areaColor) {
 		List<Pair<Integer, Integer>> points = getPointsInArea(areaCornerPoints);
 		for (Pair<Integer, Integer> point : points) {
