@@ -527,17 +527,17 @@ public class Image {
 		}
 
 		// figure out how far we draw horizontally and vertically
-		int lineWidth = endX - startX;
-		int lineHeight = endY - startY;
+		int line_Width = endX - startX;
+		int line_Height = endY - startY;
 
 		// no line drawn at all (it is just one pixel?) - well okay!
-		if ((lineWidth < 1) && (lineHeight < 1)) {
-			drawLinePoint(startX, startY, lineColor);
+		if ((line_Width < 1) && (line_Height < 1)) {
+			drawPen(startX, startY, lineColor, lineWidth);
 			return;
 		}
 
 		// actually do the drawing - mainly horizontally or mainly vertically
-		if (lineWidth > lineHeight) {
+		if (line_Width > line_Height) {
 			for (int x = startX; x <= endX; x++) {
 				if (dotted) {
 					if ((x % 6 == 3) || (x % 6 == 4) || (x % 6 == 5)) {
@@ -546,11 +546,11 @@ public class Image {
 				}
 				int y;
 				if (invertDirection) {
-					y = startY + MathUtils.divideInts((endX - x) * lineHeight, lineWidth);
+					y = startY + MathUtils.divideInts((endX - x) * line_Height, line_Width);
 				} else {
-					y = startY + MathUtils.divideInts((x - startX) * lineHeight, lineWidth);
+					y = startY + MathUtils.divideInts((x - startX) * line_Height, line_Width);
 				}
-				drawLinePoint(x, y, lineColor);
+				drawPen(x, y, lineColor, lineWidth);
 			}
 		} else {
 			for (int y = startY; y <= endY; y++) {
@@ -561,28 +561,12 @@ public class Image {
 				}
 				int x;
 				if (invertDirection) {
-					x = startX + MathUtils.divideInts((endY - y) * lineWidth, lineHeight);
+					x = startX + MathUtils.divideInts((endY - y) * line_Width, line_Height);
 				} else {
-					x = startX + MathUtils.divideInts((y - startY) * lineWidth, lineHeight);
+					x = startX + MathUtils.divideInts((y - startY) * line_Width, line_Height);
 				}
-				drawLinePoint(x, y, lineColor);
+				drawPen(x, y, lineColor, lineWidth);
 			}
-		}
-	}
-
-	private void drawLinePoint(int x, int y, ColorRGBA color) {
-		setPixelSafely(x, y, color);
-		if (lineWidth > 1) {
-			setPixelSafely(x+1, y, color);
-			setPixelSafely(x+1, y+1, color);
-			setPixelSafely(x, y+1, color);
-		}
-		if (lineWidth > 2) {
-			setPixelSafely(x-1, y+1, color);
-			setPixelSafely(x-1, y, color);
-			setPixelSafely(x-1, y-1, color);
-			setPixelSafely(x, y-1, color);
-			setPixelSafely(x+1, y-1, color);
 		}
 	}
 
@@ -2066,24 +2050,25 @@ public class Image {
 	public void drawPen(int x, int y, ColorRGBA color, int size) {
 		if (size > 0) {
 			setPixelSafely(x, y, color);
-		}
-		if (size > 1) {
-			setPixelSafely(x+1, y, color);
-			setPixelSafely(x, y+1, color);
-			setPixelSafely(x+1, y+1, color);
-		}
-		if (size > 3) {
-			setPixelSafely(x, y-1, color);
-			setPixelSafely(x+1, y-1, color);
-			setPixelSafely(x+1, y, color);
-			setPixelSafely(x-1, y, color);
-			setPixelSafely(x+2, y, color);
-			setPixelSafely(x-1, y+1, color);
-			setPixelSafely(x+2, y+1, color);
-			setPixelSafely(x, y+1, color);
-			setPixelSafely(x+1, y+1, color);
-			setPixelSafely(x, y+2, color);
-			setPixelSafely(x+1, y+2, color);
+			if (size > 1) {
+				setPixelSafely(x+1, y, color);
+				setPixelSafely(x, y+1, color);
+				setPixelSafely(x+1, y+1, color);
+				if (size > 2) {
+					setPixelSafely(x-1, y+1, color);
+					setPixelSafely(x-1, y, color);
+					setPixelSafely(x, y-1, color);
+					setPixelSafely(x+1, y-1, color);
+					if (size > 3) {
+						setPixelSafely(x+2, y, color);
+						setPixelSafely(x+2, y+1, color);
+						setPixelSafely(x, y+2, color);
+						setPixelSafely(x+1, y+2, color);
+					} else {
+						setPixelSafely(x-1, y-1, color);
+					}
+				}
+			}
 		}
 	}
 
