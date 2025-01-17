@@ -137,6 +137,12 @@ public class ImageMultiLayered {
 	}
 
 	public Image bake() {
+
+		if (layers.size() == 0) {
+			ColorRGBA backgroundColor = new ColorRGBA(0, 0, 0, 0);
+			return new Image(width, height, backgroundColor);
+		}
+
 		if (layers.size() == 1) {
 			ImageLayer layer = layers.get(0);
 			if ((layer.getOffsetX() == 0) && (layer.getOffsetY() == 0)) {
@@ -149,7 +155,21 @@ public class ImageMultiLayered {
 				}
 			}
 		}
-		ColorRGBA backgroundColor = new ColorRGBA(0, 0, 0, 255);
+
+		// special case: base layer is already an image, no drawing necessary
+		ImageLayer baseLayer = layers.get(0);
+		if (baseLayer instanceof ImageLayerBasedOnImage) {
+			ImageLayerBasedOnImage baseLayerImg = (ImageLayerBasedOnImage) baseLayer;
+			if ((baseLayerImg.getOffsetX() == 0) && (baseLayerImg.getOffsetY() == 0) && (baseLayerImg.getWidth() == width) && (baseLayerImg.getHeight() == height)) {
+				Image base = baseLayerImg.getImage().copy();
+				for (int i = 1; i < layers.size(); i++) {
+					layers.get(i).drawOnto(base);
+				}
+				return base;
+			}
+		}
+
+		ColorRGBA backgroundColor = new ColorRGBA(0, 0, 0, 0);
 		Image base = new Image(width, height, backgroundColor);
 		for (ImageLayer layer : layers) {
 			layer.drawOnto(base);
