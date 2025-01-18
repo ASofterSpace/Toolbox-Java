@@ -44,9 +44,12 @@ public class Utf8Decoder {
 		str = str.replace("Ã¾", "þ");
 		str = str.replace("Ãž", "Þ");
 		str = str.replace("ÃŸ", "ß");
-		str = str.replace("Â¯", "¯");
+		str = str.replace("Ã", "ß");
 		str = str.replace("â€“", "-");
-		
+		str = str.replace("Â¯", "¯");
+		str = str.replace("Â½", "½");
+		str = str.replace("Â¼", "¼");
+
 		return str;
 	}
 

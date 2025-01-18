@@ -22,16 +22,32 @@ public class GenericPrettifier {
 			text = UrlDecoder.decode(text);
 		}
 
+		// UTF-8 encoded thrice and a bit broken
+		text = StrUtils.replaceAll(text, "ÃÂÃÂ¤", "ä");
+		text = StrUtils.replaceAll(text, "ÃÂÃÂ¶", "ö");
+		text = StrUtils.replaceAll(text, "ÃÂÃÂ¼", "ü");
+		text = StrUtils.replaceAll(text, "ÃÂÃÂ", "Ü");
+		text = StrUtils.replaceAll(text, "Ã¢ÂÂ¬", "€");
+		text = StrUtils.replaceAll(text, "ÃÂÃÂ", "ß");
+		text = StrUtils.replaceAll(text, "Ã°ÂÂ¤Â", ":hug:");
+		text = StrUtils.replaceAll(text, "Ã°ÂÂÂ", ":D");
+
+		// UTF-8 encoded twice and a bit broken
+		text = StrUtils.replaceAll(text, "ÃÂ¤", "ä");
+		text = StrUtils.replaceAll(text, "ÃÂ¶", "ö");
+		text = StrUtils.replaceAll(text, "ÃÂ¼", "ü");
+		text = StrUtils.replaceAll(text, "ÃÂ", "ß");
+
+		// UTF-8 encoded once - fixes stuff like Ã¶...
+		text = Utf8Decoder.decode(text);
+
 		text = StrUtils.replaceAll(text, "o¨", "ö");
-		text = StrUtils.replaceAll(text, "a¨", "ä");
 		text = StrUtils.replaceAll(text, "u¨", "ü");
+		text = StrUtils.replaceAll(text, "a¨", "ä");
+		text = StrUtils.replaceAll(text, "A¨", "Ä");
 		text = StrUtils.replaceAll(text, "O¨", "Ö");
-		text = StrUtils.replaceAll(text, "Ä¨", "Ä");
 		text = StrUtils.replaceAll(text, "U¨", "Ü");
 		text = StrUtils.replaceAll(text, "…", "...");
-
-		// fixes stuff like Ã¶...
-		text = Utf8Decoder.decode(text);
 
 		// this is a special dash (not the regular -) which is used to separate word parts for a possible
 		// line break - but gets in the way of reading the text when it is not hidden, so just remove it
