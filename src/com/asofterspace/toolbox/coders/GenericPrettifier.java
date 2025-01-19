@@ -36,6 +36,7 @@ public class GenericPrettifier {
 		text = StrUtils.replaceAll(text, "ÃÂ¤", "ä");
 		text = StrUtils.replaceAll(text, "ÃÂ¶", "ö");
 		text = StrUtils.replaceAll(text, "ÃÂ¼", "ü");
+		text = StrUtils.replaceAll(text, "Ã", "Ü");
 		text = StrUtils.replaceAll(text, "ÃÂ", "ß");
 
 		// UTF-8 encoded once - fixes stuff like Ã¶...
