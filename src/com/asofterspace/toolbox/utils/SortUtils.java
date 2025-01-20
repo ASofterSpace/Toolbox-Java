@@ -64,6 +64,10 @@ public class SortUtils  {
 		return newList;
 	}
 
+	public static <T> List<T> sort(Collection<T> listToSort) {
+		return sort(listToSort, SortOrder.ALPHABETICAL, null);
+	}
+
 	public static <T> List<T> sort(Collection<T> listToSort, SortOrder sortOrder) {
 		return sort(listToSort, sortOrder, null);
 	}
