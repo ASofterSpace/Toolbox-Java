@@ -749,6 +749,23 @@ public class ColorRGBA {
 		);
 	}
 
+	public ColorRGBA getBrightnessInverted4() {
+
+		/*
+		int prevSum = getR() + getG() + getB();
+		int prevAvg = prevSum / 3;
+		*/
+		int prevAvg = getPerceivedGrayness();
+		int newAvg = 255 - prevAvg;
+
+		return new ColorRGBA(
+			newAvg + getR() - prevAvg,
+			newAvg + getG() - prevAvg,
+			newAvg + getB() - prevAvg,
+			getA()
+		);
+	}
+
 	private int getEditedChannel(String baseStr, double modifier) {
 		int base = 0;
 		if (baseStr != null) {
