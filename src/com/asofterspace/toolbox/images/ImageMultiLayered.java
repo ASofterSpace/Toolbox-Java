@@ -51,6 +51,12 @@ public class ImageMultiLayered {
 		}
 	}
 
+	public void replaceLayer(int index, ImageLayer layer) {
+		if ((index >= 0) && (index < layers.size())) {
+			layers.set(index, layer);
+		}
+	}
+
 	public void deleteLayer(int index) {
 		if ((index >= 0) && (index < layers.size())) {
 			layers.remove(index);

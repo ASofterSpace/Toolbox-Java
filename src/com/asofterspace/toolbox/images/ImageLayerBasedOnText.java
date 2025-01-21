@@ -85,4 +85,10 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 		return new ImageLayerBasedOnText(offsetX, offsetY, text, fontName, fontSize, textColor);
 	}
 
+	public ImageLayerBasedOnImage convertToImageLayerBasedOnImage() {
+		Image baseImg = new Image(getWidth(), getHeight(), new ColorRGBA(0, 0, 0, 0));
+		drawOnto(baseImg);
+		return new ImageLayerBasedOnImage(offsetX, offsetY, baseImg);
+	}
+
 }

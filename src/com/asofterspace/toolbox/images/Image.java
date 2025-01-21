@@ -1681,6 +1681,15 @@ public class Image {
 		}
 	}
 
+	public void createNoise() {
+		Random r = new Random();
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = new ColorRGBA(r.nextInt(255), r.nextInt(255), r.nextInt(255));
+			}
+		}
+	}
+
 	/**
 	 * Get the most common color in the image
 	 */
@@ -2028,6 +2037,11 @@ public class Image {
 				}
 			}
 		}
+	}
+
+	public void pixelate(int pixelSize) {
+		resampleTo(width / pixelSize, height / pixelSize);
+		resize(width * pixelSize, height * pixelSize);
 	}
 
 	public int getLineWidth() {

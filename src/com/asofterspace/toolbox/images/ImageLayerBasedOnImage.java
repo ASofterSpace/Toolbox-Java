@@ -44,4 +44,8 @@ public class ImageLayerBasedOnImage extends ImageLayer  {
 		return new ImageLayerBasedOnImage(offsetX, offsetY, image.copy());
 	}
 
+	public ImageLayerBasedOnImage convertToImageLayerBasedOnImage() {
+		return copy();
+	}
+
 }

@@ -26,6 +26,8 @@ public abstract class ImageLayer  {
 
 	public abstract ImageLayer copy();
 
+	public abstract ImageLayerBasedOnImage convertToImageLayerBasedOnImage();
+
 	public int getOffsetX() {
 		return offsetX;
 	}
