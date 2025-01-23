@@ -14,10 +14,19 @@ public class ImageLayerBasedOnImage extends ImageLayer  {
 
 	private Image image;
 
+	private String caption;
 
-	public ImageLayerBasedOnImage(int offsetX, int offsetY, Image image) {
+
+	public ImageLayerBasedOnImage(int offsetX, int offsetY, Image image, String caption) {
 		super(offsetX, offsetY);
 		this.image = image;
+
+		// we do not want image to be null so instead we create a flaming red default
+		if (this.image == null) {
+			this.image = new Image(64, 64, new ColorRGBA(255, 0, 0, 255));
+		}
+
+		this.caption = caption;
 	}
 
 	public void drawOnto(Image ontoImage) {
@@ -29,7 +38,9 @@ public class ImageLayerBasedOnImage extends ImageLayer  {
 	}
 
 	public void setImage(Image image) {
-		this.image = image;
+		if (image != null) {
+			this.image = image;
+		}
 	}
 
 	public int getWidth() {
@@ -40,8 +51,16 @@ public class ImageLayerBasedOnImage extends ImageLayer  {
 		return this.image.getHeight();
 	}
 
+	public String getCaption() {
+		return caption;
+	}
+
+	public void setCaption(String caption) {
+		this.caption = caption;
+	}
+
 	public ImageLayerBasedOnImage copy() {
-		return new ImageLayerBasedOnImage(offsetX, offsetY, image.copy());
+		return new ImageLayerBasedOnImage(offsetX, offsetY, image.copy(), caption);
 	}
 
 	public ImageLayerBasedOnImage convertToImageLayerBasedOnImage() {

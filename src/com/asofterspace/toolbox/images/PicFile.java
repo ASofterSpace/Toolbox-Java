@@ -79,7 +79,7 @@ public class PicFile extends JsonFile {
 						Image innerImg = innerImageFile.getImage();
 						if (innerImg != null) {
 							ImageLayerBasedOnImage imgLayer = new ImageLayerBasedOnImage(
-								offsetX, offsetY, innerImageFile.getImage()
+								offsetX, offsetY, innerImageFile.getImage(), layerRec.getString("caption", "")
 							);
 							img.addLayer(imgLayer);
 						} else {
@@ -132,6 +132,7 @@ public class PicFile extends JsonFile {
 				if (layer instanceof ImageLayerBasedOnImage) {
 					layerRec.set("kind", "image");
 					ImageLayerBasedOnImage imgLayer = (ImageLayerBasedOnImage) layer;
+					layerRec.set("caption", imgLayer.getCaption());
 					String relPath = "_" + StrUtils.leftPad0(""+i, 3) + ".png";
 					layerRec.set("path", relPath);
 					DefaultImageFile innerImageFile = new DefaultImageFile(

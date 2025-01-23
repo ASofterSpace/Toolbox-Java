@@ -79,6 +79,7 @@ public class HTML {
 
 		// if we have an enumeration, with *, -, > or >> as bullet points...
 		if (line.startsWith("* ") || line.startsWith("- ") || line.startsWith("&gt; ") || line.startsWith("&gt;&gt; ") ||
+			line.startsWith("-&gt; ") ||
 			line.startsWith("&nbsp;") || line.startsWith("&#9;") || line.startsWith(" ") || line.startsWith("\t")) {
 
 			// ... set level 0 by default / for the top-most level...
@@ -131,6 +132,11 @@ public class HTML {
 						if (line.startsWith("&gt;&gt; ")) {
 							line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>&gt;&gt; </span>" + line.substring(9);
 							spaceCounter += 5;
+						} else {
+							if (line.startsWith("-&gt; ")) {
+								line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>-&gt; </span>" + line.substring(6);
+								spaceCounter += 5;
+							}
 						}
 					}
 				}

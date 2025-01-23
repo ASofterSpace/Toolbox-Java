@@ -30,7 +30,7 @@ public class ImageMultiLayered {
 	public ImageMultiLayered(Image img) {
 		this(img.getWidth(), img.getHeight());
 		layers = new ArrayList<>();
-		layers.add(new ImageLayerBasedOnImage(0, 0, img));
+		layers.add(new ImageLayerBasedOnImage(0, 0, img, null));
 	}
 
 	public void clear() {

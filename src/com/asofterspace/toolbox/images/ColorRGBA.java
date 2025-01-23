@@ -32,6 +32,7 @@ public class ColorRGBA {
 
 	public final static ColorRGBA WHITE = new ColorRGBA(255, 255, 255, 255);
 	public final static ColorRGBA BLACK = new ColorRGBA(  0,   0,   0, 255);
+	public final static ColorRGBA TRANS = new ColorRGBA(  0,   0,   0,   0);
 	public final static boolean DEFAULT_ALLOW_OVERFLOW = false;
 
 
