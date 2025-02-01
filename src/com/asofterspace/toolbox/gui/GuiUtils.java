@@ -177,7 +177,12 @@ public class GuiUtils {
 		} catch (IOException ex) {
 			// if the desktop environment does not exist or has problems with this,
 			// try to run in xterm if one exists
-			IoUtils.executeAsyncInDir("xterm -e '' &", new Directory(folderpath));
+
+			// but instead of regular xterm start...
+			// IoUtils.executeAsyncInDir("xterm -e '' &", new Directory(folderpath));
+
+			// ... actually start xterm for copying using leftclick
+			IoUtils.executeAsyncInDir("/cyber/prog/asofterspace/assScripts/startxterm.sh", new Directory(folderpath));
 		}
 	}
 
