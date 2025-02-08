@@ -30,6 +30,9 @@ public class XlsxSheet {
 
 	private XlsxFile parent;
 
+	private boolean sharedStringFastModeActive = false;
+	private List<XmlElement> sharedStrings = null;
+
 
 	public XlsxSheet(String title, XmlFile sheetFile, XlsxFile parent) {
 
@@ -223,7 +226,7 @@ public class XlsxSheet {
 			try {
 				int sharedStringIndex = Integer.parseInt(sharedStringIndexStr);
 
-				List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
+				List<XmlElement> sharedStrings = getSharedStrings();
 
 				XmlElement actualStringElement = sharedStrings.get(sharedStringIndex);
 
@@ -312,7 +315,7 @@ public class XlsxSheet {
 			try {
 				int sharedStringIndex = Integer.parseInt(sharedStringIndexStr);
 
-				List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
+				List<XmlElement> sharedStrings = getSharedStrings();
 
 				XmlElement actualStringElement = sharedStrings.get(sharedStringIndex);
 				XmlElement tChild = actualStringElement.getChild("t");
@@ -349,7 +352,7 @@ public class XlsxSheet {
 
 			// we just set this to string... and the strings are kept in a separate string file... so put it there!
 			try {
-				List<XmlElement> sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
+				List<XmlElement> sharedStrings = getSharedStrings();
 
 				int newSharedStringIndex = sharedStrings.size();
 
@@ -582,6 +585,20 @@ public class XlsxSheet {
 
 	public String getTitle() {
 		return title;
+	}
+
+	public synchronized void setSharedStringFastModeActive(boolean activate) {
+		if (activate) {
+			sharedStrings = parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
+		}
+		sharedStringFastModeActive = activate;
+	}
+
+	private List<XmlElement> getSharedStrings() {
+		if (sharedStringFastModeActive) {
+			return sharedStrings;
+		}
+		return parent.getSharedStrings().getRoot().getElementsByTagNameHierarchy("sst", "si");
 	}
 
 	public void save() {
