@@ -228,6 +228,11 @@ public class XlsxSheet {
 
 				List<XmlElement> sharedStrings = getSharedStrings();
 
+				if (sharedStringIndex >= sharedStrings.size()) {
+					System.out.println("[XlsxSheet Exception] Shared string index " + sharedStringIndex + " is above share string size " + sharedStrings.size() + "!");
+					return null;
+				}
+
 				XmlElement actualStringElement = sharedStrings.get(sharedStringIndex);
 
 				XmlElement tChild = actualStringElement.getChild("t");
@@ -246,6 +251,7 @@ public class XlsxSheet {
 
 			} catch (NumberFormatException e) {
 				// ooops... the string could not be parsed, humm...
+				System.out.println("[XlsxSheet Exception] " + sharedStringIndexStr + " cannot be parsed as shared string index!");
 			}
 		}
 
