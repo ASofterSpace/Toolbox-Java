@@ -22,6 +22,8 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 
 	private byte[] data;
 
+	private String preferredCacheParadigm = null;
+
 
 	public WebServerAnswerBasedOnFile(File fileContainingData) {
 
@@ -43,6 +45,10 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 	@Override
 	public String getPreferredCacheParadigm() {
 
+		if (preferredCacheParadigm != null) {
+			return preferredCacheParadigm;
+		}
+
 		String lowFilename = filename.toLowerCase();
 
 		// keep these a week long
@@ -56,6 +62,10 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 
 		// never keep the others
 		return "no-store";
+	}
+
+	public void setPreferredCacheParadigm(String preferredCacheParadigm) {
+		this.preferredCacheParadigm = preferredCacheParadigm;
 	}
 
 	@Override

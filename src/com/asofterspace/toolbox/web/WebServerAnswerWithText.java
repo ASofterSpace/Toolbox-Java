@@ -19,6 +19,9 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 
 	private String textKind = "plain";
 
+	// by default, never keep text data as it might change all the time
+	private String preferredCacheParadigm = "no-store";
+
 
 	public WebServerAnswerWithText(String text) {
 		this.data = text.getBytes(StandardCharsets.UTF_8);
@@ -32,9 +35,11 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 
 	@Override
 	public String getPreferredCacheParadigm() {
+		return preferredCacheParadigm;
+	}
 
-		// never keep text data as it might change all the time
-		return "no-store";
+	public void setPreferredCacheParadigm(String preferredCacheParadigm) {
+		this.preferredCacheParadigm = preferredCacheParadigm;
 	}
 
 	@Override
