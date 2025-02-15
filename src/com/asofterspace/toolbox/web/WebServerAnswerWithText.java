@@ -22,6 +22,8 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 	// by default, never keep text data as it might change all the time
 	private String preferredCacheParadigm = "no-store";
 
+	private int status = 200;
+
 
 	public WebServerAnswerWithText(String text) {
 		this.data = text.getBytes(StandardCharsets.UTF_8);
@@ -67,6 +69,14 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 	 */
 	public void setTextKind(String textKind) {
 		this.textKind = textKind;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
 	}
 
 }

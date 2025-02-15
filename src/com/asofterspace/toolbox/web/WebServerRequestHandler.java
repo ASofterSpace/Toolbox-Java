@@ -196,7 +196,7 @@ public class WebServerRequestHandler implements Runnable {
 				respond(404);
 			}
 		} else {
-			respond(200, answer);
+			respond(answer.getStatus(), answer);
 		}
 	}
 
@@ -325,8 +325,6 @@ public class WebServerRequestHandler implements Runnable {
 		WebRequestContent result = new WebRequestContent();
 
 		int length = 0;
-
-		String contentType = null;
 
 		while (true) {
 

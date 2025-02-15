@@ -20,6 +20,8 @@ public class WebServerAnswerInJson implements WebServerAnswer {
 
 	private byte[] data;
 
+	private int status = 200;
+
 
 	public WebServerAnswerInJson(String jsonData) {
 		init(jsonData);
@@ -61,4 +63,13 @@ public class WebServerAnswerInJson implements WebServerAnswer {
 
 		return data;
 	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
 }

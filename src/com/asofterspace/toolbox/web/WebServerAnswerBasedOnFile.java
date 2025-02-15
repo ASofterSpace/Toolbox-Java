@@ -24,6 +24,8 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 
 	private String preferredCacheParadigm = null;
 
+	private int status = 200;
+
 
 	public WebServerAnswerBasedOnFile(File fileContainingData) {
 
@@ -79,4 +81,13 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 
 		return data;
 	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
 }

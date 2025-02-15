@@ -88,4 +88,10 @@ public class WebRequestContent {
 		return contentLength;
 	}
 
+	@Override
+	public String toString() {
+		return "WebRequestContent [contentString: " + this.contentString + ", contentLength: " + this.contentLength +
+			", contentType: " + this.contentType + "]";
+	}
+
 }

@@ -21,4 +21,6 @@ public interface WebServerAnswer {
 
 	public byte[] getBinaryContent();
 
+	public int getStatus();
+
 }
