@@ -1121,7 +1121,7 @@ public class Image {
 	/**
 	 * Plainly resize the image by some amount horizontally and vertically
 	 */
-	public void resizeBy(double horizontalStretch, double verticalStretch) {
+	public void resizeBy (double horizontalStretch, double verticalStretch) {
 
 		int newWidth = (int) (width * horizontalStretch);
 		int newHeight = (int) (height * verticalStretch);
@@ -1201,6 +1201,70 @@ public class Image {
 			for (int y = 0; y < newHeight; y++) {
 				rotatedData[y][x] = data[x][width - y - 1];
 			}
+		}
+
+		this.data = rotatedData;
+		this.width = newWidth;
+		this.height = newHeight;
+	}
+
+	public void rotateLeft45(ColorRGBA bgColor) {
+
+		resampleTo((width*3)/2, (height*3)/2);
+
+		int maxHW = Math.max(height, width);
+		int newHeight = maxHW * 2;
+		int newWidth = maxHW * 2;
+
+		ColorRGBA[][] rotatedData = new ColorRGBA[newHeight][newWidth];
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				rotatedData[y][x] = bgColor;
+			}
+		}
+
+		int xOff = 0;
+		int yOff = maxHW;
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				// rotatedData[((y+yOff)*3)/4][((x+xOff)*3)/4] = data[y][x];
+				rotatedData[((y+yOff))/2][((x+xOff))/2] = data[y][x];
+				xOff++;
+			}
+			yOff--;
+			xOff = 0;
+		}
+
+		this.data = rotatedData;
+		this.width = newWidth;
+		this.height = newHeight;
+	}
+
+	public void rotateLeft22(ColorRGBA bgColor) {
+
+		resampleTo(width*2, height*2);
+
+		int maxHW = Math.max(height, width);
+		int newHeight = maxHW * 2;
+		int newWidth = maxHW * 2;
+
+		ColorRGBA[][] rotatedData = new ColorRGBA[newHeight][newWidth];
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				rotatedData[y][x] = bgColor;
+			}
+		}
+
+		int xOff = 0;
+		int yOff = maxHW;
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				// rotatedData[((y+(yOff/2))*3)/4][((x+(xOff/2))*3)/4] = data[y][x];
+				rotatedData[((y+(yOff/2)))/2][((x+(xOff/2)))/2] = data[y][x];
+				xOff++;
+			}
+			yOff--;
+			xOff = 0;
 		}
 
 		this.data = rotatedData;
