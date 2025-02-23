@@ -1213,8 +1213,8 @@ public class Image {
 		resampleTo((width*3)/2, (height*3)/2);
 
 		int maxHW = Math.max(height, width);
-		int newHeight = maxHW * 2;
-		int newWidth = maxHW * 2;
+		int newHeight = maxHW;
+		int newWidth = maxHW;
 
 		ColorRGBA[][] rotatedData = new ColorRGBA[newHeight][newWidth];
 		for (int x = 0; x < newWidth; x++) {
@@ -1245,8 +1245,8 @@ public class Image {
 		resampleTo(width*2, height*2);
 
 		int maxHW = Math.max(height, width);
-		int newHeight = maxHW * 2;
-		int newWidth = maxHW * 2;
+		int newHeight = maxHW;
+		int newWidth = maxHW;
 
 		ColorRGBA[][] rotatedData = new ColorRGBA[newHeight][newWidth];
 		for (int x = 0; x < newWidth; x++) {
