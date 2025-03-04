@@ -1971,6 +1971,63 @@ public class Image {
 		}
 	}
 
+	public void fillConnectedArea(int x, int y, ColorRGBA newCol) {
+		fillConnectedArea(x, y, newCol, 0);
+	}
+
+	public void fillConnectedArea(int x, int y, ColorRGBA newCol, int leniency) {
+		if ((x < 0) || (y < 0) || (x >= width) || (y >= height)) {
+			return;
+		}
+		ColorRGBA oldCol = data[y][x];
+		boolean[][] lookedAtPixels = new boolean[height][width];
+		for (int x2 = 0; x2 < width; x2++) {
+			for (int y2 = 0; y2 < height; y2++) {
+				lookedAtPixels[y2][x2] = false;
+			}
+		}
+		List<Pair<Integer, Integer>> toLookAt = new ArrayList<>();
+		lookedAtPixels[y][x] = true;
+		toLookAt.add(new Pair<Integer, Integer>(x, y));
+		while (toLookAt.size() > 0) {
+			Pair<Integer, Integer> cur = toLookAt.get(0);
+			toLookAt.remove(0);
+			fillConnectedAreaInner(cur.getX(), cur.getY(), oldCol, newCol, lookedAtPixels, toLookAt, leniency);
+		}
+	}
+
+	private void fillConnectedAreaInner(int x, int y, ColorRGBA oldCol, ColorRGBA newCol, boolean[][] lookedAtPixels, List<Pair<Integer, Integer>> toLookAt,
+		int leniency) {
+
+		if (leniency > 0) {
+			if (data[y][x].fastDiff(oldCol) > leniency) {
+				return;
+			}
+		} else {
+			if (!data[y][x].equals(oldCol)) {
+				return;
+			}
+		}
+
+		data[y][x] = newCol;
+		if ((x > 0) && !lookedAtPixels[y][x-1]) {
+			toLookAt.add(new Pair<Integer, Integer>(x-1, y));
+			lookedAtPixels[y][x-1] = true;
+		}
+		if ((x < width-1) && !lookedAtPixels[y][x+1]) {
+			toLookAt.add(new Pair<Integer, Integer>(x+1, y));
+			lookedAtPixels[y][x+1] = true;
+		}
+		if ((y > 0) && !lookedAtPixels[y-1][x]) {
+			toLookAt.add(new Pair<Integer, Integer>(x, y-1));
+			lookedAtPixels[y-1][x] = true;
+		}
+		if ((y < height-1) && !lookedAtPixels[y+1][x]) {
+			toLookAt.add(new Pair<Integer, Integer>(x, y+1));
+			lookedAtPixels[y+1][x] = true;
+		}
+	}
+
 	public void makeBlackAndWhite() {
 
 		for (int x = 0; x < width; x++) {
