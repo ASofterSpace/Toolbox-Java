@@ -7,8 +7,13 @@ package com.asofterspace.toolbox.web;
 import com.asofterspace.toolbox.io.Directory;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +30,8 @@ import java.util.List;
 public class WebServer implements Runnable {
 
 	private boolean serverRunning;
+
+	private boolean acceptLocalConnectionsOnly = false;
 
 	private int port;
 
@@ -91,6 +98,25 @@ public class WebServer implements Runnable {
 
 				// ... get the next incoming connection request (waiting until there is one) ...
 				Socket request = socket.accept();
+
+				if (acceptLocalConnectionsOnly) {
+					String hostAddr = null;
+					if (request != null) {
+						SocketAddress sockAddr = request.getRemoteSocketAddress();
+						if (sockAddr instanceof InetSocketAddress) {
+							InetAddress inAddr = ((InetSocketAddress) sockAddr).getAddress();
+							if (inAddr instanceof Inet4Address) {
+								hostAddr = ((Inet4Address) inAddr).getHostAddress();
+							}
+							if (inAddr instanceof Inet6Address) {
+								hostAddr = ((Inet6Address) inAddr).getHostAddress();
+							}
+						}
+					}
+					if ((hostAddr == null) || (!hostAddr.equals("127.0.0.1"))) {
+						continue;
+					}
+				}
 
 				// ... and handle it expertly through one of our handlers :)
 				synchronized(currentHandlerThreads) {
@@ -192,4 +218,13 @@ public class WebServer implements Runnable {
 			serverThread.interrupt();
 		}
 	}
+
+	public boolean getAcceptLocalConnectionsOnly() {
+		return acceptLocalConnectionsOnly;
+	}
+
+	public void setAcceptLocalConnectionsOnly(boolean acceptLocalConnectionsOnly) {
+		this.acceptLocalConnectionsOnly = acceptLocalConnectionsOnly;
+	}
+
 }
