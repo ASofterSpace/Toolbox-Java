@@ -123,6 +123,11 @@ public class Image {
 	 */
 	public Image copy(int top, int right, int bottom, int left) {
 
+		top = Math.max(top, 0);
+		left = Math.max(left, 0);
+		bottom = Math.min(bottom, height-1);
+		right = Math.min(right, width-1);
+
 		int newWidth = 1 + right - left;
 		int newHeight = 1 + bottom - top;
 
@@ -2229,27 +2234,42 @@ public class Image {
 	 * within an area spanned by these points
 	 */
 	public static List<Pair<Integer, Integer>> getPointsInArea(List<Pair<Integer, Integer>> areaCornerPoints) {
-		List<Pair<Integer, Integer>> result = new ArrayList<>();
-		for (Pair<Integer, Integer> p : areaCornerPoints) {
-			if (!result.contains(p)) {
-				result.add(p);
-			}
-		}
+		List<Pair<Integer, Integer>> cur = new ArrayList<>();
 
-		// very VERY ooompfh algorithm that has O^3 complexity and EACH O is huge, but at least this way
-		// we get full area coverage...
-		// which is not even how the usual area filling algorithm behaves, but oh well... xD
-		for (int i = 0; i < areaCornerPoints.size(); i++) {
-			for (int j = i+1; j < areaCornerPoints.size(); j++) {
-				for (int k = j+1; k < areaCornerPoints.size(); k++) {
-					List<Pair<Integer, Integer>> cur = getPointsInTriangle(
-						areaCornerPoints.get(i), areaCornerPoints.get(j), areaCornerPoints.get(k));
-					for (Pair<Integer, Integer> p : cur) {
-						if (!result.contains(p)) {
-							result.add(p);
+		if (areaCornerPoints.size() > 2) {
+			cur.addAll(areaCornerPoints);
+
+			// triangle
+			if (areaCornerPoints.size() < 4) {
+				cur.addAll(getPointsInTriangle(areaCornerPoints.get(0), areaCornerPoints.get(1), areaCornerPoints.get(2)));
+			} else {
+
+				// quadrangle
+				if (areaCornerPoints.size() < 5) {
+					cur.addAll(getPointsInTriangle(areaCornerPoints.get(0), areaCornerPoints.get(1), areaCornerPoints.get(2)));
+					cur.addAll(getPointsInTriangle(areaCornerPoints.get(0), areaCornerPoints.get(2), areaCornerPoints.get(3)));
+
+				} else {
+
+					// pentangle and more
+					// very VERY ooompfh algorithm that has O^3 complexity and EACH O is huge, but at least this way
+					// we get full area coverage...
+					// which is not even how the usual area filling algorithm behaves, but oh well... xD
+					for (int i = 0; i < areaCornerPoints.size(); i++) {
+						for (int j = i+1; j < areaCornerPoints.size(); j++) {
+							for (int k = j+1; k < areaCornerPoints.size(); k++) {
+								cur.addAll(getPointsInTriangle(areaCornerPoints.get(i), areaCornerPoints.get(j), areaCornerPoints.get(k)));
+							}
 						}
 					}
 				}
+			}
+		}
+
+		List<Pair<Integer, Integer>> result = new ArrayList<>();
+		for (Pair<Integer, Integer> p : cur) {
+			if (!result.contains(p)) {
+				result.add(p);
 			}
 		}
 
