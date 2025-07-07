@@ -474,6 +474,53 @@ public class Image {
 	}
 
 	/**
+	 * Draw an area from another image on top of this one, starting (top left) at
+	 * coordinates x and y (respective to this image), specifying origin area with
+	 * from / until in the other image
+	 */
+	public void draw(Image other, int drawAtX, int drawAtY, int fromX, int fromY, int untilX, int untilY) {
+
+		if (fromX < 0) {
+			fromX = 0;
+		}
+		if (fromY < 0) {
+			fromY = 0;
+		}
+		if ((fromX >= other.width) || (fromY >= other.height)) {
+			return;
+		}
+		if (untilX >= other.width) {
+			untilX = other.width - 1;
+		}
+		if (untilY >= other.height) {
+			untilY = other.height - 1;
+		}
+		int otherWidth = untilX - fromX;
+		int otherHeight = untilY - fromY;
+		if ((otherWidth < 1) || (otherHeight < 1)) {
+			return;
+		}
+
+		for (int y = 0; (y < otherHeight) && (y + drawAtY < height); y++) {
+			if (y + drawAtY >= 0) {
+				int drawWidth = otherWidth;
+				if (drawAtX + drawWidth > width) {
+					drawWidth = width - drawAtX;
+				}
+				if (drawAtX < 0) {
+					if (drawWidth + drawAtX > 0) {
+						System.arraycopy(other.data[y+fromY], fromX-drawAtX, this.data[y + drawAtY], 0, drawWidth + drawAtX);
+					}
+				} else {
+					if (drawWidth > 0) {
+						System.arraycopy(other.data[y+fromY], fromX, this.data[y + drawAtY], drawAtX, drawWidth);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Draw another image on top of this one, starting (top left) at
 	 * coordinates x and y (respective to this image), and actually draw,
 	 * taking transparency into account - don't just assign pixels, but draw...
