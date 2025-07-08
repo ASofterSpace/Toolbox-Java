@@ -216,6 +216,10 @@ public class MathUtils {
 			rand = new Random();
 		}
 
+		if (under < 1) {
+			return 0;
+		}
+
 		return rand.nextInt(under);
 	}
 
