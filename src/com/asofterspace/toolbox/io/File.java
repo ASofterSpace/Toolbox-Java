@@ -192,7 +192,7 @@ public class File {
 	 */
 	public java.io.File getJavaFile() {
 
-		return new java.io.File(filename);
+		return new java.io.File(Paths.get(filename).toAbsolutePath().toString());
 	}
 
 	/**
