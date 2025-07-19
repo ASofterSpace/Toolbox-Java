@@ -536,6 +536,15 @@ public class Image {
 		}
 	}
 
+	public void shiftPosition(int xOffset, int yOffset) {
+		Image other = copy();
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				data[y][x] = other.data[(y + yOffset) % height][(x + xOffset) % width];
+			}
+		}
+	}
+
 	public void applyBitMask(Image other) {
 
 		for (int x = 0; (x < other.width) && (x < width); x++) {
