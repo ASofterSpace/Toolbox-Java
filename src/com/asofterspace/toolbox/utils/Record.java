@@ -1210,7 +1210,24 @@ public class Record {
 			return null;
 		}
 
-		return 0.0;
+		return null;
+	}
+
+	/**
+	 * Gets a double value stored in a key of a Record object
+	 * @param key  the key to be searched for
+	 * @param defaultValue  the default value to be returned if none is set
+	 * @return the double value stored in the key
+	 */
+	public Double getDouble(Object key, Double defaultValue) {
+
+		Double result = getDouble(key);
+
+		if (result == null) {
+			return defaultValue;
+		}
+
+		return result;
 	}
 
 	/**

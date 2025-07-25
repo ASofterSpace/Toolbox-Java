@@ -538,6 +538,12 @@ public class Image {
 
 	public void shiftPosition(int xOffset, int yOffset) {
 		Image other = copy();
+		while (xOffset < 0) {
+			xOffset += width;
+		}
+		while (yOffset < 0) {
+			yOffset += height;
+		}
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				data[y][x] = other.data[(y + yOffset) % height][(x + xOffset) % width];
