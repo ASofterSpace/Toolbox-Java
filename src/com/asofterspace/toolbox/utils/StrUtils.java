@@ -861,6 +861,10 @@ public class StrUtils {
 
 	public static String prepareForParsing(String value) {
 
+		// remove currency signs
+		value = value.replaceAll("€", "");
+		value = value.replaceAll("$", "");
+
 		// super-trim whitespace characters
 		value = normalizeWhitespace(value);
 
