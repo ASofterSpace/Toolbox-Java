@@ -208,12 +208,19 @@ public class StrUtils {
 
 	public static int countStringInString(String find, String inHere) {
 
-		if (inHere == null) {
+		if ((inHere == null) || (find == null)) {
 			return 0;
 		}
 
 		int result = 0;
+		int next = inHere.indexOf(find);
 
+		while (next >= 0) {
+			result++;
+			next = inHere.indexOf(find, next+1);
+		}
+
+		/*
 		for (int i = 0; i < 1 + inHere.length() - find.length(); i++) {
 			boolean found = true;
 			for (int j = 0; j < find.length(); j++) {
@@ -226,6 +233,7 @@ public class StrUtils {
 				result++;
 			}
 		}
+		*/
 
 		return result;
 	}

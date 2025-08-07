@@ -437,6 +437,21 @@ public class XlsxSheet {
 		}
 	}
 
+	public static String colIToCol(int col) {
+
+		String result = "";
+
+		// TODO :: also handle more than ZZ columns (which currently will NOT work, even catastrophically - an exception will be thrown!)
+		if (col >= COLS.length) {
+			result += COLS[(col / COLS.length) - 1];
+			col = col % COLS.length;
+		}
+
+		result += COLS[col];
+
+		return result;
+	}
+
 	public static String colRowToName(int col, int row) {
 
 		String result = "";
