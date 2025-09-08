@@ -219,6 +219,14 @@ public class XlsxSheet {
 			}
 		}
 
+		// cellType str means string (directly embedded as calculated value of a formula, where the value is in <v> and the formula is in <f> right next ot it)
+		if (cellType.equals("str")) {
+			String strContent = vChild.getInnerText();
+			if (strContent != null) {
+				return new Record(strContent);
+			}
+		}
+
 		// cellType s means string (from the shared strings document)
 		if (cellType.equals("s")) {
 			// we have a string... and the strings are kept in a separate string file... so look there!

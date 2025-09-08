@@ -290,6 +290,8 @@ public class XML extends Record {
 		str = str.replace("&#147;", "“");
 		str = str.replace("&#148;", "”");
 		str = str.replace("&#160;", " ");
+		str = str.replace("&#171;", "«");
+		str = str.replace("&#187;", "»");
 		str = str.replace("&#193;", "Á");
 		str = str.replace("&#200;", "È");
 		str = str.replace("&#201;", "É");
@@ -298,6 +300,7 @@ public class XML extends Record {
 		str = str.replace("&#218;", "Ú");
 		str = str.replace("&#221;", "Ý");
 		str = str.replace("&#225;", "á");
+		str = str.replace("&#229;", "å");
 		str = str.replace("&#232;", "è");
 		str = str.replace("&#233;", "é");
 		str = str.replace("&#237;", "í");
@@ -318,7 +321,7 @@ public class XML extends Record {
 		str = str.replace("&auml;", "ä");
 		str = str.replace("&ouml;", "ö");
 		str = str.replace("&uuml;", "ü");
-		str = str.replace("&Äuml;", "Ä");
+		str = str.replace("&Auml;", "Ä");
 		str = str.replace("&Ouml;", "Ö");
 		str = str.replace("&Uuml;", "Ü");
 		str = str.replace("&aelig;", "æ");
