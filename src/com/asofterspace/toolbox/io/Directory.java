@@ -516,6 +516,10 @@ public class Directory {
 		deleteDir(getJavaFile());
 	}
 
+	/**
+	 * Deletes the indicated file or directory recursively,
+	 * if it exists (does not throw an exception otherwise)
+	 */
 	private static void deleteDir(java.io.File dir) {
 
 		if (dir.isDirectory()) {
@@ -530,6 +534,47 @@ public class Directory {
 	@Override
 	public String toString() {
 		return "Directory: " + dirname;
+	}
+
+	// Implements equals based on the exact dirname only; there may be several dirnames corresponding to the same directory on the disk though
+	// (e.g. absolute vs. relative paths)
+	@Override
+	public boolean equals(Object other) {
+
+		// If the other one does not even exist, we are not the same - because we exist!
+		if (other == null) {
+			return false;
+		}
+
+		if (other instanceof Directory) {
+			Directory otherDirectory = (Directory) other;
+
+			// If our values for dirname are different...
+			if (this.dirname == null) {
+				if (otherDirectory.dirname != null) {
+					// ... then we are not the same!
+					return false;
+				}
+			} else if (!this.dirname.equals(otherDirectory.dirname)) {
+				// ... then we are not the same!
+				return false;
+			}
+
+			// We have no reason to assume that we are not the same
+			return true;
+		}
+
+		// If the other one cannot even be cast to us, then we are not the same!
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = 0;
+		if (this.dirname != null) {
+			result += this.dirname.hashCode();
+		}
+		return result;
 	}
 
 }

@@ -516,6 +516,8 @@ public class File {
 		return "File: " + filename;
 	}
 
+	// Implements equals based on the exact filename only; there may be several filenames corresponding to the same file on the disk though
+	// (e.g. absolute vs. relative paths)
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) {
