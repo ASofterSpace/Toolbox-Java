@@ -756,6 +756,77 @@ public class Image {
 		}
 	}
 
+	public void drawEllipse(int startX, int startY, int endX, int endY, ColorRGBA ellipseColor) {
+		if (endX < startX) {
+			int swap = endX;
+			endX = startX;
+			startX = swap;
+		}
+		if (endY < startY) {
+			int swap = endY;
+			endY = startY;
+			startY = swap;
+		}
+		// the middle of the rectangle in which the ellipse shall be drawn
+		int midX = (endX - startX) / 2;
+		int midY = (endY - startY) / 2;
+
+		// the two middle points of the ellipse (miiight not really be exact oops...)
+		int midPointDist = ((endX - startX) - (endY - startY)) * 2;
+		int middle1X = midX - midPointDist;
+		int middle1Y = midY;
+		int middle2X = midX + midPointDist;
+		int middle2Y = midY;
+		if (endY - startY > endX - startX) {
+			midPointDist = ((endY - startY) - (endX - startX)) * 2;
+			middle1X = midX;
+			middle1Y = midY - midPointDist;
+			middle2X = midX;
+			middle2Y = midY + midPointDist;
+		}
+
+		// the radius of the ellipse: distance from the middle points to a point
+		// that lies on the ellipse: (midX, startY)
+		double radius = Math.sqrt(((middle1X - midX)*(middle1X - midX)) + ((middle1Y - startY)*(middle1Y - startY))) +
+						Math.sqrt(((middle2X - midX)*(middle2X - midX)) + ((middle2Y - startY)*(middle2Y - startY)));
+
+		if (startX < 0) {
+			startX = 0;
+		}
+		if (startX >= width) {
+			startX = width - 1;
+		}
+		if (endX < 0) {
+			endX = 0;
+		}
+		if (endX >= width) {
+			endX = width - 1;
+		}
+		if (startY < 0) {
+			startY = 0;
+		}
+		if (startY >= height) {
+			startY = height - 1;
+		}
+		if (endY < 0) {
+			endY = 0;
+		}
+		if (endY >= height) {
+			endY = height - 1;
+		}
+
+		for (int x = startX; x <= endX; x++) {
+			for (int y = startY; y <= endY; y++) {
+				// the distance, squared, of x and y from the middle points of the ellipse
+				double dist = Math.sqrt(((middle1X - x)*(middle1X - x)) + ((middle1Y - y)*(middle1Y - y))) +
+							  Math.sqrt(((middle2X - x)*(middle2X - x)) + ((middle2Y - y)*(middle2Y - y)));
+				if (dist <= radius) {
+					data[y][x] = ellipseColor;
+				}
+			}
+		}
+	}
+
 	/**
 	 * Specify one of left and right, and one of top and bottom - the other one will be chosen automatically
 	 * (However, all four are absolute values starting from top left - so if you have a width of 100, and want
