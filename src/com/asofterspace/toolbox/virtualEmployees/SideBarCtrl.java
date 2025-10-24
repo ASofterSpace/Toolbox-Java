@@ -201,7 +201,7 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"localhost:3013/?console=cybersnail\" target=\"_blank\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/?console=cybersnail\" target=\"_blank\" ");
 		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/cybersnail.png\" />\n");
 		html.append("<br>\n");
