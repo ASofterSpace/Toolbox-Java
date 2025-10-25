@@ -767,28 +767,60 @@ public class Image {
 			endY = startY;
 			startY = swap;
 		}
-		// the middle of the rectangle in which the ellipse shall be drawn
-		int midX = (endX - startX) / 2;
-		int midY = (endY - startY) / 2;
 
-		// the two middle points of the ellipse (miiight not really be exact oops...)
-		int midPointDist = ((endX - startX) - (endY - startY)) * 2;
-		int middle1X = midX - midPointDist;
+		// the middle of the rectangle in which the ellipse shall be drawn
+		int midX = (endX + startX) / 2;
+		int midY = (endY + startY) / 2;
+
+		// the two middle points of the ellipse, which we are getting iteratively (iterating each possible location and seeing which fits best)...
+		int bestMidPointDist = 0;
+		double bestRadiusDiff = Math.max(endY - startY, endX - startX);
+		int middle1X = midX;
 		int middle1Y = midY;
-		int middle2X = midX + midPointDist;
+		int middle2X = midX;
 		int middle2Y = midY;
-		if (endY - startY > endX - startX) {
-			midPointDist = ((endY - startY) - (endX - startX)) * 2;
-			middle1X = midX;
-			middle1Y = midY - midPointDist;
-			middle2X = midX;
-			middle2Y = midY + midPointDist;
+		double radius = 0.0;
+		for (int midPointDist = 0; midPointDist < Math.max(endY - startY, endX - startX); midPointDist++) {
+			middle1X = midX - midPointDist;
+			middle1Y = midY;
+			middle2X = midX + midPointDist;
+			middle2Y = midY;
+			if (endY - startY > endX - startX) {
+				middle1X = midX;
+				middle1Y = midY - midPointDist;
+				middle2X = midX;
+				middle2Y = midY + midPointDist;
+			}
+
+			// the radius of the ellipse: distance from the middle points to a point
+			// that lies on the ellipse: (midX, startY)
+			radius = Math.sqrt(((middle1X - midX)*(middle1X - midX)) + ((middle1Y - startY)*(middle1Y - startY))) +
+					 Math.sqrt(((middle2X - midX)*(middle2X - midX)) + ((middle2Y - startY)*(middle2Y - startY)));
+
+			// now check the radius with a different point that lies on the ellipse: (startX, midY)
+			double radius2 = Math.sqrt(((middle1X - startX)*(middle1X - startX)) + ((middle1Y - midY)*(middle1Y - midY))) +
+							 Math.sqrt(((middle2X - startX)*(middle2X - startX)) + ((middle2Y - midY)*(middle2Y - midY)));
+
+			double curRadiusDiff = Math.abs(radius2 - radius);
+			if (curRadiusDiff < bestRadiusDiff) {
+				bestRadiusDiff = curRadiusDiff;
+				bestMidPointDist = midPointDist;
+			}
 		}
 
-		// the radius of the ellipse: distance from the middle points to a point
-		// that lies on the ellipse: (midX, startY)
-		double radius = Math.sqrt(((middle1X - midX)*(middle1X - midX)) + ((middle1Y - startY)*(middle1Y - startY))) +
-						Math.sqrt(((middle2X - midX)*(middle2X - midX)) + ((middle2Y - startY)*(middle2Y - startY)));
+		middle1X = midX - bestMidPointDist;
+		middle1Y = midY;
+		middle2X = midX + bestMidPointDist;
+		middle2Y = midY;
+		if (endY - startY > endX - startX) {
+			middle1X = midX;
+			middle1Y = midY - bestMidPointDist;
+			middle2X = midX;
+			middle2Y = midY + bestMidPointDist;
+		}
+
+		radius = Math.sqrt(((middle1X - midX)*(middle1X - midX)) + ((middle1Y - startY)*(middle1Y - startY))) +
+				 Math.sqrt(((middle2X - midX)*(middle2X - midX)) + ((middle2Y - startY)*(middle2Y - startY)));
 
 		if (startX < 0) {
 			startX = 0;
