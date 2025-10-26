@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.coders;
 
+import com.asofterspace.toolbox.utils.StrUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -30,6 +32,19 @@ public class UrlEncoder {
 			.replace("+", "%20")
 			.replace("#", "%23")
 			.replace("'", "%27");
+	}
+
+	/**
+	 * Takes http://www.foo.org/sections/bar bob
+	 * and converts to http://www.foo.org/sections/bar%20bob
+	 */
+	public static String encodePath(String urlString) {
+
+		if (urlString == null) {
+			return null;
+		}
+
+		return StrUtils.replaceAll(StrUtils.replaceAll(StrUtils.replaceAll(encode(urlString), "%2F", "/"), "%2E", "."), "%3A", ":");
 	}
 
 	// encodes to the special string format inside form requests (both GET and POST requests),
