@@ -143,7 +143,7 @@ public class CsvFile extends SimpleFile {
 		this.appendContent(joinColumns(lineColumns));
 	}
 
-	public void setEntrySeparator(char entrySeparator) {
+	public final void setEntrySeparator(char entrySeparator) {
 		this.entrySeparator = entrySeparator;
 	}
 

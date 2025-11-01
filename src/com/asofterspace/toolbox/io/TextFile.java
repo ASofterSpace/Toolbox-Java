@@ -109,7 +109,7 @@ public class TextFile extends File {
 	 * this, if you also want to change the file on the disk, call
 	 * save() afterwards!
 	 */
-	public void setEncoding(TextEncoding encoding) {
+	public final void setEncoding(TextEncoding encoding) {
 		usingEncoding = encoding;
 	}
 
