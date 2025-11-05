@@ -18,6 +18,7 @@ import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -193,7 +194,7 @@ public class WebAccessor {
 			String fullUrlForFtpTransaction =
 				"ftp://" + username + ":" + password + "@" + url + ":" + port + pathOnServer;
 
-			URL urlAsURL = new URL(fullUrlForFtpTransaction);
+			URL urlAsURL = URI.create(fullUrlForFtpTransaction).toURL();
 
 			URLConnection connection = urlAsURL.openConnection();
 			InputStream inputStream = connection.getInputStream();
@@ -253,7 +254,7 @@ public class WebAccessor {
 				url = "http://" + url;
 			}
 
-			URL urlAsURL = new URL(url);
+			URL urlAsURL = URI.create(url).toURL();
 
 			HttpURLConnection connection = (HttpURLConnection) urlAsURL.openConnection();
 

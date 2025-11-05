@@ -20,8 +20,8 @@ public class CsvFileGerman extends CsvFile {
 
 		super(fullyQualifiedFileName);
 
-		setEntrySeparator(';');
-		setEncoding(TextEncoding.UTF8_WITH_BOM);
+		this.entrySeparator = ';';
+		this.usingEncoding = TextEncoding.UTF8_WITH_BOM;
 	}
 
 	/**
@@ -31,8 +31,8 @@ public class CsvFileGerman extends CsvFile {
 
 		super(regularFile);
 
-		setEntrySeparator(';');
-		setEncoding(TextEncoding.UTF8_WITH_BOM);
+		this.entrySeparator = ';';
+		this.usingEncoding = TextEncoding.UTF8_WITH_BOM;
 	}
 
 	/**
@@ -45,8 +45,8 @@ public class CsvFileGerman extends CsvFile {
 
 		super(directory, filename);
 
-		setEntrySeparator(';');
-		setEncoding(TextEncoding.UTF8_WITH_BOM);
+		this.entrySeparator = ';';
+		this.usingEncoding = TextEncoding.UTF8_WITH_BOM;
 	}
 
 	public static String sanitizeForCsv(Object val) {

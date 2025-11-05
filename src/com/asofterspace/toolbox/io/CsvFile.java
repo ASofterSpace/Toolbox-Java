@@ -16,7 +16,7 @@ public class CsvFile extends SimpleFile {
 
 	int currentLine = 1;
 
-	private char entrySeparator = ',';
+	char entrySeparator = ',';
 
 
 	/**
