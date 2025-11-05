@@ -21,8 +21,6 @@ public class FileTree extends JTree {
 	public FileTree(TreeModel model) {
 		super(model);
 
-		this.cellRenderer = new FileTreeCellRenderer();
-
 		/*
 		// we could use this to prevent the tree from being collapsed by user input
 		TreeWillExpandListener willExpand = new TreeWillExpandListener() {
