@@ -36,11 +36,6 @@ public class ImagePanel extends JPanel {
 		super();
 	}
 
-	public ImagePanel(Image img) {
-		super();
-		setImage(img);
-	}
-
 	public void setImage(Image img) {
 		this.image = img;
 		redrawImage();

@@ -11,13 +11,13 @@ import java.nio.charset.StandardCharsets;
  * This represents the text that a web server might send as answer
  * to a request
  *
- * @author Tom Moya Schau, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class WebServerAnswerWithText implements WebServerAnswer {
 
 	private byte[] data;
 
-	private String textKind = "plain";
+	protected String textKind = "plain";
 
 	// by default, never keep text data as it might change all the time
 	private String preferredCacheParadigm = "no-store";

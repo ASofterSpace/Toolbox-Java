@@ -11,7 +11,7 @@ import com.asofterspace.toolbox.io.File;
  * A loader lets us implement new image loading and saving behavior for
  * the ImageFileCtrl outside of the core io part
  *
- * @author Tom Moya Schiller, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public interface ImageFileHandler {
 

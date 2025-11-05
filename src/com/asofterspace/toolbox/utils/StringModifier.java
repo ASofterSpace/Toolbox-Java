@@ -7,7 +7,7 @@ package com.asofterspace.toolbox.utils;
 /**
  * Interface that anything can implement that can modify a string
  *
- * @author Tom Moya Schau, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public interface StringModifier {
 

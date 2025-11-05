@@ -75,7 +75,7 @@ public class XmlElement {
 
 		construct(name, new TinyXmlMap());
 
-		setInnerText(innerText);
+		this.innerText = innerText;
 	}
 
 	public XmlElement(Record other) {
@@ -510,8 +510,7 @@ public class XmlElement {
 			"definition",
 			"controlledSystemRootDefinition",
 			"valueDefinition",
-			"unit"
-		};
+			"unit"};
 		for (String attrName : attrNames) {
 			String curLink = attributes.get(attrName);
 			if (curLink != null) {

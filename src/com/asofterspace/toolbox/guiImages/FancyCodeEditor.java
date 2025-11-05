@@ -19,14 +19,14 @@ import java.awt.RenderingHints;
  * This is an even fancier version of our regular code editor, which can display
  * and image as watermark inside of it
  *
- * @author Tom Moya Schiller, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class FancyCodeEditor extends CodeEditor {
 
 	private final static long serialVersionUID = 1L;
 
 	private final static int BG_OFFSET = 4;
-	
+
 	private final static int SCROLL_BAR_SIZE = 16;
 
 	private boolean gradientBackground;

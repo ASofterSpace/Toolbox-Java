@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * A controller that allows us to interact with images and files
  *
- * @author Tom Moya Schiller, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class ImageFileCtrl {
 

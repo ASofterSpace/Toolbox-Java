@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * A utility class for date / time fun
  *
- * @author Tom Moya Schiller, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class DateUtils {
 

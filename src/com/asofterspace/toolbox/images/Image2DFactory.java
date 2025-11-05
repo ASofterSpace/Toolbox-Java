@@ -10,7 +10,7 @@ import java.util.Random;
 /**
  * A factory for auto-generating new 2D images
  *
- * @author Tom Moya Schiller, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class Image2DFactory {
 

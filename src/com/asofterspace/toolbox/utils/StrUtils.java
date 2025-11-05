@@ -17,7 +17,7 @@ import java.util.Random;
 /**
  * A utility class for stringy fun
  *
- * @author Tom Moya Schiller, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class StrUtils {
 

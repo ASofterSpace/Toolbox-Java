@@ -9,12 +9,12 @@ package com.asofterspace.toolbox.web;
  * This represents the html data that a web server might send as answer
  * to a request
  *
- * @author Tom Moya Schau, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class WebServerAnswerInHtml extends WebServerAnswerWithText {
 
 	public WebServerAnswerInHtml(String html) {
 		super(html);
-		setTextKind("html");
+		this.textKind = "html";
 	}
 }

@@ -16,7 +16,7 @@ import java.util.List;
  * This lets us implement PDF image loading behavior for
  * the ImageFileCtrl
  *
- * @author Tom Moya Schiller, moya@asofterspace.com
+ * @author Moya Schiller, moya@asofterspace.com
  */
 public class PdfImageHandler implements ImageFileHandler {
 

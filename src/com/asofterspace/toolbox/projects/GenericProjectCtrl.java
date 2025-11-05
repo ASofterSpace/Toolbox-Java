@@ -43,12 +43,8 @@ public class GenericProjectCtrl {
 		List<String> projectsNameList = projectsRec.getArrayAsStringList(PROJECT_NAMES);
 		projects = new ArrayList<>();
 		for (String curProjName : projectsNameList) {
-			projects.add(createProject(curProjName, projectsDir));
+			projects.add(new GenericProject(curProjName, projectsDir));
 		}
-	}
-
-	protected GenericProject createProject(String curProjName, Directory projectsDir) {
-		return new GenericProject(curProjName, projectsDir);
 	}
 
 	public List<GenericProject> getGenericProjects() {
