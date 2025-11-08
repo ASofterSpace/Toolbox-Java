@@ -374,74 +374,84 @@ public class File {
 	 */
 	public String getContentType() {
 
-		String lowFilename = filename.toLowerCase();
-
-		if (lowFilename.endsWith(".htm") || lowFilename.endsWith(".html")) {
-			return "text/html";
-		}
-
-		if (lowFilename.endsWith(".css")) {
-			return "text/css";
-		}
-
-		if (lowFilename.endsWith(".js")) {
-			return "text/javascript";
-		}
-
-		if (lowFilename.endsWith(".json")) {
-			return "application/json";
-		}
-
-		if (lowFilename.endsWith(".pdf")) {
-			return "application/pdf";
-		}
-
-		if (lowFilename.endsWith(".png")) {
-			return "image/png";
-		}
-
-		if (lowFilename.endsWith(".jpg") || lowFilename.endsWith(".jpeg")) {
-			return "image/jpeg";
-		}
-
-		if (lowFilename.endsWith(".bmp")) {
-			return "image/bmp";
-		}
-
-		if (lowFilename.endsWith(".webp")) {
-			return "image/webp";
-		}
-
-		if (lowFilename.endsWith(".avif")) {
-			return "image/avif";
-		}
-
-		if (lowFilename.endsWith(".svg")) {
-			return "image/svg+xml";
-		}
-
-		if (lowFilename.endsWith(".mp4")) {
-			return "video/mp4";
-		}
-
-		if (lowFilename.endsWith(".webm")) {
-			return "video/webm";
-		}
-
-		if (lowFilename.endsWith(".mpg") || lowFilename.endsWith(".mpeg")) {
-			return "video/mpeg";
-		}
-
-		if (lowFilename.endsWith(".wmv")) {
-			return "video/x-ms-wmv";
-		}
-
-		if (lowFilename.endsWith(".avi")) {
-			return "video/x-msvideo";
-		}
-
-		if (lowFilename.endsWith(".qzp")) {
-			return "application/octet-stream";
+		switch (getFiletype().toLowerCase()) {
+			case "htm":
+			case "html":
+				return "text/html";
+			case "md":
+				return "text/markdown";
+			case "csv":
+				return "text/csv";
+			case "xml":
+				return "application/xml";
+			case "css":
+				return "text/css";
+			case "js":
+				return "text/javascript";
+			case "json":
+				return "application/json";
+			case "pdf":
+				return "application/pdf";
+			case "png":
+				return "image/png";
+			case "jpg":
+			case "jpeg":
+				return "image/jpeg";
+			case "bmp":
+				return "image/bmp";
+			case "gif":
+				return "image/gif";
+			case "webp":
+				return "image/webp";
+			case "avif":
+				return "image/avif";
+			case "svg":
+				return "image/svg+xml";
+			case "mp4":
+				return "video/mp4";
+			case "webm":
+				return "video/webm";
+			case "mpg":
+			case "mpeg":
+				return "video/mpeg";
+			case "wmv":
+				return "video/x-ms-wmv";
+			case "avi":
+				return "video/x-msvideo";
+			case "ts":
+				return "video/mp2t";
+			case "mp3":
+				return "audio/mpeg";
+			case "wav":
+				return "audio/wav";
+			case "mid":
+			case "midi":
+				return "audio/midi";
+			case "weba":
+				return "audio/webm";
+			case "ogg":
+				return "audio/ogg";
+			case "aac":
+				return "audio/aac";
+			case "odt":
+				return "application/vnd.oasis.opendocument.text";
+			case "ods":
+				return "application/vnd.oasis.opendocument.spreadsheet";
+			case "odp":
+				return "application/vnd.oasis.opendocument.presentation";
+			case "doc":
+				return "application/msword";
+			case "xls":
+				return "application/vnd.ms-excel";
+			case "docx":
+				return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+			case "xlsx":
+				return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+			case "zip":
+				return "application/zip";
+			case "bin":
+			case "qzp":
+				return "application/octet-stream";
 		}
 
 		return "text/plain";
