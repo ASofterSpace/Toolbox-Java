@@ -418,6 +418,8 @@ public class File {
 				return "video/x-ms-wmv";
 			case "avi":
 				return "video/x-msvideo";
+			case "mkv":
+				return "video/x-matroska";
 			case "ts":
 				return "video/mp2t";
 			case "mp3":
