@@ -58,12 +58,7 @@ public class ConfigFile extends JsonFile {
 	 */
 	public ConfigFile(String name) throws JsonParseException {
 
-		super(getConfigFilename(name, false));
-
-		createParentDirectory();
-
-		// EVERY ConfigFile constructor MUST call ensureContent()!
-		ensureContent();
+		this(name, false);
 	}
 
 	/**

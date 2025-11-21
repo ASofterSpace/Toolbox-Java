@@ -281,6 +281,10 @@ public class Directory {
 	 */
 	public boolean exists() {
 
+		if (dirname == null) {
+			return false;
+		}
+
 		java.io.File entryPoint = getJavaFile();
 
 		return entryPoint.exists() && entryPoint.isDirectory();

@@ -399,6 +399,9 @@ public class File {
 				return "image/jpeg";
 			case "bmp":
 				return "image/bmp";
+			case "tif":
+			case "tiff":
+				return "image/tiff";
 			case "gif":
 				return "image/gif";
 			case "webp":

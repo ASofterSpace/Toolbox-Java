@@ -31,7 +31,7 @@ public class WebServer implements Runnable {
 
 	private boolean serverRunning;
 
-	private boolean acceptLocalConnectionsOnly = false;
+	protected boolean acceptLocalConnectionsOnly = false;
 
 	private int port;
 
