@@ -32,9 +32,7 @@ public class CsvFile extends SimpleFile {
 	 */
 	public CsvFile(File regularFile) {
 
-		super();
-
-		regularFile.copyToFileObject(this);
+		super(regularFile);
 	}
 
 	/**

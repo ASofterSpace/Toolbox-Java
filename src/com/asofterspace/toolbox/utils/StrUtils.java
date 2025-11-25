@@ -955,6 +955,22 @@ public class StrUtils {
 		return ""+value;
 	}
 
+	public static String longToHumanReadableBytes(long value) {
+		if (value > 4l*1024*1024*1024*1024) {
+			return (value/(1024l*1024*1024*1024)) + " TB";
+		}
+		if (value > 4l*1024*1024*1024) {
+			return (value/(1024l*1024*1024)) + " GB";
+		}
+		if (value > 4l*1024*1024) {
+			return (value/(1024l*1024)) + " MB";
+		}
+		if (value > 4l*1024) {
+			return (value/1024l) + " KB";
+		}
+		return value + " B";
+	}
+
 	public static Double strToDouble(String value) {
 
 		if (value == null) {

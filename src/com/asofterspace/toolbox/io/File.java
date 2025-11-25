@@ -46,8 +46,11 @@ public class File {
 	 * @param File
 	 */
 	public File(File regularFile) {
-
-		regularFile.copyToFileObject(this);
+		if (regularFile == null) {
+			this.filename = null;
+		} else {
+			this.filename = regularFile.filename;
+		}
 	}
 
 	/**
