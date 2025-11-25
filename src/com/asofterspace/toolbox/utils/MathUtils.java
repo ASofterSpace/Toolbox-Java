@@ -121,6 +121,14 @@ public class MathUtils {
 		return result;
 	}
 
+	public static long divideLongs(long dividend, long divisor) {
+		long result = dividend / divisor;
+		if ((dividend % divisor) * 2 > divisor) {
+			result++;
+		}
+		return result;
+	}
+
 	/**
 	 * Gets an average of a list of integers, assuming none of them are null (!)
 	 * Returns 0 for an empty list
