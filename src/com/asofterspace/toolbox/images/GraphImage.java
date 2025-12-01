@@ -84,7 +84,7 @@ public class GraphImage extends Image {
 	}
 
 	public void setInnerWidthAndHeight(int newWidth, int newHeight) {
-		init(newWidth + (2 * BORDER_WIDTH), newHeight + (2 * BORDER_WIDTH));
+		setWidthAndHeight(newWidth + (2 * BORDER_WIDTH), newHeight + (2 * BORDER_WIDTH));
 	}
 
 	private void sort() {

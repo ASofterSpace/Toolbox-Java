@@ -43,32 +43,52 @@ public class Image {
 
 	private int lineWidth = 1;
 
+	private static final ColorRGBA DEFAULT_COLOR = ColorRGBA.WHITE;
+
 
 	public Image(int width, int height) {
-		init(width, height);
+		this(width, height, true, null);
 	}
 
 	/**
 	 * Creates an image of the given dimensions, pre-filled with the given background color
 	 */
 	public Image(int width, int height, ColorRGBA backgroundColor) {
-		initWithoutClear(width, height);
-		clear(backgroundColor);
+		this(width, height, true, backgroundColor);
 	}
 
 	public Image() {
-		init(8, 8);
+		this(8, 8);
 	}
 
 	/**
 	 * Internal constructor; only called by copy() and static factory methods,
 	 * as we want to only allow the outside world to actually create cleared images
 	 */
-	private Image(int width, int height, boolean doClear) {
+	private Image(int width, int height, boolean doClear, ColorRGBA backgroundColor) {
+
+		this.height = height;
+		this.width = width;
+
+		if ((height < 1) || (width < 1)) {
+			return;
+		}
+
+		this.data = new ColorRGBA[height][width];
+
 		if (doClear) {
-			init(width, height);
-		} else {
-			initWithoutClear(width, height);
+			if (backgroundColor == null) {
+				backgroundColor = DEFAULT_COLOR;
+			}
+
+			int y = 0;
+			for (int x = 0; x < width; x++) {
+				this.data[y][x] = backgroundColor;
+			}
+
+			for (y = 1; y < height; y++) {
+				System.arraycopy(this.data[0], 0, this.data[y], 0, width);
+			}
 		}
 	}
 
@@ -85,28 +105,13 @@ public class Image {
 		}
 	}
 
-	protected void init(int width, int height) {
-
-		initWithoutClear(width, height);
-
-		clear();
-	}
-
-	protected void initWithoutClear(int width, int height) {
-
-		this.height = height;
-		this.width = width;
-
-		this.data = new ColorRGBA[height][width];
-	}
-
 	/**
 	 * Copy this image, giving back a new image that contains the same pixel values
 	 * but when modified does not modify this one
 	 */
 	public Image copy() {
 
-		Image result = new Image(width, height, false);
+		Image result = new Image(width, height, false, null);
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -132,10 +137,10 @@ public class Image {
 		int newHeight = 1 + bottom - top;
 
 		if ((newWidth < 0) || (newHeight < 0)) {
-			return new Image(0, 0, false);
+			return new Image(0, 0, true, null);
 		}
 
-		Image result = new Image(newWidth, newHeight, false);
+		Image result = new Image(newWidth, newHeight, false, null);
 
 		for (int y = top; y <= bottom; y++) {
 			for (int x = left; x <= right; x++) {
@@ -161,7 +166,7 @@ public class Image {
 		int oldHeight = height;
 		ColorRGBA[][] oldData = data;
 
-		initWithoutClear(newWidth, newHeight);
+		this.data = new ColorRGBA[newHeight][newWidth];
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -176,7 +181,7 @@ public class Image {
 		int oldHeight = height;
 		ColorRGBA[][] oldData = data;
 
-		initWithoutClear(newWidth, newHeight);
+		this.data = new ColorRGBA[newHeight][newWidth];
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -269,7 +274,7 @@ public class Image {
 
 	public void clear() {
 
-		clear(new ColorRGBA());
+		clear(DEFAULT_COLOR);
 	}
 
 	public void clear(ColorRGBA defaultCol) {
@@ -301,7 +306,16 @@ public class Image {
 	}
 
 	public void setWidthAndHeight(int newWidth, int newHeight) {
-		init(newWidth, newHeight);
+		this.height = newHeight;
+		this.width = newWidth;
+
+		if ((height < 1) || (width < 1)) {
+			return;
+		}
+
+		this.data = new ColorRGBA[height][width];
+
+		clear();
 	}
 
 	public int getWidth() {
@@ -1030,7 +1044,7 @@ public class Image {
 
 	public static Image createFromAwtImage(BufferedImage javaImg) {
 
-		Image result = new Image(javaImg.getWidth(), javaImg.getHeight(), false);
+		Image result = new Image(javaImg.getWidth(), javaImg.getHeight(), false, null);
 
 		result.drawAwtImage(javaImg, 0, 0);
 

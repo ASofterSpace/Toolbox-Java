@@ -89,6 +89,7 @@ public class IoUtils {
 	 * Just execute a simple command, waiting until it returns
 	 */
 	public static void execute(String command) {
+		/*
 		try {
 			Process process = Runtime.getRuntime().exec(command);
 			try {
@@ -99,6 +100,8 @@ public class IoUtils {
 		} catch (IOException e) {
 			System.err.println("There was an I/O Exception while executing the external command '" + command + "' synchronously: " + e);
 		}
+		*/
+		execute(command, null);
 	}
 
 	/**
@@ -133,15 +136,23 @@ public class IoUtils {
 
 		ProcessBuilder builder = new ProcessBuilder(input);
 
-		// we want to get stdout and stderr!
-		builder.redirectErrorStream(true);
+		try {
+			if (callback == null) {
+				builder.start();
+			} else {
+				// we want to get stdout and stderr!
+				builder.redirectErrorStream(true);
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
-			String curline = reader.readLine();
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
+					String curline = reader.readLine();
 
-			while (curline != null) {
-				callback.call(curline);
-				curline = reader.readLine();
+					while (curline != null) {
+						callback.call(curline);
+						curline = reader.readLine();
+					}
+				} catch (IOException e2) {
+					throw e2;
+				}
 			}
 		} catch (IOException e) {
 			System.err.println("There was an I/O Exception while executing an external command: " + e);
