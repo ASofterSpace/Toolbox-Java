@@ -99,6 +99,9 @@ public class TaskCtrlBase {
 		}
 
 		this.lastTaskGeneration = root.getDateHolder(LAST_TASK_GENERATION);
+		if ((this.lastTaskGeneration == null) || this.lastTaskGeneration.getIsNull()) {
+			this.lastTaskGeneration = DateUtils.nowHolder();
+		}
 	}
 
 	public void generateNewInstances(Date until) {

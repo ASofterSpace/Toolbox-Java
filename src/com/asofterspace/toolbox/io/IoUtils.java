@@ -244,4 +244,9 @@ public class IoUtils {
 		execute("shutdown -r");
 	}
 
+	public static String canonicalizePath(String path) {
+		File file = new File(path);
+		return file.getCanonicalFilename();
+	}
+
 }
