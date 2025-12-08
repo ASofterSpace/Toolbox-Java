@@ -1305,7 +1305,7 @@ public class Image {
 	/**
 	 * Plainly resize the image by some amount horizontally and vertically
 	 */
-	public void resizeBy (double horizontalStretch, double verticalStretch) {
+	public void resizeBy(double horizontalStretch, double verticalStretch) {
 
 		int newWidth = (int) (width * horizontalStretch);
 		int newHeight = (int) (height * verticalStretch);
@@ -1372,6 +1372,76 @@ public class Image {
 
 	public void expandLeftBy(int howMuch, ColorRGBA fillWith) {
 		expandBy(0, 0, 0, howMuch, fillWith);
+	}
+
+	public void shrinkToVisibleContent() {
+		if ((width < 0) || (height < 0)) {
+			return;
+		}
+
+		ColorRGBA bgCol = getPixel(0, 0);
+		int top = 0;
+		int left = 0;
+		int right = 0;
+		int bottom = 0;
+
+		boolean done = false;
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (!bgCol.equals(data[y][x])) {
+					top = y;
+					done = true;
+					break;
+				}
+			}
+			if (done) {
+				break;
+			}
+		}
+
+		done = false;
+		for (int y = height-1; y >= 0; y--) {
+			for (int x = 0; x < width; x++) {
+				if (!bgCol.equals(data[y][x])) {
+					bottom = height - y - 1;
+					done = true;
+					break;
+				}
+			}
+			if (done) {
+				break;
+			}
+		}
+
+		done = false;
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (!bgCol.equals(data[y][x])) {
+					left = x;
+					done = true;
+					break;
+				}
+			}
+			if (done) {
+				break;
+			}
+		}
+
+		done = false;
+		for (int x = width-1; x >= 0; x--) {
+			for (int y = 0; y < height; y++) {
+				if (!bgCol.equals(data[y][x])) {
+					right = width - x - 1;
+					done = true;
+					break;
+				}
+			}
+			if (done) {
+				break;
+			}
+		}
+
+		expandBy(-top, -right, -bottom, -left, null);
 	}
 
 	public void rotateLeft() {
