@@ -183,11 +183,14 @@ public class Image {
 
 		this.data = new ColorRGBA[newHeight][newWidth];
 
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
+		for (int y = 0; y < newHeight; y++) {
+			for (int x = 0; x < newWidth; x++) {
 				double xAmount = (x * oldWidth) / (0.0 + width);
 				int oldX = (int) Math.floor(xAmount);
 				xAmount -= oldX;
+				if (oldX >= oldWidth) {
+					oldX = oldWidth - 1;
+				}
 				int oldXp1 = oldX + 1;
 				if (oldXp1 >= oldWidth) {
 					oldXp1 = oldWidth - 1;
@@ -195,6 +198,9 @@ public class Image {
 				double yAmount = (y * oldHeight) / (0.0 + height);
 				int oldY = (int) Math.floor(yAmount);
 				yAmount -= oldY;
+				if (oldY >= oldHeight) {
+					oldY = oldHeight - 1;
+				}
 				int oldYp1 = oldY + 1;
 				if (oldYp1 >= oldHeight) {
 					oldYp1 = oldHeight - 1;
