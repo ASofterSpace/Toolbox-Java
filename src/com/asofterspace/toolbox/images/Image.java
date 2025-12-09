@@ -151,6 +151,57 @@ public class Image {
 		return result;
 	}
 
+	// copies part of an image inside of a rotated rectangle and fills the part outside of the rectangle with the bgColor
+	public Image copyRotatedRectangle(int startX, int startY, int midX, int midY, int endX, int endY, ColorRGBA bgColor) {
+
+		// calculate the fourth point
+		int otherMidX = startX + endX - midX;
+		int otherMidY = startY + endY - midY;
+
+		int minX = MathUtils.min(startX, midX, endX, otherMidX);
+		int maxX = MathUtils.max(startX, midX, endX, otherMidX);
+		int minY = MathUtils.min(startY, midY, endY, otherMidY);
+		int maxY = MathUtils.max(startY, midY, endY, otherMidY);
+
+		int newWidth = 1 + maxX - minX;
+		int newHeight = 1 + maxY - minY;
+
+		if ((newWidth < 0) || (newHeight < 0)) {
+			return new Image(0, 0, true, null);
+		}
+
+		Image result = new Image(newWidth, newHeight, false, null);
+
+		// y = m x + n;
+		for (int x = minX; x <= maxX; x++) {
+			for (int y = minY; y <= maxY; y++) {
+				result.data[y-minY][x-minX] = bgColor;
+				// if Y below line from (startX,startY) to (midX,midY)
+				float m = (0.0f + midY - startY) / (midX - startX);
+				float n = startY - (startX * (0.0f + midY - startY) / (midX - startX));
+				if (y >= (m * x) + n) {
+					// if Y above line from (otherMidX,otherMidY) to (endX,endY)
+					n = otherMidY - (otherMidX * (0.0f + endY - otherMidY) / (endX - otherMidX));
+					if (y <= (m * x) + n) {
+						// if X right of line from (startX,startY) to (otherMidX,otherMidY)
+						m = (0.0f + otherMidY - startY) / (otherMidX - startX);
+						n = startY - (startX * (0.0f + otherMidY - startY) / (otherMidX - startX));
+						if (x >= (y - n) / m) {
+							// if X left of line from (midX,midY) to (endX,endY)
+							n = midY - (midX * (0.0f + endY - midY) / (endX - midX));
+							if (x <= (y - n) / m) {
+								// then draw!
+								result.data[y-minY][x-minX] = this.data[y][x];
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Copy to clipboard, for paste from clipboard see createFromClipboard()
 	 */
@@ -763,21 +814,6 @@ public class Image {
 				}
 			}
 		}
-
-		/*
-		for (int m = startX; m <= midX; m++) {
-			for (int n = midY; n <= endY; n++) {
-				int x = m +
-
-			int y = ((startY * x) + ((midY - startY) * (x - startX))) / (midX - startX);
-			data[y][x] = rectColor;
-
-
-			for (int y = startY; y <= midY; y++) {
-				data[y][x] = rectColor;
-			}
-		}
-		*/
 	}
 
 	public void drawDiamond(int startX, int startY, int endX, int endY, ColorRGBA rectColor) {

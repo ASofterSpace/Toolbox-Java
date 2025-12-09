@@ -18,6 +18,22 @@ public class MathUtils {
 	private static Random rand = null;
 
 
+	public static int max(int a, int b) {
+		if (a > b) {
+			return a;
+		} else {
+			return b;
+		}
+	}
+
+	public static int min(int a, int b) {
+		if (a < b) {
+			return a;
+		} else {
+			return b;
+		}
+	}
+
 	public static int max(int a, int b, int c) {
 		if (a > b) {
 			if (a > c) {
