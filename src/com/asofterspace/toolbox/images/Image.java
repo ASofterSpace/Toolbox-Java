@@ -152,6 +152,8 @@ public class Image {
 	}
 
 	// copies part of an image inside of a rotated rectangle and fills the part outside of the rectangle with the bgColor
+	// defines rotated rectangle just like drawRotatedRectangle: (startX, startY) is left-most, (midX, midY) is further right,
+	// (endX, endY) is roughly perpendicular to the line formed by the other two points and below
 	public Image copyRotatedRectangle(int startX, int startY, int midX, int midY, int endX, int endY, ColorRGBA bgColor) {
 
 		// calculate the fourth point
@@ -778,6 +780,8 @@ public class Image {
 		}
 	}
 
+	// defines rotated rectangle just like copyRotatedRectangle: (startX, startY) is left-most, (midX, midY) is further right,
+	// (endX, endY) is roughly perpendicular to the line formed by the other two points and below
 	public void drawRotatedRectangle(int startX, int startY, int midX, int midY, int endX, int endY, ColorRGBA rectColor) {
 
 		// calculate the fourth point

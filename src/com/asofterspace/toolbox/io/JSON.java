@@ -418,7 +418,7 @@ public class JSON extends Record {
 	}
 
 	@Override
-	protected String toString(Record item, boolean compressed, String linePrefix) {
+	public String toString(Record item, boolean compressed, String linePrefix) {
 
 		JSON jsonItem = null;
 
