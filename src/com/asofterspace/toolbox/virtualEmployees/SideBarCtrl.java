@@ -392,14 +392,26 @@ public class SideBarCtrl {
 			switch (fileLocation) {
 				case "/_ve_openLocally":
 					JSON json = new JSON(jsonData);
-					if ("editor".equals(json.getString("whatToOpen"))) {
-						IoUtils.execute(basePath + "assEditor/assEditor.bat");
-					}
-					if ("picturizer".equals(json.getString("whatToOpen"))) {
-						IoUtils.execute(basePath + "Picturizer/run.bat");
-					}
-					if ("backupgenerator".equals(json.getString("whatToOpen"))) {
-						IoUtils.execute(basePath + "BackupGenerator/run.bat");
+					if ("\\".equals(System.getProperty("file.separator"))) {
+						if ("editor".equals(json.getString("whatToOpen"))) {
+							IoUtils.execute(basePath + "assEditor\\assEditor.bat");
+						}
+						if ("picturizer".equals(json.getString("whatToOpen"))) {
+							IoUtils.execute(basePath + "Picturizer\\run.bat");
+						}
+						if ("backupgenerator".equals(json.getString("whatToOpen"))) {
+							IoUtils.execute(basePath + "BackupGenerator\\run.bat");
+						}
+					} else {
+						if ("editor".equals(json.getString("whatToOpen"))) {
+							IoUtils.execute(basePath + "assEditor/assEditor.sh");
+						}
+						if ("picturizer".equals(json.getString("whatToOpen"))) {
+							IoUtils.execute(basePath + "Picturizer/run.sh");
+						}
+						if ("backupgenerator".equals(json.getString("whatToOpen"))) {
+							IoUtils.execute(basePath + "BackupGenerator/run.sh");
+						}
 					}
 					return new WebServerAnswerInJson("{\"success\": true}");
 			}
