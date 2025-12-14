@@ -27,24 +27,37 @@ public class GenericProjectCtrl {
 
 		projectsDir = new Directory(projectsDirStr);
 
+		projects = new ArrayList<>();
+	}
+
+	// always call init after the contructor - the controller is not ready until init is called,
+	// but calling init in the constructor makes java21 sad because it calls other methods
+	// (which is exactly how it should be, they are there to be called exactly during construction,
+	// aaaarghs... .-. this nonsense here is so much more prone to errors x_X')
+	public void init() {
+
 		JsonFile projectsFile = new JsonFile(projectsDir, "projects.json");
-		Record projectsRec = Record.emptyObject();
-		projectsRec.set(PROJECT_NAMES, Record.emptyArray());
 		if (!projectsFile.exists()) {
+			Record projectsRec = Record.emptyObject();
+			projectsRec.set(PROJECT_NAMES, Record.emptyArray());
 			projectsFile.save(projectsRec);
 		}
 		try {
-			projectsRec = projectsFile.getAllContents();
+			Record projectsRec = projectsFile.getAllContents();
+
+			List<String> projectsNameList = projectsRec.getArrayAsStringList(PROJECT_NAMES);
+			for (String curProjName : projectsNameList) {
+				projects.add(createProject(curProjName, projectsDir));
+			}
 		} catch (JsonParseException ex) {
 			System.err.println("The input file " + projectsFile.getAbsoluteFilename() +
 				" could not be read due to:\n" + ex);
 			System.exit(1);
 		}
-		List<String> projectsNameList = projectsRec.getArrayAsStringList(PROJECT_NAMES);
-		projects = new ArrayList<>();
-		for (String curProjName : projectsNameList) {
-			projects.add(new GenericProject(curProjName, projectsDir));
-		}
+	}
+
+	protected GenericProject createProject(String curProjName, Directory projectsDir) {
+		return new GenericProject(curProjName, projectsDir);
 	}
 
 	public List<GenericProject> getGenericProjects() {

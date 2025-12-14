@@ -215,6 +215,7 @@ public class SideBarCtrl {
 
 		GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
 			System.getProperty("java.class.path") + "/../../assWorkbench/server/projects");
+		projectCtrl.init();
 		List<GenericProject> projects = projectCtrl.getGenericProjects();
 
 		html.append("<div class='projectbar' style='right: unset;'>\n");
