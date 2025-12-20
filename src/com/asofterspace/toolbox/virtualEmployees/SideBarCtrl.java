@@ -22,10 +22,13 @@ import java.util.List;
 public class SideBarCtrl {
 
 	private static final String AVATAR = "avatar";
-
 	private static final String NAME = "name";
-
 	private static final String DESCRIPTION = "description";
+	private static final String KEY_PICTURIZER = "picturizer";
+	private static final String KEY_METAPLAYER = "metaplayer";
+	private static final String KEY_BACKUPGENERATOR = "backupgenerator";
+	private static final String KEY_EDITOR = "editor";
+	private static final String KEY_WHAT_TO_OPEN = "whatToOpen";
 
 	private static Record rootRecord = null;
 
@@ -142,7 +145,27 @@ public class SideBarCtrl {
 
 		top = 180;
 
-		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"target\" ");
+		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
+		html.append("<br>\n");
+		html.append("Browser\n");
+		html.append("</a>\n");
+		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/\";\n");
+
+		entry++;
+		left += 62;
+
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_PICTURIZER + "')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/picturizer.png\" />\n");
+		html.append("<br>\n");
+		html.append("Picturizer\n");
+		html.append("</div>\n");
+
+		entry++;
+		left += 62;
+
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_EDITOR + "')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
 		html.append("<br>\n");
 		html.append("Editor\n");
@@ -151,13 +174,30 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"target\" ");
-		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
-		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_BACKUPGENERATOR + "')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/backupgenerator.png\" />\n");
 		html.append("<br>\n");
-		html.append("Browser\n");
+		html.append("Backups\n");
+		html.append("</div>\n");
+
+		entry++;
+		left += 62;
+
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/?console=cybersnail\" target=\"_blank\" ");
+		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/cybersnail.png\" />\n");
+		html.append("<br>\n");
+		html.append("CyberSnail\n");
 		html.append("</a>\n");
-		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/\";\n");
+
+		entry++;
+		left += 62;
+
+		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_METAPLAYER + "')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/metaplayer.png\" />\n");
+		html.append("<br>\n");
+		html.append("MetaPlayer\n");
+		html.append("</div>\n");
 
 		entry++;
 		left += 62;
@@ -183,29 +223,11 @@ public class SideBarCtrl {
 		entry++;
 		left += 62;
 
-		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('picturizer')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
-		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/picturizer.png\" />\n");
-		html.append("<br>\n");
-		html.append("Picturizer\n");
-		html.append("</div>\n");
-
-		entry++;
-		left += 62;
-
-		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('backupgenerator')\" style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
-		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/backupgenerator.png\" />\n");
-		html.append("<br>\n");
-		html.append("Backups\n");
-		html.append("</div>\n");
-
-		entry++;
-		left += 62;
-
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/?console=cybersnail\" target=\"_blank\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"file:///cyber/prog/asofterspace/MediaSorter/output/index.htm\" target=\"_blank\" ");
 		html.append("style=\"left: " + left + "pt; top: " + top + "pt; color: #000; text-align: center; text-decoration: none;\">\n");
-		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/cybersnail.png\" />\n");
+		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/links.png\" />\n");
 		html.append("<br>\n");
-		html.append("CyberSnail\n");
+		html.append("Link&nbsp;Archive\n");
 		html.append("</a>\n");
 
 		entry++;
@@ -295,7 +317,7 @@ public class SideBarCtrl {
 			script.append("    var request = new XMLHttpRequest();\n");
 			script.append("    request.open(\"POST\", \"_ve_openLocally\", true);\n");
 			script.append("    request.setRequestHeader(\"Content-Type\", \"application/json\");\n");
-			script.append("    request.send('{\"whatToOpen\": \"' + whatToOpen + '\"}');\n");
+			script.append("    request.send('{\"" + KEY_WHAT_TO_OPEN + "\": \"' + whatToOpen + '\"}');\n");
 			script.append("}\n");
 			html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('editor')\" style=\"bottom: " + bottom + "pt; top: unset;\">\n");
 			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/editor.png\" />\n");
@@ -347,6 +369,14 @@ public class SideBarCtrl {
 			result = new File(basePath + "assBrowser/server/pics/films.png");
 		}
 
+		if (location.equals("/pics/links.png")) {
+			result = new File(basePath + "assBrowser/server/pics/links.png");
+		}
+
+		if (location.equals("/pics/metaplayer.png")) {
+			result = new File(basePath + "MetaPlayer/res/ico.png");
+		}
+
 		if (location.equals("/pics/editor.png")) {
 			result = new File(basePath + "assEditor/res/ico.png");
 		}
@@ -393,23 +423,29 @@ public class SideBarCtrl {
 				case "/_ve_openLocally":
 					JSON json = new JSON(jsonData);
 					if ("\\".equals(System.getProperty("file.separator"))) {
-						if ("editor".equals(json.getString("whatToOpen"))) {
+						if (KEY_EDITOR.equals(json.getString(KEY_WHAT_TO_OPEN))) {
 							IoUtils.execute(basePath + "assEditor\\assEditor.bat");
 						}
-						if ("picturizer".equals(json.getString("whatToOpen"))) {
+						if (KEY_PICTURIZER.equals(json.getString(KEY_WHAT_TO_OPEN))) {
 							IoUtils.execute(basePath + "Picturizer\\run.bat");
 						}
-						if ("backupgenerator".equals(json.getString("whatToOpen"))) {
+						if (KEY_METAPLAYER.equals(json.getString(KEY_WHAT_TO_OPEN))) {
+							IoUtils.execute(basePath + "MetaPlayer\\run.bat");
+						}
+						if (KEY_BACKUPGENERATOR.equals(json.getString(KEY_WHAT_TO_OPEN))) {
 							IoUtils.execute(basePath + "BackupGenerator\\run.bat");
 						}
 					} else {
-						if ("editor".equals(json.getString("whatToOpen"))) {
+						if (KEY_EDITOR.equals(json.getString(KEY_WHAT_TO_OPEN))) {
 							IoUtils.execute(basePath + "assEditor/assEditor.sh");
 						}
-						if ("picturizer".equals(json.getString("whatToOpen"))) {
+						if (KEY_PICTURIZER.equals(json.getString(KEY_WHAT_TO_OPEN))) {
 							IoUtils.execute(basePath + "Picturizer/run.sh");
 						}
-						if ("backupgenerator".equals(json.getString("whatToOpen"))) {
+						if (KEY_METAPLAYER.equals(json.getString(KEY_WHAT_TO_OPEN))) {
+							IoUtils.execute(basePath + "MetaPlayer/run.sh");
+						}
+						if (KEY_BACKUPGENERATOR.equals(json.getString(KEY_WHAT_TO_OPEN))) {
 							IoUtils.execute(basePath + "BackupGenerator/run.sh");
 						}
 					}
