@@ -71,6 +71,9 @@ public class IoUtils {
 			builder.directory(directory.getJavaFile());
 		}
 
+		// allow grabbing errors as well
+		builder.redirectErrorStream(true);
+
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
 			String curline = reader.readLine();
 

@@ -304,7 +304,12 @@ public class Directory {
 	 */
 	public List<File> getAllFiles(boolean recursively) {
 
-		return getAllFilesInternally(getJavaFile(), null, null, recursively);
+		return getAllFilesInternally(getJavaFile(), null, null, recursively, false);
+	}
+
+	public List<File> getAllFiles(boolean recursively, boolean followSymbolicLinks) {
+
+		return getAllFilesInternally(getJavaFile(), null, null, recursively, followSymbolicLinks);
 	}
 
 	/**
@@ -314,7 +319,7 @@ public class Directory {
 	 */
 	public List<File> getAllFilesEndingWith(String endStr, boolean recursively) {
 
-		return getAllFilesInternally(getJavaFile(), null, endStr, recursively);
+		return getAllFilesInternally(getJavaFile(), null, endStr, recursively, false);
 	}
 
 	/**
@@ -324,7 +329,7 @@ public class Directory {
 	 */
 	public List<File> getAllFilesStartingWith(String startStr, boolean recursively) {
 
-		return getAllFilesInternally(getJavaFile(), startStr, null, recursively);
+		return getAllFilesInternally(getJavaFile(), startStr, null, recursively, false);
 	}
 
 	/**
@@ -334,10 +339,10 @@ public class Directory {
 	 */
 	public List<File> getAllFilesStartingAndEndingWith(String startStr, String endStr, boolean recursively) {
 
-		return getAllFilesInternally(getJavaFile(), startStr, endStr, recursively);
+		return getAllFilesInternally(getJavaFile(), startStr, endStr, recursively, false);
 	}
 
-	private List<File> getAllFilesInternally(java.io.File entryPoint, String startStr, String endStr, boolean recursively) {
+	private List<File> getAllFilesInternally(java.io.File entryPoint, String startStr, String endStr, boolean recursively, boolean followSymbolicLinks) {
 
 		List<File> result = new ArrayList<>();
 
@@ -347,7 +352,12 @@ public class Directory {
 				for (java.io.File curChild : children) {
 					if (curChild.isDirectory()) {
 						if (recursively) {
-							result.addAll(getAllFilesInternally(curChild, startStr, endStr, true));
+							if (!followSymbolicLinks) {
+								if (Files.isSymbolicLink(Paths.get(curChild.getAbsolutePath()))) {
+									continue;
+								}
+							}
+							result.addAll(getAllFilesInternally(curChild, startStr, endStr, recursively, followSymbolicLinks));
 						}
 					} else {
 						if ((endStr == null) || curChild.getAbsolutePath().endsWith(endStr)) {
@@ -363,15 +373,19 @@ public class Directory {
 		return result;
 	}
 
+	public List<Directory> getAllDirectories(boolean recursively, boolean followSymbolicLinks) {
+		return getAllDirectoriesInternally(getJavaFile(), recursively, followSymbolicLinks);
+	}
+
 	/**
 	 * Get all the directories contained in the directory (and, if recursively
 	 * is set to true, in its sub-directories)
 	 */
 	public List<Directory> getAllDirectories(boolean recursively) {
-		return getAllDirectoriesInternally(getJavaFile(), recursively);
+		return getAllDirectoriesInternally(getJavaFile(), recursively, false);
 	}
 
-	private List<Directory> getAllDirectoriesInternally(java.io.File entryPoint, boolean recursively) {
+	private List<Directory> getAllDirectoriesInternally(java.io.File entryPoint, boolean recursively, boolean followSymbolicLinks) {
 
 		List<Directory> result = new ArrayList<>();
 
@@ -379,10 +393,15 @@ public class Directory {
 			java.io.File[] children = entryPoint.listFiles();
 			if (children != null) {
 				for (java.io.File curChild : children) {
+					if (!followSymbolicLinks) {
+						if (Files.isSymbolicLink(Paths.get(curChild.getAbsolutePath()))) {
+							continue;
+						}
+					}
 					if (curChild.isDirectory()) {
 						result.add(new Directory(curChild));
 						if (recursively) {
-							result.addAll(getAllDirectoriesInternally(curChild, true));
+							result.addAll(getAllDirectoriesInternally(curChild, recursively, followSymbolicLinks));
 						}
 					}
 				}

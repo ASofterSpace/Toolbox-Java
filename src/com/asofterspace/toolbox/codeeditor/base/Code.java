@@ -1335,6 +1335,13 @@ public abstract class Code extends DefaultStyledDocument {
 			mark++;
 		}
 
+		if (dot < 0) {
+			dot = 0;
+		}
+		if (mark > origText.length()) {
+			mark = origText.length();
+		}
+
 		String before = origText.substring(0, dot);
 		String middle = origText.substring(dot, mark);
 		String after = origText.substring(mark);
@@ -1358,7 +1365,12 @@ public abstract class Code extends DefaultStyledDocument {
 			dot = mark;
 			mark = exchange;
 		}
-
+		if (dot < 0) {
+			dot = 0;
+		}
+		if (mark > origText.length()) {
+			mark = origText.length();
+		}
 		String before = origText.substring(0, dot);
 		String middle = origText.substring(dot, mark);
 		String after = origText.substring(mark);
