@@ -63,62 +63,64 @@ public class WebTemplateEngine {
 
 		Record files = config.get("files");
 
-		int fileAmount = files.getLength();
+		if (files != null) {
+			int fileAmount = files.getLength();
 
-		for (int i = 0; i < fileAmount; i++) {
+			for (int i = 0; i < fileAmount; i++) {
 
-			currentFile = files.getString(i);
+				currentFile = files.getString(i);
 
-			// in case we have an entry such as /foo/bar/*,
-			// just copy everything inside the  bar  folder without applying any conversions to it
-			// (this is supposed to be used for basically folders consisting of lots of files
-			// without any templating)
-			if (currentFile.endsWith("/*")) {
-				String dirName = currentFile.substring(0, currentFile.length() - 2);
-				Directory parentDir = new Directory(origDir, dirName);
-				parentDir.copyToDisk(new Directory(targetDir, dirName));
-				continue;
-			}
-
-			SimpleFile indexIn = new SimpleFile(origDir, currentFile);
-
-			if (!indexIn.exists()) {
-				System.err.println("Could not find " + indexIn.getAbsoluteFilename() + "!");
-				result = false;
-			}
-
-			if (isWebTextFile(indexIn)) {
-
-				String content = indexIn.getContent();
-
-				boolean isHtml = currentFile.endsWith(".htm") || currentFile.endsWith(".html");
-				boolean isPhp = currentFile.endsWith(".php");
-				boolean isCss = currentFile.endsWith(".css");
-
-				// perform the PHP templating (both for regular HTML files and for PHP files)
-				if (isHtml || isPhp) {
-					content = compilePhp(content, contentkind);
+				// in case we have an entry such as /foo/bar/*,
+				// just copy everything inside the  bar  folder without applying any conversions to it
+				// (this is supposed to be used for basically folders consisting of lots of files
+				// without any templating)
+				if (currentFile.endsWith("/*")) {
+					String dirName = currentFile.substring(0, currentFile.length() - 2);
+					Directory parentDir = new Directory(origDir, dirName);
+					parentDir.copyToDisk(new Directory(targetDir, dirName));
+					continue;
 				}
 
-				// convert PHP to HTML - if we have a PHP file, and if the conversion is wanted
-				if (isPhp && convertPhpToHtm) {
-					content = removePhp(content);
+				SimpleFile indexIn = new SimpleFile(origDir, currentFile);
 
-					content = makeLinksRelative(content);
-
-					currentFile = currentFile.substring(0, currentFile.length() - 4) + ".htm";
-				}
-				if (isCss && convertPhpToHtm) {
-					content = makeCssLinksRelative(content);
+				if (!indexIn.exists()) {
+					System.err.println("Could not find " + indexIn.getAbsoluteFilename() + "!");
+					result = false;
 				}
 
-				SimpleFile indexOut = new SimpleFile(targetDir, currentFile);
+				if (isWebTextFile(indexIn)) {
 
-				indexOut.saveContent(content);
+					String content = indexIn.getContent();
 
-			} else {
+					boolean isHtml = currentFile.endsWith(".htm") || currentFile.endsWith(".html");
+					boolean isPhp = currentFile.endsWith(".php");
+					boolean isCss = currentFile.endsWith(".css");
 
-				indexIn.copyToDisk(new File(targetDir, currentFile));
+					// perform the PHP templating (both for regular HTML files and for PHP files)
+					if (isHtml || isPhp) {
+						content = compilePhp(content, contentkind);
+					}
+
+					// convert PHP to HTML - if we have a PHP file, and if the conversion is wanted
+					if (isPhp && convertPhpToHtm) {
+						content = removePhp(content);
+
+						content = makeLinksRelative(content);
+
+						currentFile = currentFile.substring(0, currentFile.length() - 4) + ".htm";
+					}
+					if (isCss && convertPhpToHtm) {
+						content = makeCssLinksRelative(content);
+					}
+
+					SimpleFile indexOut = new SimpleFile(targetDir, currentFile);
+
+					indexOut.saveContent(content);
+
+				} else {
+
+					indexIn.copyToDisk(new File(targetDir, currentFile));
+				}
 			}
 		}
 

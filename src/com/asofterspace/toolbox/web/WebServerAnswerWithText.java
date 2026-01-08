@@ -26,6 +26,9 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 
 
 	public WebServerAnswerWithText(String text) {
+		if (text == null) {
+			text = "";
+		}
 		this.data = text.getBytes(StandardCharsets.UTF_8);
 	}
 

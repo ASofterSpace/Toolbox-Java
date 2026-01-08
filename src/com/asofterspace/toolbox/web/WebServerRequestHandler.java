@@ -29,6 +29,11 @@ import java.util.Map;
  */
 public class WebServerRequestHandler implements Runnable {
 
+	public static final String HEADER_KEY_AUTHORIZATION = "Authorization: ";
+	public static final String HEADER_KEY_CACHE_CONTROL = "Cache-Control: ";
+	public static final String HEADER_KEY_CONTENT_LENGTH = "Content-Length: ";
+	public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type: ";
+
 	private WebServer server;
 
 	private Socket request;
@@ -50,6 +55,12 @@ public class WebServerRequestHandler implements Runnable {
 	private List<Thread> threadList;
 
 	private boolean responded = false;
+
+	// the auth token string that was received
+	// will be set to the content of the Authorization: header
+	// after a call to receiveArbitraryContent
+	// (which is also called by receiveJsonContent or receiveFormDataContent)
+	private String receivedAuthTokenStr = null;
 
 
 	public WebServerRequestHandler(WebServer server, Socket request, Directory webRoot) {
@@ -322,9 +333,8 @@ public class WebServerRequestHandler implements Runnable {
 
 	protected WebRequestContent receiveArbitraryContent(Charset charset) throws IOException {
 
-		WebRequestContent result = new WebRequestContent();
-
-		int length = 0;
+		int receivedContentLength = 0;
+		String receivedContentType = null;
 
 		while (true) {
 
@@ -334,21 +344,28 @@ public class WebServerRequestHandler implements Runnable {
 				break;
 			}
 
-			if (line.toLowerCase().startsWith("content-length: ")) {
-				try {
-					result.setContentLength(Integer.parseInt(line.substring(16)));
-				} catch (NumberFormatException e) {
-				}
+			if (line.startsWith(HEADER_KEY_AUTHORIZATION)) {
+				this.receivedAuthTokenStr = line.substring(HEADER_KEY_AUTHORIZATION.length());
+				continue;
 			}
 
-			if (line.toLowerCase().startsWith("content-type: ")) {
-				result.setContentType(line.substring(14));
+			if (line.startsWith(HEADER_KEY_CONTENT_LENGTH)) {
+				try {
+					receivedContentLength = Integer.parseInt(line.substring(HEADER_KEY_CONTENT_LENGTH.length()));
+				} catch (NumberFormatException e) {
+				}
+				continue;
+			}
+
+			if (line.startsWith(HEADER_KEY_CONTENT_TYPE)) {
+				receivedContentType = line.substring(HEADER_KEY_CONTENT_TYPE.length());
+				continue;
 			}
 
 			if ("".equals(line)) {
-				if (result.getContentLength() > 0) {
+				if (receivedContentLength > 0) {
 					ByteBuffer readData = new ByteBuffer();
-					for (int i = 0; i < result.getContentLength(); i++) {
+					for (int i = 0; i < receivedContentLength; i++) {
 						if (!input.ready()) {
 							try {
 								Thread.sleep(1000);
@@ -368,8 +385,12 @@ public class WebServerRequestHandler implements Runnable {
 
 					// and now that all the bytes have been gathered, we can (once) interpret this as UTF-8,
 					// or whatever it should be interpreted as!
-					String strContent = readData.toString(charset);
-					result.setContent(strContent);
+					String receivedContent = readData.toString(charset);
+
+					WebRequestContent result = new WebRequestContent();
+					result.setContentLength(receivedContentLength);
+					result.setContentType(receivedContentType);
+					result.setContent(receivedContent);
 					return result;
 				}
 				break;
@@ -412,20 +433,16 @@ public class WebServerRequestHandler implements Runnable {
 		if (answer == null) {
 
 			// never keep these (as there is no big file involved anyway...)
-			send("Cache-Control: no-store");
-
+			send(HEADER_KEY_CACHE_CONTROL + "no-store");
 			send("");
 
 		} else {
 
 			long length = answer.getContentLength();
 
-			send("Content-Control: " + answer.getPreferredCacheParadigm());
-
-			send("Content-Type: " + answer.getContentType());
-
-			send("Content-Length: " + length);
-
+			send(HEADER_KEY_CACHE_CONTROL + answer.getPreferredCacheParadigm());
+			send(HEADER_KEY_CONTENT_TYPE + answer.getContentType());
+			send(HEADER_KEY_CONTENT_LENGTH + length);
 			send("");
 
 			if (!doNotSendBody) {
@@ -447,6 +464,9 @@ public class WebServerRequestHandler implements Runnable {
 				break;
 			case 400:
 				respond("400 Bad Request", answer);
+				break;
+			case 401:
+				respond("401 Unauthorized", answer);
 				break;
 			case 403:
 				respond("403 Forbidden", answer);
