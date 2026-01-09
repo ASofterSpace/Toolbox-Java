@@ -17,4 +17,9 @@ public class WebServerAnswerInHtml extends WebServerAnswerWithText {
 		super(html);
 		this.textKind = "html";
 	}
+
+	public WebServerAnswerInHtml(int statusCode, String html) {
+		super(statusCode, html);
+		this.textKind = "html";
+	}
 }

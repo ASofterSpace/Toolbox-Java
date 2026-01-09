@@ -411,6 +411,75 @@ public class WebServerRequestHandler implements Runnable {
 		return "*";
 	}
 
+	protected void respond(int status) throws IOException {
+		respond(status, null);
+	}
+
+	protected void respond(String status) throws IOException {
+		respond(status, null);
+	}
+
+	protected void respond(WebServerAnswer answer) throws IOException {
+		respond(answer.getStatus(), answer);
+	}
+
+	protected void respond(int status, WebServerAnswer answer) throws IOException {
+
+		switch (status) {
+			case 200:
+				respond("200 OK", answer);
+				break;
+			case 204:
+				respond("204 No Content", answer);
+				break;
+			case 301:
+				respond("301 Moved Permanently", answer);
+				break;
+			case 302:
+				respond("302 Moved Temporarily", answer);
+				break;
+			case 400:
+				respond("400 Bad Request", answer);
+				break;
+			case 401:
+				respond("401 Unauthorized", answer);
+				break;
+			case 403:
+				respond("403 Forbidden", answer);
+				break;
+			case 404:
+				respond("404 Not Found", answer);
+				break;
+			case 405:
+				respond("405 Method Not Allowed", answer);
+				break;
+			case 406:
+				respond("406 Not Acceptable", answer);
+				break;
+			case 418:
+				respond("418 I'm a teapot", answer);
+				break;
+			case 419:
+				respond("419 Page Expired", answer);
+				break;
+			case 429:
+				respond("429 Too Many Requests", answer);
+				break;
+			case 501:
+				respond("501 Not Implemented", answer);
+				break;
+			case 505:
+				respond("505 HTTP Version Not Supported", answer);
+				break;
+			default:
+				if (status != 500) {
+					System.err.println("WebServerRequestHandler responding with HTTP 500, as HTTP " +
+									   status + " is unknown!");
+				}
+				respond("500 Internal Server Error", answer);
+		}
+	}
+
 	protected void respond(String status, WebServerAnswer answer) throws IOException {
 
 		if (responded) {
@@ -454,56 +523,6 @@ public class WebServerRequestHandler implements Runnable {
 		}
 
 		output.flush();
-	}
-
-	protected void respond(int status, WebServerAnswer answer) throws IOException {
-
-		switch (status) {
-			case 200:
-				respond("200 OK", answer);
-				break;
-			case 400:
-				respond("400 Bad Request", answer);
-				break;
-			case 401:
-				respond("401 Unauthorized", answer);
-				break;
-			case 403:
-				respond("403 Forbidden", answer);
-				break;
-			case 404:
-				respond("404 Not Found", answer);
-				break;
-			case 405:
-				respond("405 Method Not Allowed", answer);
-				break;
-			case 406:
-				respond("406 Not Acceptable", answer);
-				break;
-			case 418:
-				respond("418 I'm a teapot", answer);
-				break;
-			case 501:
-				respond("501 Not Implemented", answer);
-				break;
-			case 505:
-				respond("505 HTTP Version Not Supported", answer);
-				break;
-			default:
-				if (status != 500) {
-					System.err.println("WebServerRequestHandler responding with HTTP 500, as HTTP " +
-									   status + " is unknown!");
-				}
-				respond("500 Internal Server Error", answer);
-		}
-	}
-
-	protected void respond(String status) throws IOException {
-		respond(status, null);
-	}
-
-	protected void respond(int status) throws IOException {
-		respond(status, null);
 	}
 
 	private WebServerAnswer answerGet(String location) {

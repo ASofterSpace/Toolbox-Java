@@ -20,23 +20,36 @@ public class WebServerAnswerInJson implements WebServerAnswer {
 
 	private byte[] data;
 
-	private int status = 200;
+	private int status = WebServer.DEFAULT_STATUS;
 
 
 	public WebServerAnswerInJson(String jsonData) {
-		init(jsonData);
+		this(WebServer.DEFAULT_STATUS, jsonData);
+	}
+
+	public WebServerAnswerInJson(int statusCode, String jsonData) {
+		this.data = jsonData.getBytes(StandardCharsets.UTF_8);
+		this.status = statusCode;
 	}
 
 	public WebServerAnswerInJson(Record jsonData) {
-		if (jsonData instanceof JSON) {
-			init(jsonData.toString());
-		} else {
-			init(new JSON(jsonData).toString());
-		}
+		this(WebServer.DEFAULT_STATUS, jsonData);
 	}
 
-	private void init(String jsonData) {
-		this.data = jsonData.getBytes(StandardCharsets.UTF_8);
+	public WebServerAnswerInJson(int statusCode, Record jsonData) {
+		if (jsonData instanceof JSON) {
+			this.data = jsonData.toString().getBytes(StandardCharsets.UTF_8);
+		} else {
+			this.data = (new JSON(jsonData)).toString().getBytes(StandardCharsets.UTF_8);
+		}
+		this.status = statusCode;
+	}
+
+	public WebServerAnswerInJson(int statusCode, String key, String value) {
+		JSON jsonData = new JSON();
+		jsonData.set(key, value);
+		this.data = jsonData.toString().getBytes(StandardCharsets.UTF_8);
+		this.status = statusCode;
 	}
 
 	@Override

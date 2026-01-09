@@ -29,6 +29,8 @@ import java.util.List;
  */
 public class WebServer implements Runnable {
 
+	static final int DEFAULT_STATUS = 200;
+
 	private boolean serverRunning;
 
 	protected boolean acceptLocalConnectionsOnly = false;
