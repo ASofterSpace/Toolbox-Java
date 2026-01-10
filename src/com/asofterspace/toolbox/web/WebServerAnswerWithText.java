@@ -13,16 +13,9 @@ import java.nio.charset.StandardCharsets;
  *
  * @author Moya Schiller, moya@asofterspace.com
  */
-public class WebServerAnswerWithText implements WebServerAnswer {
-
-	private byte[] data;
+public class WebServerAnswerWithText extends WebServerAnswerBase {
 
 	protected String textKind = "plain";
-
-	// by default, never keep text data as it might change all the time
-	private String preferredCacheParadigm = "no-store";
-
-	private int status = WebServer.DEFAULT_STATUS;
 
 
 	public WebServerAnswerWithText(String text) {
@@ -41,21 +34,6 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 	}
 
 	@Override
-	public long getContentLength() {
-
-		return data.length;
-	}
-
-	@Override
-	public String getPreferredCacheParadigm() {
-		return preferredCacheParadigm;
-	}
-
-	public void setPreferredCacheParadigm(String preferredCacheParadigm) {
-		this.preferredCacheParadigm = preferredCacheParadigm;
-	}
-
-	@Override
 	public String getContentType() {
 
 		if (textKind == null) {
@@ -63,12 +41,6 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 		}
 
 		return "text/" + textKind.toLowerCase();
-	}
-
-	@Override
-	public byte[] getBinaryContent() {
-
-		return data;
 	}
 
 	public String getTextKind() {
@@ -80,14 +52,6 @@ public class WebServerAnswerWithText implements WebServerAnswer {
 	 */
 	public void setTextKind(String textKind) {
 		this.textKind = textKind;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
 	}
 
 }

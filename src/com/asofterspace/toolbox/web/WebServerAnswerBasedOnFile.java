@@ -14,17 +14,11 @@ import com.asofterspace.toolbox.io.File;
  *
  * @author Moya (a softer space, 2019)
  */
-public class WebServerAnswerBasedOnFile implements WebServerAnswer {
+public class WebServerAnswerBasedOnFile extends WebServerAnswerBase {
 
 	private String filename;
 
 	private String contentType;
-
-	private byte[] data;
-
-	private String preferredCacheParadigm = null;
-
-	private int status = 200;
 
 
 	public WebServerAnswerBasedOnFile(File fileContainingData) {
@@ -58,6 +52,7 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 		if (lowFilename.endsWith(".jpg") ||
 			lowFilename.endsWith(".png") ||
 			lowFilename.endsWith(".pdf") ||
+			lowFilename.endsWith(".css") ||
 			lowFilename.endsWith(".js")) {
 			return "public, max-age=604800";
 		}
@@ -66,28 +61,10 @@ public class WebServerAnswerBasedOnFile implements WebServerAnswer {
 		return "no-store";
 	}
 
-	public void setPreferredCacheParadigm(String preferredCacheParadigm) {
-		this.preferredCacheParadigm = preferredCacheParadigm;
-	}
-
 	@Override
 	public String getContentType() {
 
 		return contentType;
-	}
-
-	@Override
-	public byte[] getBinaryContent() {
-
-		return data;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
 	}
 
 }

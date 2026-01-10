@@ -29,7 +29,10 @@ import java.util.Map;
  */
 public class WebServerRequestHandler implements Runnable {
 
+	public static final String HEADER_KEY_HOST = "Host: ";
 	public static final String HEADER_KEY_AUTHORIZATION = "Authorization: ";
+	public static final String HEADER_KEY_COOKIE = "Cookie: ";
+	public static final String HEADER_KEY_SET_COOKIE = "Set-Cookie: ";
 	public static final String HEADER_KEY_CACHE_CONTROL = "Cache-Control: ";
 	public static final String HEADER_KEY_CONTENT_LENGTH = "Content-Length: ";
 	public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type: ";
@@ -61,6 +64,8 @@ public class WebServerRequestHandler implements Runnable {
 	// after a call to receiveArbitraryContent
 	// (which is also called by receiveJsonContent or receiveFormDataContent)
 	private String receivedAuthTokenStr = null;
+	private String receivedCookieStr = null;
+	private String receivedHostStr = null;
 
 
 	public WebServerRequestHandler(WebServer server, Socket request, Directory webRoot) {
@@ -249,6 +254,8 @@ public class WebServerRequestHandler implements Runnable {
 	// receive a whole line
 	protected String receive() throws IOException {
 
+		// System.out.println("DEBUG START receive()");
+
 		try {
 			// one minute (60 seconds) long, check every 100 ms if data became available...
 			for (int i = 0; i < 600; i++) {
@@ -344,8 +351,20 @@ public class WebServerRequestHandler implements Runnable {
 				break;
 			}
 
+			// System.out.println(line);
+
 			if (line.startsWith(HEADER_KEY_AUTHORIZATION)) {
 				this.receivedAuthTokenStr = line.substring(HEADER_KEY_AUTHORIZATION.length());
+				continue;
+			}
+
+			if (line.startsWith(HEADER_KEY_COOKIE)) {
+				this.receivedCookieStr = line.substring(HEADER_KEY_COOKIE.length());
+				continue;
+			}
+
+			if (line.startsWith(HEADER_KEY_HOST)) {
+				this.receivedHostStr = line.substring(HEADER_KEY_HOST.length());
 				continue;
 			}
 
@@ -512,6 +531,14 @@ public class WebServerRequestHandler implements Runnable {
 			send(HEADER_KEY_CACHE_CONTROL + answer.getPreferredCacheParadigm());
 			send(HEADER_KEY_CONTENT_TYPE + answer.getContentType());
 			send(HEADER_KEY_CONTENT_LENGTH + length);
+			List<String> extraHeaderLines = answer.getExtraHeaderLines();
+			if (extraHeaderLines != null) {
+				for (String extraHeaderLine : extraHeaderLines) {
+					if ((extraHeaderLine != null) && (!"".equals(extraHeaderLine))) {
+						send(extraHeaderLine);
+					}
+				}
+			}
 			send("");
 
 			if (!doNotSendBody) {
@@ -667,6 +694,18 @@ public class WebServerRequestHandler implements Runnable {
 			}
 		}
 		return null;
+	}
+
+	public String getReceivedAuthTokenStr() {
+		return receivedAuthTokenStr;
+	}
+
+	public String getReceivedCookieStr() {
+		return receivedCookieStr;
+	}
+
+	public String getReceivedHostStr() {
+		return receivedHostStr;
 	}
 
 }

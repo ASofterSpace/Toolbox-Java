@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.web;
 
+import java.util.List;
+
 
 /**
  * This represents the data that a web server might send as answer
@@ -22,5 +24,7 @@ public interface WebServerAnswer {
 	public byte[] getBinaryContent();
 
 	public int getStatus();
+
+	public List<String> getExtraHeaderLines();
 
 }

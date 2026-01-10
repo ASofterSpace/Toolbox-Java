@@ -16,12 +16,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author Moya (a softer space, 2019)
  */
-public class WebServerAnswerInJson implements WebServerAnswer {
-
-	private byte[] data;
-
-	private int status = WebServer.DEFAULT_STATUS;
-
+public class WebServerAnswerInJson extends WebServerAnswerBase {
 
 	public WebServerAnswerInJson(String jsonData) {
 		this(WebServer.DEFAULT_STATUS, jsonData);
@@ -53,36 +48,9 @@ public class WebServerAnswerInJson implements WebServerAnswer {
 	}
 
 	@Override
-	public long getContentLength() {
-
-		return data.length;
-	}
-
-	@Override
-	public String getPreferredCacheParadigm() {
-
-		// never keep json data as it might change all the time
-		return "no-store";
-	}
-
-	@Override
 	public String getContentType() {
 
 		return "application/json";
-	}
-
-	@Override
-	public byte[] getBinaryContent() {
-
-		return data;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
 	}
 
 }
