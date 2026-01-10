@@ -444,8 +444,7 @@ public class Record {
 
 	@Override
 	public String toString() {
-
-		return toString(null);
+		return toString(false);
 	}
 
 	/**
@@ -454,11 +453,7 @@ public class Record {
 	 *					uncompressed (false) - in which case it will be easier to
 	 *					read by humans, but take up more space
 	 */
-	public String toString(Boolean compressed) {
-
-		if (compressed == null) {
-			compressed = true;
-		}
+	public String toString(boolean compressed) {
 
 		return toString(this, compressed, "");
 	}

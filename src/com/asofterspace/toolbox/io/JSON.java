@@ -419,6 +419,21 @@ public class JSON extends Record {
 
 	@Override
 	public String toString(Record item, boolean compressed, String linePrefix) {
+		if (compressed) {
+			return toString(item, Integer.MAX_VALUE, linePrefix);
+		}
+		return toString(item, 0, linePrefix);
+	}
+
+	/**
+	 * available compression levels:
+	 * 0 .. fully compressed (no indentation)
+	 * 1 .. indent first level, compress everything inside
+	 * 2 .. indent first and second level, compress everything inside
+	 * ...
+	 * Integer.MAX_VALUE .. indent everything / not compressed at all
+	 */
+	public String toString(Record item, int compressionLevel, String linePrefix) {
 
 		JSON jsonItem = null;
 
@@ -448,7 +463,7 @@ public class JSON extends Record {
 
 				arrResult.append("[");
 
-				if (!compressed) {
+				if (compressionLevel > 0) {
 					arrResult.append("\n" + linePrefix + "\t");
 				}
 
@@ -460,15 +475,15 @@ public class JSON extends Record {
 						arrFirstEntry = false;
 					} else {
 						arrResult.append(",");
-						if (!compressed) {
+						if (compressionLevel > 0) {
 							arrResult.append("\n" + linePrefix + "\t");
 						}
 					}
 
-					arrResult.append(toString(arrItem, compressed, linePrefix + "\t"));
+					arrResult.append(toString(arrItem, compressionLevel-1, linePrefix + "\t"));
 				}
 
-				if (!compressed) {
+				if (compressionLevel > 0) {
 					arrResult.append("\n" + linePrefix);
 				}
 				arrResult.append("]");
@@ -480,7 +495,7 @@ public class JSON extends Record {
 
 				objResult.append("{");
 
-				if (!compressed) {
+				if (compressionLevel > 0) {
 					objResult.append("\n" + linePrefix + "\t");
 				}
 
@@ -491,10 +506,10 @@ public class JSON extends Record {
 					if (objFirstEntry) {
 						objFirstEntry = false;
 					} else {
-						if (compressed) {
-							objResult.append(", ");
-						} else {
+						if (compressionLevel > 0) {
 							objResult.append(",\n" + linePrefix + "\t");
+						} else {
+							objResult.append(", ");
 						}
 					}
 
@@ -504,10 +519,10 @@ public class JSON extends Record {
 					objResult.append("\"");
 					objResult.append(key);
 					objResult.append("\": ");
-					objResult.append(toString(content, compressed, linePrefix + "\t"));
+					objResult.append(toString(content, compressionLevel-1, linePrefix + "\t"));
 				}
 
-				if (!compressed) {
+				if (compressionLevel > 0) {
 					objResult.append("\n" + linePrefix);
 				}
 				objResult.append("}");

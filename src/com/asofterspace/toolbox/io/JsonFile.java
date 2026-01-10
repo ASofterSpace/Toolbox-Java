@@ -13,6 +13,8 @@ public class JsonFile extends TextFile {
 
 	protected JSON jsonContent = null;
 
+	protected int compressionLevel = Integer.MAX_VALUE;
+
 
 	/**
 	 * Please do not construct a file without a name ;)
@@ -249,11 +251,27 @@ public class JsonFile extends TextFile {
 		save();
 	}
 
+	public int getCompressionLevel() {
+		return compressionLevel;
+	}
+
+	/**
+	 * available compression levels:
+	 * 0 .. fully compressed (no indentation)
+	 * 1 .. indent first level, compress everything inside
+	 * 2 .. indent first and second level, compress everything inside
+	 * ...
+	 * Integer.MAX_VALUE .. indent everything / not compressed at all
+	 */
+	public void setCompressionLevel(int compressionLevel) {
+		this.compressionLevel = compressionLevel;
+	}
+
 	public void save() {
 
-		String uncompressedJson = jsonContent.toString(false);
+		String jsonText = jsonContent.toString(jsonContent, getCompressionLevel(), "");
 
-		setContent(uncompressedJson);
+		setContent(jsonText);
 
 		super.save();
 	}
@@ -265,4 +283,5 @@ public class JsonFile extends TextFile {
 		setAllContents(data);
 		save();
 	}
+
 }
