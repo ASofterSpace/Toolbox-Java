@@ -34,6 +34,24 @@ public class MathUtils {
 		}
 	}
 
+	// this gets the smaller value that is zero or above, and returns -1 if neither is zero or above -
+	// which is especially helpful for getting the smallest of several indexOf() calls
+	public static int getMinimumIndex(int a, int b) {
+		if (a < 0) {
+			if (b < 0) {
+				return min(a, b); // both negative: smallest
+			} else {
+				return b; // only b positive or zero
+			}
+		} else {
+			if (b < 0) {
+				return a; // only a positive or zero
+			} else {
+				return min(a, b); // both positive or zero: smallest
+			}
+		}
+	}
+
 	public static int max(int a, int b, int c) {
 		if (a > b) {
 			if (a > c) {
@@ -62,6 +80,40 @@ public class MathUtils {
 				return b;
 			} else {
 				return c;
+			}
+		}
+	}
+
+	// this gets the smaller value that is zero or above, and returns -1 if neither is zero or above -
+	// which is especially helpful for getting the smallest of several indexOf() calls
+	public static int getMinimumIndex(int a, int b, int c) {
+		if (a < 0) {
+			if (b < 0) {
+				if (c < 0) {
+					return min(a, b, c); // all three negative: smallest
+				} else {
+					return c; // only c positive or zero
+				}
+			} else {
+				if (c < 0) {
+					return b; // only b positive or zero
+				} else {
+					return min(b, c); // both b and c positive or zero: smallest
+				}
+			}
+		} else {
+			if (b < 0) {
+				if (c < 0) {
+					return a; // only a positive or zero
+				} else {
+					return min(a, c); // both a and c positive or zero: smallest
+				}
+			} else {
+				if (c < 0) {
+					return min(a, b); // both a and b positive or zero: smallest
+				} else {
+					return min(a, b, c); // all three positive or zero: smallest
+				}
 			}
 		}
 	}
