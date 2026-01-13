@@ -4,8 +4,12 @@
  */
 package com.asofterspace.toolbox.coders;
 
+import com.asofterspace.toolbox.utils.StrUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -35,6 +39,24 @@ public class UrlDecoder {
 
 			return urlString;
 		}
+	}
+
+	public static String decodeLeavePlusses(String urlString) {
+
+		if (urlString == null) {
+			return null;
+		}
+
+		if (!urlString.contains("+")) {
+			return decode(urlString);
+		}
+
+		List<String> strs = StrUtils.split(urlString, "+");
+		List<String> newStrs = new ArrayList<>();
+		for (String str : strs) {
+			newStrs.add(decode(str));
+		}
+		return StrUtils.join("+", newStrs);
 	}
 
 }

@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.coders.UrlDecoder;
 import com.asofterspace.toolbox.utils.CallbackWithString;
 import com.asofterspace.toolbox.utils.StrUtils;
 
@@ -260,6 +261,7 @@ public class IoUtils {
 	 * Making safe includes:
 	 * - removing the # sign
 	 * - replaceing the ' sign with -
+	 * - URL decode the filename (so %XY turns into nice utf8 character)
 	 * - removing leading and trailing space characters
 	 * Returns true if at least one replacement was made, false otherwise
 	 */
@@ -279,6 +281,13 @@ public class IoUtils {
 					String adjustedName = oldName;
 					adjustedName = StrUtils.replaceAll(adjustedName, "'", "-");
 					adjustedName = StrUtils.replaceAll(adjustedName, "#", "");
+					String newStr = null;
+					try {
+						newStr = UrlDecoder.decodeLeavePlusses(adjustedName);
+					} catch (IllegalArgumentException e) {
+						newStr = StrUtils.replaceAll(adjustedName, "%", "");
+					}
+					adjustedName = newStr;
 					adjustedName = adjustedName.trim();
 					if (!oldName.equals(adjustedName)) {
 						if (curParentDir == null) {
