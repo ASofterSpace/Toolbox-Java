@@ -5,11 +5,13 @@
 package com.asofterspace.toolbox.io;
 
 import com.asofterspace.toolbox.utils.CallbackWithString;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -250,6 +252,51 @@ public class IoUtils {
 	public static String canonicalizePath(String path) {
 		File file = new File(path);
 		return file.getCanonicalFilename();
+	}
+
+	/**
+	 * Makes file and folder names safe inside the given entryPoint (optionally recursively
+	 * inside as well)
+	 * Making safe includes:
+	 * - removing the # sign
+	 * - replaceing the ' sign with -
+	 * - removing leading and trailing space characters
+	 * Returns true if at least one replacement was made, false otherwise
+	 */
+	public static boolean makeFileAndFolderNamesSafe(Directory entryPoint, boolean recursively) {
+		java.io.File entryPointAsJavaFile = entryPoint.getJavaFile();
+		return makeFileAndFolderNamesSafeInternally(entryPointAsJavaFile, recursively);
+	}
+
+	private static boolean makeFileAndFolderNamesSafeInternally(java.io.File entryPoint, boolean recursively) {
+		boolean result = false;
+		java.io.File[] children = entryPoint.listFiles();
+		Directory curParentDir = null;
+		if (children != null) {
+			for (java.io.File curChild : children) {
+				String oldName = curChild.getName();
+				if (oldName != null) {
+					String adjustedName = oldName;
+					adjustedName = StrUtils.replaceAll(adjustedName, "'", "-");
+					adjustedName = StrUtils.replaceAll(adjustedName, "#", "");
+					adjustedName = adjustedName.trim();
+					if (!oldName.equals(adjustedName)) {
+						if (curParentDir == null) {
+							File oldFile = new File(curChild);
+							curParentDir = oldFile.getParentDirectory();
+						}
+						File newFile = new File(curParentDir, adjustedName);
+						curChild.renameTo(newFile.getJavaFile());
+						result = true;
+					}
+				}
+				if (recursively && curChild.isDirectory()) {
+					boolean innerResult = makeFileAndFolderNamesSafeInternally(curChild, recursively);
+					result = (result || innerResult);
+				}
+			}
+		}
+		return result;
 	}
 
 }
