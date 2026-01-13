@@ -673,6 +673,13 @@ public class DateUtils {
 		return serializeDate(someDate).equals(serializeDate(otherDate));
 	}
 
+	public static boolean isSameDayHolder(DateHolder someDate, DateHolder otherDate) {
+		if ((someDate == null) || (someDate.serializeDate() == null)) {
+			return (otherDate == null) || (otherDate.serializeDate() == null);
+		}
+		return someDate.serializeDate().equals(otherDate.serializeDate());
+	}
+
 	public static Integer getDayOfMonth(Date someDate) {
 		if (someDate == null) {
 			return null;

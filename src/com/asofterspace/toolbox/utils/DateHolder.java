@@ -123,6 +123,34 @@ public class DateHolder {
 		return isNull;
 	}
 
+	// returns true ONLY IF this is after other
+	// (so returns false if either is null, or if they are the same)
+	public boolean after(DateHolder other) {
+		if (getIsNull() || (other == null) || other.getIsNull() ||
+			(serializeDate() == null) || (other.serializeDate() == null)) {
+			return false;
+		}
+		int res = serializeDate().compareTo(other.serializeDate());
+		if (res > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	// returns true ONLY IF this is before other
+	// (so returns false if either is null, or if they are the same)
+	public boolean before(DateHolder other) {
+		if (getIsNull() || (other == null) || other.getIsNull() ||
+			(serializeDate() == null) || (other.serializeDate() == null)) {
+			return false;
+		}
+		int res = serializeDate().compareTo(other.serializeDate());
+		if (res < 0) {
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 
