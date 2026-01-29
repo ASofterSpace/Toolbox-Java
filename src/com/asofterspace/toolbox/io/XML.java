@@ -307,6 +307,7 @@ public class XML extends Record {
 		str = str.replace("&#243;", "ó");
 		str = str.replace("&#250;", "ú");
 		str = str.replace("&#253;", "ý");
+		str = str.replace("&#350;", "Ş");
 		str = str.replace("&#8216;", "‘");
 		str = str.replace("&#8217;", "’");
 		str = str.replace("&#8218;", "‚");

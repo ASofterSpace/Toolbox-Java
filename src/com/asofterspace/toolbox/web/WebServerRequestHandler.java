@@ -30,12 +30,19 @@ import java.util.Map;
 public class WebServerRequestHandler implements Runnable {
 
 	public static final String HEADER_KEY_HOST = "Host: ";
+	public static final String HEADER_KEY_HOST_LOW = HEADER_KEY_HOST.toLowerCase();
 	public static final String HEADER_KEY_AUTHORIZATION = "Authorization: ";
+	public static final String HEADER_KEY_AUTHORIZATION_LOW = HEADER_KEY_AUTHORIZATION.toLowerCase();
 	public static final String HEADER_KEY_COOKIE = "Cookie: ";
+	public static final String HEADER_KEY_COOKIE_LOW = HEADER_KEY_COOKIE.toLowerCase();
 	public static final String HEADER_KEY_SET_COOKIE = "Set-Cookie: ";
+	public static final String HEADER_KEY_SET_COOKIE_LOW = HEADER_KEY_SET_COOKIE.toLowerCase();
 	public static final String HEADER_KEY_CACHE_CONTROL = "Cache-Control: ";
+	public static final String HEADER_KEY_CACHE_CONTROL_LOW = HEADER_KEY_CACHE_CONTROL.toLowerCase();
 	public static final String HEADER_KEY_CONTENT_LENGTH = "Content-Length: ";
+	public static final String HEADER_KEY_CONTENT_LENGTH_LOW = HEADER_KEY_CONTENT_LENGTH.toLowerCase();
 	public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type: ";
+	public static final String HEADER_KEY_CONTENT_TYPE_LOW = HEADER_KEY_CONTENT_TYPE.toLowerCase();
 
 	private WebServer server;
 
@@ -353,31 +360,33 @@ public class WebServerRequestHandler implements Runnable {
 
 			// System.out.println(line);
 
-			if (line.startsWith(HEADER_KEY_AUTHORIZATION)) {
-				this.receivedAuthTokenStr = line.substring(HEADER_KEY_AUTHORIZATION.length());
+			String lineLow = line.toLowerCase();
+
+			if (lineLow.startsWith(HEADER_KEY_AUTHORIZATION_LOW)) {
+				this.receivedAuthTokenStr = line.substring(HEADER_KEY_AUTHORIZATION_LOW.length());
 				continue;
 			}
 
-			if (line.startsWith(HEADER_KEY_COOKIE)) {
-				this.receivedCookieStr = line.substring(HEADER_KEY_COOKIE.length());
+			if (lineLow.startsWith(HEADER_KEY_COOKIE_LOW)) {
+				this.receivedCookieStr = line.substring(HEADER_KEY_COOKIE_LOW.length());
 				continue;
 			}
 
-			if (line.startsWith(HEADER_KEY_HOST)) {
-				this.receivedHostStr = line.substring(HEADER_KEY_HOST.length());
+			if (lineLow.startsWith(HEADER_KEY_HOST_LOW)) {
+				this.receivedHostStr = line.substring(HEADER_KEY_HOST_LOW.length());
 				continue;
 			}
 
-			if (line.startsWith(HEADER_KEY_CONTENT_LENGTH)) {
+			if (lineLow.startsWith(HEADER_KEY_CONTENT_LENGTH_LOW)) {
 				try {
-					receivedContentLength = Integer.parseInt(line.substring(HEADER_KEY_CONTENT_LENGTH.length()));
+					receivedContentLength = Integer.parseInt(line.substring(HEADER_KEY_CONTENT_LENGTH_LOW.length()));
 				} catch (NumberFormatException e) {
 				}
 				continue;
 			}
 
-			if (line.startsWith(HEADER_KEY_CONTENT_TYPE)) {
-				receivedContentType = line.substring(HEADER_KEY_CONTENT_TYPE.length());
+			if (lineLow.startsWith(HEADER_KEY_CONTENT_TYPE_LOW)) {
+				receivedContentType = line.substring(HEADER_KEY_CONTENT_TYPE_LOW.length());
 				continue;
 			}
 
