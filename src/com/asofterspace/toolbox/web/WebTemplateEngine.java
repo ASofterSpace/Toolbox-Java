@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
+import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.utils.StrUtils;
 
@@ -36,6 +37,8 @@ public class WebTemplateEngine {
 
 	// keep this as global variable such that isTrue can later on check against it
 	private String currentFile;
+
+	private static String startTimeStamp = null;
 
 
 	public WebTemplateEngine(Directory origDir, Record config) {
@@ -717,6 +720,15 @@ public class WebTemplateEngine {
 
 		while (content.contains("@version")) {
 			content = content.replaceAll("@version", ""+version);
+		}
+
+		if (startTimeStamp == null) {
+			startTimeStamp = StrUtils.replaceAll(StrUtils.replaceAll(StrUtils.replaceAll(StrUtils.replaceAll(
+				DateUtils.serializeDateTime(DateUtils.now()), " ", ""), "-", ""), ".", ""), ":", "");
+		}
+
+		while (content.contains("@startTimeStamp")) {
+			content = content.replaceAll("@startTimeStamp", ""+startTimeStamp);
 		}
 
 		return content;

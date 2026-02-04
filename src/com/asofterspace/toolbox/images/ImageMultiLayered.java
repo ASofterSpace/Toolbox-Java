@@ -41,8 +41,16 @@ public class ImageMultiLayered {
 		return width;
 	}
 
+	public void setWidth(int newWidth) {
+		this.width = newWidth;
+	}
+
 	public int getHeight() {
 		return height;
+	}
+
+	public void setHeight(int newHeight) {
+		this.height = newHeight;
 	}
 
 	public void addLayer(ImageLayer layer) {
@@ -143,13 +151,27 @@ public class ImageMultiLayered {
 	}
 
 	public Image bake() {
+		return bakeUntilLayer(null);
+	}
 
-		if (layers.size() == 0) {
+	/*
+	 * Bake until, but not including, the layerNum - if that is null, bake all
+	 */
+	public Image bakeUntilLayer(Integer layerNum) {
+
+		int bakeUntilLayerNum = layers.size();
+		if (layerNum != null) {
+			bakeUntilLayerNum = Math.min(bakeUntilLayerNum, layerNum);
+		}
+
+		// special case: NO layers exist / requested, return nothing
+		if (bakeUntilLayerNum < 1) {
 			ColorRGBA backgroundColor = new ColorRGBA(0, 0, 0, 0);
 			return new Image(width, height, backgroundColor);
 		}
 
-		if (layers.size() == 1) {
+		// special case: base layer is already an image, only one layer requested - no drawing necessary
+		if (bakeUntilLayerNum < 2) {
 			ImageLayer layer = layers.get(0);
 			if ((layer.getOffsetX() == 0) && (layer.getOffsetY() == 0)) {
 				if (layer instanceof ImageLayerBasedOnImage) {
@@ -162,13 +184,13 @@ public class ImageMultiLayered {
 			}
 		}
 
-		// special case: base layer is already an image, no drawing necessary
+		// special case: base layer is already an image, no drawing necessary for base, but for all others
 		ImageLayer baseLayer = layers.get(0);
 		if (baseLayer instanceof ImageLayerBasedOnImage) {
 			ImageLayerBasedOnImage baseLayerImg = (ImageLayerBasedOnImage) baseLayer;
 			if ((baseLayerImg.getOffsetX() == 0) && (baseLayerImg.getOffsetY() == 0) && (baseLayerImg.getWidth() == width) && (baseLayerImg.getHeight() == height)) {
 				Image base = baseLayerImg.getImage().copy();
-				for (int i = 1; i < layers.size(); i++) {
+				for (int i = 1; i < bakeUntilLayerNum; i++) {
 					layers.get(i).drawOnto(base);
 				}
 				return base;
@@ -177,8 +199,8 @@ public class ImageMultiLayered {
 
 		ColorRGBA backgroundColor = new ColorRGBA(0, 0, 0, 0);
 		Image base = new Image(width, height, backgroundColor);
-		for (ImageLayer layer : layers) {
-			layer.drawOnto(base);
+		for (int i = 0; i < bakeUntilLayerNum; i++) {
+			layers.get(i).drawOnto(base);
 		}
 		return base;
 	}
