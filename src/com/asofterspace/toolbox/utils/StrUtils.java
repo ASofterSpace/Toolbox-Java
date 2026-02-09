@@ -1569,7 +1569,7 @@ public class StrUtils {
 	public static String performMathOps(String str, String ops) {
 
 		if (ops == null) {
-			return performMathOps(performMathOps(performMathOps(performMathOps(str, '*'), '/'), '+'), '-');
+			return performMathOps(performMathOps(performMathOps(performMathOps(str, "*"), "/"), "+"), "-");
 		}
 
 		int cur = 0;
