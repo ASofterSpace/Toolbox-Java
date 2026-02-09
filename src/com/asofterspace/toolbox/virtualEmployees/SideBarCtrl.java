@@ -34,6 +34,8 @@ public class SideBarCtrl {
 
 	private static List<Record> virtualEmployeeRecords = null;
 
+	private static GenericProjectCtrl projCtrl = null;
+
 
 	public static String getAvatarDescription(SideBarEntryForEmployee virtualEmployee) {
 
@@ -241,10 +243,7 @@ public class SideBarCtrl {
 
 		left = LEFT_OFFSET;
 
-		GenericProjectCtrl projectCtrl = new GenericProjectCtrl(
-			System.getProperty("java.class.path") + "/../../assWorkbench/server/projects");
-		projectCtrl.init();
-		List<GenericProject> projects = projectCtrl.getGenericProjects();
+		List<GenericProject> projects = getProjectCtrl().getGenericProjects();
 
 		html.append("<div class='projectbar' style='right: unset;'>\n");
 
@@ -503,6 +502,17 @@ public class SideBarCtrl {
 		}
 
 		return null;
+	}
+
+	public static GenericProjectCtrl getProjectCtrl() {
+
+		if (projCtrl == null) {
+			GenericProjectCtrl curCtrl = new GenericProjectCtrl(
+				System.getProperty("java.class.path") + "/../../assWorkbench/server/projects");
+			curCtrl.init();
+			projCtrl = curCtrl;
+		}
+		return projCtrl;
 	}
 
 }

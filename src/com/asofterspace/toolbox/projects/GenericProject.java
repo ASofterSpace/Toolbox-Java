@@ -25,14 +25,14 @@ public class GenericProject {
 
 	private Boolean onShortlist;
 
+	private Boolean projIsWork;
+
 	private Directory projectDir;
 
 
-	public GenericProject(String name, Directory projectParentDir) {
+	public GenericProject(String key, Directory projectParentDir) {
 
-		this.fullName = name;
-
-		this.shortName = nameToShortName(name);
+		this.shortName = key;
 
 		this.projectDir = new Directory(projectParentDir, shortName);
 
@@ -55,6 +55,9 @@ public class GenericProject {
 	}
 
 	protected void readRecord(Record projectConfRec) {
+
+		this.fullName = projectConfRec.getString("name");
+
 		this.color = ColorRGBA.fromString(projectConfRec.getString("color"));
 
 		String colorDirtyStr = projectConfRec.getString("colorDirty");
@@ -65,56 +68,15 @@ public class GenericProject {
 		this.colorDirtySpecial = projectConfRec.getString("colorDirtySpecial");
 
 		this.onShortlist = projectConfRec.getBoolean("onShortlist");
+
+		this.projIsWork = projectConfRec.getBoolean("isWork");
 	}
 
 	protected Record createRecord() {
 		Record projectConfRec = Record.emptyObject();
 		projectConfRec.set("color", "#EEEEEE");
+		projectConfRec.set("name", this.shortName);
 		return projectConfRec;
-	}
-
-	private String nameToShortName(String name) {
-
-		String result = name;
-		String resLo = result.toLowerCase();
-
-		// LABEL :: TO ADD ORIGIN, LOOK HERE (resolving display name to origin string)
-		if (resLo.equals("polyamorous pirates & curious cephalopods")) {
-			return "ppcc";
-		}
-		if (resLo.startsWith("dir")) {
-			return "da";
-		}
-		if (resLo.startsWith("effect")) {
-			return "ea";
-		}
-		if (resLo.startsWith("uni")) {
-			return "uni";
-		}
-		if (resLo.startsWith("queeres")) {
-			return "qzt";
-		}
-		if (resLo.startsWith("queer")) {
-			return "qld";
-		}
-		if (resLo.startsWith("wood")) {
-			return "ww";
-		}
-		if (resLo.startsWith("transition")) {
-			return "tt";
-		}
-
-		result = result.toLowerCase();
-		result = result.replace(" ", "");
-		result = result.replace("-", "");
-		result = result.replace("ä", "ae");
-		result = result.replace("ö", "oe");
-		result = result.replace("ü", "ue");
-		if (result.contains("(")) {
-			result = result.substring(0, result.indexOf("("));
-		}
-
-		return result;
 	}
 
 	public String getFullName() {
@@ -148,6 +110,13 @@ public class GenericProject {
 			return false;
 		}
 		return onShortlist;
+	}
+
+	public boolean isWork() {
+		if (projIsWork == null) {
+			return false;
+		}
+		return projIsWork;
 	}
 
 	public Directory getProjectDir() {

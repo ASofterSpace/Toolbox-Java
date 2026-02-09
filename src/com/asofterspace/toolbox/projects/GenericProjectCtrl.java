@@ -16,7 +16,7 @@ import java.util.List;
 
 public class GenericProjectCtrl {
 
-	private final static String PROJECT_NAMES = "names";
+	private final static String PROJECT_KEYS = "keys";
 
 	private Directory projectsDir;
 
@@ -39,15 +39,15 @@ public class GenericProjectCtrl {
 		JsonFile projectsFile = new JsonFile(projectsDir, "projects.json");
 		if (!projectsFile.exists()) {
 			Record projectsRec = Record.emptyObject();
-			projectsRec.set(PROJECT_NAMES, Record.emptyArray());
+			projectsRec.set(PROJECT_KEYS, Record.emptyArray());
 			projectsFile.save(projectsRec);
 		}
 		try {
 			Record projectsRec = projectsFile.getAllContents();
 
-			List<String> projectsNameList = projectsRec.getArrayAsStringList(PROJECT_NAMES);
-			for (String curProjName : projectsNameList) {
-				projects.add(createProject(curProjName, projectsDir));
+			List<String> projectsKeyList = projectsRec.getArrayAsStringList(PROJECT_KEYS);
+			for (String curProjKey : projectsKeyList) {
+				projects.add(createProject(curProjKey, projectsDir));
 			}
 		} catch (JsonParseException ex) {
 			System.err.println("The input file " + projectsFile.getAbsoluteFilename() +
@@ -56,8 +56,8 @@ public class GenericProjectCtrl {
 		}
 	}
 
-	protected GenericProject createProject(String curProjName, Directory projectsDir) {
-		return new GenericProject(curProjName, projectsDir);
+	protected GenericProject createProject(String curProjKey, Directory projectsDir) {
+		return new GenericProject(curProjKey, projectsDir);
 	}
 
 	public List<GenericProject> getGenericProjects() {
@@ -79,6 +79,19 @@ public class GenericProjectCtrl {
 		}
 		for (GenericProject proj : projects) {
 			if (str.equals(proj.getShortName())) {
+				return proj;
+			}
+		}
+		return null;
+	}
+
+	public GenericProject resolveFullNameGenerically(String str) {
+		if (str == null) {
+			return null;
+		}
+		str = str.toLowerCase();
+		for (GenericProject proj : projects) {
+			if (str.equals(proj.getFullName().toLowerCase())) {
 				return proj;
 			}
 		}
