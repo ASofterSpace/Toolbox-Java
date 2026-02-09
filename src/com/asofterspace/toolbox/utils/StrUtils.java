@@ -1565,4 +1565,56 @@ public class StrUtils {
 
 		return result;
 	}
+
+	public static String performMathOps(String str, String ops) {
+
+		if (ops == null) {
+			return performMathOps(performMathOps(performMathOps(performMathOps(str, '*'), '/'), '+'), '-');
+		}
+
+		int cur = 0;
+		StringBuilder result = new StringBuilder();
+
+		int pos = str.indexOf(ops);
+
+		while (pos >= 0) {
+			int posBefore = 1;
+			char c = str.charAt(pos - posBefore);
+			while ((c >= '0') && (c <= '9')) {
+				posBefore++;
+				c = str.charAt(pos - posBefore);
+			}
+			int posAfter = 1;
+			c = str.charAt(pos + posAfter);
+			while ((c >= '0') && (c <= '9')) {
+				posAfter++;
+				c = str.charAt(pos + posAfter);
+			}
+			result.append(str.substring(cur, pos + 1 - posBefore));
+			int strBefore = strToInt(str.substring(pos + 1 - posBefore, pos));
+			int strAfter = strToInt(str.substring(pos + 1, pos + posAfter));
+			switch (ops) {
+				case "+":
+					result.append("" + (strBefore + strAfter));
+					break;
+				case "-":
+					result.append("" + (strBefore - strAfter));
+					break;
+				case "*":
+					result.append("" + (strBefore * strAfter));
+					break;
+				case "/":
+					result.append("" + (strBefore / strAfter));
+					break;
+			}
+
+			cur = pos + posAfter;
+			pos = str.indexOf(ops, cur);
+		}
+
+		result.append(str.substring(cur));
+
+		return result.toString();
+	}
+
 }
