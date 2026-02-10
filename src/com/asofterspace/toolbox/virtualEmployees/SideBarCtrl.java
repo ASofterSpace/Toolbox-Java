@@ -247,23 +247,21 @@ public class SideBarCtrl {
 
 		html.append("<div class='projectbar' style='right: unset;'>\n");
 
-		boolean topRow = true;
+		int rownum = 0;
+		int ROW_AMOUNT = 3;
 
 		for (GenericProject proj : projects) {
 			html.append("\n");
-			int bottomPt = 25;
-			if (topRow) {
-				bottomPt = 95;
-			}
+			int bottomPt = (70 * (ROW_AMOUNT - rownum)) - 45;
 			html.append("  <a href=\"localhost:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: " + bottomPt + "pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
 			html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
 			html.append("  </a>");
 
-			if (!topRow) {
+			rownum++;
+			if (rownum >= ROW_AMOUNT) {
+				rownum = 0;
 				left += 99;
 			}
-
-			topRow = !topRow;
 		}
 
 		html.append("</div>\n");
