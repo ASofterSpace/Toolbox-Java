@@ -48,6 +48,8 @@ public class StrUtilsTest implements Test {
 		leftPadTest();
 
 		removePartsTest();
+
+		extractPartsTest();
 	}
 
 	public void countStringInStringTest() {
@@ -503,7 +505,24 @@ public class StrUtilsTest implements Test {
 			TestUtils.fail("We called removeTrailingPronounsFromName(\"Fefi [they/them]\") and got '" + result + "'!");
 		}
 
+		result = StrUtils.removeFromTo("12345678", "23", "67");
+		if (!result.equals("18")) {
+			TestUtils.fail("We called removeFromTo(\"12345678\", \"23\", \"67\") and got '" + result + "'!");
+		}
+
 		TestUtils.succeed();
 	}
 
+
+	private void extractPartsTest() {
+
+		TestUtils.start("Extract Parts");
+
+		String result = StrUtils.extract("12345678", "23", "67");
+		if (!result.equals("45")) {
+			TestUtils.fail("We called extract(\"12345678\", \"23\", \"67\") and got '" + result + "'!");
+		}
+
+		TestUtils.succeed();
+	}
 }

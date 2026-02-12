@@ -135,7 +135,9 @@ public class StrUtils {
 	}
 
 	/**
-	 * Extract the content from the haystack string that is between strbefore and strafter
+	 * Extract the content from the haystack string that is between strbefore and strafter,
+	 * so: "12345678", "23", "67" => "45"
+	 * Opposite: removeFromTo
 	 */
 	public static String extract(String haystack, String strbefore, String strafter) {
 		if (haystack == null) {
@@ -1448,6 +1450,30 @@ public class StrUtils {
 		str = StrUtils.replaceAllRepeatedly(str, "  ", " ");
 		str = str.trim();
 		return str;
+	}
+
+	/**
+	 * Remove parts of the content starting with curStart and ending with curEnd,
+	 * so: "12345678", "23", "67" => "18"
+	 * Opposite: extract
+	 */
+	public static String removeFromTo(String haystack, String curStart, String curEnd) {
+		if (haystack == null) {
+			return null;
+		}
+		if (curStart == null) {
+			return haystack;
+		}
+		if (curEnd == null) {
+			return haystack;
+		}
+		int len = curStart.length();
+		int startindex = haystack.indexOf(curStart);
+		int endindex = haystack.indexOf(curEnd, startindex + len);
+		if ((startindex >= 0) && (endindex >= startindex + len)) {
+			return haystack.substring(0, startindex) + haystack.substring(endindex + curEnd.length());
+		}
+		return haystack;
 	}
 
 	/**
