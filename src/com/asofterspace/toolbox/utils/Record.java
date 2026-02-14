@@ -1149,6 +1149,15 @@ public class Record {
 		return 0L;
 	}
 
+
+	public Long getLong(Object key, Long defaultValue) {
+		Long result = getLong(key);
+		if (result == null) {
+			return defaultValue;
+		}
+		return result;
+	}
+
 	/**
 	 * Gets an double value stored in a key of a Record object
 	 * @param key  the key to be searched for

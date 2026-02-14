@@ -538,6 +538,13 @@ public class DateUtils {
 		return (int) Math.round((to.getTime() - from.getTime()) / (1000.0 * 60.0 * 60.0 * 24.0));
 	}
 
+	public static Integer getDayDifferenceMillis(Long from, Long to) {
+		if ((from == null) || (to == null)) {
+			return null;
+		}
+		return (int) Math.round((to - from) / (1000.0 * 60.0 * 60.0 * 24.0));
+	}
+
 	public static Integer getMinuteDifference(Date from, Date to) {
 		if ((from == null) || (to == null)) {
 			return null;
