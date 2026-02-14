@@ -119,6 +119,10 @@ public class DateHolder {
 		return toString();
 	}
 
+	public boolean isNull() {
+		return isNull;
+	}
+
 	public boolean getIsNull() {
 		return isNull;
 	}
@@ -126,7 +130,7 @@ public class DateHolder {
 	// returns true ONLY IF this is after other
 	// (so returns false if either is null, or if they are the same)
 	public boolean after(DateHolder other) {
-		if (getIsNull() || (other == null) || other.getIsNull() ||
+		if (isNull() || (other == null) || other.isNull() ||
 			(serializeDate() == null) || (other.serializeDate() == null)) {
 			return false;
 		}
@@ -140,7 +144,7 @@ public class DateHolder {
 	// returns true ONLY IF this is before other
 	// (so returns false if either is null, or if they are the same)
 	public boolean before(DateHolder other) {
-		if (getIsNull() || (other == null) || other.getIsNull() ||
+		if (isNull() || (other == null) || other.isNull() ||
 			(serializeDate() == null) || (other.serializeDate() == null)) {
 			return false;
 		}
