@@ -2362,9 +2362,16 @@ public abstract class Code extends DefaultStyledDocument {
 			// ... go hunt for one!
 			String[] familiarFontFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
-			// in the worst case, any "monospace" font is better than the default
+			// if there is a dedicated terminal font (Terminus Font, ...), use that
 			for (String fontFamily : familiarFontFamilies) {
-				if (fontFamily.toLowerCase().startsWith("monospace")) {
+				if (fontFamily.toLowerCase().startsWith("terminus")) {
+					editorFontFamily = fontFamily;
+				}
+			}
+
+			// if there is Courier New, then yayyy - use that, we like it!
+			for (String fontFamily : familiarFontFamilies) {
+				if (fontFamily.toLowerCase().replace(" ", "").equals("couriernew")) {
 					editorFontFamily = fontFamily;
 				}
 			}
@@ -2376,16 +2383,9 @@ public abstract class Code extends DefaultStyledDocument {
 				}
 			}
 
-			// if there is a dedicated terminal font (Terminus Font, ...), use that
+			// we really like "monospace" fonts :)
 			for (String fontFamily : familiarFontFamilies) {
-				if (fontFamily.toLowerCase().startsWith("terminus")) {
-					editorFontFamily = fontFamily;
-				}
-			}
-
-			// if there is Courier New, then yayyy - use that, we like it!
-			for (String fontFamily : familiarFontFamilies) {
-				if (fontFamily.toLowerCase().replace(" ", "").equals("couriernew")) {
+				if (fontFamily.toLowerCase().startsWith("monospace")) {
 					editorFontFamily = fontFamily;
 				}
 			}
