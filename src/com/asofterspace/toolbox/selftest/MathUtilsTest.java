@@ -25,6 +25,8 @@ public class MathUtilsTest implements Test {
 		divideIntsTest();
 
 		averageTest();
+
+		calculateMathStrTest();
 	}
 
 	public void findMinimaTest() {
@@ -221,6 +223,27 @@ public class MathUtilsTest implements Test {
 			}
 			TestUtils.fail("We called averageSlow([" + listStr + "])" +
 				" and did not get the expected result " + expectedResult + " but instead " + res + "!");
+		}
+	}
+
+	public void calculateMathStrTest() {
+
+		TestUtils.start("Calculate Math Str Test");
+
+		testCalcMath("1+1", "2");
+		testCalcMath("1*1", "1");
+		testCalcMath("10*12", "120");
+		testCalcMath("10-12", "-2");
+		testCalcMath("3*(4+5)", "27");
+
+		TestUtils.succeed();
+	}
+
+	private void testCalcMath(String calcStr, String expectedResult) {
+
+		String actualResult = MathUtils.calculateMathStr(calcStr);
+		if (!expectedResult.equals(actualResult)) {
+			TestUtils.fail(calcStr + " is " + actualResult + ", NOT " + expectedResult + "!");
 		}
 	}
 
