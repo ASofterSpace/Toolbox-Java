@@ -75,7 +75,7 @@ public class GenericProject {
 	protected Record createRecord() {
 		Record projectConfRec = Record.emptyObject();
 		projectConfRec.set("color", "#EEEEEE");
-		projectConfRec.set("name", this.shortName);
+		projectConfRec.set("name", this.fullName);
 		return projectConfRec;
 	}
 

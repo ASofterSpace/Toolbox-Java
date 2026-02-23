@@ -235,6 +235,7 @@ public class MathUtilsTest implements Test {
 		testCalcMath("10*12", "120");
 		testCalcMath("10-12", "-2");
 		testCalcMath("3*(4+5)", "27");
+		testCalcMath("-9", "-9");
 
 		TestUtils.succeed();
 	}

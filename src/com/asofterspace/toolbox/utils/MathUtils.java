@@ -486,7 +486,7 @@ public class MathUtils {
 		}
 		while (vars.startsWith("+")) {
 			if (vars.length() > 1) {
-				vars = vars.substring(2);
+				vars = vars.substring(1);
 			} else {
 				return "ERROR: No input!";
 			}

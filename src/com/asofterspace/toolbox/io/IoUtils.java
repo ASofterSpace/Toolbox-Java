@@ -144,7 +144,12 @@ public class IoUtils {
 
 		try {
 			if (callback == null) {
-				builder.start();
+				Process proc = builder.start();
+				try {
+					proc.waitFor();
+				} catch (InterruptedException e3) {
+					// ignore
+				}
 			} else {
 				// we want to get stdout and stderr!
 				builder.redirectErrorStream(true);
