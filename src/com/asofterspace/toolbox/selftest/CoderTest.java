@@ -23,7 +23,7 @@ public class CoderTest implements Test {
 
 		TestUtils.start("URL Encoder / Decoder Test");
 
-		String input = "http://www.foo.org/sections/bar bob";
+		String input = "http://www.foo.org/sections/bar bob'#\"";
 		String encoded = UrlEncoder.encode(input);
 		String encodedPath = UrlEncoder.encodePath(input);
 		String encodedFormData = UrlEncoder.encodeFormData(input);
@@ -31,15 +31,15 @@ public class CoderTest implements Test {
 		String decodedPath = UrlDecoder.decode(encodedPath);
 		String decodedFormData = UrlDecoder.decode(encodedFormData);
 
-		if (!"http%3A%2F%2Fwww%2Efoo%2Eorg%2Fsections%2Fbar%20bob".equals(encoded)) {
+		if (!"http%3A%2F%2Fwww%2Efoo%2Eorg%2Fsections%2Fbar%20bob%27%23%22".equals(encoded)) {
 			TestUtils.fail("URL encoding unexpected: " + input + " encoded to: " + encoded);
 			return;
 		}
-		if (!"http://www.foo.org/sections/bar%20bob".equals(encodedPath)) {
+		if (!"http://www.foo.org/sections/bar%20bob%27%23%22".equals(encodedPath)) {
 			TestUtils.fail("URL path encoding unexpected: " + input + " encoded to: " + encodedPath);
 			return;
 		}
-		if (!"http%3A%2F%2Fwww.foo.org%2Fsections%2Fbar+bob".equals(encodedFormData)) {
+		if (!"http%3A%2F%2Fwww.foo.org%2Fsections%2Fbar+bob%27%23%22".equals(encodedFormData)) {
 			TestUtils.fail("URL form data encoding unexpected: " + input + " encoded to: " + encodedFormData);
 			return;
 		}
