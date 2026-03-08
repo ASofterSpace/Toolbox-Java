@@ -120,12 +120,20 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 		this.min = min;
 	}
 
+	public int getMinimum() {
+		return min;
+	}
+
 	public void setMaximum(int max) {
 		this.max = max;
 		setSize(new Dimension(max + 2 * BORDER_WIDTH, getHeight()));
 		setPreferredSize(new Dimension(max + 2 * BORDER_WIDTH, (int) getPreferredSize().getHeight()));
 		setMinimumSize(new Dimension(max + 2 * BORDER_WIDTH, (int) getMinimumSize().getHeight()));
 		setMaximumSize(new Dimension(max + 2 * BORDER_WIDTH, (int) getMaximumSize().getHeight()));
+	}
+
+	public int getMaximum() {
+		return max;
 	}
 
 	public void setBarPosition(Integer newPos, boolean notifyListeners) {
@@ -152,6 +160,10 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 				notifierThread.start();
 			}
 		}
+	}
+
+	public Integer getBarPosition() {
+		return pos;
 	}
 
 	private void displayBarAtPosition(Integer newPos, boolean notifyListeners) {
