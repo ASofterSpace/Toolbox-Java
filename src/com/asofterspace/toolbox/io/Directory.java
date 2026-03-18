@@ -15,6 +15,8 @@ import java.util.List;
 
 public class Directory {
 
+	static final String DIR_STRING_START = "Directory: ";
+
 	private String dirname;
 
 
@@ -556,7 +558,7 @@ public class Directory {
 
 	@Override
 	public String toString() {
-		return "Directory: " + dirname;
+		return DIR_STRING_START + dirname;
 	}
 
 	// Implements equals based on the exact dirname only; there may be several dirnames corresponding to the same directory on the disk though

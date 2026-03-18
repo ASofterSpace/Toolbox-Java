@@ -74,21 +74,25 @@ public class DateUtils {
 			dateStr = dateStr.substring(0, DEFAULT_DATE_FORMAT_STR.length());
 		}
 
-		try {
-			// if we do not have 02-04-2020, but more like 2020-04-02
-			if (dateStr.length() > 5) {
-				if (!((dateStr.charAt(2) == '-') && (dateStr.charAt(5) == '-'))) {
-					try {
-						return DEFAULT_DATE_FORMAT.parse(dateStr);
-					} catch (ArrayIndexOutOfBoundsException aobE) {
-						SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
-						DEFAULT_DATE_FORMAT = newFormat;
-						return newFormat.parse(dateStr);
+		// if the date contains a dot after omitting timestamp (which might contain dots...),
+		// it is more like D. M. YYYY, so skip over YYYY-MM-DD parsing...
+		if (!dateStr.contains(".")) {
+			try {
+				// if we do not have 02-04-2020, but more like 2020-04-02
+				if (dateStr.length() > 5) {
+					if (!((dateStr.charAt(2) == '-') && (dateStr.charAt(5) == '-'))) {
+						try {
+							return DEFAULT_DATE_FORMAT.parse(dateStr);
+						} catch (ArrayIndexOutOfBoundsException aobE) {
+							SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
+							DEFAULT_DATE_FORMAT = newFormat;
+							return newFormat.parse(dateStr);
+						}
 					}
 				}
+			} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
+				// oh no! fall through to backup approach...
 			}
-		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
-			// oh no! fall through to backup approach...
 		}
 
 		// go back to original as it was before cutting pieces off

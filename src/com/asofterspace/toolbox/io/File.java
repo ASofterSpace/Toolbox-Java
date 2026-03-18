@@ -38,6 +38,11 @@ public class File {
 	 */
 	public File(String fullyQualifiedFileName) {
 
+		if (fullyQualifiedFileName.startsWith(Directory.DIR_STRING_START)) {
+			System.out.println("It looks like you are initializing a File(dir + name) " +
+				"object instead of using File(dir, name)!");
+		}
+
 		this.filename = fullyQualifiedFileName;
 	}
 
