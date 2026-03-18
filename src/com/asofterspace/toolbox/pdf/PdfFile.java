@@ -53,12 +53,18 @@ public class PdfFile extends BinaryFile {
 		XREF,
 		TRAILER,
 		STARTXREF,
-		EOF
+		EOF;
 	};
 
 	private PdfSection currentSection;
 
 	private PdfObject currentObject;
+
+	// the builder objects are used to create new PDFs from scratch; they do NOT get populated when
+	// opening an existing PDF which could by laid out in a lot of ways internally - instead, they
+	// only build new PDFs!
+	private List<PdfBuilderText> builderTexts = new ArrayList<>();
+	private List<PdfBuilderPage> builderPages = new ArrayList<>();
 
 
 	/**
@@ -75,6 +81,17 @@ public class PdfFile extends BinaryFile {
 	public PdfFile(File regularFile) {
 
 		super(regularFile);
+	}
+
+	/**
+	 * Create a new PdfFile instance based on a Directory and the name of
+	 * the file inside the directory
+	 * @param directory The directory in which the file is located
+	 * @param filename The (local) name of the actual file
+	 */
+	public PdfFile(Directory directory, String filename) {
+
+		super(directory, filename);
 	}
 
 	private void initEmptyPdf() {
@@ -368,54 +385,98 @@ public class PdfFile extends BinaryFile {
 		return link;
 	}
 
-	public void create(String text) {
+	public void createEmptyDocument() {
+
+		builderTexts = new ArrayList<>();
+		builderPages = new ArrayList<>();
+		builderPages.add(new PdfBuilderPage(612, 792));
+
+		assemble();
+	}
+
+	public void addText(String text, int x, int y) {
+
+		builderTexts.add(new PdfBuilderText(text, x, y));
+
+		assemble();
+	}
+
+	private void assemble() {
 
 		initEmptyPdf();
 
-		this.version = 0;
+		this.version = 7;
 
 		int objNum = 1;
 
-		PdfObject obj = new PdfObject(this, objNum++, 0);
-		obj.setDictValue("/Type", "/Catalog");
-		obj.setDictValue("/Pages", "2 0 R"); // TODO :: use reference instead of hardcoded link
-		objects.add(obj);
+		PdfBuilderPage curBuilderPage = builderPages.get(0);
 
-		obj = new PdfObject(this, objNum++, 0);
+		int catalogObjNum = objNum;
+		PdfObject obj = new PdfObject(this, objNum, 0);
+		obj.setDictValue("/Type", "/Catalog");
+		obj.setDictValue("/Pages", (catalogObjNum+1) + " 0 R");
+		objects.add(obj);
+		objNum++;
+
+		int pagesObjNum = objNum;
+		obj = new PdfObject(this, objNum, 0);
 		obj.setDictValue("/Type", "/Pages");
 		obj.setDictValue("/Count", "1");
-		obj.setDictValue("/Kids", "[3 0 R]"); // TODO :: use reference(s) instead of hardcoded link(s)
+		obj.setDictValue("/Kids", "[" + (pagesObjNum+1) + " 0 R]");
 		objects.add(obj);
+		objNum++;
 
-		obj = new PdfObject(this, objNum++, 0);
+		int rangeObjNum = objNum;
+		obj = new PdfObject(this, objNum, 0);
 		obj.setDictValue("/Type", "/Range");
-		obj.setDictValue("/Parent", "2 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
-		obj.setDictValue("/MediaBox", "[0 0 612 792]");
-		obj.setDictValue("/Contents", "4 0 R"); // TODO :: use reference(s) instead of hardcoded link(s)
+		obj.setDictValue("/Parent", pagesObjNum + " 0 R");
+		obj.setDictValue("/MediaBox", "[0 0 " +
+			curBuilderPage.getWidth() + " " + curBuilderPage.getHeight() + "]");
+		StringBuilder contentsVal = new StringBuilder();
+		contentsVal.append("[");
+		int curBuilderTextNum = rangeObjNum + 2;
+		String sep = "";
+		for (PdfBuilderText builderText : builderTexts) {
+			contentsVal.append(sep);
+			sep = " ";
+			contentsVal.append(curBuilderTextNum + " 0 R");
+			curBuilderTextNum++;
+		}
+		contentsVal.append("]");
+		obj.setDictValue("/Contents", contentsVal.toString());
 		PdfDictionary f1 = new PdfDictionary();
-		f1.set("/F1", "5 0 R");
+		f1.set("/F1", (rangeObjNum+1) + " 0 R");
 		PdfDictionary font = new PdfDictionary();
 		font.set("/Font", f1);
 		obj.setDictValue("/Resources", font);
 		objects.add(obj);
+		objNum++;
 
-		obj = new PdfObject(this, objNum++, 0);
-		String streamContent = "BT\n/F1 24 Tf\n250 700 Td (" + text + ") Tj\nET";
-		obj.setDictValue("/Length", "" + streamContent.length());
-		obj.setStreamContent(streamContent);
-		objects.add(obj);
-
-		obj = new PdfObject(this, objNum++, 0);
+		// int fontObjNum = objNum;
+		obj = new PdfObject(this, objNum, 0);
 		obj.setDictValue("/Type", "/Font");
 		obj.setDictValue("/Subtype", "/Type1");
 		obj.setDictValue("/BaseFont", "/Helvetica"); // TODO :: embed font inline
 		objects.add(obj);
+		objNum++;
+
+		for (PdfBuilderText builderText : builderTexts) {
+			obj = new PdfObject(this, objNum, 0);
+			String streamContent = "BT\n/F1 " + builderText.getSize() +
+				" Tf\n" + builderText.getX() + " " +
+				(curBuilderPage.getHeight() - builderText.getY()) +
+				" Td (" + builderText.getText() + ") Tj\nET";
+			obj.setDictValue("/Length", "" + streamContent.length());
+			obj.setStreamContent(streamContent);
+			objects.add(obj);
+			objNum++;
+		}
 
 		int xrefSize = objects.size() + 1;
 		xrefs.add("0 " + xrefSize);
 
 		trailer.set("/Size", "" + xrefSize);
-		trailer.set("/Root", "1 0 R"); // TODO :: search objects, get the one with Type Catalog, and put its reference here (usually it is 1 0, but not necessarily)
+		trailer.set("/Root", catalogObjNum + " 0 R");
 
 		pdfLoaded = true;
 	}
@@ -549,6 +610,8 @@ public class PdfFile extends BinaryFile {
 			pdf.append("\r\n");
 		}
 
+		startxref = "" + pdf.length();
+
 		pdf.append("xref\r\n");
 		for (String xrefLine : xrefs) {
 			pdf.append(xrefLine + "\r\n");
@@ -560,9 +623,6 @@ public class PdfFile extends BinaryFile {
 		trailer.appendToPdfFile(pdf, "\r\n");
 
 		pdf.append("\r\nstartxref\r\n");
-		// TODO :: insert actual byte offset of the latest xref section... although some pdfviewers seem to not explode if we leave it out
-		// for now, we just keep startxref empty (instead of calculating it properly)
-		startxref = "";
 		pdf.append(startxref + "\r\n");
 
 		pdf.append("%%EOF");
