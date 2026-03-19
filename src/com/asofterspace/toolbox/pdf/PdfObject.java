@@ -320,31 +320,35 @@ public class PdfObject {
 	/**
 	 * Append the content of this PDF object to a PDF file that is in the process of being created
 	 */
-	public void appendToPdfFile(StringBuilder result) {
+	public void appendToPdfFile(StringBuilder result, String outputLineSeparator) {
 
 		result.append(number);
 		result.append(" ");
 		result.append(generation);
 		result.append(" ");
 		result.append("obj");
-		result.append("\r\n");
+		result.append(outputLineSeparator);
 
 		if (content != null) {
 			result.append(content);
-			result.append("\r\n");
+			result.append(outputLineSeparator);
 		}
 
 		if (dictContent != null) {
-			dictContent.appendToPdfFile(result, "\r\n");
-			result.append("\r\n");
+			dictContent.appendToPdfFile(result, outputLineSeparator);
+			result.append(outputLineSeparator);
 		}
 
 		if (streamContent != null) {
-			result.append("stream\r\n");
+			result.append("stream");
+			result.append(outputLineSeparator);
 			result.append(streamContent);
-			result.append("\r\nendstream\r\n");
+			result.append(outputLineSeparator);
+			result.append("endstream");
+			result.append(outputLineSeparator);
 		}
 
-		result.append("endobj\r\n");
+		result.append("endobj");
+		result.append(outputLineSeparator);
 	}
 }
