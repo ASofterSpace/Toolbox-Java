@@ -402,16 +402,37 @@ public class PdfFile extends BinaryFile {
 		assemble();
 	}
 
-	public void addText(String text, int x, int y) {
+	public PdfBuilderText addText(String text, String fontName, int x, int y, int size) {
 
-		builderTexts.add(new PdfBuilderText(text, x, y));
+		PdfBuilderText result = new PdfBuilderText(text, fontName, x, y, size);
+
+		builderTexts.add(result);
 
 		assemble();
+
+		return result;
+	}
+
+	public PdfBuilderTextAcrossLines addTextAcrossLines(String text, String fontName,
+			int x, int y, int size, int maxWidth) {
+
+		PdfBuilderTextAcrossLines result = new PdfBuilderTextAcrossLines(text, fontName, x, y, size, maxWidth);
+
+		builderTexts.add(result);
+
+		assemble();
+
+		return result;
 	}
 
 	private void assemble() {
 
 		initEmptyPdf();
+
+		List<PdfBuilderText> effectiveBuilderTexts = new ArrayList<>();
+		for (PdfBuilderText builderText : builderTexts) {
+			effectiveBuilderTexts.addAll(builderText.splitIntoLines());
+		}
 
 		int objNum = 1;
 
@@ -442,7 +463,7 @@ public class PdfFile extends BinaryFile {
 		contentsVal.append("[");
 		int curBuilderTextNum = rangeObjNum + 2;
 		String sep = "";
-		for (PdfBuilderText builderText : builderTexts) {
+		for (PdfBuilderText builderText : effectiveBuilderTexts) {
 			contentsVal.append(sep);
 			sep = " ";
 			contentsVal.append(curBuilderTextNum + " 0 R");
@@ -466,7 +487,7 @@ public class PdfFile extends BinaryFile {
 		objects.add(obj);
 		objNum++;
 
-		for (PdfBuilderText builderText : builderTexts) {
+		for (PdfBuilderText builderText : effectiveBuilderTexts) {
 			obj = new PdfObject(this, objNum, 0);
 			String streamContent = "BT" + writeNL() + "/F1 " + builderText.getSize() +
 				" Tf" + writeNL() + builderText.getX() + " " +

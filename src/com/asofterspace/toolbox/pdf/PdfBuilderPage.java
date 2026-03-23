@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.pdf;
 
+
 public class PdfBuilderPage {
 
 	private int width;

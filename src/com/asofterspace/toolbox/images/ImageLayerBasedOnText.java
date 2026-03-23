@@ -4,6 +4,10 @@
  */
 package com.asofterspace.toolbox.images;
 
+import java.awt.Canvas;
+import java.awt.Font;
+import java.awt.FontMetrics;
+
 
 /**
  * A single text layer in a multi-layered image
@@ -23,6 +27,8 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 	private Integer outlineSize;
 
 	private ColorRGBA outlineColor;
+
+	private Integer savedDrawOffsetY = null;
 
 
 	public ImageLayerBasedOnText(int offsetX, int offsetY, String text, String fontName, Integer fontSize,
@@ -103,7 +109,7 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 			// not currently supported with transparent drawing!
 			Boolean useAntiAliasing = false;
 
-			ontoImage.drawTextTransparently(text, offsetY, null, null, offsetX,
+			ontoImage.drawTextTransparently(text, offsetY - getDrawOffsetY(), null, null, offsetX,
 				fontName, fontSize, useAntiAliasing, textColor);
 		}
 	}
@@ -111,8 +117,22 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 	private void drawOutline(Image ontoImage, int atX, int atY) {
 
 		Boolean useAntiAliasing = false;
-		ontoImage.drawTextTransparently(text, offsetY+atY, null, null, offsetX+atX,
+		ontoImage.drawTextTransparently(text, offsetY + atY - getDrawOffsetY(), null, null, offsetX+atX,
 			fontName, fontSize, useAntiAliasing, outlineColor);
+	}
+
+	private int getDrawOffsetY() {
+		if (savedDrawOffsetY != null) {
+			return savedDrawOffsetY;
+		}
+
+		Font font = new Font(fontName, Font.PLAIN, fontSize);
+		Canvas c = new Canvas();
+		FontMetrics metrics = c.getFontMetrics(font);
+
+		savedDrawOffsetY = metrics.getMaxDescent();
+
+		return savedDrawOffsetY;
 	}
 
 	public String getText() {
@@ -121,6 +141,7 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 
 	public void setText(String text) {
 		this.text = text;
+		this.savedDrawOffsetY = null;
 	}
 
 	public String getFontName() {
@@ -129,6 +150,7 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 
 	public void setFontName(String fontName) {
 		this.fontName = fontName;
+		this.savedDrawOffsetY = null;
 	}
 
 	public Integer getFontSize() {
@@ -137,6 +159,7 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 
 	public void setFontSize(Integer fontSize) {
 		this.fontSize = fontSize;
+		this.savedDrawOffsetY = null;
 	}
 
 	public ColorRGBA getTextColor() {
@@ -164,11 +187,11 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 	}
 
 	public int getWidth() {
-		return Image.getTextDimensions(text, fontName, fontSize).getX();
+		return Image.getTextDimensionsWidth(text, fontName, fontSize);
 	}
 
 	public int getHeight() {
-		return Image.getTextDimensions(text, fontName, fontSize).getY();
+		return Image.getTextDimensionsHeight(text, fontName, fontSize);
 	}
 
 	public ImageLayerBasedOnText copy() {
@@ -179,7 +202,13 @@ public class ImageLayerBasedOnText extends ImageLayer  {
 
 	public ImageLayerBasedOnImage convertToImageLayerBasedOnImage() {
 		Image baseImg = new Image(getWidth(), getHeight(), new ColorRGBA(0, 0, 0, 0));
+		int prevX = offsetX;
+		int prevY = offsetY;
+		offsetX = 0;
+		offsetY = 0;
 		drawOnto(baseImg);
+		offsetX = prevX;
+		offsetY = prevY;
 		return new ImageLayerBasedOnImage(offsetX, offsetY, baseImg, text);
 	}
 

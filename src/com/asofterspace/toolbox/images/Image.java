@@ -1004,12 +1004,41 @@ public class Image {
 
 	public static Pair<Integer, Integer> getTextDimensions(String text, String fontName, int fontSize) {
 
-		Font font = new Font(fontName, Font.PLAIN, fontSize);
+		if (text == null) {
+			return new Pair<>(0, 0);
+		}
 
+		Font font = new Font(fontName, Font.PLAIN, fontSize);
 		Canvas c = new Canvas();
 		FontMetrics metrics = c.getFontMetrics(font);
 
 		return new Pair<>(metrics.stringWidth(text), metrics.getMaxAscent() + metrics.getMaxDescent());
+	}
+
+	public static int getTextDimensionsWidth(String text, String fontName, int fontSize) {
+
+		if (text == null) {
+			return 0;
+		}
+
+		Font font = new Font(fontName, Font.PLAIN, fontSize);
+		Canvas c = new Canvas();
+		FontMetrics metrics = c.getFontMetrics(font);
+
+		return metrics.stringWidth(text);
+	}
+
+	public static int getTextDimensionsHeight(String text, String fontName, int fontSize) {
+
+		if (text == null) {
+			return 0;
+		}
+
+		Font font = new Font(fontName, Font.PLAIN, fontSize);
+		Canvas c = new Canvas();
+		FontMetrics metrics = c.getFontMetrics(font);
+
+		return metrics.getMaxAscent() + metrics.getMaxDescent();
 	}
 
 	/**
