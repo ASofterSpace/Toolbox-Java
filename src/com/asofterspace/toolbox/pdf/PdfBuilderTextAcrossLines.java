@@ -41,6 +41,10 @@ public class PdfBuilderTextAcrossLines extends PdfBuilderText {
 				result.add(new PdfBuilderText(line.substring(0, untilchar), fontName, x, y + offset, size));
 				offset += size;
 				line = line.substring(untilchar);
+				// after wraparound newline do not start with a space character
+				while (line.startsWith(" ")) {
+					line = line.substring(1);
+				}
 				width = getWidth(line);
 			}
 			result.add(new PdfBuilderText(line, fontName, x, y + offset, size));

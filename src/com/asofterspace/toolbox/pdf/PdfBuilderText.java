@@ -4,9 +4,11 @@
  */
 package com.asofterspace.toolbox.pdf;
 
-import com.asofterspace.toolbox.images.Image;
 import com.asofterspace.toolbox.utils.StrUtils;
 
+import java.awt.Canvas;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,10 @@ public class PdfBuilderText {
 	int y;
 
 	int size;
+
+	private FontMetrics savedMetrics = null;
+
+	private static final Canvas METRICS_CANVAS = new Canvas();
 
 
 	public PdfBuilderText(String text, String fontName, int x, int y, int size) {
@@ -70,7 +76,15 @@ public class PdfBuilderText {
 		// silly approximation
 		// return line.length() * size;
 
-		return Image.getTextDimensionsWidth(line, fontName, size);
+		// works, but will create metrics again and again
+		// return Image.getTextDimensionsWidth(line, fontName, size);
+
+		if (savedMetrics == null) {
+			Font font = new Font(fontName, Font.PLAIN, size);
+			savedMetrics = METRICS_CANVAS.getFontMetrics(font);
+		}
+
+		return savedMetrics.stringWidth(line);
 	}
 
 }

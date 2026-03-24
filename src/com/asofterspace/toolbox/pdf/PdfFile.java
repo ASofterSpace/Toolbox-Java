@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.pdf;
 
+import com.asofterspace.toolbox.coders.PdfTextEncoder;
 import com.asofterspace.toolbox.images.Image;
 import com.asofterspace.toolbox.images.ImageFileCtrl;
 import com.asofterspace.toolbox.io.BinaryFile;
@@ -32,6 +33,7 @@ public class PdfFile extends BinaryFile {
 
 	private boolean pdfLoadingStarted = false;
 	private boolean pdfLoaded = false;
+	private boolean assemblyNeeded = false;
 
 	private Integer version;
 
@@ -399,7 +401,7 @@ public class PdfFile extends BinaryFile {
 		this.builderPages.add(new PdfBuilderPage(612, 792));
 		this.buildXRefsOnSave = true;
 
-		assemble();
+		assemblyNeeded = true;
 	}
 
 	public PdfBuilderText addText(String text, String fontName, int x, int y, int size) {
@@ -408,7 +410,7 @@ public class PdfFile extends BinaryFile {
 
 		builderTexts.add(result);
 
-		assemble();
+		assemblyNeeded = true;
 
 		return result;
 	}
@@ -420,7 +422,7 @@ public class PdfFile extends BinaryFile {
 
 		builderTexts.add(result);
 
-		assemble();
+		assemblyNeeded = true;
 
 		return result;
 	}
@@ -429,8 +431,13 @@ public class PdfFile extends BinaryFile {
 
 		initEmptyPdf();
 
+		// fallback default
+		String fontForAssembly = "Helvetica";
+
 		List<PdfBuilderText> effectiveBuilderTexts = new ArrayList<>();
 		for (PdfBuilderText builderText : builderTexts) {
+			// TODO :: handle several fonts being used
+			fontForAssembly = builderText.getFontName();
 			effectiveBuilderTexts.addAll(builderText.splitIntoLines());
 		}
 
@@ -483,7 +490,8 @@ public class PdfFile extends BinaryFile {
 		obj = new PdfObject(this, objNum, 0);
 		obj.setDictValue("/Type", "/Font");
 		obj.setDictValue("/Subtype", "/Type1");
-		obj.setDictValue("/BaseFont", "/Helvetica"); // TODO :: embed font inline
+		obj.setDictValue("/BaseFont", "/" + fontForAssembly); // TODO :: embed font inline
+		obj.setDictValue("/Encoding", "/WinAnsiEncoding");
 		objects.add(obj);
 		objNum++;
 
@@ -492,7 +500,9 @@ public class PdfFile extends BinaryFile {
 			String streamContent = "BT" + writeNL() + "/F1 " + builderText.getSize() +
 				" Tf" + writeNL() + builderText.getX() + " " +
 				(curBuilderPage.getHeight() - builderText.getY()) +
-				" Td (" + builderText.getText() + ") Tj" + writeNL() + "ET";
+				// using Tj (show text regularly)
+				// also possible would be TJ (show text with additional positioning offset info per glyph)
+				" Td " + PdfTextEncoder.encode(builderText.getText()) + " Tj" + writeNL() + "ET";
 			obj.setDictValue("/Length", "" + streamContent.length());
 			obj.setStreamContent(streamContent);
 			objects.add(obj);
@@ -628,6 +638,11 @@ public class PdfFile extends BinaryFile {
 	}
 
 	public void save() {
+
+		if (assemblyNeeded) {
+			assemble();
+			assemblyNeeded = false;
+		}
 
 		if (!pdfLoaded) {
 			loadPdfContents();

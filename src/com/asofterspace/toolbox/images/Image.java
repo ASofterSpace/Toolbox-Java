@@ -45,6 +45,8 @@ public class Image {
 
 	private static final ColorRGBA DEFAULT_COLOR = ColorRGBA.WHITE;
 
+	private static final Canvas METRICS_CANVAS = new Canvas();
+
 
 	public Image(int width, int height) {
 		this(width, height, true, null);
@@ -1009,8 +1011,7 @@ public class Image {
 		}
 
 		Font font = new Font(fontName, Font.PLAIN, fontSize);
-		Canvas c = new Canvas();
-		FontMetrics metrics = c.getFontMetrics(font);
+		FontMetrics metrics = METRICS_CANVAS.getFontMetrics(font);
 
 		return new Pair<>(metrics.stringWidth(text), metrics.getMaxAscent() + metrics.getMaxDescent());
 	}
@@ -1022,8 +1023,7 @@ public class Image {
 		}
 
 		Font font = new Font(fontName, Font.PLAIN, fontSize);
-		Canvas c = new Canvas();
-		FontMetrics metrics = c.getFontMetrics(font);
+		FontMetrics metrics = METRICS_CANVAS.getFontMetrics(font);
 
 		return metrics.stringWidth(text);
 	}
@@ -1035,8 +1035,7 @@ public class Image {
 		}
 
 		Font font = new Font(fontName, Font.PLAIN, fontSize);
-		Canvas c = new Canvas();
-		FontMetrics metrics = c.getFontMetrics(font);
+		FontMetrics metrics = METRICS_CANVAS.getFontMetrics(font);
 
 		return metrics.getMaxAscent() + metrics.getMaxDescent();
 	}
@@ -1073,8 +1072,7 @@ public class Image {
 		// get width and height
 		Font font = new Font(fontName, Font.PLAIN, fontSize);
 
-		Canvas c = new Canvas();
-		FontMetrics metrics = c.getFontMetrics(font);
+		FontMetrics metrics = METRICS_CANVAS.getFontMetrics(font);
 
 		int textWidth = metrics.stringWidth(text);
 		// adding max descent twice as otherwise Ä is missing dots in League Spartan...

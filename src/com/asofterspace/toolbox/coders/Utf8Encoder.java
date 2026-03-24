@@ -46,7 +46,7 @@ public class Utf8Encoder {
 		str = str.replace("ß", "ÃŸ");
 		str = str.replace("¯", "Â¯");
 		str = str.replace("-", "â€“");
-		
+
 		return str;
 	}
 
