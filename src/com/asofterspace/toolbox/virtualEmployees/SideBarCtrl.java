@@ -143,11 +143,12 @@ public class SideBarCtrl {
 		}
 
 
-		int captionWidth = 90;
+		int captionWidth = 100;
+		int leftOffsetToAdd = 72;
 		int iconWidth = 66;
 		left = LEFT_OFFSET + 4 - ((captionWidth - iconWidth)/2);
 
-		top = 180;
+		top = 163;
 
 		String aStr = "top: " + top + "pt; width: " + captionWidth + "px; color: #000; text-align: center; text-decoration: none;";
 		String imgStr = "class=\"avatar\" style=\"border-radius: unset; width: " + iconWidth + "px;\"";
@@ -160,7 +161,7 @@ public class SideBarCtrl {
 		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/\";\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_PICTURIZER + "')\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/picturizer.png\" />\n");
@@ -169,7 +170,7 @@ public class SideBarCtrl {
 		html.append("</div>\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_EDITOR + "')\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/editor.png\" />\n");
@@ -178,7 +179,7 @@ public class SideBarCtrl {
 		html.append("</div>\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_BACKUPGENERATOR + "')\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/backupgenerator.png\" />\n");
@@ -187,7 +188,7 @@ public class SideBarCtrl {
 		html.append("</div>\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/?console=cybersnail\" target=\"_blank\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/cybersnail.png\" />\n");
@@ -196,7 +197,7 @@ public class SideBarCtrl {
 		html.append("</a>\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<div class=\"sidebar\" onclick=\"window._ve_openLocally('" + KEY_METAPLAYER + "')\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/metaplayer.png\" />\n");
@@ -205,7 +206,7 @@ public class SideBarCtrl {
 		html.append("</div>\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" target=\"target\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/funtube.png\" />\n");
@@ -215,7 +216,7 @@ public class SideBarCtrl {
 		script.append("document.getElementById('sidebar_full_" + entry + "').href = \"http://\" + window.location.hostname + \":3013/funtube\";\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"file:///cyber/Desktop/Filme/overview.htm\" target=\"_blank\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/films.png\" />\n");
@@ -224,7 +225,7 @@ public class SideBarCtrl {
 		html.append("</a>\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"file:///cyber/prog/asofterspace/MediaSorter/output/index.htm\" target=\"_blank\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/links.png\" />\n");
@@ -233,13 +234,14 @@ public class SideBarCtrl {
 		html.append("</a>\n");
 
 		entry++;
-		left += 62;
+		left += leftOffsetToAdd;
 
 		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"https://cloud.asofterspace.com\" target=\"_blank\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/cloud.png\" />\n");
 		html.append("<br>\n");
 		html.append("Cloud\n");
 		html.append("</a>\n");
+
 
 		left = LEFT_OFFSET;
 
@@ -248,11 +250,11 @@ public class SideBarCtrl {
 		html.append("<div class='projectbar' style='right: unset;'>\n");
 
 		int rownum = 0;
-		int ROW_AMOUNT = 3;
+		int ROW_AMOUNT = 4;
 
 		for (GenericProject proj : projects) {
 			html.append("\n");
-			int bottomPt = (70 * (ROW_AMOUNT - rownum)) - 45;
+			int bottomPt = (70 * (ROW_AMOUNT - rownum)) - 60;
 			html.append("  <a href=\"localhost:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: " + bottomPt + "pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
 			html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
 			html.append("  </a>");
