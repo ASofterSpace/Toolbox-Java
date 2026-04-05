@@ -46,14 +46,6 @@ public class DateHolder {
 			return;
 		}
 
-		if (dateStrArg.length() > FORMAT_LENGTH) {
-			dateStrArg = dateStrArg.substring(0, FORMAT_LENGTH);
-		}
-
-		if (dateStrArg.length() < FORMAT_LENGTH) {
-			dateStrArg = dateStrArg + EMPTY_FORMAT_STR.substring(dateStrArg.length());
-		}
-
 		this.dateTimeStr = dateStrArg;
 		this.isNull = false;
 	}
@@ -83,7 +75,7 @@ public class DateHolder {
 		}
 
 		if (date == null) {
-			date = DateUtils.parseDateTime(dateTimeStr);
+			date = DateUtils.parseDateTime(serializeDateTime());
 		}
 
 		return date;
@@ -101,7 +93,9 @@ public class DateHolder {
 		}
 
 		if (dateTimeStr == null) {
-			dateTimeStr = DateUtils.serializeDateTime(date);
+			if (date != null) {
+				dateTimeStr = DateUtils.serializeDateTime(date);
+			}
 		}
 
 		return dateTimeStr;
@@ -112,11 +106,27 @@ public class DateHolder {
 		if (result == null) {
 			return null;
 		}
-		return result.substring(0, DATE_FORMAT_LENGTH);
+		if (result.length() < DATE_FORMAT_LENGTH) {
+			result += EMPTY_FORMAT_STR.substring(result.length());
+		}
+		if (result.length() > DATE_FORMAT_LENGTH) {
+			result = result.substring(0, DATE_FORMAT_LENGTH);
+		}
+		return result;
 	}
 
 	public String serializeDateTime() {
-		return toString();
+		String result = toString();
+		if (result == null) {
+			return null;
+		}
+		if (result.length() < FORMAT_LENGTH) {
+			result += EMPTY_FORMAT_STR.substring(result.length());
+		}
+		if (result.length() > FORMAT_LENGTH) {
+			result = result.substring(0, FORMAT_LENGTH);
+		}
+		return result;
 	}
 
 	public boolean isNull() {
