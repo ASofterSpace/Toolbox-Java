@@ -222,6 +222,8 @@ public class Image {
 		ColorRGBA[][] oldData = data;
 
 		this.data = new ColorRGBA[newHeight][newWidth];
+		this.width = newWidth;
+		this.height = newHeight;
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -237,6 +239,8 @@ public class Image {
 		ColorRGBA[][] oldData = data;
 
 		this.data = new ColorRGBA[newHeight][newWidth];
+		this.width = newWidth;
+		this.height = newHeight;
 
 		for (int y = 0; y < newHeight; y++) {
 			for (int x = 0; x < newWidth; x++) {
