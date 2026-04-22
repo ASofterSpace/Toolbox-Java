@@ -77,9 +77,12 @@ public class HTML {
 	 */
 	public static String prettifyLine(String line) {
 
-		// if we have an enumeration, with *, -, > or >> as bullet points...
-		if (line.startsWith("* ") || line.startsWith("- ") || line.startsWith("&gt; ") || line.startsWith("&gt;&gt; ") ||
-			line.startsWith("-&gt; ") ||
+		if ("***".equals(line) || "---".equals(line)) {
+			return "<hr>";
+		}
+
+		// if we have an enumeration, with *, -, -> or >> as bullet points...
+		if (line.startsWith("* ") || line.startsWith("- ") || line.startsWith("-&gt; ") || line.startsWith("&gt;&gt; ") ||
 			line.startsWith("&nbsp;") || line.startsWith("&#9;") || line.startsWith(" ") || line.startsWith("\t")) {
 
 			// ... set level 0 by default / for the top-most level...
@@ -125,18 +128,13 @@ public class HTML {
 					line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>- </span>" + line.substring(2);
 					spaceCounter += 3;
 				} else {
-					if (line.startsWith("&gt; ")) {
-						line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>&gt; </span>" + line.substring(5);
-						spaceCounter += 3;
+					if (line.startsWith("&gt;&gt; ")) {
+						line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>&gt;&gt; </span>" + line.substring(9);
+						spaceCounter += 5;
 					} else {
-						if (line.startsWith("&gt;&gt; ")) {
-							line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>&gt;&gt; </span>" + line.substring(9);
+						if (line.startsWith("-&gt; ")) {
+							line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>-&gt; </span>" + line.substring(6);
 							spaceCounter += 5;
-						} else {
-							if (line.startsWith("-&gt; ")) {
-								line = "<span style='position:absolute;left:" + (3*spaceCounter) + "pt;'>-&gt; </span>" + line.substring(6);
-								spaceCounter += 5;
-							}
 						}
 					}
 				}
