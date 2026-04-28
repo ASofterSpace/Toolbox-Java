@@ -22,6 +22,10 @@ public class GenericPrettifier {
 			text = UrlDecoder.decode(text);
 		}
 
+		if (text.contains("=C3=")) {
+			text = EmailDecoder.decode(text);
+		}
+
 		// UTF-8 encoded thrice and a bit broken
 		text = StrUtils.replaceAll(text, "ÃÂÃÂ¤", "ä");
 		text = StrUtils.replaceAll(text, "ÃÂÃÂ¶", "ö");
