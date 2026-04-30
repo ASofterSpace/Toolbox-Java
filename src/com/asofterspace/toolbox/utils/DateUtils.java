@@ -22,6 +22,7 @@ public class DateUtils {
 	private static final String DEFAULT_DATE_FORMAT_STR = "yyyy-MM-dd";
 	private static final String FALLBACK_DATE_FORMAT_STR = "dd.MM.yyyy";
 	private static final String DEFAULT_DATE_TIME_FORMAT_STR = "yyyy-MM-dd HH:mm:ss.SSS";
+	private static final String FALLBACK_DATE_TIME_FORMAT_STR = "dd.MM.yyyy HH:mm:ss.SSS";
 	private static final String NUMERICAL_DATE_TIME_FORMAT_STR = "yyyyMMddHHmmssSSS";
 	private static final String DEFAULT_TIME_FORMAT_STR = "HH:mm:ss.SSS";
 	private static final String SHORT_TIME_FORMAT_STR = "HH:mm";
@@ -29,6 +30,7 @@ public class DateUtils {
 	private static SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(DEFAULT_DATE_FORMAT_STR);
 	private static SimpleDateFormat FALLBACK_DATE_FORMAT = new SimpleDateFormat(FALLBACK_DATE_FORMAT_STR);
 	private static SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+	private static SimpleDateFormat FALLBACK_DATE_TIME_FORMAT = new SimpleDateFormat(FALLBACK_DATE_TIME_FORMAT_STR);
 	private static SimpleDateFormat NUMERICAL_DATE_TIME_FORMAT = new SimpleDateFormat(NUMERICAL_DATE_TIME_FORMAT_STR);
 	private static SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat(DEFAULT_TIME_FORMAT_STR);
 	private static SimpleDateFormat SHORT_TIME_FORMAT = new SimpleDateFormat(SHORT_TIME_FORMAT_STR);
@@ -183,16 +185,52 @@ public class DateUtils {
 		if (!dateTimeStr.contains(":")) {
 			dateTimeStr = dateTimeStr + " 00:00:00.000";
 		}
+		if (!dateTimeStr.contains(".")) {
+			dateTimeStr = dateTimeStr + ".000";
+		}
 
 		try {
 			try {
-				return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
-			} catch (ArrayIndexOutOfBoundsException aobE) {
-				SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
-				DEFAULT_DATE_TIME_FORMAT = newFormat;
-				return newFormat.parse(dateTimeStr);
+				try {
+					try {
+						return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
+					} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex1) {
+
+						// convert 1 Feb 2026 to 01.02.2026
+						dateTimeStr = dateTimeStr.toUpperCase();
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " JAN ", ".01.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " FEB ", ".02.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " MAR ", ".03.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " APR ", ".04.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " MAY ", ".05.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " JUN ", ".06.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " JUL ", ".07.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " AUG ", ".08.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " SEP ", ".09.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " OCT ", ".10.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " NOV ", ".11.");
+						dateTimeStr = StrUtils.replaceAll(dateTimeStr, " DEC ", ".12.");
+						if (dateTimeStr.indexOf(".") == 1) {
+							dateTimeStr = "0" + dateTimeStr;
+						}
+
+						// convert 2026-01-01T16:34:12 to 2026-01-01 16:34:12
+						dateTimeStr = dateTimeStr.replace('T', ' ');
+
+						return DEFAULT_DATE_TIME_FORMAT.parse(dateTimeStr);
+					}
+
+				} catch (ArrayIndexOutOfBoundsException ex2) {
+					SimpleDateFormat newFormat = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STR);
+					DEFAULT_DATE_TIME_FORMAT = newFormat;
+					return newFormat.parse(dateTimeStr);
+				}
+
+			} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex3) {
+				return FALLBACK_DATE_TIME_FORMAT.parse(dateTimeStr);
 			}
-		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex) {
+
+		} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException ex4) {
 			System.err.println("Could not parse the date time " + dateTimeStr + " - using current time instead!");
 			return new Date();
 		}
