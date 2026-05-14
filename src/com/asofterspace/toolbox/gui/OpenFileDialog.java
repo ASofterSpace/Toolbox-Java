@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -46,6 +47,8 @@ public class OpenFileDialog {
 	public static final int CANCEL_OPTION = JFileChooser.CANCEL_OPTION;
 	public static final int ERROR_OPTION = JFileChooser.ERROR_OPTION;
 
+	public static final String VISUAL_DIR_INDICATOR = " >";
+
 	private Directory currentDirectory = new Directory(".");
 
 	private String dialogTitle = "Open File";
@@ -53,6 +56,13 @@ public class OpenFileDialog {
 	private int fileSelectionMode = FILES_ONLY;
 
 	private boolean multiSelectionEnabled = false;
+	private boolean fileHidingEnabled = false;
+
+	// true for opening, false for saving
+	private boolean openingMode = true;
+	private JTextField currentSaveFileNameField = null;
+
+	private List<FileFilter> filters = new ArrayList<>();
 
 	private List<File> selectedFiles;
 
@@ -79,6 +89,18 @@ public class OpenFileDialog {
 	}
 
 	public void showOpenDialog(CallbackWithStatus callback) {
+		this.openingMode = true;
+		showDialog(callback);
+	}
+
+	public void showSaveDialog(CallbackWithStatus callback) {
+		this.openingMode = false;
+		showDialog(callback);
+	}
+
+	private void showDialog(CallbackWithStatus callback) {
+
+		int rowNum = 0;
 
 		this.callback = callback;
 		this.selectedFiles = new ArrayList<>();
@@ -122,20 +144,31 @@ public class OpenFileDialog {
 		});
 		topPanel.add(upBtn, new Arrangement(1, 0, 0.0, 0.0));
 
-		dialog.add(topPanel, new Arrangement(0, 0, 1.0, 0.0));
+		dialog.add(topPanel, new Arrangement(0, rowNum++, 1.0, 0.0));
 
 		fileView = new JList<>();
 		setMultiSelectionEnabled(multiSelectionEnabled);
+		setFileHidingEnabled(fileHidingEnabled);
 		JScrollPane fileViewScroller = new JScrollPane(fileView);
 		fileViewScroller.setPreferredSize(new Dimension(8, 8));
-		dialog.add(fileViewScroller, new Arrangement(0, 1, 1.0, 1.0));
+		dialog.add(fileViewScroller, new Arrangement(0, rowNum++, 1.0, 1.0));
 
 		// enter directories / open files when double clicking
 		fileView.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
+				// when clicking, in save mode, do set the save-as-name to the name of what we clicked
+				if (!openingMode) {
+					if (currentSaveFileNameField != null) {
+						int index = fileView.locationToIndex(e.getPoint());
+						if (index >= visibleDirectories.size()) {
+							currentSaveFileNameField.setText(visibleFiles.get(index - visibleDirectories.size()));
+						}
+					}
+				}
+				// when double-clicking, perform an action (open or save)
 				if (e.getClickCount() == 2) {
 					// one selected (as a double click always targets just one row)
-					// - enter directory (if it is one) or open file (if it is one)
+					// - enter directory (if it is one) or open/save file (if it is one)
 					int index = fileView.locationToIndex(e.getPoint());
 					performFileViewActionBasedOnIndex(index);
 				}
@@ -166,13 +199,23 @@ public class OpenFileDialog {
 			}
 		});
 
+		if (!openingMode) {
+			currentSaveFileNameField = new JTextField();
+			dialog.add(currentSaveFileNameField, new Arrangement(0, rowNum++, 1.0, 0.0));
+		}
+
 		JPanel buttonRow = new JPanel();
 		GridLayout buttonRowLayout = new GridLayout(1, 3);
 		buttonRowLayout.setHgap(8);
 		buttonRow.setLayout(buttonRowLayout);
-		dialog.add(buttonRow, new Arrangement(0, 2, 1.0, 0.0));
+		dialog.add(buttonRow, new Arrangement(0, rowNum++, 1.0, 0.0));
 
-		JButton openButton = new JButton("Select These");
+		JButton openButton = null;
+		if (openingMode) {
+			openButton = new JButton("Select These");
+		} else {
+			openButton = new JButton("Save As This");
+		}
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openCurrentlySelectedFiles();
@@ -186,7 +229,10 @@ public class OpenFileDialog {
 				// enter into the currently selected directory
 				List<String> highlightedEntries = fileView.getSelectedValuesList();
 				if (highlightedEntries.size() > 0) {
-					enterDirectory(highlightedEntries.get(0));
+					String cur = highlightedEntries.get(0);
+					if (cur.endsWith(VISUAL_DIR_INDICATOR)) {
+						enterDirectory(cur.substring(0, cur.length() - 2));
+					}
 				}
 			}
 		});
@@ -248,7 +294,7 @@ public class OpenFileDialog {
 			if (fileSelectionMode == DIRECTORIES_ONLY) {
 				return;
 			}
-			// open this file
+			// open/save this file
 			selectedFiles = new ArrayList<>();
 			selectedDirectories = new ArrayList<>();
 			selectedFiles.add(new File(currentDirectory, visibleFiles.get(index - visibleDirectories.size())));
@@ -262,6 +308,11 @@ public class OpenFileDialog {
 	 */
 	private void refreshFileView() {
 
+		// only refresh once the visible parts are actually shown
+		if ((currentDirPathField == null) || (fileView == null)) {
+			return;
+		}
+
 		currentDirPathField.setText(currentDirectory.getCanonicalDirname());
 
 		boolean recursively = false;
@@ -269,7 +320,9 @@ public class OpenFileDialog {
 		visibleDirectories = new ArrayList<>();
 
 		for (Directory cur : currentDirectory.getAllDirectories(recursively)) {
-			visibleDirectories.add(cur.getLocalDirname());
+			if (!(fileHidingEnabled && cur.isHidden())) {
+				visibleDirectories.add(cur.getLocalDirname());
+			}
 		}
 
 		visibleDirectories = SortUtils.sortNumerically(visibleDirectories);
@@ -277,7 +330,9 @@ public class OpenFileDialog {
 		visibleFiles = new ArrayList<>();
 
 		for (File cur : currentDirectory.getAllFiles(recursively)) {
-			visibleFiles.add(cur.getLocalFilename());
+			if (!(fileHidingEnabled && cur.isHidden())) {
+				visibleFiles.add(cur.getLocalFilename());
+			}
 		}
 
 		visibleFiles = SortUtils.sortNumerically(visibleFiles);
@@ -285,7 +340,7 @@ public class OpenFileDialog {
 		String[] fileViewData = new String[visibleDirectories.size() + visibleFiles.size()];
 
 		for (int i = 0; i < visibleDirectories.size(); i++) {
-			fileViewData[i] = visibleDirectories.get(i);
+			fileViewData[i] = visibleDirectories.get(i) + VISUAL_DIR_INDICATOR;
 		}
 		for (int i = 0; i < visibleFiles.size(); i++) {
 			fileViewData[i + visibleDirectories.size()] = visibleFiles.get(i);
@@ -357,12 +412,53 @@ public class OpenFileDialog {
 		}
 	}
 
+	public boolean getFileHidingEnabled() {
+		return fileHidingEnabled;
+	}
+
+	public void setFileHidingEnabled(boolean fileHidingEnabled) {
+		this.fileHidingEnabled = fileHidingEnabled;
+
+		refreshFileView();
+	}
+
 	public List<File> getSelectedFiles() {
-		return selectedFiles;
+
+		if (openingMode) {
+			return selectedFiles;
+		} else {
+			List<File> result = new ArrayList<>();
+			result.add(new File(getCurrentDirectory(), currentSaveFileNameField.getText()));
+			return result;
+		}
+	}
+
+	public File getSelectedFile() {
+		if (openingMode) {
+			if (selectedFiles != null) {
+				if (selectedFiles.size() > 0) {
+					return selectedFiles.get(0);
+				}
+			}
+			return null;
+		} else {
+			return new File(getCurrentDirectory(), currentSaveFileNameField.getText());
+		}
 	}
 
 	public List<Directory> getSelectedDirectories() {
 		return selectedDirectories;
+	}
+
+	public void addChoosableFileFilter(FileFilter filter) {
+		filters.add(filter);
+	}
+
+	/**
+	 * Gets the currently selected filter (of all the choosable ones)
+	 */
+	public FileFilter getFileFilter() {
+		return null; // TODO
 	}
 
 }

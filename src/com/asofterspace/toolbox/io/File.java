@@ -211,6 +211,10 @@ public class File {
 		return Paths.get(filename);
 	}
 
+	public boolean isHidden() {
+		return getJavaFile().isHidden();
+	}
+
 	/**
 	 * Get a URI object representing this file
 	 */

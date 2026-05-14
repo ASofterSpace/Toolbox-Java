@@ -224,6 +224,10 @@ public class Directory {
 		return Paths.get(dirname);
 	}
 
+	public boolean isHidden() {
+		return getJavaFile().isHidden();
+	}
+
 	/**
 	 * Creates this directory on the underlying file system
 	 */

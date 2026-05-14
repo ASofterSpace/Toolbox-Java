@@ -40,7 +40,7 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 	public BarMenuItemForMainMenu() {
 		super("");
 
-		setMinimum(0);
+		this.min = 0;
 		setMaximum(100);
 		this.pos = 0;
 		this.setPos = 0;
