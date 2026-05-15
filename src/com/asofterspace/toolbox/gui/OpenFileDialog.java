@@ -26,6 +26,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -69,8 +70,9 @@ public class OpenFileDialog {
 	private List<Directory> selectedDirectories;
 
 	// GUI parts
-	private JFrame dialog;
-	private JTextField currentDirPathField;
+	private JFrame dialog = null;
+	private JTextField currentDirPathField = null;
+	private JComboBox<String> filterDropDown = null;
 	private JList<String> fileView;
 
 	// data for the GUI
@@ -162,6 +164,9 @@ public class OpenFileDialog {
 						int index = fileView.locationToIndex(e.getPoint());
 						if (index >= visibleDirectories.size()) {
 							currentSaveFileNameField.setText(visibleFiles.get(index - visibleDirectories.size()));
+							// do NOT progress to double-click code - instead, someone has to click the "Save" button
+							// explicitly to avoid accidentally overwriting files!
+							return;
 						}
 					}
 				}
@@ -203,6 +208,15 @@ public class OpenFileDialog {
 			currentSaveFileNameField = new JTextField();
 			dialog.add(currentSaveFileNameField, new Arrangement(0, rowNum++, 1.0, 0.0));
 		}
+
+		filterDropDown = new JComboBox<>();
+		refreshFilterContents();
+		filterDropDown.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshFileView();
+			}
+		});
+		dialog.add(filterDropDown, new Arrangement(0, rowNum++, 1.0, 0.0));
 
 		JPanel buttonRow = new JPanel();
 		GridLayout buttonRowLayout = new GridLayout(1, 3);
@@ -329,9 +343,13 @@ public class OpenFileDialog {
 
 		visibleFiles = new ArrayList<>();
 
+		FileFilter filter = getFileFilter();
+
 		for (File cur : currentDirectory.getAllFiles(recursively)) {
 			if (!(fileHidingEnabled && cur.isHidden())) {
-				visibleFiles.add(cur.getLocalFilename());
+				if ((filter == null) || (filter.accept(cur.getJavaFile()))) {
+					visibleFiles.add(cur.getLocalFilename());
+				}
 			}
 		}
 
@@ -452,13 +470,34 @@ public class OpenFileDialog {
 
 	public void addChoosableFileFilter(FileFilter filter) {
 		filters.add(filter);
+		refreshFilterContents();
 	}
 
 	/**
 	 * Gets the currently selected filter (of all the choosable ones)
 	 */
 	public FileFilter getFileFilter() {
-		return null; // TODO
+		if (filterDropDown != null) {
+			return filters.get(filterDropDown.getSelectedIndex());
+		}
+		return null;
 	}
 
+	private void refreshFilterContents() {
+		if (filterDropDown != null) {
+			filterDropDown.setVisible(filters.size() > 0);
+			filterDropDown.removeAllItems();
+
+			int lastNum = -1;
+			if (filters != null) {
+				for (FileFilter cur : filters) {
+					filterDropDown.addItem(cur.getDescription());
+					lastNum++;
+				}
+			}
+			if (lastNum >= 0) {
+				filterDropDown.setSelectedIndex(lastNum);
+			}
+		}
+	}
 }
