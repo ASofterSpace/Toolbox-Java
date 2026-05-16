@@ -36,6 +36,8 @@ public class CreateFolderDialog {
 	private JFrame dialog = null;
 	private JTextField newDirNameField = null;
 
+	private String dialogTitle = "Create Directory";
+
 
 	public CreateFolderDialog(Directory currentDirectory) {
 		this.currentDirectory = currentDirectory;
@@ -46,7 +48,7 @@ public class CreateFolderDialog {
 		if (currentDirectory == null) {
 			currentDirectory = new Directory("/");
 		}
-		this.dialog = new JFrame("Create Directory in " + currentDirectory.getCanonicalDirname());
+		this.dialog = new JFrame(dialogTitle + " in " + currentDirectory.getCanonicalDirname());
 
 		GridBagLayout dialogLayout = new GridBagLayout();
 		dialog.setLayout(dialogLayout);
@@ -92,6 +94,10 @@ public class CreateFolderDialog {
 		dialog.setPreferredSize(new Dimension(width, height));
 
 		GuiUtils.centerAndShowWindow(dialog);
+	}
+
+	public void setDialogTitle(String dialogTitle) {
+		this.dialogTitle = dialogTitle;
 	}
 
 	public Directory getCreatedDirectory() {

@@ -488,8 +488,31 @@ public class OpenFileDialog {
 		}
 	}
 
+	public Directory getSelectedDirectory() {
+		if (openingMode) {
+			if (selectedDirectories != null) {
+				if (selectedDirectories.size() > 0) {
+					return selectedDirectories.get(0);
+				}
+			}
+			return null;
+		} else {
+			String curText = currentSaveFileNameField.getText();
+			if ("".equals(curText)) {
+				return getCurrentDirectory();
+			}
+			return new Directory(getCurrentDirectory(), curText);
+		}
+	}
+
 	public List<Directory> getSelectedDirectories() {
-		return selectedDirectories;
+		if (openingMode) {
+			return selectedDirectories;
+		} else {
+			List<Directory> result = new ArrayList<>();
+			result.add(getSelectedDirectory());
+			return result;
+		}
 	}
 
 	public void addChoosableFileFilter(FileFilter filter) {
@@ -502,7 +525,10 @@ public class OpenFileDialog {
 	 */
 	public FileFilter getFileFilter() {
 		if (filterDropDown != null) {
-			return filters.get(filterDropDown.getSelectedIndex());
+			int index = filterDropDown.getSelectedIndex();
+			if ((index >= 0) && (index < filters.size())) {
+				return filters.get(index);
+			}
 		}
 		return null;
 	}
