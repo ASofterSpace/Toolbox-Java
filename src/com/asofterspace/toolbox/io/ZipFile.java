@@ -105,11 +105,19 @@ public class ZipFile extends File {
 		return null;
 	}
 
+	public void addZippedFile(File fileToAdd) {
+
+		if (fileToAdd == null) {
+			return;
+		}
+
+		addZippedFile(fileToAdd, "");
+	}
+
 	/**
 	 * Add one particular file to the zip file, storing it in a relative path
 	 * which identifies the internal folder only (!), but does NOT include the filename!
-	 * The zipRelativePath should NOT start with a slash/backslash, but it may or may not
-	 * end on one.
+	 * The leading and/or trailing slashes and/or backslashes in zipRelativePath get ignored.
 	 */
 	public void addZippedFile(File fileToAdd, String zipRelativePath) {
 
@@ -121,10 +129,6 @@ public class ZipFile extends File {
 			return;
 		}
 
-		if (!zipRelativePath.endsWith("/") && !zipRelativePath.endsWith("\\")) {
-			zipRelativePath += "/";
-		}
-
 		if (zippedFiles == null) {
 			loadZipContents();
 		}
@@ -134,6 +138,26 @@ public class ZipFile extends File {
 		File addedFile = fileToAdd.copyToDisk(addFileInDirectory);
 
 		zippedFiles.add(new ZippedFile(zipRelativePath + addedFile.getLocalFilename(), addedFile));
+	}
+
+	/**
+	 * initialize this zip file as empty / fresh / new one
+	 * returns true if it succeeds
+	 * afterwards, call addZippedFile (multiple times if wanted), and finally save or saveTo
+	 */
+	public boolean createEmpty(boolean complainIfExists) {
+
+		if (complainIfExists) {
+			if (exists()) {
+				return false;
+			}
+		}
+
+		createWorkDir();
+
+		zippedFiles = new ArrayList<>();
+
+		return true;
 	}
 
 	protected void loadZipContents() {
@@ -195,6 +219,10 @@ public class ZipFile extends File {
 		}
 
 		zippedFiles = result;
+	}
+
+	public void save() {
+		saveTo(getCanonicalFilename());
 	}
 
 	public void saveTo(String newLocation) {

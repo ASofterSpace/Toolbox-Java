@@ -392,7 +392,7 @@ public class PdfFile extends BinaryFile {
 		return link;
 	}
 
-	public void createEmptyDocument() {
+	public void createEmpty() {
 
 		this.version = 7;
 

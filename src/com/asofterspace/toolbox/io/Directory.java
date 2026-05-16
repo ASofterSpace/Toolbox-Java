@@ -4,6 +4,8 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.StrUtils;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -119,7 +121,20 @@ public class Directory {
 	 */
 	public Directory createChildDir(String name) {
 
+		name = StrUtils.replaceAll(name, "\\", "/");
+		name = StrUtils.replaceAllRepeatedly(name, "//", "/");
+		while (name.startsWith("/")) {
+			name = name.substring(1);
+		}
+		while (name.endsWith("/")) {
+			name = name.substring(0, name.length() - 1);
+		}
+
 		Directory child = new Directory(dirname + "/" + name);
+
+		if ("".equals(name)) {
+			child = new Directory(dirname);
+		}
 
 		child.create();
 
