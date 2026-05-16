@@ -146,6 +146,25 @@ public class OpenFileDialog {
 		});
 		topPanel.add(upBtn, new Arrangement(1, 0, 0.0, 0.0));
 
+		if (!openingMode) {
+			JButton createDirBtn = new JButton("Create Dir");
+			createDirBtn.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					CreateFolderDialog diag = new CreateFolderDialog(currentDirectory);
+					diag.showDialog(new CallbackWithStatus() {
+						public void call(int status) {
+							switch (status) {
+								case CreateFolderDialog.APPROVE_OPTION:
+									enterDirectory(diag.getCreatedDirectory().getLocalDirname());
+									break;
+							}
+						}
+					});
+				}
+			});
+			topPanel.add(createDirBtn, new Arrangement(2, 0, 0.0, 0.0));
+		}
+
 		dialog.add(topPanel, new Arrangement(0, rowNum++, 1.0, 0.0));
 
 		fileView = new JList<>();
@@ -162,6 +181,11 @@ public class OpenFileDialog {
 				if (!openingMode) {
 					if (currentSaveFileNameField != null) {
 						int index = fileView.locationToIndex(e.getPoint());
+						if (fileSelectionMode != FILES_ONLY) {
+							if (index < visibleDirectories.size()) {
+								currentSaveFileNameField.setText(visibleDirectories.get(index));
+							}
+						}
 						if (index >= visibleDirectories.size()) {
 							currentSaveFileNameField.setText(visibleFiles.get(index - visibleDirectories.size()));
 							// do NOT progress to double-click code - instead, someone has to click the "Save" button
