@@ -269,7 +269,7 @@ public class OpenFileDialog {
 				if (highlightedEntries.size() > 0) {
 					String cur = highlightedEntries.get(0);
 					if (cur.endsWith(VISUAL_DIR_INDICATOR)) {
-						enterDirectory(cur.substring(0, cur.length() - 2));
+						enterDirectory(cur.substring(0, cur.length() - VISUAL_DIR_INDICATOR.length()));
 					}
 				}
 			}
@@ -308,8 +308,9 @@ public class OpenFileDialog {
 		List<String> highlightedEntries = fileView.getSelectedValuesList();
 
 		for (String highlightedEntry : highlightedEntries) {
-			Directory newDir = new Directory(currentDirectory, highlightedEntry);
-			if (newDir.exists()) {
+			if (highlightedEntry.endsWith(VISUAL_DIR_INDICATOR)) {
+				Directory newDir = new Directory(currentDirectory, highlightedEntry.substring(0,
+					highlightedEntry.length() - VISUAL_DIR_INDICATOR.length()));
 				if (fileSelectionMode != FILES_ONLY) {
 					selectedDirectories.add(newDir);
 				}
