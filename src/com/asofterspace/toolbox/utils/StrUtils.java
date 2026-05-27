@@ -869,6 +869,10 @@ public class StrUtils {
 		return true;
 	}
 
+	public static boolean similar(String str1, String str2) {
+		return removeWhitespace(str1).equals(removeWhitespace(str2));
+	}
+
 	public static String prepareForParsing(String value) {
 
 		// remove currency signs
