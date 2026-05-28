@@ -320,6 +320,14 @@ public class OpenFileDialog {
 				}
 			}
 		}
+
+		// do not actually exit the dialog if files are wanted but none are selected!
+		if (fileSelectionMode == FILES_ONLY) {
+			if (getSelectedFile() == null) {
+				return;
+			}
+		}
+
 		dialog.dispose();
 		callback.call(APPROVE_OPTION);
 	}
@@ -485,7 +493,11 @@ public class OpenFileDialog {
 			}
 			return null;
 		} else {
-			return new File(getCurrentDirectory(), currentSaveFileNameField.getText());
+			String currentSaveFileNameFieldStr = currentSaveFileNameField.getText();
+			if ("".equals(currentSaveFileNameFieldStr)) {
+				return null;
+			}
+			return new File(getCurrentDirectory(), currentSaveFileNameFieldStr);
 		}
 	}
 
