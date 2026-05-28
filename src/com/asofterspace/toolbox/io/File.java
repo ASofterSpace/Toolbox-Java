@@ -543,6 +543,15 @@ public class File {
 		return "File: " + filename;
 	}
 
+	/**
+	 * Returns true if this file and the other one have the same contents
+	 * (so e.g. two images with exactly the same contents, two documents with the same contents etc. -
+	 * even if they are two different files on disk, which would then just be duplicates)
+	 */
+	public boolean hasSameContentAs(File other) {
+		return IoUtils.filesHaveSameContent(this, other);
+	}
+
 	// Implements equals based on the exact filename only; there may be several filenames corresponding to the same file on the disk though
 	// (e.g. absolute vs. relative paths)
 	@Override

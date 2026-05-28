@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -311,6 +312,41 @@ public class IoUtils {
 			}
 		}
 		return result;
+	}
+
+	public static boolean filesHaveSameContent(File a, File b) {
+		if ((a == null) || (b == null)) {
+			return false;
+		}
+
+		Long aSize = a.getSize();
+		Long bSize = b.getSize();
+		if ((aSize == null) || (bSize == null)) {
+			return false;
+		}
+		long aSizeL = aSize;
+		long bSizeL = bSize;
+		if (aSizeL != bSizeL) {
+			return false;
+		}
+
+		BinaryFile aBin = null;
+		if (a instanceof BinaryFile) {
+			aBin = (BinaryFile) a;
+		} else {
+			aBin = new BinaryFile(a);
+		}
+		BinaryFile bBin = null;
+		if (b instanceof BinaryFile) {
+			bBin = (BinaryFile) b;
+		} else {
+			bBin = new BinaryFile(b);
+		}
+
+		byte[] aBytes = aBin.loadContent();
+		byte[] bBytes = bBin.loadContent();
+
+		return Arrays.equals(aBytes, bBytes);
 	}
 
 }

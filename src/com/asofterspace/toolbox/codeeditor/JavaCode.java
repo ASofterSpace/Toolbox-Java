@@ -113,6 +113,7 @@ public class JavaCode extends PublicPrivateFunctionSupplyingCode {
 		automaticallyAddedImports.put("StandardCharsets", "java.nio.charset.StandardCharsets");
 		automaticallyAddedImports.put("Files", "java.nio.file.Files");
 		automaticallyAddedImports.put("ArrayList", "java.util.ArrayList");
+		automaticallyAddedImports.put("Arrays", "java.util.Arrays");
 		automaticallyAddedImports.put("Collection", "java.util.Collection");
 		automaticallyAddedImports.put("Collections", "java.util.Collections");
 		automaticallyAddedImports.put("Comparator", "java.util.Comparator");
