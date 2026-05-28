@@ -321,11 +321,23 @@ public class OpenFileDialog {
 			}
 		}
 
-		// do not actually exit the dialog if files are wanted but none are selected!
-		if (fileSelectionMode == FILES_ONLY) {
-			if (getSelectedFile() == null) {
-				return;
-			}
+		// do not actually exit the dialog if nothing is selected!
+		switch (fileSelectionMode) {
+			case FILES_ONLY:
+				if (getSelectedFile() == null) {
+					return;
+				}
+				break;
+			case DIRECTORIES_ONLY:
+				if (getSelectedDirectory() == null) {
+					return;
+				}
+				break;
+			default:
+				if ((getSelectedFile() == null) && (getSelectedDirectory() == null)) {
+					return;
+				}
+				break;
 		}
 
 		dialog.dispose();
