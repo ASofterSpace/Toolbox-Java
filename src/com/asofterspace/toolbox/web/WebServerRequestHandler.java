@@ -167,9 +167,10 @@ public class WebServerRequestHandler implements Runnable {
 				}
 			}
 
-		} catch (IOException e) {
+		} catch (Throwable t) {
 			System.err.println("Something unexpected happened to the connection request handler!");
-			System.err.println(e);
+			System.err.println(t);
+			respond(500);
 		}
 
 		cleanup();
@@ -510,7 +511,7 @@ public class WebServerRequestHandler implements Runnable {
 
 	protected void respond(String status, WebServerAnswer answer) throws IOException {
 
-		if (responded) {
+		if (responded || (output == null)) {
 			return;
 		}
 

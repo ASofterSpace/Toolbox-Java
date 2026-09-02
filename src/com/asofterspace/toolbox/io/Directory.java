@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.io;
 
+import com.asofterspace.toolbox.utils.MathUtils;
 import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.io.IOException;
@@ -147,7 +148,30 @@ public class Directory {
 	 */
 	public Directory getParentDirectory() {
 
-		return new Directory(dirname + "/..");
+		String newDirname = dirname;
+		while (newDirname.endsWith("/") || newDirname.endsWith("\\")) {
+			newDirname = newDirname.substring(0, newDirname.length() - 1);
+		}
+		int lp1 = newDirname.lastIndexOf("/");
+		int lp2 = newDirname.lastIndexOf("\\");
+		int pos = 0;
+		if (lp1 > 0) {
+			if (lp2 > 0) {
+				pos = MathUtils.max(lp1, lp2);
+			} else {
+				pos = lp1;
+			}
+		} else {
+			pos = lp2;
+		}
+		if (pos < 0) {
+			pos = 0;
+		}
+		newDirname = newDirname.substring(0, pos);
+		if ("".equals(newDirname)) {
+			newDirname = "/";
+		}
+		return new Directory(newDirname);
 	}
 
 	/**

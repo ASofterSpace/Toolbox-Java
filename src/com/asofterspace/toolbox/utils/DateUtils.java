@@ -161,6 +161,17 @@ public class DateUtils {
 		return createDateHolder(parseDate(dateStr));
 	}
 
+	public static DateHolder parseDateHolderFromDateAndTimeExactly(String dateStr, String timeStr) {
+		int pos = dateStr.indexOf(":");
+		if (pos >= 0) {
+			dateStr = dateStr.substring(0, Math.max(0, pos - 2));
+		}
+		dateStr = dateStr.trim() + " " + timeStr;
+		DateHolder result = new DateHolder();
+		result.initParsingExactString(dateStr);
+		return result;
+	}
+
 	public static DateHolder createDateHolder(Date date) {
 		DateHolder result = new DateHolder();
 		result.initWithDate(date);
