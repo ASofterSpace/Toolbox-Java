@@ -168,9 +168,14 @@ public class WebServerRequestHandler implements Runnable {
 			}
 
 		} catch (Throwable t) {
-			System.err.println("Something unexpected happened to the connection request handler!");
+			System.err.println("Something unexpected happened to the connection request handler:");
 			System.err.println(t);
-			respond(500);
+			try {
+				respond(500);
+			} catch (Throwable tt) {
+				System.err.println("Something more happened while trying to send a HTTP 500 response:");
+				System.err.println(tt);
+			}
 		}
 
 		cleanup();
