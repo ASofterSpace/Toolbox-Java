@@ -159,7 +159,7 @@ public class TaskCtrlBase {
 		List<String> onDone = new ArrayList<>();
 
 		// this is an ad-hoc task which is not scheduled ever
-		Integer scheduledOnXDayOfMonth = null;
+		List<Integer> scheduledOnXDayOfMonth = null;
 		Integer scheduledOnDay = null;
 		List<String> scheduledOnDaysOfWeek = null;
 		List<Integer> scheduledInMonths = null;
@@ -217,9 +217,9 @@ public class TaskCtrlBase {
 			}
 		}
 
-		return createTask(
+		GenericTask result = createTask(
 			recordTask.getString(TITLE),
-			recordTask.getInteger(X_DAY_OF_MONTH),
+			null,
 			recordTask.getInteger(DAY),
 			daysOfWeek,
 			months,
@@ -229,9 +229,16 @@ public class TaskCtrlBase {
 			recordTask.getBoolean(BIWEEKLY_EVEN),
 			recordTask.getBoolean(BIWEEKLY_ODD)
 		);
+
+		String xDayOfMonthStr = recordTask.getString(X_DAY_OF_MONTH);
+		if ((xDayOfMonthStr != null) && (!"".equals(xDayOfMonthStr))) {
+			result.setScheduledOnXDayOfMonthStr(xDayOfMonthStr);
+		}
+
+		return result;
 	}
 
-	protected GenericTask createTask(String title, Integer scheduledOnXDayOfMonth, Integer scheduledOnDay,
+	protected GenericTask createTask(String title, List<Integer> scheduledOnXDayOfMonth, Integer scheduledOnDay,
 		List<String> scheduledOnDaysOfWeek, List<Integer> scheduledInMonths, List<Integer> scheduledInYears,
 		List<String> details, List<String> onDone,
 		Boolean biweeklyEven, Boolean biweeklyOdd) {
@@ -358,7 +365,11 @@ public class TaskCtrlBase {
 		Record taskRecord = Record.emptyObject();
 		taskRecord.setOrRemove(KIND, GENERIC);
 		taskRecord.setOrRemove(TITLE, task.getTitle());
-		taskRecord.setOrRemove(X_DAY_OF_MONTH, task.getScheduledOnXDayOfMonth());
+		String xDayOfMonthStr = task.getScheduledOnXDayOfMonthStr();
+		if ("".equals(xDayOfMonthStr)) {
+			xDayOfMonthStr = null;
+		}
+		taskRecord.setOrRemove(X_DAY_OF_MONTH, xDayOfMonthStr);
 		taskRecord.setOrRemove(DAY, task.getScheduledOnDay());
 		if ((task.getScheduledOnDaysOfWeek() == null) || (task.getScheduledOnDaysOfWeek().size() == 0)) {
 			taskRecord.remove(DAYS_OF_WEEK);

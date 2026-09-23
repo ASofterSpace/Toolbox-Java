@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.calendar;
 import com.asofterspace.toolbox.utils.DateHolder;
 import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.SortUtils;
+import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,7 +20,7 @@ public class GenericTask {
 	protected String title;
 
 	// on which Xth weekday of the month is this task scheduled?
-	protected Integer scheduledOnXDayOfMonth;
+	protected List<Integer> scheduledOnXDayOfMonth;
 
 	// on which day of the month is this task scheduled?
 	protected Integer scheduledOnDay;
@@ -72,7 +73,7 @@ public class GenericTask {
 	protected Boolean biweeklyOdd;
 
 
-	public GenericTask(String title, Integer scheduledOnXDayOfMonth, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek,
+	public GenericTask(String title, List<Integer> scheduledOnXDayOfMonth, Integer scheduledOnDay, List<String> scheduledOnDaysOfWeek,
 		List<Integer> scheduledInMonths, List<Integer> scheduledInYears,
 		List<String> details, List<String> onDone, Boolean biweeklyEven, Boolean biweeklyOdd) {
 
@@ -119,13 +120,25 @@ public class GenericTask {
 				for (String weekDay : scheduledOnDaysOfWeek) {
 					if (dayName.equals(DateUtils.toDayOfWeekNameEN(weekDay))) {
 						// if scheduled on Xth weekday of the month, also check if it actually is that
-						if (scheduledOnXDayOfMonth != null) {
+						if ((scheduledOnXDayOfMonth != null) && (scheduledOnXDayOfMonth.size() > 0)) {
 							int curXDayOfMonth = ((cal.get(Calendar.DAY_OF_MONTH) - 1) / 7) + 1;
-							if (curXDayOfMonth != scheduledOnXDayOfMonth) {
-								// if not, keep searching
-								continue;
+							if (scheduledOnXDayOfMonth.size() == 1) {
+								if (curXDayOfMonth != scheduledOnXDayOfMonth.get(0)) {
+									// if not, keep searching
+									continue;
+								}
+								// if yes, found it!
+							} else {
+								boolean foundScheduledOnXDayOfMonth = false;
+								for (int i = 0; i < scheduledOnXDayOfMonth.size(); i++) {
+									if (curXDayOfMonth == scheduledOnXDayOfMonth.get(i)) {
+										foundScheduledOnXDayOfMonth = true;
+									}
+								}
+								if (!foundScheduledOnXDayOfMonth) {
+									continue;
+								}
 							}
-							// if yes, found it!
 						}
 						foundDay = true;
 						break;
@@ -234,8 +247,42 @@ public class GenericTask {
 		return title;
 	}
 
-	public void setScheduledOnXDayOfMonth(Integer scheduledOnXDayOfMonth) {
-		this.scheduledOnXDayOfMonth = scheduledOnXDayOfMonth;
+	public void setScheduledOnXDayOfMonth(List<Integer> scheduledOnXDayOfMonthInts) {
+		if ((scheduledOnXDayOfMonthInts == null) || (scheduledOnXDayOfMonthInts.size() == 0)) {
+			this.scheduledOnXDayOfMonth = null;
+		} else {
+			this.scheduledOnXDayOfMonth = new ArrayList<>();
+			for (Integer cur : scheduledOnXDayOfMonthInts) {
+				this.scheduledOnXDayOfMonth.add(cur);
+			}
+		}
+	}
+
+	public void setScheduledOnXDayOfMonthStr(String scheduledOnXDayOfMonthStr) {
+		if (scheduledOnXDayOfMonthStr == null) {
+			this.scheduledOnXDayOfMonth = null;
+		} else {
+			scheduledOnXDayOfMonthStr = scheduledOnXDayOfMonthStr.trim();
+			if ("".equals(scheduledOnXDayOfMonthStr)) {
+				this.scheduledOnXDayOfMonth = null;
+			} else {
+				scheduledOnXDayOfMonthStr = StrUtils.replaceAll(scheduledOnXDayOfMonthStr, ",", " ");
+				scheduledOnXDayOfMonthStr = StrUtils.replaceAll(scheduledOnXDayOfMonthStr, "/", " ");
+				scheduledOnXDayOfMonthStr = StrUtils.replaceAll(scheduledOnXDayOfMonthStr, "+", " ");
+				scheduledOnXDayOfMonthStr = StrUtils.replaceAll(scheduledOnXDayOfMonthStr, "\t", " ");
+				scheduledOnXDayOfMonthStr = StrUtils.replaceAll(scheduledOnXDayOfMonthStr, "  ", " ");
+				scheduledOnXDayOfMonthStr = scheduledOnXDayOfMonthStr.trim();
+				List<String> scheduledOnXDayOfMonthStrs = StrUtils.split(scheduledOnXDayOfMonthStr, " ");
+				List<Integer> scheduledOnXDayOfMonthInts = new ArrayList<>();
+				for (String cur : scheduledOnXDayOfMonthStrs) {
+					cur = cur.trim();
+					if (!"".equals(cur)) {
+						scheduledOnXDayOfMonthInts.add(StrUtils.strToInt(cur));
+					}
+				}
+				this.scheduledOnXDayOfMonth = scheduledOnXDayOfMonthInts;
+			}
+		}
 	}
 
 	public void setScheduledOnDay(Integer scheduledOnDay) {
@@ -254,7 +301,7 @@ public class GenericTask {
 		this.scheduledInYears = scheduledInYears;
 	}
 
-	public Integer getScheduledOnXDayOfMonth() {
+	public List<Integer> getScheduledOnXDayOfMonth() {
 		return scheduledOnXDayOfMonth;
 	}
 
@@ -262,7 +309,14 @@ public class GenericTask {
 		if (scheduledOnXDayOfMonth == null) {
 			return "";
 		}
-		return ""+scheduledOnXDayOfMonth;
+		StringBuilder result = new StringBuilder();
+		String sep = "";
+		for (Integer cur : scheduledOnXDayOfMonth) {
+			result.append(sep);
+			sep = ", ";
+			result.append(""+cur);
+		}
+		return result.toString();
 	}
 
 	public Integer getScheduledOnDay() {
@@ -567,8 +621,8 @@ public class GenericTask {
 				}
 			}
 			if (daysOfWeek.size() > 0) {
-				if (scheduledOnXDayOfMonth != null) {
-					result = scheduledOnXDayOfMonth + ". " + result;
+				if ((scheduledOnXDayOfMonth != null) && (scheduledOnXDayOfMonth.size() > 0)) {
+					result = StrUtils.join("+", scheduledOnXDayOfMonth) + ". " + result;
 				}
 			}
 		}
