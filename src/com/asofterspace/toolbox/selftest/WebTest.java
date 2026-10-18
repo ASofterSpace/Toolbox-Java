@@ -79,7 +79,7 @@ public class WebTest implements Test {
 
 		server.addToWhitelist("json/simple.json");
 
-		String result = WebAccessor.get("http://localhost:8081/json/simple.json");
+		String result = WebAccessor.get("http://127.0.0.1:8081/json/simple.json");
 
 		if (!"{\"foo\": \"bar\"}".equals(result)) {
 			TestUtils.fail("We tried to request a simple JSON file from our own server... and did not get it!");
@@ -95,7 +95,7 @@ public class WebTest implements Test {
 
 		server.addToWhitelist("json/advanced.json");
 
-		String result = WebAccessor.get("http://localhost:8081/json/advanced.json");
+		String result = WebAccessor.get("http://127.0.0.1:8081/json/advanced.json");
 
 		try {
 			JSON jsonContent = new JSON(result);
@@ -148,7 +148,7 @@ public class WebTest implements Test {
 
 		server.addToWhitelist("json/utf8.json");
 
-		String result = WebAccessor.get("http://localhost:8081/json/utf8.json");
+		String result = WebAccessor.get("http://127.0.0.1:8081/json/utf8.json");
 
 		try {
 			JSON jsonContent = new JSON(result);
@@ -169,7 +169,7 @@ public class WebTest implements Test {
 
 		TestUtils.start("Send JSON to Server");
 
-		String result = WebAccessor.postJson("http://localhost:8081/post", "{\"foo\": \"bar\"}");
+		String result = WebAccessor.postJson("http://127.0.0.1:8081/post", "{\"foo\": \"bar\"}");
 
 		if (!WebTestServerRequestHandler.lastPostContentStr.equals("{\"foo\": \"bar\"}")) {
 			TestUtils.fail("We sent a POST and the POST data did not arrive, instead it was: '" +
@@ -195,7 +195,7 @@ public class WebTest implements Test {
 			"\"currencies\": \"$&£\", " +
 			"\"others\": \"„“”‚‘’>|<…†‡·•—––˜±½¼¾¿¡×÷·¬\"}";
 
-		String result = WebAccessor.postJson("http://localhost:8081/post", jsonStr);
+		String result = WebAccessor.postJson("http://127.0.0.1:8081/post", jsonStr);
 
 		if (!WebTestServerRequestHandler.lastPostContentStr.equals(jsonStr)) {
 			TestUtils.fail("We sent a POST and the POST data did not arrive, instead it was: '" +
@@ -221,7 +221,7 @@ public class WebTest implements Test {
 		server.addToWhitelist("images/qrtest_large_automask.png");
 
 		// ensure that extra nonsense is stripped when the file is retrieved
-		File gotFile = WebAccessor.getFile("http://localhost:8081/images/qrtest_large_automask.png?bla=foo&bar=blobb");
+		File gotFile = WebAccessor.getFile("http://127.0.0.1:8081/images/qrtest_large_automask.png?bla=foo&bar=blobb");
 
 		DefaultImageFile gotImageFile = new DefaultImageFile(gotFile);
 

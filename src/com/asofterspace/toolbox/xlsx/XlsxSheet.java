@@ -7,6 +7,7 @@ package com.asofterspace.toolbox.xlsx;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.XmlElement;
 import com.asofterspace.toolbox.io.XmlFile;
+import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.utils.SortOrder;
 import com.asofterspace.toolbox.utils.SortUtils;
@@ -14,6 +15,7 @@ import com.asofterspace.toolbox.utils.StrUtils;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,8 @@ import java.util.Set;
 public class XlsxSheet {
 
 	private final static char[] COLS = new char[] {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
+	private Date BASE_DATE = null;
 
 	private String title;
 
@@ -56,6 +60,19 @@ public class XlsxSheet {
 		}
 
 		return null;
+	}
+
+	public Date getCellContentDate(String cellName) {
+		Record result = getCellContent(cellName);
+		if (result == null) {
+			return null;
+		}
+
+		if (BASE_DATE == null) {
+			BASE_DATE = DateUtils.parseDate("1900-01-01");
+		}
+
+		return DateUtils.addDays(BASE_DATE, result.asInteger() - 2);
 	}
 
 	public Integer getCellContentInteger(String cellName) {

@@ -91,7 +91,7 @@ public class SideBarCtrl {
 				}
 
 				html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" title=\"" + veRec.getString(NAME) + "\" ");
-				html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" target=\"_blank\" ");
+				html.append("href=\"http://127.0.0.1:" + veRec.getInteger("port") + "/\" target=\"_blank\" ");
 				html.append("style=\"top: " + top + "pt;");
 				if (veRec.getBoolean("flip", false)) {
 					html.append(" transform: scaleX(-1);");
@@ -129,7 +129,7 @@ public class SideBarCtrl {
 
 		for (Record veRec : veRecords) {
 			html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" title=\"" + veRec.getString(DESCRIPTION) + "\" ");
-			html.append("href=\"http://localhost:" + veRec.getInteger("port") + "/\" target=\"_blank\" ");
+			html.append("href=\"http://127.0.0.1:" + veRec.getInteger("port") + "/\" target=\"_blank\" ");
 			html.append("style=\"left: " + left + "pt; top: 12pt; width: 65pt; color: #000; text-align: center; text-decoration: none;\">\n");
 			html.append("<img class=\"avatar\" src=\"/pics/" + veRec.getString(NAME).toLowerCase() + ".jpg\"/>\n");
 			html.append("<br>\n");
@@ -153,7 +153,7 @@ public class SideBarCtrl {
 		String aStr = "top: " + top + "pt; width: " + captionWidth + "px; color: #000; text-align: center; text-decoration: none;";
 		String imgStr = "class=\"avatar\" style=\"border-radius: unset; width: " + iconWidth + "px;\"";
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/\" target=\"target\" style=\"left: " + left + "pt; " + aStr + "\">\n");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://127.0.0.1:3013/\" target=\"target\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/browser.png\" />\n");
 		html.append("<br>\n");
 		html.append("Browser\n");
@@ -190,7 +190,7 @@ public class SideBarCtrl {
 		entry++;
 		left += leftOffsetToAdd;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/?console=cybersnail\" target=\"_blank\" style=\"left: " + left + "pt; " + aStr + "\">\n");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://127.0.0.1:3013/?console=cybersnail\" target=\"_blank\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/cybersnail.png\" />\n");
 		html.append("<br>\n");
 		html.append("CyberSnail\n");
@@ -208,7 +208,7 @@ public class SideBarCtrl {
 		entry++;
 		left += leftOffsetToAdd;
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://localhost:3013/funtube\" target=\"target\" style=\"left: " + left + "pt; " + aStr + "\">\n");
+		html.append("<a class=\"sidebar\" id=\"sidebar_full_" + entry + "\" href=\"http://127.0.0.1:3013/funtube\" target=\"target\" style=\"left: " + left + "pt; " + aStr + "\">\n");
 		html.append("<img " + imgStr + " src=\"/pics/funtube.png\" />\n");
 		html.append("<br>\n");
 		html.append("FunTube\n");
@@ -255,7 +255,7 @@ public class SideBarCtrl {
 		for (GenericProject proj : projects) {
 			html.append("\n");
 			int bottomPt = (70 * (ROW_AMOUNT - rownum)) - 60;
-			html.append("  <a href=\"localhost:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: " + bottomPt + "pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
+			html.append("  <a href=\"127.0.0.1:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: " + bottomPt + "pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
 			html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
 			html.append("  </a>");
 
@@ -280,7 +280,7 @@ public class SideBarCtrl {
 		int bottomDistance = 46;
 
 		if (!leaveOut.contains(SideBarEntryForTool.WORKBENCH)) {
-			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" href=\"http://localhost:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
+			html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" onmouseover=\"_ve_showProjects()\" onmouseleave=\"_ve_hideProjects()\" href=\"http://127.0.0.1:3010/\" target=\"_blank\" style=\"bottom: " + bottom + "pt;\">\n");
 			html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/workbench.png\" />\n");
 			html.append("</a>\n");
 			script.append("window._ve_showProjects = function() {\n");
@@ -297,7 +297,7 @@ public class SideBarCtrl {
 			for (GenericProject proj : projects) {
 				if (proj.isOnShortlist()) {
 					html.append("\n");
-					html.append("  <a href=\"localhost:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "\">");
+					html.append("  <a href=\"127.0.0.1:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "\">");
 					html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
 					html.append("  </a>");
 				}
@@ -308,7 +308,7 @@ public class SideBarCtrl {
 			bottom += bottomDistance;
 		}
 
-		html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://localhost:3013/\" ");
+		html.append("<a class=\"sidebar\" id=\"sidebar_" + entry + "\" href=\"http://127.0.0.1:3013/\" ");
 		html.append("target=\"_blank\" ");
 		html.append("style=\"bottom: " + bottom + "pt;\">\n");
 		html.append("<img class=\"avatar\" style=\"border-radius: unset;\" src=\"/pics/browser.png\" />\n");

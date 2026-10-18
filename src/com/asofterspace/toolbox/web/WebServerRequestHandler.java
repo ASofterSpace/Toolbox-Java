@@ -43,6 +43,8 @@ public class WebServerRequestHandler implements Runnable {
 	public static final String HEADER_KEY_CONTENT_LENGTH_LOW = HEADER_KEY_CONTENT_LENGTH.toLowerCase();
 	public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type: ";
 	public static final String HEADER_KEY_CONTENT_TYPE_LOW = HEADER_KEY_CONTENT_TYPE.toLowerCase();
+	public static final String HEADER_KEY_USER_AGENT = "User-Agent: ";
+	public static final String HEADER_KEY_USER_AGENT_LOW = HEADER_KEY_USER_AGENT.toLowerCase();
 
 	private WebServer server;
 
@@ -73,6 +75,7 @@ public class WebServerRequestHandler implements Runnable {
 	private String receivedAuthTokenStr = null;
 	private String receivedCookieStr = null;
 	private String receivedHostStr = null;
+	private String receivedUserAgentStr = null;
 
 
 	public WebServerRequestHandler(WebServer server, Socket request, Directory webRoot) {
@@ -380,6 +383,11 @@ public class WebServerRequestHandler implements Runnable {
 
 			if (lineLow.startsWith(HEADER_KEY_HOST_LOW)) {
 				this.receivedHostStr = line.substring(HEADER_KEY_HOST_LOW.length());
+				continue;
+			}
+
+			if (lineLow.startsWith(HEADER_KEY_USER_AGENT_LOW)) {
+				this.receivedUserAgentStr = line.substring(HEADER_KEY_USER_AGENT_LOW.length());
 				continue;
 			}
 
@@ -721,6 +729,10 @@ public class WebServerRequestHandler implements Runnable {
 
 	public String getReceivedHostStr() {
 		return receivedHostStr;
+	}
+
+	public String getReceivedUserAgentStr() {
+		return receivedUserAgentStr;
 	}
 
 }

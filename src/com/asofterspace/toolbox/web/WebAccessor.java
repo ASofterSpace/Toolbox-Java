@@ -398,7 +398,8 @@ public class WebAccessor {
 	 */
 	public static File getLocalOrWebFile(String pathOrUrl) {
 
-		if (pathOrUrl.contains("://") || pathOrUrl.startsWith("localhost:") || pathOrUrl.startsWith("localhost/")) {
+		if (pathOrUrl.contains("://") || pathOrUrl.startsWith("localhost:") ||
+			pathOrUrl.startsWith("127.0.0.1:") || pathOrUrl.startsWith("localhost/")) {
 			return getFile(pathOrUrl);
 		}
 
