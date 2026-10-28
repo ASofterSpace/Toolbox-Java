@@ -115,7 +115,14 @@ public class WebServer implements Runnable {
 							}
 						}
 					}
-					if ((hostAddr == null) || (!hostAddr.equals("127.0.0.1"))) {
+					boolean dropThisConnection = true;
+					if ("127.0.0.1".equals(hostAddr)) {
+						dropThisConnection = false;
+					}
+					if ("localhost".equals(hostAddr)) {
+						dropThisConnection = false;
+					}
+					if (dropThisConnection) {
 						continue;
 					}
 				}

@@ -255,7 +255,7 @@ public class SideBarCtrl {
 		for (GenericProject proj : projects) {
 			html.append("\n");
 			int bottomPt = (70 * (ROW_AMOUNT - rownum)) - 60;
-			html.append("  <a href=\"127.0.0.1:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: " + bottomPt + "pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
+			html.append("  <a href=\"http://127.0.0.1:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "; position: absolute; left: " + left + "pt; bottom: " + bottomPt + "pt; width: 85pt; height: 55pt; border-style: solid; border-width: 3pt; border-radius: 8pt;\">");
 			html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
 			html.append("  </a>");
 
@@ -297,7 +297,7 @@ public class SideBarCtrl {
 			for (GenericProject proj : projects) {
 				if (proj.isOnShortlist()) {
 					html.append("\n");
-					html.append("  <a href=\"127.0.0.1:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "\">");
+					html.append("  <a href=\"http://127.0.0.1:3010/projects/" + proj.getShortName() + "/?open=logbook\" target=\"_blank\" class=\"project\" style=\"border-color: " + proj.getColor().toHexString() + "\">");
 					html.append("    <span class=\"vertAligner\"></span><img src=\"projectlogos/" + proj.getShortName() + "/logo.png\" />");
 					html.append("  </a>");
 				}
