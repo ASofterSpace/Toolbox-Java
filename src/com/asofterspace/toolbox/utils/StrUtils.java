@@ -1621,21 +1621,28 @@ public class StrUtils {
 				c = str.charAt(pos + posAfter);
 			}
 			result.append(str.substring(cur, pos + 1 - posBefore));
-			int strBefore = strToInt(str.substring(pos + 1 - posBefore, pos));
-			int strAfter = strToInt(str.substring(pos + 1, pos + posAfter));
-			switch (ops) {
-				case "+":
-					result.append("" + (strBefore + strAfter));
-					break;
-				case "-":
-					result.append("" + (strBefore - strAfter));
-					break;
-				case "*":
-					result.append("" + (strBefore * strAfter));
-					break;
-				case "/":
-					result.append("" + (strBefore / strAfter));
-					break;
+			Integer strBefore = strToInt(str.substring(pos + 1 - posBefore, pos));
+			Integer strAfter = strToInt(str.substring(pos + 1, pos + posAfter));
+			// if we cannot parse...
+			if ((strBefore == null) || (strAfter == null)) {
+				// ... just append unchanged!
+				result.append(str.substring(pos + 1 - posBefore, pos + posAfter));
+			} else {
+				// if we can parse: actually perform math ops!
+				switch (ops) {
+					case "+":
+						result.append("" + (strBefore + strAfter));
+						break;
+					case "-":
+						result.append("" + (strBefore - strAfter));
+						break;
+					case "*":
+						result.append("" + (strBefore * strAfter));
+						break;
+					case "/":
+						result.append("" + (strBefore / strAfter));
+						break;
+				}
 			}
 
 			cur = pos + posAfter;
