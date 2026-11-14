@@ -4,6 +4,7 @@
  */
 package com.asofterspace.toolbox.images;
 
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
@@ -134,10 +135,15 @@ public class PicFile extends JsonFile {
 					layerRec.set("kind", "image");
 					ImageLayerBasedOnImage imgLayer = (ImageLayerBasedOnImage) layer;
 					layerRec.set("caption", imgLayer.getCaption());
-					String relPath = "_" + StrUtils.leftPad0(""+i, 3) + ".png";
+					String absFileName = getAbsoluteFilename();
+					String SUFFIX_INTERNAL_FOLDER = "_internal";
+					Directory internalFolder = new Directory(absFileName + SUFFIX_INTERNAL_FOLDER);
+					internalFolder.create();
+					String relPath = SUFFIX_INTERNAL_FOLDER + System.getProperty("file.separator") +
+						StrUtils.leftPad0(""+i, 3) + ".png";
 					layerRec.set("path", relPath);
 					DefaultImageFile innerImageFile = new DefaultImageFile(
-						getAbsoluteFilename() + relPath
+						absFileName + relPath
 					);
 					innerImageFile.assign(imgLayer.getImage());
 					innerImageFile.saveTransparently();
