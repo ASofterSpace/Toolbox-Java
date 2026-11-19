@@ -113,7 +113,7 @@ public class ConfigFile extends JsonFile {
 		create();
 	}
 
-	protected void ensureContent() throws JsonParseException {
+	protected synchronized void ensureContent() throws JsonParseException {
 
 		try {
 			super.ensureContent();
@@ -156,7 +156,7 @@ public class ConfigFile extends JsonFile {
 	 * @return all the contents
 	 */
 	@Override
-	public JSON getAllContents() {
+	public synchronized JSON getAllContents() {
 
 		return jsonContent;
 	}
@@ -167,7 +167,7 @@ public class ConfigFile extends JsonFile {
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
 	@Override
-	public String getValue(String key) {
+	public synchronized String getValue(String key) {
 
 		return jsonContent.getString(key);
 	}
@@ -178,7 +178,7 @@ public class ConfigFile extends JsonFile {
 	 * @param defaultValue
 	 * @return the value stored in the key, or defaultValue if it cannot be found
 	 */
-	public String getValue(String key, String defaultValue) {
+	public synchronized String getValue(String key, String defaultValue) {
 
 		String result = getValue(key);
 
@@ -197,7 +197,7 @@ public class ConfigFile extends JsonFile {
 	 * @return the list stored in the key, or an empty list if it cannot be found
 	 */
 	@Override
-	public List<String> getList(String key) {
+	public synchronized List<String> getList(String key) {
 
 		return jsonContent.getArrayAsStringList(key);
 	}
@@ -208,7 +208,7 @@ public class ConfigFile extends JsonFile {
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
 	@Override
-	public Integer getInteger(String key) {
+	public synchronized Integer getInteger(String key) {
 
 		Integer result = jsonContent.getInteger(key);
 
@@ -222,7 +222,7 @@ public class ConfigFile extends JsonFile {
 	 * @return the value stored in the key, or defaultValue if it cannot be found
 	 */
 	@Override
-	public int getInteger(String key, int defaultValue) {
+	public synchronized int getInteger(String key, int defaultValue) {
 
 		Integer result = getInteger(key);
 
@@ -239,7 +239,7 @@ public class ConfigFile extends JsonFile {
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
 	@Override
-	public Boolean getBoolean(String key) {
+	public synchronized Boolean getBoolean(String key) {
 
 		Boolean result = jsonContent.getBoolean(key);
 
@@ -253,7 +253,7 @@ public class ConfigFile extends JsonFile {
 	 * @return the value stored in the key, or defaultValue if it cannot be found
 	 */
 	@Override
-	public boolean getBoolean(String key, boolean defaultValue) {
+	public synchronized boolean getBoolean(String key, boolean defaultValue) {
 
 		Boolean result = getBoolean(key);
 
@@ -267,7 +267,7 @@ public class ConfigFile extends JsonFile {
 	// setting works exactly like in JSON files - but we are making it a bit simpler:
 	// we are also saving, and also ensuring the parent folder exists
 	@Override
-	public void setAllContents(Record newContent) {
+	public synchronized void setAllContents(Record newContent) {
 
 		super.setAllContents(newContent);
 
@@ -280,7 +280,7 @@ public class ConfigFile extends JsonFile {
 	 * @param value
 	 */
 	@Override
-	public void set(String key, String value) {
+	public synchronized void set(String key, String value) {
 
 		jsonContent.setString(key, value);
 
@@ -293,7 +293,7 @@ public class ConfigFile extends JsonFile {
 	 * @param value
 	 */
 	@Override
-	public void set(String key, Integer value) {
+	public synchronized void set(String key, Integer value) {
 
 		Record recordVal = new Record(value);
 
@@ -310,7 +310,7 @@ public class ConfigFile extends JsonFile {
 	 * @param value
 	 */
 	@Override
-	public void set(String key, Boolean value) {
+	public synchronized void set(String key, Boolean value) {
 
 		Record recordVal = new Record(value);
 
@@ -327,7 +327,7 @@ public class ConfigFile extends JsonFile {
 	 * @param value
 	 */
 	@Override
-	public void set(String key, JSON value) {
+	public synchronized void set(String key, JSON value) {
 
 		jsonContent.set(key, value);
 

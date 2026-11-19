@@ -50,7 +50,7 @@ public class JsonFile extends TextFile {
 	}
 
 
-	protected void loadJsonContents() throws JsonParseException {
+	protected synchronized void loadJsonContents() throws JsonParseException {
 
 		jsonContent = new JSON(getContent(false));
 	}
@@ -59,7 +59,7 @@ public class JsonFile extends TextFile {
 	 * Gets all the contents as JSON container
 	 * @return all the contents
 	 */
-	public JSON getAllContents() throws JsonParseException {
+	public synchronized JSON getAllContents() throws JsonParseException {
 
 		if (jsonContent == null) {
 			loadJsonContents();
@@ -68,7 +68,7 @@ public class JsonFile extends TextFile {
 		return jsonContent;
 	}
 
-	protected void ensureContent() throws JsonParseException {
+	protected synchronized void ensureContent() throws JsonParseException {
 
 		if (jsonContent == null) {
 			loadJsonContents();
@@ -80,7 +80,7 @@ public class JsonFile extends TextFile {
 	 * @param key
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
-	public String getValue(String key) throws JsonParseException {
+	public synchronized String getValue(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -94,7 +94,7 @@ public class JsonFile extends TextFile {
 	 * @param key
 	 * @return the list stored in the key, or an empty list if it cannot be found
 	 */
-	public List<String> getList(String key) throws JsonParseException {
+	public synchronized List<String> getList(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -106,7 +106,7 @@ public class JsonFile extends TextFile {
 	 * @param key
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
-	public Integer getInteger(String key) throws JsonParseException {
+	public synchronized Integer getInteger(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -121,7 +121,7 @@ public class JsonFile extends TextFile {
 	 * @param defaultValue
 	 * @return the value stored in the key, or defaultValue if it cannot be found
 	 */
-	public int getInteger(String key, int defaultValue) throws JsonParseException {
+	public synchronized int getInteger(String key, int defaultValue) throws JsonParseException {
 
 		Integer result = getInteger(key);
 
@@ -137,7 +137,7 @@ public class JsonFile extends TextFile {
 	 * @param key
 	 * @return the value stored in the key, or null if it cannot be found
 	 */
-	public Boolean getBoolean(String key) throws JsonParseException {
+	public synchronized Boolean getBoolean(String key) throws JsonParseException {
 
 		ensureContent();
 
@@ -152,7 +152,7 @@ public class JsonFile extends TextFile {
 	 * @param defaultValue
 	 * @return the value stored in the key, or defaultValue if it cannot be found
 	 */
-	public boolean getBoolean(String key, boolean defaultValue) throws JsonParseException {
+	public synchronized boolean getBoolean(String key, boolean defaultValue) throws JsonParseException {
 
 		Boolean result = getBoolean(key);
 
@@ -167,7 +167,7 @@ public class JsonFile extends TextFile {
 	 * Sets all the contents based on a JSON container
 	 * @param newContent
 	 */
-	public void setAllContents(Record newContent) {
+	public synchronized void setAllContents(Record newContent) {
 
 		if (newContent instanceof JSON) {
 			this.jsonContent = (JSON) newContent;
@@ -181,7 +181,7 @@ public class JsonFile extends TextFile {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, String value) throws JsonParseException {
+	public synchronized void set(String key, String value) throws JsonParseException {
 
 		ensureContent();
 
@@ -193,7 +193,7 @@ public class JsonFile extends TextFile {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, Integer value) throws JsonParseException {
+	public synchronized void set(String key, Integer value) throws JsonParseException {
 
 		ensureContent();
 
@@ -225,7 +225,7 @@ public class JsonFile extends TextFile {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, JSON value) throws JsonParseException {
+	public synchronized void set(String key, JSON value) throws JsonParseException {
 
 		ensureContent();
 
@@ -240,7 +240,7 @@ public class JsonFile extends TextFile {
 	 *   be kept!)
 	 * - saving the file to disk
 	 */
-	public void create() {
+	public synchronized void create() {
 
 		createParentDirectory();
 
@@ -267,7 +267,7 @@ public class JsonFile extends TextFile {
 		this.compressionLevel = compressionLevel;
 	}
 
-	public void save() {
+	public synchronized void save() {
 
 		String jsonText = jsonContent.toString(jsonContent, getCompressionLevel(), "");
 
@@ -279,7 +279,7 @@ public class JsonFile extends TextFile {
 	/**
 	 * Replaces the content of this JsonFile with the given Record and saves it to disk
 	 */
-	public void save(Record data) {
+	public synchronized void save(Record data) {
 		setAllContents(data);
 		save();
 	}
