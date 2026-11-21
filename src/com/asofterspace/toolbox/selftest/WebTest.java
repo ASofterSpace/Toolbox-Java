@@ -13,6 +13,7 @@ import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.test.Test;
 import com.asofterspace.toolbox.test.TestUtils;
 import com.asofterspace.toolbox.utils.Record;
+import com.asofterspace.toolbox.Utils;
 import com.asofterspace.toolbox.web.WebAccessor;
 import com.asofterspace.toolbox.web.WebExtractor;
 import com.asofterspace.toolbox.web.WebServer;
@@ -71,6 +72,9 @@ public class WebTest implements Test {
 		this.server = new WebTestServer(new Directory(AllTests.TEST_DATA_PATH), 8081);
 
 		server.serveAsync();
+
+		// wait a second for server to start
+		Utils.sleep(1000);
 	}
 
 	public void communicateWithServerTest() {
