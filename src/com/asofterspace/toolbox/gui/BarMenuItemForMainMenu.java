@@ -19,7 +19,7 @@ import javax.swing.SwingUtilities;
  * This is a bar item right inside the main menu with a bar that
  * can be moved by the user
  */
-public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
+public final class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 
 	public static final long serialVersionUID = 3458397457249723l;
 
@@ -34,7 +34,7 @@ public class BarMenuItemForMainMenu extends MenuItemForMainMenu {
 	private boolean mouseDown;
 	private boolean sendUpdateOnMousePress = false;
 
-	private List<BarListener> listeners;
+	private transient List<BarListener> listeners;
 
 
 	public BarMenuItemForMainMenu() {

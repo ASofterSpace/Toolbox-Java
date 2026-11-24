@@ -44,7 +44,7 @@ public class CodeEditor extends JTextPane {
 	private boolean highlightChanges = true;
 	private boolean wordWrap = false;
 
-	private List<String> proposedTokens;
+	private transient List<String> proposedTokens;
 	private int proposedTokenSelection = 0;
 	private int tokenSelStart = 0;
 

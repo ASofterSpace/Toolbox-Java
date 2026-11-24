@@ -12,7 +12,7 @@ public class CodeWrapEditorKit extends StyledEditorKit {
 
 	private final static long serialVersionUID = 1L;
 
-	private ViewFactory defaultFactory = new CodeWrapColumnFactory();
+	private transient ViewFactory defaultFactory = new CodeWrapColumnFactory();
 
 
 	public ViewFactory getViewFactory() {

@@ -38,7 +38,7 @@ import java.util.List;
  * uration, that should be immediately written out to disk once the user makes one change
  * such that if the program crashes later on, the state is not lost.
  */
-public class ConfigFile extends JsonFile {
+public final class ConfigFile extends JsonFile {
 
 	private static final String FOLDER = "/config/";
 

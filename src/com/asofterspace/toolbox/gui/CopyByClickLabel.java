@@ -20,7 +20,7 @@ import javax.swing.JLabel;
  * when it is being clicked; by default, the text that is copied is the text displayed in
  * the label, but you can also set a different text to be copied
  */
-public class CopyByClickLabel extends JLabel {
+public final class CopyByClickLabel extends JLabel {
 
 	public static final long serialVersionUID = 27398L;
 
